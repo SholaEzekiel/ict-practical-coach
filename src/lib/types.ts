@@ -1,0 +1,51 @@
+import type { LucideIcon } from "lucide-react";
+
+export type AcademySlug =
+  | "word-processing"
+  | "spreadsheets"
+  | "databases"
+  | "presentations"
+  | "website-authoring"
+  | "theory-revision";
+
+export type Academy = {
+  slug: AcademySlug;
+  title: string;
+  summary: string;
+  icon: LucideIcon;
+  color: string;
+  outcomes: string[];
+  lessons: LessonSummary[];
+};
+
+export type LessonSummary = {
+  id: string;
+  title: string;
+  level: "Introduction" | "Beginner" | "Intermediate" | "Advanced" | "Checkpoint" | "Milestone" | "Assessment";
+  duration: string;
+  marks: number;
+  description: string;
+  available: boolean;
+};
+
+export type ValidationResult = {
+  isCorrect: boolean;
+  marksAwarded: number;
+  marksAvailable: number;
+  mistakeType: string;
+  feedbackMessage: string;
+  correctionSteps: string[];
+  examinerComment: string;
+  confidenceImpact: number;
+};
+
+export type ExaminerFeedback = {
+  predictedMark: string;
+  marksGained: string[];
+  marksLost: string[];
+  commonMistakes: string[];
+  alternativeMethod: string;
+  improvementTip: string;
+  predictedGradeBand: string;
+  examConfidenceScore: number;
+};
