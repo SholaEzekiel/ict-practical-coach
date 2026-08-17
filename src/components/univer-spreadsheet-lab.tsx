@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
-import { CheckCircle2, Sparkles } from "lucide-react";
-import { validateSpreadsheetCard, type SpreadsheetCardAttempt } from "@/lib/spreadsheet-card-engine";
+import { ClipboardCheck, Sparkles } from "lucide-react";
 import { currentLabSpreadsheetCards } from "@/lib/spreadsheet-instruction-cards";
 import { Card, Pill, ProgressBar } from "./ui";
 
@@ -38,14 +37,11 @@ export function UniverSpreadsheetLab() {
   const reactId = useId().replaceAll(":", "");
   const containerId = `univer-${reactId}`;
   const [activeIndex, setActiveIndex] = useState(0);
-  const [attempt, setAttempt] = useState<SpreadsheetCardAttempt>({});
-  const [completed, setCompleted] = useState<string[]>([]);
-  const [points, setPoints] = useState(0);
-  const [celebrating, setCelebrating] = useState(false);
+  const [checkGuideOpen, setCheckGuideOpen] = useState(false);
   const [ready, setReady] = useState(false);
 
   const card = currentLabSpreadsheetCards[activeIndex];
-  const feedback = useMemo(() => validateSpreadsheetCard(card, attempt), [attempt, card]);
+  const progressValue = useMemo(() => ((activeIndex + 1) / currentLabSpreadsheetCards.length) * 100, [activeIndex]);
 
   useEffect(() => {
     let disposed = false;
@@ -83,23 +79,11 @@ export function UniverSpreadsheetLab() {
   }, [containerId]);
 
   function checkWork() {
-    setAttempt((current) => ({
-      ...current,
-      selectedRange: card.expectedSelection || current.selectedRange,
-      clickedPath: card.clickPath,
-      action: card.expectedAction,
-      resultConfirmed: true
-    }));
-    if (!completed.includes(card.id)) {
-      setCompleted((current) => [...current, card.id]);
-      setPoints((value) => value + card.marks * 10);
-      setCelebrating(true);
-      window.setTimeout(() => setCelebrating(false), 900);
-    }
+    setCheckGuideOpen(true);
   }
 
   function nextCard() {
-    setAttempt({});
+    setCheckGuideOpen(false);
     setActiveIndex((value) => (value + 1) % currentLabSpreadsheetCards.length);
   }
 
@@ -108,19 +92,23 @@ export function UniverSpreadsheetLab() {
       <Card className="h-fit">
         <div className="flex items-center justify-between gap-3">
           <Pill>{card.category}</Pill>
-          <span className="text-sm font-semibold text-slate-500">{activeIndex + 1}/{currentLabSpreadsheetCards.length}</span>
+          <span className="text-sm font-semibold text-slate-500">
+            {activeIndex + 1}/{currentLabSpreadsheetCards.length}
+          </span>
         </div>
         <h1 className="mt-4 text-2xl font-bold">Spreadsheet practice</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Follow the steps, try it in the sheet, then check your work.
+          Follow the steps in the sheet, then compare your result with the check guide.
         </p>
 
         <div className="mt-5">
           <div className="mb-2 flex justify-between text-sm">
-            <span>Progress</span>
-            <span>{completed.length}/{currentLabSpreadsheetCards.length}</span>
+            <span>Card</span>
+            <span>
+              {activeIndex + 1}/{currentLabSpreadsheetCards.length}
+            </span>
           </div>
-          <ProgressBar value={(completed.length / currentLabSpreadsheetCards.length) * 100} />
+          <ProgressBar value={progressValue} />
         </div>
 
         <div className="mt-6 rounded-lg border border-line bg-mist p-4">
@@ -140,25 +128,37 @@ export function UniverSpreadsheetLab() {
           </ol>
         </div>
 
-        <div className="relative mt-5">
-          {celebrating && (
-            <div className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center">
-              <span className="rounded-full bg-rose-50 px-4 py-2 text-xl shadow-soft">♥ +{card.marks * 10}</span>
-            </div>
-          )}
+        <div className="mt-5">
           <button onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
-            <CheckCircle2 size={16} /> Check my work
+            <ClipboardCheck size={16} /> Show check guide
           </button>
         </div>
 
-        <div className={`mt-5 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
-          <p className="font-semibold">{feedback.message}</p>
-          <p className="mt-1 text-slate-700">{feedback.nextStep}</p>
-        </div>
+        {checkGuideOpen && (
+          <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6" role="status">
+            <p className="font-semibold">Teacher check required.</p>
+            <p className="mt-1 text-slate-700">
+              Auto-checking is not connected for this command yet, so this card will not award points by itself.
+            </p>
+            <div className="mt-3 space-y-2">
+              {card.expectedSelection && (
+                <p>
+                  <span className="font-semibold">Selection:</span> {card.expectedSelection}
+                </p>
+              )}
+              <p>
+                <span className="font-semibold">Command path:</span> {card.clickPath.join(" > ")}
+              </p>
+              <p>
+                <span className="font-semibold">Expected result:</span> {card.expectedResult}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Sparkles size={16} className="text-amber" /> {points} points
+            <Sparkles size={16} className="text-amber" /> Points unlock after real auto-checking
           </span>
           <button onClick={nextCard} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">
             Next
