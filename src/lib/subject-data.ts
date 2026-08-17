@@ -39,17 +39,81 @@ export const hotSensePlan = [
   "Any major AI-generated assessment, certificate decision, teacher-facing judgement, paid unlock, or personal-data action must require clear user approval before it runs."
 ];
 
+export const ictPracticeAreas = [
+  {
+    title: "Theory",
+    href: "/subjects/ict/theory",
+    summary: "Devices, networks, storage, safety, applications, systems, and command-word practice.",
+    actions: ["identify images", "match functions", "explain uses", "compare choices"]
+  },
+  {
+    title: "Word Processing",
+    href: "/academies/word-processing",
+    summary: "Document layout, tables, headers, footers, styles, proofing, and evidence preparation.",
+    actions: ["format text", "edit tables", "apply styles", "check layout"]
+  },
+  {
+    title: "Spreadsheets",
+    href: "/academies/spreadsheets/lessons/club-attendance",
+    summary: "Cell selection, formulae, formatting, charts, page setup, and output checks.",
+    actions: ["select ranges", "enter formulae", "format values", "create charts"]
+  },
+  {
+    title: "Databases",
+    href: "/academies/databases",
+    summary: "Tables, fields, data types, keys, forms, queries, reports, and validation.",
+    actions: ["set fields", "filter records", "build reports", "format output"]
+  },
+  {
+    title: "Presentations",
+    href: "/academies/presentations",
+    summary: "Slide layouts, master slides, objects, notes, hyperlinks, and print settings.",
+    actions: ["choose layouts", "insert objects", "align content", "prepare outputs"]
+  },
+  {
+    title: "Website Authoring",
+    href: "/academies/website-authoring",
+    summary: "HTML structure, CSS styles, tables, images, hyperlinks, metadata, and browser preview.",
+    actions: ["edit HTML", "apply CSS", "check paths", "preview pages"]
+  }
+];
+
+export const businessPracticeAreas = [
+  {
+    title: "Terminology",
+    summary: "Short drills for key business words, definitions, examples, and common confusions.",
+    actions: ["define", "identify", "match", "recall"]
+  },
+  {
+    title: "Application",
+    summary: "Scenario-based practice that trains students to apply ideas to the business in the question.",
+    actions: ["select context", "connect concept", "write applied points"]
+  },
+  {
+    title: "Analysis",
+    summary: "Cause-and-effect chains that move answers beyond simple statements.",
+    actions: ["explain impact", "link consequences", "develop chains"]
+  },
+  {
+    title: "Evaluation",
+    summary: "Judgement practice for weighing options, using evidence, and writing balanced conclusions.",
+    actions: ["compare options", "justify", "evaluate", "conclude"]
+  }
+];
+
 export const subjects: SubjectArea[] = [
   {
     slug: "ict",
     title: "ICT",
     summary:
-      "Interactive practical and theory preparation for ICT, built around instructions, simulated actions, expected results, and feedback.",
-    status: "Interactive MVP",
-    paperStructure: [
-      "Paper 1: theory practice across all ICT syllabus sections",
-      "Paper 2: document production, databases, and presentations",
-      "Paper 3: spreadsheets and website authoring"
+      "Practice ICT theory and application software skills by reading instructions, attempting actions, and checking the expected result.",
+    focus: [
+      "Theory and image recognition",
+      "Word processing",
+      "Spreadsheets",
+      "Databases",
+      "Presentations",
+      "Website authoring"
     ],
     learningModel: [
       "Read the instruction",
@@ -59,21 +123,20 @@ export const subjects: SubjectArea[] = [
       "Receive feedback, corrections, and next-step practice"
     ],
     routes: [
-      { label: "Open ICT roadmap", href: "/subjects/ict" },
-      { label: "Start spreadsheet practice", href: "/academies/spreadsheets/lessons/club-attendance" },
-      { label: "Browse ICT practical academies", href: "/academies" }
+      { label: "Open ICT", href: "/subjects/ict" },
+      { label: "Start spreadsheet practice", href: "/academies/spreadsheets/lessons/club-attendance" }
     ]
   },
   {
     slug: "business",
     title: "Business",
     summary:
-      "A structured practice area for business terminology, application, analysis, and evaluation. Full content will be mapped when the Business syllabus and sample papers are added.",
-    status: "Content scaffold",
-    paperStructure: [
-      "Terminology and definition practice",
-      "Application to short business contexts",
-      "Analysis and evaluation response building"
+      "Practice business terms, application, analysis, and evaluation through guided scenarios and response building.",
+    focus: [
+      "Terminology",
+      "Application",
+      "Analysis",
+      "Evaluation"
     ],
     learningModel: [
       "Read the business scenario",
@@ -83,8 +146,7 @@ export const subjects: SubjectArea[] = [
       "Revise weak terminology and evaluation habits"
     ],
     routes: [
-      { label: "Open Business scaffold", href: "/subjects/business" },
-      { label: "View pricing", href: "/pricing" }
+      { label: "Open Business", href: "/subjects/business" }
     ]
   }
 ];

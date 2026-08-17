@@ -24,8 +24,7 @@ export type SubjectArea = {
   slug: SubjectSlug;
   title: string;
   summary: string;
-  status: "Interactive MVP" | "Content scaffold";
-  paperStructure: string[];
+  focus: string[];
   learningModel: string[];
   routes: { label: string; href: string }[];
 };

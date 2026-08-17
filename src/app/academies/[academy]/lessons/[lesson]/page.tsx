@@ -27,7 +27,7 @@ export default function LessonPage({ params }: { params: { academy: string; less
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-lg bg-mist p-4">
             <h2 className="font-semibold">Introduction</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">A short original practice activity scaffold is ready for this academy.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">A short original practice activity is ready for this academy.</p>
           </div>
           <div className="rounded-lg bg-mist p-4">
             <h2 className="font-semibold">Learning outcomes</h2>

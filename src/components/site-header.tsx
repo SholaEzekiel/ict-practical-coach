@@ -1,14 +1,9 @@
 import Link from "next/link";
-import { GraduationCap, Menu } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { PRODUCT_NAME } from "@/lib/constants";
 
 const nav = [
-  ["Subjects", "/subjects"],
-  ["ICT", "/subjects/ict"],
-  ["Student", "/dashboard/student"],
-  ["Teacher", "/dashboard/teacher"],
-  ["Pricing", "/pricing"],
-  ["About", "/about"]
+  ["Subjects", "/subjects"]
 ];
 
 export function SiteHeader() {
@@ -29,14 +24,11 @@ export function SiteHeader() {
           ))}
         </nav>
         <Link
-          href="/academies/spreadsheets/lessons/club-attendance"
-          className="hidden rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90 sm:inline-flex"
+          href="/subjects"
+          className="rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90"
         >
-          Start ICT Practice
+          Choose Subject
         </Link>
-        <button className="grid h-10 w-10 place-items-center rounded-lg border border-line md:hidden" aria-label="Open navigation menu">
-          <Menu size={20} aria-hidden="true" />
-        </button>
       </div>
     </header>
   );

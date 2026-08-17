@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import type { SubjectArea } from "@/lib/types";
-import { Card, Pill } from "./ui";
+import { Card } from "./ui";
 
 export function SubjectCard({ subject }: { subject: SubjectArea }) {
   return (
@@ -10,16 +10,13 @@ export function SubjectCard({ subject }: { subject: SubjectArea }) {
         <span className="grid h-11 w-11 place-items-center rounded-lg bg-ink text-white">
           <BookOpenCheck size={22} aria-hidden="true" />
         </span>
-        <Pill className={subject.status === "Interactive MVP" ? "bg-emerald-50 text-leaf" : "bg-amber-50 text-amber"}>
-          {subject.status}
-        </Pill>
       </div>
       <div>
         <h2 className="text-2xl font-semibold text-ink">{subject.title}</h2>
         <p className="mt-2 leading-6 text-slate-600">{subject.summary}</p>
       </div>
       <ul className="space-y-2 text-sm text-slate-600">
-        {subject.paperStructure.map((item) => (
+        {subject.focus.map((item) => (
           <li key={item}>• {item}</li>
         ))}
       </ul>
