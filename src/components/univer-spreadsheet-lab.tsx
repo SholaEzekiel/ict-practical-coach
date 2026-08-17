@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
-import { CheckCircle2, Eye, ListChecks } from "lucide-react";
+import { CheckCircle2, Sparkles } from "lucide-react";
 import { validateSpreadsheetCard, type SpreadsheetCardAttempt } from "@/lib/spreadsheet-card-engine";
-import { spreadsheetInstructionCards } from "@/lib/spreadsheet-instruction-cards";
+import { currentLabSpreadsheetCards } from "@/lib/spreadsheet-instruction-cards";
 import { Card, Pill, ProgressBar } from "./ui";
 
 const starterWorkbook = {
@@ -40,9 +40,11 @@ export function UniverSpreadsheetLab() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [attempt, setAttempt] = useState<SpreadsheetCardAttempt>({});
   const [completed, setCompleted] = useState<string[]>([]);
+  const [points, setPoints] = useState(0);
+  const [celebrating, setCelebrating] = useState(false);
   const [ready, setReady] = useState(false);
 
-  const card = spreadsheetInstructionCards[activeIndex];
+  const card = currentLabSpreadsheetCards[activeIndex];
   const feedback = useMemo(() => validateSpreadsheetCard(card, attempt), [attempt, card]);
 
   useEffect(() => {
@@ -80,29 +82,25 @@ export function UniverSpreadsheetLab() {
     };
   }, [containerId]);
 
-  function markToolPath() {
-    setAttempt((current) => ({ ...current, clickedPath: card.clickPath }));
-  }
-
-  function markAction() {
+  function checkWork() {
     setAttempt((current) => ({
       ...current,
       selectedRange: card.expectedSelection || current.selectedRange,
       clickedPath: card.clickPath,
-      action: card.expectedAction
+      action: card.expectedAction,
+      resultConfirmed: true
     }));
-  }
-
-  function confirmResult() {
-    setAttempt((current) => ({ ...current, resultConfirmed: true }));
     if (!completed.includes(card.id)) {
       setCompleted((current) => [...current, card.id]);
+      setPoints((value) => value + card.marks * 10);
+      setCelebrating(true);
+      window.setTimeout(() => setCelebrating(false), 900);
     }
   }
 
   function nextCard() {
     setAttempt({});
-    setActiveIndex((value) => (value + 1) % spreadsheetInstructionCards.length);
+    setActiveIndex((value) => (value + 1) % currentLabSpreadsheetCards.length);
   }
 
   return (
@@ -110,53 +108,46 @@ export function UniverSpreadsheetLab() {
       <Card className="h-fit">
         <div className="flex items-center justify-between gap-3">
           <Pill>{card.category}</Pill>
-          <span className="text-sm font-semibold text-slate-500">{activeIndex + 1}/{spreadsheetInstructionCards.length}</span>
+          <span className="text-sm font-semibold text-slate-500">{activeIndex + 1}/{currentLabSpreadsheetCards.length}</span>
         </div>
-        <h1 className="mt-4 text-2xl font-bold">Spreadsheet instruction lab</h1>
+        <h1 className="mt-4 text-2xl font-bold">Spreadsheet practice</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Practise one instruction at a time: understand it, find the command path, complete the action, then check the expected result.
+          Follow the steps, try it in the sheet, then check your work.
         </p>
 
         <div className="mt-5">
           <div className="mb-2 flex justify-between text-sm">
-            <span>Card progress</span>
-            <span>{completed.length}/{spreadsheetInstructionCards.length}</span>
+            <span>Progress</span>
+            <span>{completed.length}/{currentLabSpreadsheetCards.length}</span>
           </div>
-          <ProgressBar value={(completed.length / spreadsheetInstructionCards.length) * 100} />
+          <ProgressBar value={(completed.length / currentLabSpreadsheetCards.length) * 100} />
         </div>
 
         <div className="mt-6 rounded-lg border border-line bg-mist p-4">
-          <p className="text-sm font-semibold text-ocean">{card.skill}</p>
-          <h2 className="mt-2 font-semibold">{card.instruction}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-700">{card.meaning}</p>
+          <p className="text-sm font-semibold text-ocean">Goal</p>
+          <h2 className="mt-2 text-xl font-bold">{card.studentGoal}</h2>
         </div>
 
-        <div className="mt-5 space-y-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Where to click</p>
-            <p className="mt-1 text-sm font-semibold text-ink">{card.clickPath.join(" > ")}</p>
-          </div>
-          {card.expectedSelection && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Expected selection</p>
-              <p className="mt-1 text-sm font-semibold text-ink">{card.expectedSelection}</p>
+        <div className="mt-5 rounded-lg border border-line bg-white p-4">
+          <p className="text-sm font-semibold text-ink">Steps</p>
+          <ol className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
+            {card.studentSteps.map((step, index) => (
+              <li key={step} className="flex gap-3">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="relative mt-5">
+          {celebrating && (
+            <div className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center">
+              <span className="rounded-full bg-rose-50 px-4 py-2 text-xl shadow-soft">♥ +{card.marks * 10}</span>
             </div>
           )}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Expected result</p>
-            <p className="mt-1 text-sm leading-6 text-slate-700">{card.expectedResult}</p>
-          </div>
-        </div>
-
-        <div className="mt-5 grid gap-2">
-          <button onClick={markToolPath} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold hover:border-ocean">
-            <Eye size={16} /> I found the command path
-          </button>
-          <button onClick={markAction} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold hover:border-ocean">
-            <ListChecks size={16} /> I completed the action
-          </button>
-          <button onClick={confirmResult} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-2 text-sm font-semibold text-white hover:bg-leaf/90">
-            <CheckCircle2 size={16} /> Result matches
+          <button onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
+            <CheckCircle2 size={16} /> Check my work
           </button>
         </div>
 
@@ -165,9 +156,14 @@ export function UniverSpreadsheetLab() {
           <p className="mt-1 text-slate-700">{feedback.nextStep}</p>
         </div>
 
-        <button onClick={nextCard} className="mt-4 w-full rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">
-          Next instruction
-        </button>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <Sparkles size={16} className="text-amber" /> {points} points
+          </span>
+          <button onClick={nextCard} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">
+            Next
+          </button>
+        </div>
       </Card>
 
       <Card className="overflow-hidden p-0">

@@ -11,7 +11,7 @@ export default function IctSpreadsheetsPage() {
           <Pill>ICT Spreadsheets</Pill>
           <h1 className="mt-4 text-4xl font-bold">Instruction-led spreadsheet practice</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-            Read the instruction, locate the command path, complete the action in the spreadsheet surface, and check the expected result.
+            Pick a short task, follow the steps, try it in the spreadsheet, and check your work.
           </p>
         </div>
         <Link href="/subjects/ict" className="inline-flex items-center gap-2 font-semibold text-ocean">
