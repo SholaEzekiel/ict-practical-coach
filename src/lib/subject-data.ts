@@ -54,7 +54,7 @@ export const ictPracticeAreas = [
   },
   {
     title: "Spreadsheets",
-    href: "/academies/spreadsheets/lessons/club-attendance",
+    href: "/subjects/ict/spreadsheets",
     summary: "Cell selection, formulae, formatting, charts, page setup, and output checks.",
     actions: ["select ranges", "enter formulae", "format values", "create charts"]
   },

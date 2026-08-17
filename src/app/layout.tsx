@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@univerjs/preset-sheets-core/lib/index.css";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
