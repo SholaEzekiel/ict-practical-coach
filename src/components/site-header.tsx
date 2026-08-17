@@ -3,7 +3,8 @@ import { GraduationCap, Menu } from "lucide-react";
 import { PRODUCT_NAME } from "@/lib/constants";
 
 const nav = [
-  ["Academies", "/academies"],
+  ["Subjects", "/subjects"],
+  ["ICT", "/subjects/ict"],
   ["Student", "/dashboard/student"],
   ["Teacher", "/dashboard/teacher"],
   ["Pricing", "/pricing"],
@@ -31,7 +32,7 @@ export function SiteHeader() {
           href="/academies/spreadsheets/lessons/club-attendance"
           className="hidden rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90 sm:inline-flex"
         >
-          Start Practising Free
+          Start ICT Practice
         </Link>
         <button className="grid h-10 w-10 place-items-center rounded-lg border border-line md:hidden" aria-label="Open navigation menu">
           <Menu size={20} aria-hidden="true" />

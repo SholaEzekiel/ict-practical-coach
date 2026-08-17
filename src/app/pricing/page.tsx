@@ -10,8 +10,8 @@ export default function PricingPage() {
   return (
     <Section>
       <p className="text-sm font-semibold uppercase tracking-wide text-ocean">Pricing</p>
-      <h1 className="mt-2 text-4xl font-bold">Start practising free</h1>
-      <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">This first version keeps practice accessible immediately. Paid plans are structured for future progress saving, teacher tools, and optional extras.</p>
+      <h1 className="mt-2 text-4xl font-bold">Start studying free</h1>
+      <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">This first version keeps ICT practice accessible immediately. Paid plans are structured for future subject expansion, progress saving, teacher tools, and optional extras.</p>
       <div className="mt-8 grid gap-5 md:grid-cols-3">
         {tiers.map(([name, body, price]) => (
           <Card key={name}>

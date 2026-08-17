@@ -5,12 +5,14 @@ import { SiteHeader } from "@/components/site-header";
 import { PRODUCT_NAME, SHORT_DISCLAIMER } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `${PRODUCT_NAME} | Independent IGCSE ICT Practical Practice`,
+  title: `${PRODUCT_NAME} | Independent IGCSE Study Practice`,
   description:
-    "Independent exam-style ICT practical preparation for word processing, spreadsheets, databases, presentations, website authoring, and theory revision.",
+    "Independent exam-style study practice for ICT practical skills, theory revision, and future Business practice.",
   keywords: [
+    "IGCSE study practice",
     "IGCSE ICT practical practice",
     "ICT practical skills",
+    "business studies practice",
     "spreadsheet practice",
     "database practice",
     "presentation practice",
