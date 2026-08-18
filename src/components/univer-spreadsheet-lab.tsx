@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
-import { ClipboardCheck, Sparkles } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { CheckCircle2, ClipboardCheck, Sparkles } from "lucide-react";
+import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { currentLabSpreadsheetCards } from "@/lib/spreadsheet-instruction-cards";
 import { Card, Pill, ProgressBar } from "./ui";
 
@@ -23,25 +24,32 @@ const starterWorkbook = {
           2: { v: "Sessions" },
           3: { v: "Average" }
         },
-        3: { 0: { v: "Drama" }, 1: { v: 18 }, 2: { v: 6 } },
-        4: { 0: { v: "Robotics" }, 1: { v: 22 }, 2: { v: 6 } },
-        5: { 0: { v: "Coding" }, 1: { v: 16 }, 2: { v: 5 } },
-        6: { 0: { v: "Art" }, 1: { v: 20 }, 2: { v: 5 } },
         7: { 0: { v: "Total" } }
       }
     }
   }
 };
 
+type UniverApi = {
+  getActiveWorkbook?: () => {
+    save?: () => unknown;
+    getSnapshot?: () => unknown;
+  } | null;
+};
+
 export function UniverSpreadsheetLab() {
   const reactId = useId().replaceAll(":", "");
   const containerId = `univer-${reactId}`;
+  const univerApiRef = useRef<UniverApi | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [checkGuideOpen, setCheckGuideOpen] = useState(false);
+  const [feedback, setFeedback] = useState<SpreadsheetResultFeedback | null>(null);
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [points, setPoints] = useState(0);
+  const [celebrating, setCelebrating] = useState(false);
   const [ready, setReady] = useState(false);
 
   const card = currentLabSpreadsheetCards[activeIndex];
-  const progressValue = useMemo(() => ((activeIndex + 1) / currentLabSpreadsheetCards.length) * 100, [activeIndex]);
+  const progressValue = useMemo(() => (completed.length / currentLabSpreadsheetCards.length) * 100, [completed.length]);
 
   useEffect(() => {
     let disposed = false;
@@ -68,6 +76,7 @@ export function UniverSpreadsheetLab() {
       });
 
       univerAPI.createWorkbook(starterWorkbook);
+      univerApiRef.current = univerAPI;
       setReady(true);
     }
 
@@ -79,11 +88,22 @@ export function UniverSpreadsheetLab() {
   }, [containerId]);
 
   function checkWork() {
-    setCheckGuideOpen(true);
+    const workbook = univerApiRef.current?.getActiveWorkbook?.();
+    const snapshot = workbook?.save?.() || workbook?.getSnapshot?.();
+    const result = validateSpreadsheetResult(card, snapshot);
+
+    setFeedback(result);
+
+    if (result.isCorrect && !completed.includes(card.id)) {
+      setCompleted((current) => [...current, card.id]);
+      setPoints((value) => value + card.marks * 10);
+      setCelebrating(true);
+      window.setTimeout(() => setCelebrating(false), 900);
+    }
   }
 
   function nextCard() {
-    setCheckGuideOpen(false);
+    setFeedback(null);
     setActiveIndex((value) => (value + 1) % currentLabSpreadsheetCards.length);
   }
 
@@ -98,14 +118,14 @@ export function UniverSpreadsheetLab() {
         </div>
         <h1 className="mt-4 text-2xl font-bold">Spreadsheet practice</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Follow the steps in the sheet, then compare your result with the check guide.
+          Follow the steps in the sheet, then check the final result.
         </p>
 
         <div className="mt-5">
           <div className="mb-2 flex justify-between text-sm">
-            <span>Card</span>
+            <span>Progress</span>
             <span>
-              {activeIndex + 1}/{currentLabSpreadsheetCards.length}
+              {completed.length}/{currentLabSpreadsheetCards.length}
             </span>
           </div>
           <ProgressBar value={progressValue} />
@@ -128,18 +148,27 @@ export function UniverSpreadsheetLab() {
           </ol>
         </div>
 
-        <div className="mt-5">
+        <div className="relative mt-5">
+          {celebrating && (
+            <div className="pointer-events-none absolute inset-x-0 -top-8 flex justify-center">
+              <span className="rounded-full bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-soft">+{card.marks * 10} points</span>
+            </div>
+          )}
           <button onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
-            <ClipboardCheck size={16} /> Show check guide
+            {card.autoCheck ? <CheckCircle2 size={16} /> : <ClipboardCheck size={16} />}
+            {card.autoCheck ? "Check my result" : "Show check guide"}
           </button>
         </div>
 
-        {checkGuideOpen && (
-          <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6" role="status">
-            <p className="font-semibold">Teacher check required.</p>
-            <p className="mt-1 text-slate-700">
-              Auto-checking is not connected for this command yet, so this card will not award points by itself.
-            </p>
+        {feedback && (
+          <div
+            className={`mt-5 rounded-lg border p-4 text-sm leading-6 ${
+              feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"
+            }`}
+            role="status"
+          >
+            <p className="font-semibold">{feedback.message}</p>
+            <p className="mt-1 text-slate-700">{feedback.nextStep}</p>
             <div className="mt-3 space-y-2">
               {card.expectedSelection && (
                 <p>
@@ -158,7 +187,7 @@ export function UniverSpreadsheetLab() {
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Sparkles size={16} className="text-amber" /> Points unlock after real auto-checking
+            <Sparkles size={16} className="text-amber" /> {points} points
           </span>
           <button onClick={nextCard} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">
             Next

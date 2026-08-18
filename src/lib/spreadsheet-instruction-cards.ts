@@ -18,6 +18,14 @@ export type SpreadsheetInstructionCard = {
   expectedSelection?: string;
   expectedAction: string;
   expectedResult: string;
+  autoCheck?: {
+    cells: Array<{
+      cell: string;
+      value?: string | number;
+      formula?: string;
+      formulaIncludes?: string[];
+    }>;
+  };
   commonMistakes: string[];
   feedback: {
     wrongSelection?: string;
@@ -112,6 +120,14 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     expectedSelection: "A4:A7",
     expectedAction: "enter-labels",
     expectedResult: "A4:A7 contains the four club names in the requested order.",
+    autoCheck: {
+      cells: [
+        { cell: "A4", value: "Drama" },
+        { cell: "A5", value: "Robotics" },
+        { cell: "A6", value: "Coding" },
+        { cell: "A7", value: "Art" }
+      ]
+    },
     commonMistakes: ["Typing labels across a row", "Missing one label", "Entering labels in column B"],
     feedback: {
       wrongSelection: "Use A4:A7 for the club labels.",
@@ -135,6 +151,14 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     expectedSelection: "B4:B7",
     expectedAction: "enter-values",
     expectedResult: "B4:B7 contains numeric attendance values.",
+    autoCheck: {
+      cells: [
+        { cell: "B4", value: 18 },
+        { cell: "B5", value: 22 },
+        { cell: "B6", value: 16 },
+        { cell: "B7", value: 20 }
+      ]
+    },
     commonMistakes: ["Typing numbers as headings", "Putting numbers in column C", "Including text with the numbers"],
     feedback: {
       wrongSelection: "Use B4:B7 for the numeric values.",
@@ -158,6 +182,9 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     expectedSelection: "B8",
     expectedAction: "formula-sum",
     expectedResult: "B8 displays the total of the values in B4:B7.",
+    autoCheck: {
+      cells: [{ cell: "B8", formula: "=SUM(B4:B7)", value: 76 }]
+    },
     commonMistakes: ["Missing the equals sign", "Using the wrong range", "Typing the answer instead of a formula"],
     feedback: {
       wrongSelection: "The total should be calculated in B8.",
@@ -181,6 +208,9 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     expectedSelection: "B9",
     expectedAction: "formula-average",
     expectedResult: "B9 displays the average value for B4:B7.",
+    autoCheck: {
+      cells: [{ cell: "B9", formula: "=AVERAGE(B4:B7)", value: 19 }]
+    },
     commonMistakes: ["Using SUM instead of AVERAGE", "Including the total cell", "Using B4:B8"],
     feedback: {
       wrongSelection: "Place the average in B9.",
@@ -201,9 +231,12 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     instruction: "Find the highest attendance value from B4:B7.",
     meaning: "Use MAX to return the largest number in the selected range.",
     clickPath: ["Target result cell", "Formula bar", "Type =MAX(B4:B7)"],
-    expectedSelection: "Result cell",
+    expectedSelection: "B10",
     expectedAction: "formula-max",
     expectedResult: "The result cell displays the largest attendance value.",
+    autoCheck: {
+      cells: [{ cell: "B10", formula: "=MAX(B4:B7)", value: 22 }]
+    },
     commonMistakes: ["Using MIN", "Typing the largest value manually", "Including text labels"],
     feedback: {
       wrongSelection: "Choose the result cell requested by the task.",
@@ -224,9 +257,12 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     instruction: "Find the lowest attendance value from B4:B7.",
     meaning: "Use MIN to return the smallest number in the selected range.",
     clickPath: ["Target result cell", "Formula bar", "Type =MIN(B4:B7)"],
-    expectedSelection: "Result cell",
+    expectedSelection: "B11",
     expectedAction: "formula-min",
     expectedResult: "The result cell displays the smallest attendance value.",
+    autoCheck: {
+      cells: [{ cell: "B11", formula: "=MIN(B4:B7)", value: 16 }]
+    },
     commonMistakes: ["Using MAX", "Typing the answer manually", "Selecting the label column"],
     feedback: {
       wrongSelection: "Choose the result cell requested by the task.",
@@ -611,8 +647,12 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
     instruction: "Use IF to display Good when attendance is at least 20, otherwise Review.",
     meaning: "Create a decision formula that returns different text based on a condition.",
     clickPath: ["Result cell", "Formula bar", "Type IF formula"],
+    expectedSelection: "E4",
     expectedAction: "formula-if",
     expectedResult: "Rows with attendance of 20 or more show Good; other rows show Review.",
+    autoCheck: {
+      cells: [{ cell: "E4", value: "Review", formulaIncludes: ["IF", "B4", ">=20"] }]
+    },
     commonMistakes: ["Using greater than instead of at least", "Reversing the two outputs", "Missing quotation marks around text"],
     feedback: {
       wrongTool: "Enter an IF formula in the result cell.",
