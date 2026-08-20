@@ -49,6 +49,7 @@ export function UniverSpreadsheetLab() {
   const [ready, setReady] = useState(false);
 
   const card = currentLabSpreadsheetCards[activeIndex];
+  const currentCardComplete = completed.includes(card.id);
   const progressValue = useMemo(() => (completed.length / currentLabSpreadsheetCards.length) * 100, [completed.length]);
 
   useEffect(() => {
@@ -158,6 +159,9 @@ export function UniverSpreadsheetLab() {
             {card.autoCheck ? <CheckCircle2 size={16} /> : <ClipboardCheck size={16} />}
             {card.autoCheck ? "Check my result" : "Show check guide"}
           </button>
+          {!currentCardComplete && (
+            <p className="mt-3 text-center text-sm text-slate-600">Complete this goal to unlock Next.</p>
+          )}
         </div>
 
         {feedback && (
@@ -189,7 +193,11 @@ export function UniverSpreadsheetLab() {
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
             <Sparkles size={16} className="text-amber" /> {points} points
           </span>
-          <button onClick={nextCard} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">
+          <button
+            onClick={nextCard}
+            disabled={!currentCardComplete}
+            className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
+          >
             Next
           </button>
         </div>

@@ -670,4 +670,4 @@ export function getSpreadsheetCard(id: string) {
 
 export const firstSpreadsheetCard = spreadsheetInstructionCards[0];
 
-export const currentLabSpreadsheetCards = spreadsheetInstructionCards.filter((card) => card.supportedInCurrentLab);
+export const currentLabSpreadsheetCards = spreadsheetInstructionCards.filter((card) => card.supportedInCurrentLab && card.autoCheck);

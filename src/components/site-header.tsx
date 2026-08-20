@@ -1,10 +1,6 @@
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
+import { ChevronDown, GraduationCap } from "lucide-react";
 import { PRODUCT_NAME } from "@/lib/constants";
-
-const nav = [
-  ["Subjects", "/subjects"]
-];
 
 export function SiteHeader() {
   return (
@@ -16,18 +12,29 @@ export function SiteHeader() {
           </span>
           <span>{PRODUCT_NAME}</span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-slate-700 md:flex" aria-label="Primary navigation">
-          {nav.map(([label, href]) => (
-            <Link key={href} href={href} className="hover:text-ocean">
-              {label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-5 text-sm text-slate-700 md:flex" aria-label="Primary navigation">
+          <div className="group relative">
+            <button className="inline-flex items-center gap-1 rounded-lg px-2 py-2 font-medium hover:text-ocean" type="button">
+              Subjects <ChevronDown size={15} aria-hidden="true" />
+            </button>
+            <div className="invisible absolute left-0 top-full z-50 w-64 rounded-lg border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:opacity-100">
+              <Link href="/subjects/ict/spreadsheets" className="block rounded-md px-3 py-2 hover:bg-mist">
+                ICT Practical
+              </Link>
+              <Link href="/subjects/ict/theory" className="block rounded-md px-3 py-2 hover:bg-mist">
+                ICT Theory
+              </Link>
+              <Link href="/subjects/business" className="block rounded-md px-3 py-2 hover:bg-mist">
+                Business
+              </Link>
+            </div>
+          </div>
         </nav>
         <Link
-          href="/subjects"
+          href="/subjects/ict/spreadsheets"
           className="rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90"
         >
-          Choose Subject
+          Start Practice
         </Link>
       </div>
     </header>
