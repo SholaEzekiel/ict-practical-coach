@@ -11,7 +11,9 @@ export function SiteFooter({ disclaimer }: { disclaimer: string }) {
           <p className="mt-3">Contact: hello@example.com</p>
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end">
+          <Link href="/" className="hover:text-ocean">Home</Link>
           <Link href="/about" className="hover:text-ocean">About</Link>
+          <Link href="/contact" className="hover:text-ocean">Contact</Link>
           <Link href="/terms" className="hover:text-ocean">Terms</Link>
           <Link href="/privacy" className="hover:text-ocean">Privacy</Link>
           <Link href="/disclaimer" className="hover:text-ocean">Disclaimer</Link>

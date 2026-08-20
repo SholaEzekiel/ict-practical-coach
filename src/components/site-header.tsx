@@ -13,6 +13,9 @@ export function SiteHeader() {
           <span>{PRODUCT_NAME}</span>
         </Link>
         <nav className="hidden items-center gap-5 text-sm text-slate-700 md:flex" aria-label="Primary navigation">
+          <Link href="/" className="rounded-lg px-2 py-2 font-medium hover:text-ocean">
+            Home
+          </Link>
           <div className="group relative">
             <button className="inline-flex items-center gap-1 rounded-lg px-2 py-2 font-medium hover:text-ocean" type="button">
               Subjects <ChevronDown size={15} aria-hidden="true" />
@@ -29,6 +32,12 @@ export function SiteHeader() {
               </Link>
             </div>
           </div>
+          <Link href="/about" className="rounded-lg px-2 py-2 font-medium hover:text-ocean">
+            About
+          </Link>
+          <Link href="/contact" className="rounded-lg px-2 py-2 font-medium hover:text-ocean">
+            Contact
+          </Link>
         </nav>
         <Link
           href="/subjects/ict/spreadsheets"
