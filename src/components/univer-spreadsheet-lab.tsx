@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { CheckCircle2, ClipboardCheck, Sparkles } from "lucide-react";
 import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
-import { currentLabSpreadsheetCards } from "@/lib/spreadsheet-instruction-cards";
+import { currentLabSpreadsheetCards, spreadsheetModules } from "@/lib/spreadsheet-instruction-cards";
 import { Card, Pill, ProgressBar } from "./ui";
 
 const starterWorkbook = {
@@ -51,6 +51,14 @@ export function UniverSpreadsheetLab() {
   const card = currentLabSpreadsheetCards[activeIndex];
   const currentCardComplete = completed.includes(card.id);
   const progressValue = useMemo(() => (completed.length / currentLabSpreadsheetCards.length) * 100, [completed.length]);
+  const availableModules = useMemo(
+    () => spreadsheetModules.filter((module) => currentLabSpreadsheetCards.some((task) => (task.moduleId || task.category) === module.id)),
+    []
+  );
+  const currentModuleId = card.moduleId || card.category;
+  const currentModule = spreadsheetModules.find((module) => module.id === currentModuleId);
+  const moduleCards = currentLabSpreadsheetCards.filter((task) => (task.moduleId || task.category) === currentModuleId);
+  const completedModuleCards = moduleCards.filter((task) => completed.includes(task.id)).length;
 
   useEffect(() => {
     let disposed = false;
@@ -108,11 +116,20 @@ export function UniverSpreadsheetLab() {
     setActiveIndex((value) => (value + 1) % currentLabSpreadsheetCards.length);
   }
 
+  function openModule(moduleId: string) {
+    const moduleStartIndex = currentLabSpreadsheetCards.findIndex((task) => (task.moduleId || task.category) === moduleId);
+
+    if (moduleStartIndex >= 0) {
+      setFeedback(null);
+      setActiveIndex(moduleStartIndex);
+    }
+  }
+
   return (
     <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
       <Card className="h-fit">
         <div className="flex items-center justify-between gap-3">
-          <Pill>{card.category}</Pill>
+          <Pill>{currentModule?.title || card.category}</Pill>
           <span className="text-sm font-semibold text-slate-500">
             {activeIndex + 1}/{currentLabSpreadsheetCards.length}
           </span>
@@ -132,10 +149,48 @@ export function UniverSpreadsheetLab() {
           <ProgressBar value={progressValue} />
         </div>
 
+        <div className="mt-5 rounded-lg border border-line bg-white p-3">
+          <p className="text-sm font-semibold text-ink">Modules</p>
+          <div className="mt-3 grid gap-2">
+            {availableModules.map((module) => {
+              const moduleTasks = currentLabSpreadsheetCards.filter((task) => (task.moduleId || task.category) === module.id);
+              const done = moduleTasks.filter((task) => completed.includes(task.id)).length;
+              const isActive = module.id === currentModuleId;
+
+              return (
+                <button
+                  key={module.id}
+                  onClick={() => openModule(module.id)}
+                  className={`flex items-center justify-between rounded-md px-3 py-2 text-left text-sm font-semibold ${
+                    isActive ? "bg-ocean text-white" : "bg-mist text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>{module.title}</span>
+                  <span className={isActive ? "text-white/85" : "text-slate-500"}>{done}/{moduleTasks.length}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-lg border border-line bg-mist p-4">
+          <p className="text-sm font-semibold text-ocean">Module</p>
+          <h2 className="mt-2 text-lg font-bold">{currentModule?.title || card.category}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{currentModule?.description}</p>
+          <p className="mt-3 text-sm font-semibold text-slate-700">{completedModuleCards}/{moduleCards.length} tasks complete</p>
+        </div>
+
         <div className="mt-6 rounded-lg border border-line bg-mist p-4">
           <p className="text-sm font-semibold text-ocean">Goal</p>
           <h2 className="mt-2 text-xl font-bold">{card.studentGoal}</h2>
         </div>
+
+        {card.scenario && (
+          <div className="mt-5 rounded-lg border border-line bg-white p-4">
+            <p className="text-sm font-semibold text-ink">Scenario</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{card.scenario}</p>
+          </div>
+        )}
 
         <div className="mt-5 rounded-lg border border-line bg-white p-4">
           <p className="text-sm font-semibold text-ink">Steps</p>

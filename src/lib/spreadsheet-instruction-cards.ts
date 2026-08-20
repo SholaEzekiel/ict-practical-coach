@@ -9,7 +9,10 @@ export type SpreadsheetInstructionCard = {
     | "layout"
     | "data-tools";
   skill: string;
+  moduleId?: string;
+  moduleTitle?: string;
   studentGoal: string;
+  scenario?: string;
   studentSteps: string[];
   supportedInCurrentLab: boolean;
   instruction: string;
@@ -664,10 +667,446 @@ export const spreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
   }
 ];
 
-export function getSpreadsheetCard(id: string) {
-  return spreadsheetInstructionCards.find((card) => card.id === id);
+export const spreadsheetModules = [
+  {
+    id: "intro",
+    title: "Introduction",
+    description: "Cells, rows, columns, ranges, and simple movement."
+  },
+  {
+    id: "data-entry",
+    title: "Data Entry",
+    description: "Typing labels, values, headings, and small tables accurately."
+  },
+  {
+    id: "formatting",
+    title: "Formatting",
+    description: "Fonts, alignment, merge, number formats, rows, columns, and gridlines."
+  },
+  {
+    id: "formula",
+    title: "Formulae",
+    description: "SUM, AVERAGE, MIN, MAX, IF, SUMIF, COUNTIF, AVERAGEIF, lookup, and rounding."
+  },
+  {
+    id: "data-tools",
+    title: "Data Tools",
+    description: "Sorting, filtering, searching, and preparing source data."
+  },
+  {
+    id: "chart",
+    title: "Charts",
+    description: "Creating charts and adding titles, labels, and suitable chart choices."
+  },
+  {
+    id: "layout",
+    title: "Print and Layout",
+    description: "Print area, orientation, gridlines, row height, and column width."
+  }
+];
+
+const introSpreadsheetCards: SpreadsheetInstructionCard[] = [
+  {
+    id: "sheet-intro-cell-a1-001",
+    moduleId: "intro",
+    moduleTitle: "Introduction",
+    category: "selection",
+    skill: "Identify a cell",
+    studentGoal: "Show that you can find cell A1.",
+    scenario: "The school office is preparing a simple register sheet. Before entering data, you need to prove you can find the first cell on the worksheet.",
+    studentSteps: ["Click cell A1.", "Type Start.", "Press Enter and check that Start is in A1."],
+    supportedInCurrentLab: true,
+    instruction: "Enter Start in cell A1.",
+    meaning: "A1 means column A, row 1.",
+    clickPath: ["Worksheet grid", "Cell A1", "Type Start"],
+    expectedSelection: "A1",
+    expectedAction: "enter-cell-value",
+    expectedResult: "Cell A1 contains Start.",
+    autoCheck: { cells: [{ cell: "A1", value: "Start" }] },
+    commonMistakes: ["Typing into B1", "Typing into A2", "Clicking the column heading instead of the cell"],
+    feedback: {
+      wrongSelection: "Click the cell where column A and row 1 meet.",
+      wrongTool: "This task is completed directly on the worksheet grid.",
+      wrongResult: "A1 should contain Start."
+    },
+    hints: ["Columns use letters.", "Rows use numbers."],
+    difficulty: "beginner",
+    marks: 1
+  },
+  {
+    id: "sheet-intro-cell-c3-001",
+    moduleId: "intro",
+    moduleTitle: "Introduction",
+    category: "selection",
+    skill: "Identify a cell",
+    studentGoal: "Find a cell by column and row.",
+    scenario: "A teacher asks you to place a marker in a specific location so the table can be checked later.",
+    studentSteps: ["Find column C.", "Find row 3.", "Click the cell where column C and row 3 meet.", "Type Found and press Enter."],
+    supportedInCurrentLab: true,
+    instruction: "Enter Found in cell C3.",
+    meaning: "C3 is the cell at column C and row 3.",
+    clickPath: ["Worksheet grid", "Cell C3", "Type Found"],
+    expectedSelection: "C3",
+    expectedAction: "enter-cell-value",
+    expectedResult: "Cell C3 contains Found.",
+    autoCheck: { cells: [{ cell: "C3", value: "Found" }] },
+    commonMistakes: ["Using row C", "Using column 3", "Typing into C4"],
+    feedback: {
+      wrongSelection: "Use column C and row 3 together.",
+      wrongTool: "This task is completed directly on the worksheet grid.",
+      wrongResult: "C3 should contain Found."
+    },
+    hints: ["Read the column letter first.", "Read the row number second."],
+    difficulty: "beginner",
+    marks: 1
+  },
+  {
+    id: "sheet-intro-row-label-001",
+    moduleId: "intro",
+    moduleTitle: "Introduction",
+    category: "selection",
+    skill: "Recognise a row",
+    studentGoal: "Use a row correctly.",
+    scenario: "The class tutor wants row 2 reserved for a short note before the table begins.",
+    studentSteps: ["Click A2.", "Type Tutor note.", "Press Enter."],
+    supportedInCurrentLab: true,
+    instruction: "Enter Tutor note in A2.",
+    meaning: "Row 2 is the second horizontal line of cells.",
+    clickPath: ["Worksheet grid", "Cell A2", "Type Tutor note"],
+    expectedSelection: "A2",
+    expectedAction: "enter-cell-value",
+    expectedResult: "A2 contains Tutor note.",
+    autoCheck: { cells: [{ cell: "A2", value: "Tutor note" }] },
+    commonMistakes: ["Typing into B2", "Typing into A1", "Selecting the whole row instead of the cell"],
+    feedback: {
+      wrongSelection: "Click A2 on the second row.",
+      wrongTool: "This task is completed directly on the worksheet grid.",
+      wrongResult: "A2 should contain Tutor note."
+    },
+    hints: ["Rows go across.", "A2 is in column A."],
+    difficulty: "beginner",
+    marks: 1
+  },
+  {
+    id: "sheet-intro-column-label-001",
+    moduleId: "intro",
+    moduleTitle: "Introduction",
+    category: "selection",
+    skill: "Recognise a column",
+    studentGoal: "Use a column correctly.",
+    scenario: "The PE department wants column F reserved for quick comments.",
+    studentSteps: ["Click F1.", "Type Comment.", "Press Enter."],
+    supportedInCurrentLab: true,
+    instruction: "Enter Comment in F1.",
+    meaning: "Column F is the vertical set of cells under the letter F.",
+    clickPath: ["Worksheet grid", "Cell F1", "Type Comment"],
+    expectedSelection: "F1",
+    expectedAction: "enter-cell-value",
+    expectedResult: "F1 contains Comment.",
+    autoCheck: { cells: [{ cell: "F1", value: "Comment" }] },
+    commonMistakes: ["Typing into E1", "Typing into F2", "Looking for a row named F"],
+    feedback: {
+      wrongSelection: "Use the column headed F.",
+      wrongTool: "This task is completed directly on the worksheet grid.",
+      wrongResult: "F1 should contain Comment."
+    },
+    hints: ["Columns go down.", "The column label is a letter."],
+    difficulty: "beginner",
+    marks: 1
+  },
+  {
+    id: "sheet-intro-range-copy-001",
+    moduleId: "intro",
+    moduleTitle: "Introduction",
+    category: "selection",
+    skill: "Use a small range",
+    studentGoal: "Fill a short range across a row.",
+    scenario: "A club coordinator wants three quick status cells across the top of the sheet.",
+    studentSteps: ["Click G1.", "Type One and press Tab.", "Type Two and press Tab.", "Type Three and press Enter."],
+    supportedInCurrentLab: true,
+    instruction: "Enter One, Two, and Three across G1:I1.",
+    meaning: "A range can run across a row from one cell to another.",
+    clickPath: ["Worksheet grid", "Cells G1:I1"],
+    expectedSelection: "G1:I1",
+    expectedAction: "enter-row-values",
+    expectedResult: "G1:I1 contains One, Two, and Three.",
+    autoCheck: { cells: [{ cell: "G1", value: "One" }, { cell: "H1", value: "Two" }, { cell: "I1", value: "Three" }] },
+    commonMistakes: ["Entering values down a column", "Skipping H1", "Starting in G2"],
+    feedback: {
+      wrongSelection: "Start at G1 and move across the row.",
+      wrongTool: "Use direct data entry.",
+      wrongResult: "G1, H1, and I1 should each contain one value."
+    },
+    hints: ["Tab moves across.", "Enter usually moves down."],
+    difficulty: "beginner",
+    marks: 2
+  }
+];
+
+const expansionSpreadsheetCards: SpreadsheetInstructionCard[] = [
+  {
+    id: "sheet-data-sessions-001",
+    moduleId: "data-entry",
+    moduleTitle: "Data Entry",
+    category: "data-entry",
+    skill: "Enter numeric values",
+    studentGoal: "Add the number of sessions.",
+    scenario: "The activities coordinator has counted how many sessions each club ran this term and needs the figures entered beside the attendance data.",
+    studentSteps: ["Click C4.", "Type 6 and press Enter.", "Type 6 in C5, 5 in C6, and 5 in C7.", "Check that all four session values are in column C."],
+    supportedInCurrentLab: true,
+    instruction: "Enter the session values in C4:C7.",
+    meaning: "Numeric values should be entered into the correct column so they can be used in calculations.",
+    clickPath: ["Worksheet grid", "Column C data cells"],
+    expectedSelection: "C4:C7",
+    expectedAction: "enter-values",
+    expectedResult: "C4:C7 contains the session values 6, 6, 5, and 5.",
+    autoCheck: { cells: [{ cell: "C4", value: 6 }, { cell: "C5", value: 6 }, { cell: "C6", value: 5 }, { cell: "C7", value: 5 }] },
+    commonMistakes: ["Typing the numbers in column B", "Entering text with the numbers", "Missing one row"],
+    feedback: {
+      wrongSelection: "Use C4:C7 for the sessions.",
+      wrongTool: "This is direct data entry.",
+      wrongResult: "Column C should contain 6, 6, 5, and 5."
+    },
+    hints: ["Sessions are in column C.", "Use one number per row."],
+    difficulty: "beginner",
+    marks: 2
+  },
+  {
+    id: "sheet-data-average-heading-001",
+    moduleId: "data-entry",
+    moduleTitle: "Data Entry",
+    category: "data-entry",
+    skill: "Enter a heading",
+    studentGoal: "Add a heading for average attendance.",
+    scenario: "The head teacher wants a separate column where the average per session will be calculated.",
+    studentSteps: ["Click D3.", "Type Average per session.", "Press Enter."],
+    supportedInCurrentLab: true,
+    instruction: "Enter Average per session in D3.",
+    meaning: "Headings explain what each column is used for.",
+    clickPath: ["Worksheet grid", "Cell D3"],
+    expectedSelection: "D3",
+    expectedAction: "enter-heading",
+    expectedResult: "D3 contains Average per session.",
+    autoCheck: { cells: [{ cell: "D3", value: "Average per session" }] },
+    commonMistakes: ["Typing in D4", "Changing the wrong heading", "Leaving the heading too vague"],
+    feedback: {
+      wrongSelection: "Use D3 for the heading.",
+      wrongTool: "Type the heading directly into the cell.",
+      wrongResult: "D3 should read Average per session."
+    },
+    hints: ["Headings sit above the data.", "Use the exact wording."],
+    difficulty: "beginner",
+    marks: 1
+  },
+  {
+    id: "sheet-formula-average-per-session-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "Division formula",
+    studentGoal: "Calculate attendance per session.",
+    scenario: "The PE teacher needs to compare clubs fairly by dividing attendance by the number of sessions.",
+    studentSteps: ["Click D4.", "Type =B4/C4.", "Press Enter.", "Check that D4 shows the average attendance per session for Drama."],
+    supportedInCurrentLab: true,
+    instruction: "In D4, divide attendance by sessions.",
+    meaning: "A division formula can calculate an average per event or session.",
+    clickPath: ["Cell D4", "Formula bar", "Type =B4/C4"],
+    expectedSelection: "D4",
+    expectedAction: "formula-division",
+    expectedResult: "D4 displays the result of B4 divided by C4.",
+    autoCheck: { cells: [{ cell: "D4", formula: "=B4/C4", value: 3 }] },
+    commonMistakes: ["Typing the answer only", "Using C4/B4", "Forgetting the equals sign"],
+    feedback: {
+      wrongSelection: "Place the formula in D4.",
+      wrongTool: "Type the formula in the cell or formula bar.",
+      wrongResult: "D4 should use =B4/C4."
+    },
+    hints: ["Formulae begin with =.", "Use / for division."],
+    difficulty: "developing",
+    marks: 2
+  },
+  {
+    id: "sheet-formula-countif-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "COUNTIF function",
+    studentGoal: "Count clubs with high attendance.",
+    scenario: "The deputy head wants to know how many clubs reached at least 20 pupils.",
+    studentSteps: ["Click B12.", "Type =COUNTIF(B4:B7,\">=20\").", "Press Enter.", "Check that the result counts only clubs with 20 or more attendance."],
+    supportedInCurrentLab: true,
+    instruction: "Use COUNTIF to count values in B4:B7 that are at least 20.",
+    meaning: "COUNTIF counts cells that meet a condition.",
+    clickPath: ["Cell B12", "Formula bar", "Type COUNTIF formula"],
+    expectedSelection: "B12",
+    expectedAction: "formula-countif",
+    expectedResult: "B12 displays the number of clubs with attendance of at least 20.",
+    autoCheck: { cells: [{ cell: "B12", formulaIncludes: ["COUNTIF", "B4:B7", ">=20"], value: 2 }] },
+    commonMistakes: ["Using greater than 20 instead of at least 20", "Counting the wrong range", "Using SUMIF"],
+    feedback: {
+      wrongSelection: "Place the COUNTIF result in B12.",
+      wrongTool: "Use COUNTIF for counting cells that match a condition.",
+      wrongResult: "The formula should count B4:B7 values that are at least 20."
+    },
+    hints: ["At least means >=.", "COUNTIF has a range and a condition."],
+    difficulty: "confident",
+    marks: 3
+  },
+  {
+    id: "sheet-formula-sumif-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "SUMIF function",
+    studentGoal: "Total only high attendance values.",
+    scenario: "The PE department wants the combined attendance for clubs that reached 20 or more pupils.",
+    studentSteps: ["Click B13.", "Type =SUMIF(B4:B7,\">=20\",B4:B7).", "Press Enter.", "Check that only values at least 20 are added."],
+    supportedInCurrentLab: true,
+    instruction: "Use SUMIF to add attendance values that are at least 20.",
+    meaning: "SUMIF adds values only when they meet a condition.",
+    clickPath: ["Cell B13", "Formula bar", "Type SUMIF formula"],
+    expectedSelection: "B13",
+    expectedAction: "formula-sumif",
+    expectedResult: "B13 displays the total of attendance values 20 or above.",
+    autoCheck: { cells: [{ cell: "B13", formulaIncludes: ["SUMIF", "B4:B7", ">=20"], value: 42 }] },
+    commonMistakes: ["Using SUM for all values", "Using the wrong condition", "Adding text labels"],
+    feedback: {
+      wrongSelection: "Place the SUMIF result in B13.",
+      wrongTool: "Use SUMIF for conditional totals.",
+      wrongResult: "The formula should add only attendance values at least 20."
+    },
+    hints: ["SUMIF uses a range and a condition.", "At least 20 includes 20."],
+    difficulty: "confident",
+    marks: 3
+  },
+  {
+    id: "sheet-formula-averageif-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "AVERAGEIF function",
+    studentGoal: "Average only high attendance values.",
+    scenario: "The coordinator wants the average attendance for clubs that met the target of 18 or more pupils.",
+    studentSteps: ["Click B14.", "Type =AVERAGEIF(B4:B7,\">=18\",B4:B7).", "Press Enter.", "Check that the average ignores clubs below 18."],
+    supportedInCurrentLab: true,
+    instruction: "Use AVERAGEIF to average attendance values that are at least 18.",
+    meaning: "AVERAGEIF finds the mean of values that meet a condition.",
+    clickPath: ["Cell B14", "Formula bar", "Type AVERAGEIF formula"],
+    expectedSelection: "B14",
+    expectedAction: "formula-averageif",
+    expectedResult: "B14 displays the average of attendance values 18 or above.",
+    autoCheck: { cells: [{ cell: "B14", formulaIncludes: ["AVERAGEIF", "B4:B7", ">=18"], value: 20 }] },
+    commonMistakes: ["Including 16 in the average", "Using AVERAGE only", "Using the wrong condition"],
+    feedback: {
+      wrongSelection: "Place the AVERAGEIF result in B14.",
+      wrongTool: "Use AVERAGEIF for conditional averages.",
+      wrongResult: "The formula should average only values at least 18."
+    },
+    hints: ["Average means mean.", "AVERAGEIF needs a range and a condition."],
+    difficulty: "confident",
+    marks: 3
+  },
+  {
+    id: "sheet-formula-vlookup-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "VLOOKUP function",
+    studentGoal: "Look up Robotics attendance.",
+    scenario: "A teacher asks for the attendance value for one club without manually scanning the table.",
+    studentSteps: ["Click E5.", "Type =VLOOKUP(\"Robotics\",A4:B7,2,FALSE).", "Press Enter.", "Check that the result shows the Robotics attendance."],
+    supportedInCurrentLab: true,
+    instruction: "Use VLOOKUP to return the attendance for Robotics.",
+    meaning: "VLOOKUP searches the first column of a table and returns a matching value from another column.",
+    clickPath: ["Cell E5", "Formula bar", "Type VLOOKUP formula"],
+    expectedSelection: "E5",
+    expectedAction: "formula-vlookup",
+    expectedResult: "E5 displays 22.",
+    autoCheck: { cells: [{ cell: "E5", formulaIncludes: ["VLOOKUP", "ROBOTICS", "A4:B7"], value: 22 }] },
+    commonMistakes: ["Looking up the wrong club", "Using the wrong column number", "Leaving out FALSE"],
+    feedback: {
+      wrongSelection: "Place the VLOOKUP result in E5.",
+      wrongTool: "Use VLOOKUP for a vertical table lookup.",
+      wrongResult: "E5 should return the Robotics attendance value, 22."
+    },
+    hints: ["The club names are in the first column of A4:B7.", "Attendance is the second column of the lookup range."],
+    difficulty: "confident",
+    marks: 3
+  },
+  {
+    id: "sheet-formula-xlookup-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "XLOOKUP function",
+    studentGoal: "Use XLOOKUP to find Art attendance.",
+    scenario: "The head of year wants a quicker modern lookup formula to return the attendance for Art.",
+    studentSteps: ["Click E6.", "Type =XLOOKUP(\"Art\",A4:A7,B4:B7).", "Press Enter.", "Check that the result shows the Art attendance."],
+    supportedInCurrentLab: true,
+    instruction: "Use XLOOKUP to return the attendance for Art.",
+    meaning: "XLOOKUP searches one range and returns the matching value from another range.",
+    clickPath: ["Cell E6", "Formula bar", "Type XLOOKUP formula"],
+    expectedSelection: "E6",
+    expectedAction: "formula-xlookup",
+    expectedResult: "E6 displays 20.",
+    autoCheck: { cells: [{ cell: "E6", formulaIncludes: ["XLOOKUP", "ART", "A4:A7", "B4:B7"], value: 20 }] },
+    commonMistakes: ["Using the return range first", "Looking up the wrong club", "Typing the answer manually"],
+    feedback: {
+      wrongSelection: "Place the XLOOKUP result in E6.",
+      wrongTool: "Use XLOOKUP for a modern lookup between two ranges.",
+      wrongResult: "E6 should return the Art attendance value, 20."
+    },
+    hints: ["The lookup range contains club names.", "The return range contains attendance values."],
+    difficulty: "confident",
+    marks: 3
+  },
+  {
+    id: "sheet-formula-ifs-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "IFS function",
+    studentGoal: "Classify a club using IFS.",
+    scenario: "The school wants a quick rating beside a club: Excellent for 22 or more, Good for 20 or more, and Review for the rest.",
+    studentSteps: ["Click E7.", "Type =IFS(B5>=22,\"Excellent\",B5>=20,\"Good\",TRUE,\"Review\").", "Press Enter.", "Check that Robotics is classified as Excellent."],
+    supportedInCurrentLab: true,
+    instruction: "Use IFS to classify the Robotics attendance value in B5.",
+    meaning: "IFS checks conditions in order and returns the first matching result.",
+    clickPath: ["Cell E7", "Formula bar", "Type IFS formula"],
+    expectedSelection: "E7",
+    expectedAction: "formula-ifs",
+    expectedResult: "E7 displays Excellent.",
+    autoCheck: { cells: [{ cell: "E7", formulaIncludes: ["IFS", "B5>=22", "EXCELLENT", "B5>=20", "GOOD"], value: "Excellent" }] },
+    commonMistakes: ["Putting the conditions in the wrong order", "Missing TRUE for the final case", "Using B4 instead of B5"],
+    feedback: {
+      wrongSelection: "Place the IFS result in E7.",
+      wrongTool: "Use IFS for several conditions.",
+      wrongResult: "E7 should classify Robotics as Excellent."
+    },
+    hints: ["IFS reads conditions from left to right.", "Put the highest condition first."],
+    difficulty: "confident",
+    marks: 3
+  }
+];
+
+export const allSpreadsheetInstructionCards = [
+  ...introSpreadsheetCards,
+  ...spreadsheetInstructionCards,
+  ...expansionSpreadsheetCards
+];
+
+const moduleOrder = new Map(spreadsheetModules.map((module, index) => [module.id, index]));
+
+function moduleSortIndex(card: SpreadsheetInstructionCard) {
+  return moduleOrder.get(card.moduleId || card.category) ?? spreadsheetModules.length;
 }
 
-export const firstSpreadsheetCard = spreadsheetInstructionCards[0];
+export function getSpreadsheetCard(id: string) {
+  return allSpreadsheetInstructionCards.find((card) => card.id === id);
+}
 
-export const currentLabSpreadsheetCards = spreadsheetInstructionCards.filter((card) => card.supportedInCurrentLab && card.autoCheck);
+export const firstSpreadsheetCard = allSpreadsheetInstructionCards[0];
+
+export const currentLabSpreadsheetCards = allSpreadsheetInstructionCards
+  .filter((card) => card.supportedInCurrentLab && card.autoCheck)
+  .sort((first, second) => moduleSortIndex(first) - moduleSortIndex(second));
