@@ -48,7 +48,7 @@ export const ictPracticeAreas = [
   },
   {
     title: "Word Processing",
-    href: "/academies/word-processing",
+    href: "/subjects/ict/word-processing",
     summary: "Document layout, tables, headers, footers, styles, proofing, and evidence preparation.",
     actions: ["format text", "edit tables", "apply styles", "check layout"]
   },
@@ -124,7 +124,8 @@ export const subjects: SubjectArea[] = [
     ],
     routes: [
       { label: "Open ICT", href: "/subjects/ict" },
-      { label: "Start spreadsheet practice", href: "/academies/spreadsheets/lessons/club-attendance" }
+      { label: "Start spreadsheet practice", href: "/subjects/ict/spreadsheets" },
+      { label: "Start word processing practice", href: "/subjects/ict/word-processing" }
     ]
   },
   {

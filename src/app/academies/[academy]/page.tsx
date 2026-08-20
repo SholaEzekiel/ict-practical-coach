@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowRight, Lock } from "lucide-react";
 import { Card, Pill, Section } from "@/components/ui";
 import { academies } from "@/lib/academy-data";
@@ -9,6 +9,8 @@ export function generateStaticParams() {
 }
 
 export default function AcademyPage({ params }: { params: { academy: string } }) {
+  if (params.academy === "word-processing") redirect("/subjects/ict/word-processing");
+
   const academy = academies.find((item) => item.slug === params.academy);
   if (!academy) notFound();
   const Icon = academy.icon;

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SpreadsheetWorkspace } from "@/components/spreadsheet-workspace";
 import { Card, Section } from "@/components/ui";
 import { academies } from "@/lib/academy-data";
@@ -10,6 +10,8 @@ export function generateStaticParams() {
 }
 
 export default function LessonPage({ params }: { params: { academy: string; lesson: string } }) {
+  if (params.academy === "word-processing") redirect("/subjects/ict/word-processing/intro");
+
   const academy = academies.find((item) => item.slug === params.academy);
   const lesson = academy?.lessons.find((item) => item.id === params.lesson);
   if (!academy || !lesson || !lesson.available) notFound();

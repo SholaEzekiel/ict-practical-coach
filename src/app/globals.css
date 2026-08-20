@@ -55,6 +55,49 @@ textarea {
   gap: 1rem;
 }
 
+.word-document {
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.word-document h1 {
+  margin: 0 0 1rem;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.word-document h2 {
+  margin: 0 0 0.75rem;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.word-document p {
+  margin: 0 0 0.75rem;
+}
+
+.word-document ul,
+.word-document ol {
+  margin: 0 0 1rem 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.word-document table {
+  margin: 1rem 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.word-document td,
+.word-document th {
+  min-width: 120px;
+  border: 1px solid #9ca3af;
+  padding: 0.45rem 0.6rem;
+  vertical-align: top;
+}
+
 @media (max-width: 1024px) {
   .workspace-grid {
     grid-template-columns: 1fr;

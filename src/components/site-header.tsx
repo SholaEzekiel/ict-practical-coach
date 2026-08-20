@@ -22,7 +22,10 @@ export function SiteHeader() {
             </button>
             <div className="invisible absolute left-0 top-full z-50 w-64 rounded-lg border border-line bg-white p-2 opacity-0 shadow-soft transition group-hover:visible group-hover:opacity-100">
               <Link href="/subjects/ict/spreadsheets" className="block rounded-md px-3 py-2 hover:bg-mist">
-                ICT Practical
+                ICT Spreadsheets
+              </Link>
+              <Link href="/subjects/ict/word-processing" className="block rounded-md px-3 py-2 hover:bg-mist">
+                ICT Word Processing
               </Link>
               <Link href="/subjects/ict/theory" className="block rounded-md px-3 py-2 hover:bg-mist">
                 ICT Theory
@@ -40,7 +43,7 @@ export function SiteHeader() {
           </Link>
         </nav>
         <Link
-          href="/subjects/ict/spreadsheets"
+          href="/subjects"
           className="rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90"
         >
           Start Practice
