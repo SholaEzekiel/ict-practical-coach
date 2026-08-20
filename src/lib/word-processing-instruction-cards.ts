@@ -12,6 +12,11 @@ export type WordProcessingExpectedResult = {
   alignments?: Array<{ text: string; value: "left" | "center" | "right" | "justify" }>;
   unorderedListItems?: string[];
   orderedListItems?: string[];
+  image?: {
+    alt?: string;
+    alignment?: "left" | "center" | "right";
+  };
+  columns?: 2 | 3;
   table?: {
     headers?: string[];
     minRows?: number;
@@ -547,15 +552,422 @@ const generatedExamEditingTasks: WordProcessingInstructionCard[] = [
   }
 ];
 
-export const allWordProcessingInstructionCards = [
+const cycleSupport = [
+  "Support document: Cycle Festival",
+  "The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.",
+  "A photograph of a rider is available for the article.",
+  "The final article should be clear enough for a community newsletter."
+];
+
+const typedStarter = `
+  <p>Cycle Festival</p>
+  <p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.</p>
+  <p>Visitors should check start times before arriving.</p>
+`;
+
+const extendedIntroSpecs = [
+  ["wp-intro-cycle-title", "Create a cycle article title", "Type the article title from the support document.", "Cycle Festival", cycleSupport],
+  ["wp-intro-cycle-audience", "Add the audience sentence", "Enter the sentence about the community newsletter.", "The final article should be clear enough for a community newsletter.", cycleSupport],
+  ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", cycleSupport],
+  ["wp-intro-rider-photo-note", "Add an image note", "Enter the sentence that explains the photograph.", "A photograph of a rider is available for the article.", cycleSupport],
+  ["wp-intro-charity-rides", "Add the charity ride detail", "Type the detail about charity rides.", "Charity rides are included in the festival programme.", ["Support document: Cycle Festival", "Charity rides are included in the festival programme."]],
+  ["wp-intro-skills-zone", "Add the skills zone detail", "Type the sentence about the skills zone.", "The skills zone opens after the junior races.", ["Support document: Cycle Festival", "The skills zone opens after the junior races."]],
+  ["wp-intro-winners", "Add the winners presentation", "Type the winners presentation sentence.", "The winners presentation starts at 16:00.", ["Support document: Cycle Festival", "The winners presentation starts at 16:00."]],
+  ["wp-intro-safety", "Add a safety instruction", "Type the safety instruction.", "All riders must wear a helmet.", ["Support document: Safety Notice", "All riders must wear a helmet."]],
+  ["wp-intro-meeting-point", "Add the meeting point", "Type the meeting point sentence.", "Meet at the information desk before the ride.", ["Support document: Safety Notice", "Meet at the information desk before the ride."]],
+  ["wp-intro-results-heading", "Add a results heading", "Type the results heading.", "Race Results Summary", ["Support document: Results", "Race Results Summary"]],
+  ["wp-intro-fastest-group", "Add a race category", "Type the fastest race group.", "Scratch riders are the fastest group.", ["Support document: Race Categories", "Scratch riders are the fastest group."]],
+  ["wp-intro-slowest-group", "Add another race category", "Type the slowest race group.", "Limit riders start first.", ["Support document: Race Categories", "Limit riders start first."]]
+].map(([id, title, goal, text, supportDocument]) => ({
+  id,
+  moduleId: "intro",
+  moduleTitle: "Document Basics",
+  category: "intro",
+  title,
+  scenario: "Use the support document to build accurate source text without changing the wording.",
+  supportDocument: supportDocument as string[],
+  goal,
+  steps: ["Click in the correct place in the document.", "Use the support document to type the required text.", "Check spelling, capital letters, and punctuation."],
+  starterHtml: blankDocument,
+  expected: { textIncludes: [text as string] },
+  points: 10
+} as WordProcessingInstructionCard));
+
+const extraFormattingSpecs = [
+  ["wp-format-bold-cycle-title", "Cycle Festival", "Make the article title bold.", typedStarter, "bold"],
+  ["wp-format-italic-photo-note", "A photograph of a rider is available for the article.", "Italicise the photograph note.", `${typedStarter}<p>A photograph of a rider is available for the article.</p>`, "italic"],
+  ["wp-format-underline-start-times", "Visitors should check start times before arriving.", "Underline the start time warning.", typedStarter, "underline"],
+  ["wp-format-bold-winners", "winners presentation", "Make winners presentation bold.", typedStarter, "bold"],
+  ["wp-format-italic-skills", "skills zone", "Italicise skills zone.", typedStarter, "italic"],
+  ["wp-format-underline-helmet", "All riders must wear a helmet.", "Underline the helmet instruction.", `<p>Safety Notice</p><p>All riders must wear a helmet.</p>`, "underline"],
+  ["wp-format-bold-results", "Race Results Summary", "Make the results heading bold.", `<p>Race Results Summary</p><p>Limit riders start first.</p>`, "bold"],
+  ["wp-format-bold-fastest", "Scratch riders", "Make Scratch riders bold.", `<p>Scratch riders are the fastest group.</p>`, "bold"],
+  ["wp-format-italic-limit", "Limit riders", "Italicise Limit riders.", `<p>Limit riders start first.</p>`, "italic"],
+  ["wp-format-underline-community", "community newsletter", "Underline community newsletter.", typedStarter, "underline"],
+  ["wp-format-bold-information", "information desk", "Make information desk bold.", `<p>Meet at the information desk before the ride.</p>`, "bold"],
+  ["wp-format-italic-junior", "junior races", "Italicise junior races.", typedStarter, "italic"],
+  ["wp-format-underline-final", "final article", "Underline final article.", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`, "underline"],
+  ["wp-format-bold-charity", "charity rides", "Make charity rides bold.", typedStarter, "bold"],
+  ["wp-format-italic-arriving", "before arriving", "Italicise before arriving.", typedStarter, "italic"]
+].map(([id, text, goal, starterHtml, kind]) => ({
+  id,
+  moduleId: "text-formatting",
+  moduleTitle: "Text Formatting",
+  category: "format",
+  title: goal,
+  scenario: "An article has already been typed. Edit only the named word or phrase.",
+  supportDocument: cycleSupport,
+  goal,
+  steps: [`Find the phrase ${text} in the document.`, `Select only that phrase.`, `Apply ${kind} formatting from the toolbar.`],
+  starterHtml,
+  expected: kind === "bold" ? { boldText: [text as string] } : kind === "italic" ? { italicText: [text as string] } : { underlineText: [text as string] },
+  points: 15
+} as WordProcessingInstructionCard));
+
+const extraLayoutCards: WordProcessingInstructionCard[] = [
+  ...[
+    ["wp-layout-center-cycle", "Cycle Festival", "Centre the article title.", "center", typedStarter],
+    ["wp-layout-justify-cycle-body", "The town cycle festival includes", "Justify the main article paragraph.", "justify", typedStarter],
+    ["wp-layout-right-photo-credit", "Photo: Town Cycling Club", "Right align the photo credit.", "right", `${typedStarter}<p>Photo: Town Cycling Club</p>`],
+    ["wp-layout-center-results", "Race Results Summary", "Centre the results heading.", "center", `<p>Race Results Summary</p><p>Limit riders start first.</p>`],
+    ["wp-layout-justify-safety", "All riders must wear a helmet", "Justify the safety paragraph.", "justify", `<p>Safety Notice</p><p>All riders must wear a helmet. Riders should follow marshal instructions throughout the event.</p>`],
+    ["wp-layout-right-ref-cycle", "Reference: CF/23", "Right align the document reference.", "right", `<p>Reference: CF/23</p><p>Cycle Festival</p>`],
+    ["wp-layout-center-notice", "Safety Notice", "Centre the safety heading.", "center", `<p>Safety Notice</p><p>All riders must wear a helmet.</p>`],
+    ["wp-layout-justify-newsletter", "The final article should be clear", "Justify the newsletter paragraph.", "justify", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`],
+    ["wp-layout-right-date-cycle", "Date: March 2023", "Right align the date.", "right", `<p>Date: March 2023</p><p>Cycle Festival</p>`],
+    ["wp-layout-center-awards", "Winners Presentation", "Centre the awards heading.", "center", `<p>Winners Presentation</p><p>The winners presentation starts at 16:00.</p>`]
+  ].map(([id, text, goal, value, starterHtml]) => ({
+    id,
+    moduleId: "paragraph-layout",
+    moduleTitle: "Paragraph Layout",
+    category: "layout",
+    title: goal,
+    scenario: "The text is already typed. Practise arranging paragraphs for a clear printed document.",
+    supportDocument: cycleSupport,
+    goal,
+    steps: [`Click inside the paragraph containing ${text}.`, `Use the toolbar alignment button for ${value}.`, "Check the paragraph has moved to the correct position."],
+    starterHtml,
+    expected: { alignments: [{ text: text as string, value: value as "center" | "right" | "justify" }] },
+    points: 15
+  } as WordProcessingInstructionCard)),
+  {
+    id: "wp-layout-two-columns-cycle",
+    moduleId: "paragraph-layout",
+    moduleTitle: "Paragraph Layout",
+    category: "layout",
+    title: "Apply two-column layout",
+    scenario: "The community newsletter article should use two columns like a magazine page.",
+    supportDocument: cycleSupport,
+    goal: "Apply two columns to the cycle festival article.",
+    steps: ["Click inside the document.", "Click the two-column toolbar button.", "Check the article text flows into two columns."],
+    starterHtml: `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`,
+    expected: { columns: 2 },
+    points: 20
+  },
+  {
+    id: "wp-layout-image-centre",
+    moduleId: "paragraph-layout",
+    moduleTitle: "Paragraph Layout",
+    category: "layout",
+    title: "Insert and centre an image",
+    scenario: "The article needs the rider photograph placed neatly below the title.",
+    supportDocument: cycleSupport,
+    goal: "Insert the rider image and centre it.",
+    steps: ["Click below the title.", "Click the image toolbar button.", "Check the image is centred in the document."],
+    starterHtml: `<h1>Cycle Festival</h1><p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.</p>`,
+    expected: { image: { alt: "cyclist", alignment: "center" } },
+    points: 20
+  },
+  {
+    id: "wp-layout-columns-with-image",
+    moduleId: "paragraph-layout",
+    moduleTitle: "Paragraph Layout",
+    category: "layout",
+    title: "Build a newsletter layout",
+    scenario: "The finished article should combine a rider image with a two-column body.",
+    supportDocument: cycleSupport,
+    goal: "Insert the rider image and apply two columns to the article.",
+    steps: ["Insert the rider image below the title.", "Click the two-column toolbar button.", "Check the article still reads clearly."],
+    starterHtml: `<h1>Cycle Festival</h1><p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation. Visitors should check start times before arriving. The final article should be clear enough for a community newsletter.</p>`,
+    expected: { image: { alt: "cyclist", alignment: "center" }, columns: 2 },
+    points: 25
+  }
+];
+
+const extraListSpecs = [
+  ["wp-list-cycle-events", "Festival events", ["Junior races", "Skills zone", "Charity rides", "Winners presentation"], "unordered"],
+  ["wp-list-rider-checks", "Rider checks", ["Wear a helmet", "Check start time", "Meet at the information desk"], "ordered"],
+  ["wp-list-source-files", "Source files", ["Festival article", "Rider photograph", "Race results"], "unordered"],
+  ["wp-list-editing-order", "Editing order", ["Open the source document", "Format the title", "Insert the image", "Check the final document"], "ordered"],
+  ["wp-list-newsletter-items", "Newsletter contents", ["Main article", "Results table", "Safety note"], "unordered"],
+  ["wp-list-race-groups", "Race groups", ["Limit", "Block", "Scratch"], "unordered"],
+  ["wp-list-proofing", "Proofing checklist", ["Check spelling", "Check alignment", "Check table order"], "ordered"],
+  ["wp-list-output", "Print output", ["Article", "Evidence document", "Final proof"], "ordered"],
+  ["wp-list-volunteer", "Volunteer tasks", ["Set up signs", "Guide riders", "Record winners"], "unordered"],
+  ["wp-list-safety", "Safety points", ["Helmet", "Water", "Marshal instructions"], "unordered"],
+  ["wp-list-import", "Import sequence", ["Open document", "Place image", "Resize image"], "ordered"],
+  ["wp-list-table-plan", "Table plan", ["Category", "Winners", "Points"], "unordered"],
+  ["wp-list-columns-plan", "Column plan", ["Title above columns", "Body in columns", "Image near title"], "ordered"],
+  ["wp-list-final-checks", "Final checks", ["No missing text", "No broken image", "No unsorted table"], "unordered"],
+  ["wp-list-reader-actions", "Reader actions", ["Read start time", "Find category", "Check winner"], "ordered"]
+].map(([id, title, items, listType]) => ({
+  id,
+  moduleId: "lists",
+  moduleTitle: "Lists",
+  category: "list",
+  title: `Format ${title.toString().toLowerCase()}`,
+  scenario: "A document section is already typed as plain lines. Convert it into the correct list type.",
+  supportDocument: [`Support document: ${title}`, ...(items as string[])],
+  goal: `Turn ${title.toString().toLowerCase()} into ${listType === "ordered" ? "a numbered list" : "a bullet list"}.`,
+  steps: ["Select the item lines under the heading.", `Click the ${listType === "ordered" ? "numbered list" : "bullet list"} toolbar button.`, "Check each item is on its own list line."],
+  starterHtml: `<p>${title}</p>${(items as string[]).map((item) => `<p>${item}</p>`).join("")}`,
+  expected: listType === "ordered" ? { orderedListItems: items as string[] } : { unorderedListItems: items as string[] },
+  points: 15
+} as WordProcessingInstructionCard));
+
+const raceTableStarter = `
+  <p>Race results</p>
+  <table>
+    <tbody>
+      <tr><td>Category</td><td>Points</td><td>Notes</td></tr>
+      <tr><td>Scratch</td><td>16</td><td>fastest</td></tr>
+      <tr><td>Limit</td><td>2</td><td>slowest</td></tr>
+      <tr><td>Block</td><td>6</td><td>second to last</td></tr>
+    </tbody>
+  </table>
+`;
+
+const extraTableCards: WordProcessingInstructionCard[] = [
+  ...[
+    ["wp-table-race-headers", "Race table headings", "Bold the race table headings.", raceTableStarter, ["Category", "Points", "Notes"]],
+    ["wp-table-club-headers-extra", "Club table headings", "Bold the club table headings.", tableStarter, ["Club", "Teacher", "Room"]],
+    ["wp-table-winner-headers", "Winners table headings", "Bold Winner, Category, and Time.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Ana</td><td>Limit</td><td>09:30</td></tr></tbody></table>`, ["Winner", "Category", "Time"]]
+  ].map(([id, title, goal, starterHtml, headers]) => ({
+    id,
+    moduleId: "tables",
+    moduleTitle: "Tables",
+    category: "table",
+    title,
+    scenario: "The table has been typed. Format the heading row so it stands out.",
+    supportDocument: ["Support document: Table Formatting", "Heading rows should be bold."],
+    goal,
+    steps: ["Select the first row of the table.", "Click the B button.", "Check only the headings are emphasised."],
+    starterHtml,
+    expected: { boldText: headers as string[], table: { headers: headers as string[], minRows: 2, minColumns: 3 } },
+    points: 20
+  } as WordProcessingInstructionCard)),
+  ...[
+    ["wp-table-sort-race-categories", "Sort race categories", "Sort the category table alphabetically.", raceTableStarter, ["Block", "Limit", "Scratch"]],
+    ["wp-table-sort-club-extra", "Sort clubs again", "Sort the club table alphabetically.", tableStarter, ["Art", "Drama", "Robotics"]],
+    ["wp-table-sort-winners", "Sort winner names", "Sort the winners table alphabetically.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Zara</td><td>Scratch</td><td>10:10</td></tr><tr><td>Ana</td><td>Limit</td><td>09:30</td></tr><tr><td>Milo</td><td>Block</td><td>09:50</td></tr></tbody></table>`, ["Ana", "Milo", "Zara"]]
+  ].map(([id, title, goal, starterHtml, sortedFirstColumn]) => ({
+    id,
+    moduleId: "tables",
+    moduleTitle: "Tables",
+    category: "table",
+    title,
+    scenario: "The table data is present but not in the order requested by the examiner.",
+    supportDocument: ["Support document: Sorting", "Sort the first column in ascending order."],
+    goal,
+    steps: ["Click inside the table.", "Click Sort A-Z.", "Check the first column is in ascending order."],
+    starterHtml,
+    expected: { table: { sortedFirstColumn: sortedFirstColumn as string[] } },
+    points: 20
+  } as WordProcessingInstructionCard)),
+  ...[
+    ["wp-table-add-limit-row", "Add a Limit row", "Add the Limit race row to the table.", "Limit", "2", "slowest"],
+    ["wp-table-add-scratch-row", "Add a Scratch row", "Add the Scratch race row to the table.", "Scratch", "16", "fastest"],
+    ["wp-table-add-block-row", "Add a Block row", "Add the Block race row to the table.", "Block", "6", "second to last"],
+    ["wp-table-add-winner-row", "Add a winner row", "Add Ana, Limit, and 09:30 to the table.", "Ana", "Limit", "09:30"],
+    ["wp-table-add-rider-row", "Add a rider row", "Add Milo, Block, and 09:50 to the table.", "Milo", "Block", "09:50"],
+    ["wp-table-add-scratch-winner", "Add the Scratch winner", "Add Zara, Scratch, and 10:10 to the table.", "Zara", "Scratch", "10:10"],
+    ["wp-table-add-total-row", "Add the total row", "Add Total, 38, and all groups to the table.", "Total", "38", "all groups"],
+    ["wp-table-add-start-time", "Add a start time", "Add Limit, 09:00, and First start.", "Limit", "09:00", "First start"]
+  ].map(([id, title, goal, first, second, third]) => ({
+    id,
+    moduleId: "tables",
+    moduleTitle: "Tables",
+    category: "table",
+    title,
+    scenario: "Use the support data to complete an existing table.",
+    supportDocument: ["Support document: Race Data", `${first} | ${second} | ${third}`],
+    goal,
+    steps: ["Click inside an empty table row.", "Enter the three pieces of support data into the row.", "Check the data is in separate cells."],
+    starterHtml: `<table><tbody><tr><td>Category</td><td>Points</td><td>Notes</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>`,
+    expected: { textIncludes: [first as string, second as string, third as string], table: { minRows: 2, minColumns: 3 } },
+    points: 20
+  } as WordProcessingInstructionCard))
+];
+
+const extraExamCards: WordProcessingInstructionCard[] = [
+  {
+    id: "wp-exam-cycle-newsletter",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Build the cycle newsletter article",
+    scenario: "This is a longer practical task modelled on a support-document workflow.",
+    supportDocument: cycleSupport,
+    goal: "Create a bold centred title, insert the rider image, and apply two columns.",
+    steps: ["Format the title so it is bold and centred.", "Insert the rider image below the title.", "Apply two columns to the article."],
+    starterHtml: typedStarter,
+    expected: { boldText: ["Cycle Festival"], alignments: [{ text: "Cycle Festival", value: "center" }], image: { alt: "cyclist", alignment: "center" }, columns: 2 },
+    points: 30
+  },
+  {
+    id: "wp-exam-race-results-table",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Format and sort race results",
+    scenario: "A results table has been imported from a CSV-style support file and needs final formatting.",
+    supportDocument: ["Support document: Race Results", "Sort by Category ascending.", "Make the heading row bold."],
+    goal: "Make the table headings bold and sort the first column alphabetically.",
+    steps: ["Bold the heading row.", "Click in the table.", "Sort the first column from A to Z."],
+    starterHtml: raceTableStarter,
+    expected: { boldText: ["Category", "Points", "Notes"], table: { headers: ["Category", "Points", "Notes"], sortedFirstColumn: ["Block", "Limit", "Scratch"] } },
+    points: 30
+  },
+  {
+    id: "wp-exam-safety-handout",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Prepare a safety handout",
+    scenario: "A safety handout must combine a heading, a justified paragraph, and a bullet checklist.",
+    supportDocument: ["Support document: Safety", "Heading: Rider Safety", "Items: Helmet, Water, Marshal instructions"],
+    goal: "Create a bold centred heading, justify the paragraph, and make the safety items a bullet list.",
+    steps: ["Make the heading bold and centred.", "Justify the safety paragraph.", "Turn the three safety items into bullets."],
+    starterHtml: `<p>Rider Safety</p><p>All riders must wear a helmet. Riders should follow marshal instructions throughout the event.</p><p>Helmet</p><p>Water</p><p>Marshal instructions</p>`,
+    expected: {
+      boldText: ["Rider Safety"],
+      alignments: [{ text: "Rider Safety", value: "center" }, { text: "All riders must wear", value: "justify" }],
+      unorderedListItems: ["Helmet", "Water", "Marshal instructions"]
+    },
+    points: 30
+  },
+  {
+    id: "wp-exam-proof-edit",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Edit an imported article",
+    scenario: "The article is already typed, but the examiner has asked for several finishing changes.",
+    supportDocument: ["Support document: Edit Notes", "Title should be bold.", "Photo note should be italic.", "Start time warning should be underlined."],
+    goal: "Apply bold, italic, and underline to the correct parts of the existing article.",
+    steps: ["Make the title bold.", "Italicise the photograph note.", "Underline the start time warning."],
+    starterHtml: `${typedStarter}<p>A photograph of a rider is available for the article.</p>`,
+    expected: {
+      boldText: ["Cycle Festival"],
+      italicText: ["A photograph of a rider is available for the article."],
+      underlineText: ["Visitors should check start times before arriving."]
+    },
+    points: 30
+  },
+  {
+    id: "wp-exam-two-column-results",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Create a two-column results page",
+    scenario: "A newsletter page must show article text and a sorted results table.",
+    supportDocument: ["Support document: Newsletter Page", "Use two columns.", "Sort race categories alphabetically."],
+    goal: "Apply two columns and sort the results table.",
+    steps: ["Click the two-column toolbar button.", "Click inside the results table.", "Click Sort A-Z."],
+    starterHtml: `${typedStarter}${raceTableStarter}`,
+    expected: { columns: 2, table: { sortedFirstColumn: ["Block", "Limit", "Scratch"] } },
+    points: 30
+  },
+  {
+    id: "wp-exam-image-and-caption",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Place an image with a caption",
+    scenario: "The rider image must be inserted and the caption must be included.",
+    supportDocument: ["Support document: Image", "Caption: Rider on the festival route"],
+    goal: "Insert the rider image and add the caption text.",
+    steps: ["Insert the rider image.", "Type the caption below the image.", "Centre the image."],
+    starterHtml: `<h1>Cycle Festival</h1><p></p>`,
+    expected: { image: { alt: "cyclist", alignment: "center" }, textIncludes: ["Rider on the festival route"] },
+    points: 30
+  },
+  {
+    id: "wp-exam-full-support-edit",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "Complete a support-document edit",
+    scenario: "A prepared article needs the same mix of edits students often meet in practical papers.",
+    supportDocument: cycleSupport,
+    goal: "Bold and centre the title, justify the article paragraph, insert the image, and underline the start time warning.",
+    steps: ["Format the title.", "Justify the article paragraph.", "Insert the rider image and underline the warning sentence."],
+    starterHtml: typedStarter,
+    expected: {
+      boldText: ["Cycle Festival"],
+      underlineText: ["Visitors should check start times before arriving."],
+      alignments: [{ text: "Cycle Festival", value: "center" }, { text: "The town cycle festival includes", value: "justify" }],
+      image: { alt: "cyclist", alignment: "center" }
+    },
+    points: 35
+  },
+  ...[
+    ["wp-exam-final-list", "Create the final checklist", ["No missing text", "No broken image", "No unsorted table"], "unordered"],
+    ["wp-exam-numbered-process", "Create the editing process", ["Open source", "Format document", "Check output"], "ordered"],
+    ["wp-exam-bullet-events", "Create the events list", ["Junior races", "Skills zone", "Charity rides"], "unordered"],
+    ["wp-exam-numbered-proofing", "Create proofing steps", ["Read instructions", "Compare document", "Save final work"], "ordered"],
+    ["wp-exam-bullet-files", "Create source file list", ["festival document", "rider image", "results data"], "unordered"],
+    ["wp-exam-numbered-evidence", "Create evidence steps", ["Take screenshot", "Paste evidence", "Label step"], "ordered"],
+    ["wp-exam-bullet-audience", "Create audience points", ["Parents", "Riders", "Visitors"], "unordered"],
+    ["wp-exam-numbered-layout", "Create layout sequence", ["Place title", "Insert image", "Apply columns"], "ordered"],
+    ["wp-exam-bullet-output", "Create output list", ["Newsletter", "Results table", "Safety note"], "unordered"]
+  ].map(([id, title, items, listType]) => ({
+    id,
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title,
+    scenario: "A section of the final document needs to be converted into the correct list format.",
+    supportDocument: [`Support document: ${title}`, ...(items as string[])],
+    goal: `Format the section as ${listType === "ordered" ? "a numbered list" : "a bullet list"}.`,
+    steps: ["Select the item lines.", `Click the ${listType === "ordered" ? "numbered list" : "bullet list"} button.`, "Check the list format is applied."],
+    starterHtml: `<p>${title}</p>${(items as string[]).map((item) => `<p>${item}</p>`).join("")}`,
+    expected: listType === "ordered" ? { orderedListItems: items as string[] } : { unorderedListItems: items as string[] },
+    points: 25
+  } as WordProcessingInstructionCard))
+];
+
+const rawWordProcessingCards = [
   ...wordProcessingInstructionCards,
   ...generatedIntroTasks,
+  ...extendedIntroSpecs,
   ...generatedFormattingTasks,
+  ...extraFormattingSpecs,
   ...generatedLayoutTasks,
+  ...extraLayoutCards,
   ...generatedListTasks,
+  ...extraListSpecs,
   ...generatedTableTasks,
-  ...generatedExamEditingTasks
+  ...extraTableCards,
+  ...generatedExamEditingTasks,
+  ...extraExamCards
 ];
+
+function removeCopyableTypingText(card: WordProcessingInstructionCard): WordProcessingInstructionCard {
+  const protectedTexts = card.expected.textIncludes?.filter((text) => text.length > 12) || [];
+  if (protectedTexts.length === 0) return card;
+
+  return {
+    ...card,
+    steps: card.steps.map((step) => {
+      if (!protectedTexts.some((text) => step.includes(text))) return step;
+      if (step.toLowerCase().startsWith("on the next line")) return "On the next line, type the next required sentence from the support document.";
+      return "Use the support document to type the required text in the correct place.";
+    })
+  };
+}
+
+export const allWordProcessingInstructionCards = rawWordProcessingCards.map(removeCopyableTypingText);
 
 const moduleOrder = new Map(wordProcessingModules.map((module, index) => [module.id, index]));
 

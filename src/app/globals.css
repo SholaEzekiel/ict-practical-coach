@@ -90,12 +90,35 @@ textarea {
   border-collapse: collapse;
 }
 
+.word-document img {
+  display: inline-block;
+  margin: 0.75rem 0;
+  max-width: 100%;
+}
+
 .word-document td,
 .word-document th {
   min-width: 120px;
   border: 1px solid #9ca3af;
   padding: 0.45rem 0.6rem;
   vertical-align: top;
+}
+
+.word-document.columns-2 {
+  column-count: 2;
+  column-gap: 2rem;
+}
+
+.word-document.columns-3 {
+  column-count: 3;
+  column-gap: 1.5rem;
+}
+
+.word-document.columns-2 table,
+.word-document.columns-3 table,
+.word-document.columns-2 img,
+.word-document.columns-3 img {
+  break-inside: avoid;
 }
 
 @media (max-width: 1024px) {

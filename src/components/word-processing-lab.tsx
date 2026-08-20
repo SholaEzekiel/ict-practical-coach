@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlignCenter,
@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Bold,
   CheckCircle2,
+  Columns2,
+  Image as ImageIcon,
   Italic,
   List,
   ListOrdered,
@@ -106,6 +108,36 @@ function tableResult(root: HTMLElement, expected: NonNullable<WordProcessingExpe
   }
 }
 
+function imageResult(root: HTMLElement, expected: NonNullable<WordProcessingExpectedResult["image"]>, messages: string[]) {
+  const image = root.querySelector("img");
+  if (!image) {
+    messages.push("Insert the required image.");
+    return;
+  }
+
+  if (expected.alt && normalise(image.getAttribute("alt") || "") !== normalise(expected.alt)) {
+    messages.push(`Set the image alternative text to ${expected.alt}.`);
+  }
+
+  if (expected.alignment) {
+    const wrapper = image.closest("p, div, figure") as HTMLElement | null;
+    const imageStyle = image.getAttribute("data-align") || image.style.float || image.style.display;
+    const wrapperAlign = wrapper?.style.textAlign || wrapper?.getAttribute("align") || "";
+
+    if (expected.alignment === "center" && wrapperAlign !== "center" && imageStyle !== "block") {
+      messages.push("Centre align the image.");
+    }
+
+    if (expected.alignment === "right" && wrapperAlign !== "right" && imageStyle !== "right") {
+      messages.push("Right align the image.");
+    }
+
+    if (expected.alignment === "left" && wrapperAlign === "right") {
+      messages.push("Place the image on the left.");
+    }
+  }
+}
+
 function validateDocument(root: HTMLElement, card: WordProcessingInstructionCard): Feedback {
   const messages: string[] = [];
   const expected = card.expected;
@@ -141,6 +173,11 @@ function validateDocument(root: HTMLElement, card: WordProcessingInstructionCard
   });
 
   if (expected.table) tableResult(root, expected.table, messages);
+  if (expected.image) imageResult(root, expected.image, messages);
+
+  if (expected.columns && !root.classList.contains(`columns-${expected.columns}`)) {
+    messages.push(`Apply ${expected.columns} columns to the document.`);
+  }
 
   return {
     ok: messages.length === 0,
@@ -157,6 +194,10 @@ function insertTable() {
     "insertHTML",
     `<table><tbody><tr><td>Club</td><td>Teacher</td><td>Room</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table><p></p>`
   );
+}
+
+function insertRiderImage() {
+  command("insertHTML", `<p style="text-align:center"><img src="/assets/j2321rider.jpg" alt="cyclist" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
 }
 
 function sortFirstTable(editor: HTMLElement | null) {
@@ -187,6 +228,12 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const currentComplete = completed.includes(card.id);
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
+  useEffect(() => {
+    if (!editorRef.current || !card) return;
+    editorRef.current.innerHTML = card.starterHtml;
+    editorRef.current.classList.remove("columns-2", "columns-3");
+  }, [card]);
+
   function runCheck() {
     if (!editorRef.current) return;
     const result = validateDocument(editorRef.current, card);
@@ -215,6 +262,12 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
         <Icon size={18} aria-hidden="true" />
       </button>
     );
+  }
+
+  function applyColumns(count: 2 | 3) {
+    if (!editorRef.current) return;
+    editorRef.current.classList.remove("columns-2", "columns-3");
+    editorRef.current.classList.add(`columns-${count}`);
   }
 
   if (!card) return null;
@@ -312,6 +365,8 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           {toolbarButton("Bullet list", List, () => command("insertUnorderedList"))}
           {toolbarButton("Numbered list", ListOrdered, () => command("insertOrderedList"))}
           {toolbarButton("Insert table", Table2, insertTable)}
+          {toolbarButton("Insert rider image", ImageIcon, insertRiderImage)}
+          {toolbarButton("Two columns", Columns2, () => applyColumns(2))}
           <button
             type="button"
             onMouseDown={(event) => event.preventDefault()}
@@ -323,12 +378,10 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
         </div>
         <div className="h-full overflow-auto bg-slate-100 p-6">
           <div
-            key={card.id}
             ref={editorRef}
             contentEditable
             suppressContentEditableWarning
             className="word-document mx-auto min-h-[900px] w-full max-w-[850px] bg-white p-10 shadow-sm outline-none"
-            dangerouslySetInnerHTML={{ __html: card.starterHtml }}
           />
         </div>
       </section>
