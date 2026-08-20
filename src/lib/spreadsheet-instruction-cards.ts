@@ -1089,10 +1089,471 @@ const expansionSpreadsheetCards: SpreadsheetInstructionCard[] = [
   }
 ];
 
+const generatedIntroSpecs = [
+  ["B2", "Desk", "The form tutor wants a quick location marker in the second row."],
+  ["D4", "Check", "The exams officer is checking whether students can move to a middle cell."],
+  ["H2", "Right", "A club secretary wants you to practise moving across the worksheet."],
+  ["A10", "Down", "The attendance officer wants you to practise moving down column A."],
+  ["J5", "Target", "A teacher calls out a far cell reference to test your accuracy."],
+  ["C8", "Row", "The class list uses lower rows, so you need to find row 8."],
+  ["F6", "Column", "The PE sheet uses column F for notes."],
+  ["K3", "Marker", "The office wants a marker near the right side of the sheet."],
+  ["B12", "Late", "The tutor wants a note placed further down the worksheet."],
+  ["E9", "Ready", "The spreadsheet task checks if you can combine column E and row 9."],
+  ["G7", "Club", "A club organiser asks you to mark a cell in the middle of the grid."],
+  ["L4", "End", "The coordinator wants you to practise finding a wider column."],
+  ["C15", "Register", "The register has a note area lower down the worksheet."],
+  ["I11", "House", "The house system sheet uses cells away from the first columns."],
+  ["M6", "Point", "The admin team wants you to locate a cell beyond column L."],
+  ["D14", "Task", "The teacher checks that row numbers are read correctly."],
+  ["N2", "Far", "This task checks movement across many columns."],
+  ["F16", "Finish", "The form sheet needs a marker in a lower row."],
+  ["O8", "Wide", "The worksheet is wide, so you need to scroll or move across confidently."],
+  ["H18", "Done", "The teacher wants you to practise a lower middle cell."]
+] as const;
+
+const generatedIntroSpreadsheetCards: SpreadsheetInstructionCard[] = generatedIntroSpecs.map(([cell, value, scenario], index) => ({
+  id: `sheet-intro-cell-practice-${String(index + 1).padStart(2, "0")}`,
+  moduleId: "intro",
+  moduleTitle: "Introduction",
+  category: "selection",
+  skill: "Identify a cell",
+  studentGoal: `Find cell ${cell}.`,
+  scenario,
+  studentSteps: [`Find column ${cell.replace(/\d+/g, "")}.`, `Find row ${cell.replace(/[A-Z]/gi, "")}.`, `Click ${cell}, type ${value}, and press Enter.`],
+  supportedInCurrentLab: true,
+  instruction: `Enter ${value} in cell ${cell}.`,
+  meaning: `${cell} means column ${cell.replace(/\d+/g, "")}, row ${cell.replace(/[A-Z]/gi, "")}.`,
+  clickPath: ["Worksheet grid", `Cell ${cell}`, `Type ${value}`],
+  expectedSelection: cell,
+  expectedAction: "enter-cell-value",
+  expectedResult: `${cell} contains ${value}.`,
+  autoCheck: { cells: [{ cell, value }] },
+  commonMistakes: ["Using the wrong row", "Using the wrong column", "Typing into the heading instead of the cell"],
+  feedback: {
+    wrongSelection: `Click ${cell}.`,
+    wrongTool: "This task is completed directly on the worksheet grid.",
+    wrongResult: `${cell} should contain ${value}.`
+  },
+  hints: ["Read the column letter first.", "Read the row number second."],
+  difficulty: "beginner",
+  marks: 1
+}));
+
+const generatedRangeIntroCards: SpreadsheetInstructionCard[] = [
+  {
+    id: "sheet-intro-range-row-001",
+    studentGoal: "Enter three labels across one row.",
+    scenario: "The science teacher needs three quick headings across a row for a mini experiment log.",
+    cells: [["A20", "Test"], ["B20", "Result"], ["C20", "Comment"]]
+  },
+  {
+    id: "sheet-intro-range-column-001",
+    studentGoal: "Enter three labels down one column.",
+    scenario: "The library assistant wants three book categories entered down a column.",
+    cells: [["P2", "Fiction"], ["P3", "Non-fiction"], ["P4", "Reference"]]
+  }
+].map((task) => ({
+  id: task.id,
+  moduleId: "intro",
+  moduleTitle: "Introduction",
+  category: "selection",
+  skill: "Use a cell range",
+  studentGoal: task.studentGoal,
+  scenario: task.scenario,
+  studentSteps: task.cells.map(([cell, value]) => `Click ${cell}, type ${value}, then move to the next cell.`),
+  supportedInCurrentLab: true,
+  instruction: `Enter values in ${task.cells[0][0]}:${task.cells[task.cells.length - 1][0]}.`,
+  meaning: "A range is a group of cells used together.",
+  clickPath: ["Worksheet grid", "Cell range", "Type values"],
+  expectedSelection: `${task.cells[0][0]}:${task.cells[task.cells.length - 1][0]}`,
+  expectedAction: "enter-range-values",
+  expectedResult: "The requested cells contain the correct values.",
+  autoCheck: { cells: task.cells.map(([cell, value]) => ({ cell, value })) },
+  commonMistakes: ["Typing values in the wrong direction", "Skipping a cell", "Starting in the wrong cell"],
+  feedback: {
+    wrongSelection: "Start in the first cell named in the task.",
+    wrongTool: "This is direct data entry across a range.",
+    wrongResult: "Each named cell should contain its requested value."
+  },
+  hints: ["Tab usually moves across.", "Enter usually moves down."],
+  difficulty: "beginner",
+  marks: 2
+}));
+
+const generatedDataEntrySpecs: Array<{
+  id: string;
+  goal: string;
+  scenario: string;
+  cells: Array<[string, string | number]>;
+}> = [
+  {
+    id: "sheet-data-library-names-001",
+    goal: "Enter library book categories.",
+    scenario: "The librarian is preparing a borrowing summary and needs the categories entered before adding numbers.",
+    cells: [["A22", "Fiction"], ["A23", "History"], ["A24", "Science"], ["A25", "Art"]]
+  },
+  {
+    id: "sheet-data-library-values-001",
+    goal: "Enter books borrowed.",
+    scenario: "The librarian has counted how many books were borrowed in each category this week.",
+    cells: [["B22", 34], ["B23", 18], ["B24", 26], ["B25", 12]]
+  },
+  {
+    id: "sheet-data-canteen-items-001",
+    goal: "Enter canteen item names.",
+    scenario: "The canteen manager wants a simple list of items sold during break time.",
+    cells: [["D20", "Sandwich"], ["D21", "Juice"], ["D22", "Fruit"], ["D23", "Water"]]
+  },
+  {
+    id: "sheet-data-canteen-values-001",
+    goal: "Enter canteen sales quantities.",
+    scenario: "The canteen manager has counted the number of each item sold.",
+    cells: [["E20", 45], ["E21", 38], ["E22", 24], ["E23", 52]]
+  },
+  {
+    id: "sheet-data-house-names-001",
+    goal: "Enter house names.",
+    scenario: "The sports coordinator is preparing the inter-house points table.",
+    cells: [["G20", "Red"], ["G21", "Blue"], ["G22", "Green"], ["G23", "Yellow"]]
+  },
+  {
+    id: "sheet-data-house-values-001",
+    goal: "Enter house points.",
+    scenario: "The sports coordinator has received the final points from the referee.",
+    cells: [["H20", 72], ["H21", 68], ["H22", 81], ["H23", 59]]
+  },
+  {
+    id: "sheet-data-trip-headings-001",
+    goal: "Enter trip register headings.",
+    scenario: "The trip leader needs a small table for students going on a museum visit.",
+    cells: [["J20", "Name"], ["K20", "Class"], ["L20", "Paid"]]
+  },
+  {
+    id: "sheet-data-trip-row-001",
+    goal: "Enter one trip register row.",
+    scenario: "The first student has been added to the museum visit list.",
+    cells: [["J21", "Amara"], ["K21", "10A"], ["L21", "Yes"]]
+  },
+  {
+    id: "sheet-data-stock-headings-001",
+    goal: "Enter stock table headings.",
+    scenario: "The ICT technician is checking computer room stock.",
+    cells: [["A28", "Item"], ["B28", "In stock"], ["C28", "Needed"]]
+  },
+  {
+    id: "sheet-data-stock-row-001",
+    goal: "Enter one stock row.",
+    scenario: "The technician has counted spare keyboards.",
+    cells: [["A29", "Keyboard"], ["B29", 14], ["C29", 20]]
+  },
+  {
+    id: "sheet-data-weather-days-001",
+    goal: "Enter weekday labels.",
+    scenario: "A geography class is recording temperatures for a week.",
+    cells: [["N20", "Mon"], ["O20", "Tue"], ["P20", "Wed"], ["Q20", "Thu"], ["R20", "Fri"]]
+  },
+  {
+    id: "sheet-data-weather-values-001",
+    goal: "Enter temperatures.",
+    scenario: "The geography class has measured the daily temperatures.",
+    cells: [["N21", 18], ["O21", 20], ["P21", 19], ["Q21", 21], ["R21", 17]]
+  },
+  {
+    id: "sheet-data-budget-headings-001",
+    goal: "Enter budget headings.",
+    scenario: "The drama club is preparing a small event budget.",
+    cells: [["D28", "Item"], ["E28", "Cost"], ["F28", "Paid"]]
+  },
+  {
+    id: "sheet-data-budget-row-001",
+    goal: "Enter one budget row.",
+    scenario: "The drama club has bought poster paper for the performance.",
+    cells: [["D29", "Posters"], ["E29", 12], ["F29", "Yes"]]
+  },
+  {
+    id: "sheet-data-attendance-months-001",
+    goal: "Enter month labels across a row.",
+    scenario: "The office wants attendance headings for three months.",
+    cells: [["H28", "Jan"], ["I28", "Feb"], ["J28", "Mar"]]
+  },
+  {
+    id: "sheet-data-attendance-month-values-001",
+    goal: "Enter monthly attendance totals.",
+    scenario: "The office has total attendance figures for each month.",
+    cells: [["H29", 410], ["I29", 398], ["J29", 425]]
+  }
+];
+
+const generatedDataEntryCards: SpreadsheetInstructionCard[] = generatedDataEntrySpecs.map((task) => ({
+  id: task.id,
+  moduleId: "data-entry",
+  moduleTitle: "Data Entry",
+  category: "data-entry",
+  skill: "Enter data accurately",
+  studentGoal: task.goal,
+  scenario: task.scenario,
+  studentSteps: task.cells.map(([cell, value]) => `Click ${cell}, type ${value}, then move to the next required cell.`),
+  supportedInCurrentLab: true,
+  instruction: task.goal,
+  meaning: "Enter each item in the correct cell so the table can be used later.",
+  clickPath: ["Worksheet grid", "Required cells"],
+  expectedSelection: task.cells.length > 1 ? `${task.cells[0][0]}:${task.cells[task.cells.length - 1][0]}` : task.cells[0][0],
+  expectedAction: "enter-values",
+  expectedResult: "The requested cells contain the correct data.",
+  autoCheck: { cells: task.cells.map(([cell, value]) => ({ cell, value })) },
+  commonMistakes: ["Typing in the wrong cell", "Skipping a value", "Putting labels and numbers in the wrong columns"],
+  feedback: {
+    wrongSelection: "Use the exact cells named in the steps.",
+    wrongTool: "This is direct data entry.",
+    wrongResult: "Check each cell against the required value."
+  },
+  hints: ["Read the cell reference carefully.", "Use one cell for each value."],
+  difficulty: "beginner",
+  marks: 2
+}));
+
+const generatedFormattingCards: SpreadsheetInstructionCard[] = [
+  ["sheet-format-title-merge-002", "Merge the event title.", "The school office wants the event title to stretch neatly across the table.", "A1:D1", "Merge & Centre"],
+  ["sheet-format-main-heading-bold-002", "Make the main heading bold.", "The head teacher wants the main title to stand out clearly.", "A1", "Bold"],
+  ["sheet-format-headings-bold-002", "Bold the stock table headings.", "The ICT technician wants table headings to stand out from the stock rows.", "A28:C28", "Bold"],
+  ["sheet-format-budget-currency-002", "Format budget costs as currency.", "The drama club wants the event cost column to show money clearly.", "E29:E29", "Currency"],
+  ["sheet-format-attendance-decimal-002", "Show attendance with one decimal place.", "The attendance officer wants consistent decimal formatting.", "H29:J29", "One decimal place"],
+  ["sheet-format-weather-fill-002", "Shade the weather headings.", "The geography teacher wants the weekday headings separated from values.", "N20:R20", "Fill colour"],
+  ["sheet-format-trip-wrap-002", "Wrap trip register headings.", "The trip leader wants long headings to fit inside their cells.", "J20:L20", "Wrap Text"],
+  ["sheet-format-stock-column-width-002", "Widen the item column.", "The technician wants item names to be fully visible.", "A:A", "Column width"],
+  ["sheet-format-title-font-size-002", "Increase the title font size.", "The report title needs to be more visible at the top of the worksheet.", "A1", "Font size"],
+  ["sheet-format-title-centre-002", "Centre the title text.", "The title should sit neatly in the middle of its title area.", "A1:D1", "Centre align"],
+  ["sheet-format-house-colour-002", "Apply fill colour to house headings.", "The sports coordinator wants house labels to stand out.", "G20:H20", "Fill colour"],
+  ["sheet-format-canteen-italic-002", "Italicise canteen item names.", "The canteen manager wants item names styled differently from quantities.", "D20:D23", "Italic"],
+  ["sheet-format-library-underline-002", "Underline library categories.", "The librarian wants category names emphasized.", "A22:A25", "Underline"],
+  ["sheet-format-budget-paid-centre-002", "Centre the Paid column.", "The drama club wants Yes/No values aligned neatly.", "F29:F29", "Centre align"],
+  ["sheet-format-stock-needed-bold-002", "Bold the Needed value.", "The technician wants the target stock number to stand out.", "C29", "Bold"],
+  ["sheet-format-trip-row-fill-002", "Shade the first trip row.", "The trip leader wants the first entered student row highlighted.", "J21:L21", "Fill colour"],
+  ["sheet-format-weather-values-decimal-002", "Format temperatures with one decimal place.", "The geography teacher wants temperatures displayed consistently.", "N21:R21", "One decimal place"],
+  ["sheet-format-house-points-number-002", "Format house points as whole numbers.", "The sports coordinator wants no decimal places for points.", "H20:H23", "Zero decimal places"],
+  ["sheet-format-budget-cost-bold-002", "Bold the budget cost.", "The drama club wants the cost figure easy to spot.", "E29", "Bold"],
+  ["sheet-format-gridlines-print-002", "Prepare gridlines for printing.", "The office wants the table boundaries to show when printed.", "Worksheet", "Print gridlines"],
+  ["sheet-format-row-height-title-002", "Increase the title row height.", "The report title needs breathing room above the table.", "Row 1", "Row height"],
+  ["sheet-format-library-column-width-002", "Widen the category column.", "The librarian wants longer category names fully visible.", "A:A", "Column width"],
+  ["sheet-format-data-border-002", "Add borders around the small table.", "The teacher wants the data area clearly boxed.", "A3:D8", "Borders"],
+  ["sheet-format-percentage-002", "Format completion values as percentages.", "The head of year wants completion values to show as percentages.", "M20:M23", "Percentage"],
+  ["sheet-format-font-colour-002", "Change the title font colour.", "The report needs a title colour that distinguishes it from the table.", "A1", "Font colour"]
+].map(([id, goal, scenario, range, command]) => ({
+  id,
+  moduleId: "formatting",
+  moduleTitle: "Formatting",
+  category: "formatting",
+  skill: command,
+  studentGoal: goal,
+  scenario,
+  studentSteps: [`Select ${range}.`, `Use the toolbar or three dots / More menu to choose ${command}.`, "Check that the selected cells show the requested formatting."],
+  supportedInCurrentLab: true,
+  instruction: `${goal} in ${range}.`,
+  meaning: "Formatting changes how data is displayed without changing the meaning of the data.",
+  clickPath: ["Toolbar", command],
+  expectedSelection: range,
+  expectedAction: command.toLowerCase().replace(/\s+/g, "-"),
+  expectedResult: `${range} uses ${command}.`,
+  commonMistakes: ["Selecting the wrong range", "Changing values instead of formatting", "Using a similar but incorrect command"],
+  feedback: {
+    wrongSelection: `Select ${range}.`,
+    wrongTool: `Use ${command}.`,
+    wrongResult: `The selected range should show ${command}.`
+  },
+  hints: ["Select before formatting.", "Use More if the command is hidden."],
+  difficulty: "developing",
+  marks: 2
+}));
+
+const extraFormulaCards: SpreadsheetInstructionCard[] = [
+  {
+    id: "sheet-formula-count-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "COUNT function",
+    studentGoal: "Count numeric attendance values.",
+    scenario: "The office wants to know how many numeric attendance entries are in the club table before checking totals.",
+    studentSteps: ["Click B15.", "Type =COUNT(B4:B7).", "Press Enter.", "Check that the result counts only the numeric cells."],
+    supportedInCurrentLab: true,
+    instruction: "Use COUNT to count numeric values in B4:B7.",
+    meaning: "COUNT returns how many cells in a range contain numbers.",
+    clickPath: ["Cell B15", "Formula bar", "Type COUNT formula"],
+    expectedSelection: "B15",
+    expectedAction: "formula-count",
+    expectedResult: "B15 displays 4.",
+    autoCheck: { cells: [{ cell: "B15", formula: "=COUNT(B4:B7)", value: 4 }] },
+    commonMistakes: ["Using COUNTA instead of COUNT", "Counting the label column", "Typing the answer manually"],
+    feedback: {
+      wrongSelection: "Place the COUNT result in B15.",
+      wrongTool: "Use COUNT for numeric entries.",
+      wrongResult: "B15 should use =COUNT(B4:B7) and display 4."
+    },
+    hints: ["COUNT checks numbers.", "Do not include headings."],
+    difficulty: "developing",
+    marks: 2
+  },
+  {
+    id: "sheet-formula-counta-001",
+    moduleId: "formula",
+    moduleTitle: "Formulae",
+    category: "formula",
+    skill: "COUNTA function",
+    studentGoal: "Count club name entries.",
+    scenario: "The PE department wants to count how many club labels have been entered in the table.",
+    studentSteps: ["Click A12.", "Type =COUNTA(A4:A7).", "Press Enter.", "Check that the result counts the club names."],
+    supportedInCurrentLab: true,
+    instruction: "Use COUNTA to count entries in A4:A7.",
+    meaning: "COUNTA counts cells that are not empty, including text labels.",
+    clickPath: ["Cell A12", "Formula bar", "Type COUNTA formula"],
+    expectedSelection: "A12",
+    expectedAction: "formula-counta",
+    expectedResult: "A12 displays 4.",
+    autoCheck: { cells: [{ cell: "A12", formula: "=COUNTA(A4:A7)", value: 4 }] },
+    commonMistakes: ["Using COUNT for text cells", "Including the heading", "Typing the answer manually"],
+    feedback: {
+      wrongSelection: "Place the COUNTA result in A12.",
+      wrongTool: "Use COUNTA for text or non-empty entries.",
+      wrongResult: "A12 should use =COUNTA(A4:A7) and display 4."
+    },
+    hints: ["COUNTA counts non-empty cells.", "Text labels can be counted with COUNTA."],
+    difficulty: "developing",
+    marks: 2
+  }
+];
+
+const generatedDataToolCards: SpreadsheetInstructionCard[] = [
+  ["sheet-data-tool-sort-club-002", "Sort club names alphabetically.", "The activities coordinator wants club names arranged from A to Z.", "A3:D7", "Sort A to Z"],
+  ["sheet-data-tool-sort-attendance-desc-002", "Sort attendance from highest to lowest.", "The PE teacher wants the most popular club at the top.", "A3:D7", "Sort largest to smallest"],
+  ["sheet-data-tool-sort-sessions-002", "Sort clubs by sessions.", "The deputy head wants clubs with fewer sessions shown first.", "A3:D7", "Sort smallest to largest"],
+  ["sheet-data-tool-filter-attendance-002", "Filter clubs above 18 attendance.", "The school wants to show only clubs that reached more than 18 pupils.", "A3:D7", "Number filter greater than 18"],
+  ["sheet-data-tool-filter-session-002", "Filter clubs with 6 sessions.", "The activities leader wants to view clubs that ran six sessions.", "A3:D7", "Filter equals 6"],
+  ["sheet-data-tool-search-robotics-002", "Find Robotics in the table.", "The teacher wants to locate the Robotics record quickly.", "A3:D7", "Find"],
+  ["sheet-data-tool-search-total-002", "Find the Total row.", "The office wants to check where the total summary appears.", "A1:D12", "Find"],
+  ["sheet-data-tool-clear-filter-002", "Clear the active filter.", "The teacher needs all records visible again after filtering.", "A3:D7", "Clear filter"],
+  ["sheet-data-tool-sort-library-002", "Sort library categories alphabetically.", "The librarian wants categories in alphabetical order.", "A22:B25", "Sort A to Z"],
+  ["sheet-data-tool-filter-library-002", "Filter borrowed books above 20.", "The librarian wants to see only popular categories.", "A22:B25", "Number filter greater than 20"],
+  ["sheet-data-tool-sort-house-002", "Sort house points descending.", "The sports coordinator wants the winning house first.", "G20:H23", "Sort largest to smallest"],
+  ["sheet-data-tool-filter-paid-002", "Filter paid trip records.", "The trip leader wants to see only students who have paid.", "J20:L21", "Filter equals Yes"],
+  ["sheet-data-tool-remove-filter-002", "Show all records again.", "The office has finished checking and wants the full table back.", "J20:L21", "Clear filter"]
+].map(([id, goal, scenario, range, command]) => ({
+  id,
+  moduleId: "data-tools",
+  moduleTitle: "Data Tools",
+  category: "data-tools",
+  skill: command,
+  studentGoal: goal,
+  scenario,
+  studentSteps: [`Select ${range}.`, `Open the Data tools or the column filter menu.`, `Choose ${command}.`, "Check that the table shows the requested order or records."],
+  supportedInCurrentLab: true,
+  instruction: `${goal} using ${range}.`,
+  meaning: "Data tools help you reorder, narrow down, or find records without manually rewriting the table.",
+  clickPath: ["Data", command],
+  expectedSelection: range,
+  expectedAction: command.toLowerCase().replace(/\s+/g, "-"),
+  expectedResult: `${range} has been changed using ${command}.`,
+  commonMistakes: ["Selecting only one column", "Including the total row", "Deleting records instead of filtering"],
+  feedback: {
+    wrongSelection: `Select the full table range ${range}.`,
+    wrongTool: `Use ${command}.`,
+    wrongResult: "The table should show the requested records or order."
+  },
+  hints: ["Select the whole table.", "Do not include summary totals unless asked."],
+  difficulty: "developing",
+  marks: 3
+}));
+
+const generatedChartCards: SpreadsheetInstructionCard[] = [
+  ["sheet-chart-attendance-column-002", "Create a column chart for attendance.", "The PE teacher wants a visual comparison of club attendance.", "A4:B7", "Column chart"],
+  ["sheet-chart-attendance-bar-002", "Create a bar chart for attendance.", "The head teacher wants a horizontal comparison chart.", "A4:B7", "Bar chart"],
+  ["sheet-chart-library-pie-002", "Create a pie chart for book categories.", "The librarian wants to show the share of borrowed books by category.", "A22:B25", "Pie chart"],
+  ["sheet-chart-house-column-002", "Create a column chart for house points.", "The sports coordinator wants to compare house scores.", "G20:H23", "Column chart"],
+  ["sheet-chart-weather-line-002", "Create a line chart for temperatures.", "The geography class wants to show temperature changes across the week.", "N20:R21", "Line chart"],
+  ["sheet-chart-title-attendance-002", "Add the chart title Club Attendance.", "The teacher wants the chart title to explain the data clearly.", "Chart", "Chart title"],
+  ["sheet-chart-title-library-002", "Add the chart title Book Borrowing.", "The librarian wants a clear title for the borrowing chart.", "Chart", "Chart title"],
+  ["sheet-chart-axis-attendance-002", "Add Attendance as the value axis title.", "The chart needs a label for the numbers shown.", "Chart", "Value axis title"],
+  ["sheet-chart-axis-club-002", "Add Club as the category axis title.", "The chart needs a label for the club names.", "Chart", "Category axis title"],
+  ["sheet-chart-legend-right-002", "Move the legend to the right.", "The report needs a neat chart layout for printing.", "Chart", "Legend position"],
+  ["sheet-chart-data-labels-002", "Show data labels on the chart.", "The teacher wants exact values visible on the chart.", "Chart", "Data labels"],
+  ["sheet-chart-change-type-002", "Change the chart to a bar chart.", "The first chart type was not suitable, so it needs changing.", "Chart", "Change chart type"]
+].map(([id, goal, scenario, range, command]) => ({
+  id,
+  moduleId: "chart",
+  moduleTitle: "Charts",
+  category: "chart",
+  skill: command,
+  studentGoal: goal,
+  scenario,
+  studentSteps: [`Select ${range}.`, "Open Insert or chart tools.", `Choose ${command}.`, "Check that the chart matches the requested data and label."],
+  supportedInCurrentLab: true,
+  instruction: `${goal} using ${range}.`,
+  meaning: "Charts turn data into a visual comparison.",
+  clickPath: ["Insert", "Chart", command],
+  expectedSelection: range,
+  expectedAction: command.toLowerCase().replace(/\s+/g, "-"),
+  expectedResult: `${command} is applied to ${range}.`,
+  commonMistakes: ["Selecting only numbers", "Including totals", "Using an unsuitable chart type"],
+  feedback: {
+    wrongSelection: `Use ${range}.`,
+    wrongTool: `Choose ${command}.`,
+    wrongResult: "The chart should match the requested source data and label."
+  },
+  hints: ["Charts need labels and values.", "Avoid total rows unless the task asks for them."],
+  difficulty: "developing",
+  marks: 3
+}));
+
+const generatedLayoutCards: SpreadsheetInstructionCard[] = [
+  ["sheet-layout-print-area-table-002", "Set the print area to A1:D8.", "The office only wants the main attendance table to print.", "A1:D8", "Set print area"],
+  ["sheet-layout-landscape-002", "Set the worksheet to landscape.", "The report is too wide for portrait printing.", "Worksheet", "Landscape orientation"],
+  ["sheet-layout-portrait-002", "Set the worksheet to portrait.", "The teacher wants a narrow report printed upright.", "Worksheet", "Portrait orientation"],
+  ["sheet-layout-gridlines-002", "Turn on printed gridlines.", "The printed table should show cell boundaries.", "Worksheet", "Print gridlines"],
+  ["sheet-layout-no-gridlines-002", "Turn off printed gridlines.", "The final report needs a cleaner printed look.", "Worksheet", "Hide print gridlines"],
+  ["sheet-layout-column-a-width-002", "Widen column A.", "The club names should be fully visible before printing.", "Column A", "Column width"],
+  ["sheet-layout-column-d-width-002", "Widen column D.", "The average heading needs more space.", "Column D", "Column width"],
+  ["sheet-layout-row-1-height-002", "Increase row 1 height.", "The title row needs more space for presentation.", "Row 1", "Row height"],
+  ["sheet-layout-fit-one-page-002", "Fit the sheet to one page wide.", "The report should print neatly across one page.", "Worksheet", "Fit to one page wide"],
+  ["sheet-layout-margins-narrow-002", "Set narrow margins.", "The table needs more space on the printed page.", "Worksheet", "Narrow margins"]
+].map(([id, goal, scenario, range, command]) => ({
+  id,
+  moduleId: "layout",
+  moduleTitle: "Print and Layout",
+  category: "layout",
+  skill: command,
+  studentGoal: goal,
+  scenario,
+  studentSteps: [`Select or open ${range}.`, "Open the page layout or row/column controls.", `Choose ${command}.`, "Check that the page or sheet layout matches the instruction."],
+  supportedInCurrentLab: true,
+  instruction: goal,
+  meaning: "Layout controls prepare the spreadsheet for reading and printing.",
+  clickPath: ["Page Layout", command],
+  expectedSelection: range,
+  expectedAction: command.toLowerCase().replace(/\s+/g, "-"),
+  expectedResult: `${command} has been applied.`,
+  commonMistakes: ["Changing the wrong row or column", "Changing screen view instead of print settings", "Selecting too much data"],
+  feedback: {
+    wrongSelection: `Use ${range}.`,
+    wrongTool: `Choose ${command}.`,
+    wrongResult: "The layout should match the print or display instruction."
+  },
+  hints: ["Print settings are usually under page layout.", "Row and column sizes use row/column boundaries."],
+  difficulty: "developing",
+  marks: 2
+}));
+
 export const allSpreadsheetInstructionCards = [
   ...introSpreadsheetCards,
+  ...generatedIntroSpreadsheetCards,
+  ...generatedRangeIntroCards,
   ...spreadsheetInstructionCards,
-  ...expansionSpreadsheetCards
+  ...expansionSpreadsheetCards,
+  ...generatedDataEntryCards,
+  ...extraFormulaCards,
+  ...generatedFormattingCards,
+  ...generatedDataToolCards,
+  ...generatedChartCards,
+  ...generatedLayoutCards
 ];
 
 const moduleOrder = new Map(spreadsheetModules.map((module, index) => [module.id, index]));
@@ -1110,3 +1571,15 @@ export const firstSpreadsheetCard = allSpreadsheetInstructionCards[0];
 export const currentLabSpreadsheetCards = allSpreadsheetInstructionCards
   .filter((card) => card.supportedInCurrentLab && card.autoCheck)
   .sort((first, second) => moduleSortIndex(first) - moduleSortIndex(second));
+
+export function getSpreadsheetModule(moduleId?: string) {
+  return spreadsheetModules.find((module) => module.id === moduleId);
+}
+
+export function getSpreadsheetCardsForModule(moduleId?: string) {
+  const cards = allSpreadsheetInstructionCards
+    .filter((card) => !moduleId || (card.moduleId || card.category) === moduleId)
+    .sort((first, second) => moduleSortIndex(first) - moduleSortIndex(second));
+
+  return cards;
+}
