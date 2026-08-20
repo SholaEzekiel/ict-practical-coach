@@ -15,6 +15,7 @@ import {
   Italic,
   List,
   ListOrdered,
+  Merge,
   Pilcrow,
   Table2,
   Underline
@@ -82,14 +83,15 @@ function tableResult(root: HTMLElement, expected: NonNullable<WordProcessingExpe
 
   const rows = Array.from(table.querySelectorAll("tr"));
   const firstRowCells = rows[0] ? Array.from(rows[0].querySelectorAll("td, th")) : [];
+  const widestRowCellCount = rows.reduce((max, row) => Math.max(max, row.querySelectorAll("td, th").length), 0);
   const allCellText = Array.from(table.querySelectorAll("td, th")).map((cell) => normalise(cell.textContent || ""));
 
   if (expected.minRows && rows.length < expected.minRows) {
     messages.push(`The table needs at least ${expected.minRows} rows.`);
   }
 
-  if (expected.minColumns && firstRowCells.length < expected.minColumns) {
-    messages.push(`The first row needs at least ${expected.minColumns} columns.`);
+  if (expected.minColumns && widestRowCellCount < expected.minColumns) {
+    messages.push(`The table needs at least ${expected.minColumns} columns.`);
   }
 
   expected.headers?.forEach((header) => {
@@ -105,6 +107,15 @@ function tableResult(root: HTMLElement, expected: NonNullable<WordProcessingExpe
         messages.push(`The first column should be sorted so row ${index + 1} is ${value}.`);
       }
     });
+  }
+
+  if (expected.mergedFirstRowText) {
+    const firstRow = rows[0];
+    const firstCell = firstRow?.querySelector("td, th") as HTMLTableCellElement | null;
+    const cellCount = firstRow ? firstRow.querySelectorAll("td, th").length : 0;
+    if (!firstCell || cellCount !== 1 || firstCell.colSpan < 2 || normalise(firstCell.textContent || "") !== normalise(expected.mergedFirstRowText)) {
+      messages.push(`Merge the first row and centre the text ${expected.mergedFirstRowText}.`);
+    }
   }
 }
 
@@ -181,7 +192,12 @@ function validateDocument(root: HTMLElement, card: WordProcessingInstructionCard
 
   return {
     ok: messages.length === 0,
-    messages: messages.length === 0 ? ["Good work. The final document matches the task."] : messages
+    messages: messages.length === 0
+      ? [
+          "Good work. The final document matches the checks available in Apex.",
+          ...(card.teacherReview?.length ? ["Your teacher should now review the listed exam presentation points."] : [])
+        ]
+      : messages
   };
 }
 
@@ -214,6 +230,16 @@ function sortFirstTable(editor: HTMLElement | null) {
   tbody.innerHTML = "";
   if (heading) tbody.appendChild(heading);
   bodyRows.forEach((row) => tbody.appendChild(row));
+}
+
+function mergeFirstTableRow(editor: HTMLElement | null) {
+  const table = editor?.querySelector("table");
+  const firstRow = table?.querySelector("tr");
+  if (!table || !firstRow) return;
+  const cells = Array.from(firstRow.querySelectorAll("td, th")) as HTMLTableCellElement[];
+  if (cells.length < 2) return;
+  const mergedText = cells.map((cell) => cell.textContent?.trim()).filter(Boolean).join(" ");
+  firstRow.innerHTML = `<td colspan="${cells.length}" style="text-align:center">${mergedText}</td>`;
 }
 
 export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
@@ -321,6 +347,15 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             </ol>
           </section>
 
+          {card.teacherReview && (
+            <section className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+              <h3 className="font-bold">Teacher review</h3>
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                {card.teacherReview.map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </section>
+          )}
+
           {feedback && (
             <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
               <h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3>
@@ -367,6 +402,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           {toolbarButton("Insert table", Table2, insertTable)}
           {toolbarButton("Insert rider image", ImageIcon, insertRiderImage)}
           {toolbarButton("Two columns", Columns2, () => applyColumns(2))}
+          {toolbarButton("Merge first table row", Merge, () => mergeFirstTableRow(editorRef.current))}
           <button
             type="button"
             onMouseDown={(event) => event.preventDefault()}

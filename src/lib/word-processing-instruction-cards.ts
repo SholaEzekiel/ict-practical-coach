@@ -22,6 +22,7 @@ export type WordProcessingExpectedResult = {
     minRows?: number;
     minColumns?: number;
     sortedFirstColumn?: string[];
+    mergedFirstRowText?: string;
   };
 };
 
@@ -37,6 +38,7 @@ export type WordProcessingInstructionCard = {
   steps: string[];
   starterHtml: string;
   expected: WordProcessingExpectedResult;
+  teacherReview?: string[];
   points: number;
 };
 
@@ -937,6 +939,253 @@ const extraExamCards: WordProcessingInstructionCard[] = [
   } as WordProcessingInstructionCard))
 ];
 
+const stemStyleStarter = `
+  <p>Tawara Schools STEM Development</p>
+  <p>Innovations in Science Education</p>
+  <p>working in teams</p>
+  <p>solving practical problems</p>
+  <p>developing own solutions</p>
+  <p>Why is a STEM approach to learning important?</p>
+  <p>STEM learning helps students connect science, technology, engineering and mathematics to practical tasks. Students work with real problems and present their solutions clearly.</p>
+  <p>STEM subjects</p>
+  <table>
+    <tbody>
+      <tr><td>Subject Choices</td><td>Girls</td><td>Boys</td></tr>
+      <tr><td>Chemistry</td><td>42</td><td>38</td></tr>
+      <tr><td>Physics</td><td>36</td><td>44</td></tr>
+      <tr><td>Computer Science</td><td>31</td><td>49</td></tr>
+    </tbody>
+  </table>
+  <p>Will the gender disparity change as more practical projects are introduced?</p>
+`;
+
+const festivalArticleStarter = `
+  <p>Tawara Cycling Festival</p>
+  <p>We are delighted to announce the return of the Tawara Cycling Festival this summer. The event will be held on Sunday 27 August 2023 and is open to all club members and visiting cyclists.</p>
+  <p>The Trails</p>
+  <p>All trails start and finish at the lake. Cyclists must start within twenty minutes of the listed start time for their trail.</p>
+  <p>Registration and Participation</p>
+  <p>Event registration and payment must be completed online prior to the festival. Cash transactions cannot be accepted.</p>
+  <p>Entertainment</p>
+  <p>Activities will include:</p>
+  <p>bike handling for children</p>
+  <p>cycle maintenance sessions</p>
+  <p>guided walks around the nature reserve</p>
+  <p>professional shows with stunt bike sessions</p>
+`;
+
+const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
+  {
+    id: "wp-intro-0417-source-document-challenge",
+    moduleId: "intro",
+    moduleTitle: "Document Basics",
+    category: "exam",
+    title: "0417 source document setup",
+    scenario: "A practical paper gives you a prepared source document. Your first job is to open it, recognise the structure, and add the missing source text without changing the page setup.",
+    supportDocument: [
+      "Source file: festival article",
+      "Add the subtitle Cycling for every ability below the title.",
+      "Add the sentence: Entries close on 20 August or earlier if a trail is fully subscribed.",
+      "Teacher check: file saved with the correct name and format."
+    ],
+    goal: "Complete the missing subtitle and source sentence in the prepared document.",
+    steps: [
+      "Use the prepared document already open in the workspace.",
+      "Add the subtitle below the main title.",
+      "Add the missing entry deadline sentence in the registration section.",
+      "Ask your teacher to review the save-name and file-format evidence."
+    ],
+    starterHtml: festivalArticleStarter,
+    expected: {
+      textIncludes: ["Cycling for every ability", "Entries close on 20 August or earlier if a trail is fully subscribed."]
+    },
+    teacherReview: [
+      "Confirm the student understands that the source document is edited, not recreated from scratch.",
+      "Confirm the save-name/file-format evidence would be acceptable in an exam."
+    ],
+    points: 35
+  },
+  {
+    id: "wp-format-0417-style-challenge",
+    moduleId: "text-formatting",
+    moduleTitle: "Text Formatting",
+    category: "exam",
+    title: "0417 style and title challenge",
+    scenario: "The exam often asks students to modify named styles and apply them to precise text. Apex checks visible formatting, while your teacher checks the named style setup.",
+    supportDocument: [
+      "House style: title - sans-serif, 36 point, centre, bold, underlined.",
+      "House style: subhead - sans-serif, 14 point, centre, all capitals, bold.",
+      "Apply title formatting to Tawara Schools STEM Development.",
+      "Apply subheading formatting to Why is a STEM approach to learning important?"
+    ],
+    goal: "Format the title and one subheading to match a 0417-style house style.",
+    steps: [
+      "Select the title and apply bold, underline and centre alignment.",
+      "Make the subheading bold and centre aligned.",
+      "Teacher should review whether the student can explain how this would be done using named styles in Word."
+    ],
+    starterHtml: stemStyleStarter,
+    expected: {
+      boldText: ["Tawara Schools STEM Development", "Why is a STEM approach to learning important?"],
+      underlineText: ["Tawara Schools STEM Development"],
+      alignments: [
+        { text: "Tawara Schools STEM Development", value: "center" },
+        { text: "Why is a STEM approach", value: "center" }
+      ]
+    },
+    teacherReview: [
+      "Check the student understands named paragraph styles, not only manual formatting.",
+      "Check the student can identify title, subtitle, and subheadings in a long document."
+    ],
+    points: 40
+  },
+  {
+    id: "wp-layout-0417-columns-image-challenge",
+    moduleId: "paragraph-layout",
+    moduleTitle: "Paragraph Layout",
+    category: "exam",
+    title: "0417 columns and image challenge",
+    scenario: "A common document-production task changes only part of a document into columns and places an image beside a specific paragraph.",
+    supportDocument: [
+      "Change from the subheading The Trails onwards into two equal columns.",
+      "Insert the rider image near the paragraph beginning All trails start...",
+      "The image should be aligned neatly and text should sit around it in the final printout."
+    ],
+    goal: "Apply two columns and insert the rider image into the festival article.",
+    steps: [
+      "Click inside the document and apply the two-column layout.",
+      "Place the cursor near the trails paragraph and insert the rider image.",
+      "Teacher should review image wrapping, exact position, and column start point."
+    ],
+    starterHtml: festivalArticleStarter,
+    expected: {
+      columns: 2,
+      image: { alt: "cyclist", alignment: "center" }
+    },
+    teacherReview: [
+      "Check that columns should begin at the requested subheading, not necessarily at the top of the document.",
+      "Check image size, wrapping, and placement against the instruction."
+    ],
+    points: 40
+  },
+  {
+    id: "wp-list-0417-bullet-style-challenge",
+    moduleId: "lists",
+    moduleTitle: "Lists",
+    category: "exam",
+    title: "0417 bullet style challenge",
+    scenario: "The exam may ask for a specific bullet style to be applied to a selected range of plain text.",
+    supportDocument: [
+      "Apply the bullet style to the activity lines only.",
+      "The list starts with bike handling for children.",
+      "The list ends with professional shows with stunt bike sessions.",
+      "Teacher check: bullet shape and left-margin alignment."
+    ],
+    goal: "Turn the activity lines in the festival article into a bullet list.",
+    steps: [
+      "Select the activity lines only.",
+      "Click the bullet list button.",
+      "Do not include the heading Activities will include:"
+    ],
+    starterHtml: festivalArticleStarter,
+    expected: {
+      unorderedListItems: [
+        "bike handling for children",
+        "cycle maintenance sessions",
+        "guided walks around the nature reserve",
+        "professional shows with stunt bike sessions"
+      ]
+    },
+    teacherReview: [
+      "Check whether the correct range was selected.",
+      "Check whether the bullet appearance and alignment match the requested style."
+    ],
+    points: 35
+  },
+  {
+    id: "wp-table-0417-table-edit-challenge",
+    moduleId: "tables",
+    moduleTitle: "Tables",
+    category: "exam",
+    title: "0417 table edit challenge",
+    scenario: "The exam often gives an existing table, then asks for a row insertion, merged heading row, centred text, and consistent table formatting.",
+    supportDocument: [
+      "Insert a new row above Chemistry.",
+      "Enter Biology, 50 and 40.",
+      "Merge and centre the first row of the table.",
+      "Teacher check: table style, borders, spacing after table, and whether data fits without wrapping."
+    ],
+    goal: "Edit the STEM table by adding Biology and merging the heading row.",
+    steps: [
+      "Add Biology, 50 and 40 above Chemistry.",
+      "Use the merge toolbar button to merge the first table row.",
+      "Check the first row text is centred and the Biology row is present."
+    ],
+    starterHtml: stemStyleStarter,
+    expected: {
+      textIncludes: ["Biology", "50", "40"],
+      table: {
+        headers: ["Chemistry", "Physics", "Computer Science"],
+        minRows: 5,
+        minColumns: 3,
+        mergedFirstRowText: "Subject Choices Girls Boys"
+      }
+    },
+    teacherReview: [
+      "Check the Biology row is in the correct position above Chemistry.",
+      "Check all printed gridlines/borders would show and no table data wraps.",
+      "Check the 6-point space after the table."
+    ],
+    points: 45
+  },
+  {
+    id: "wp-exam-0417-full-document-production",
+    moduleId: "exam-editing",
+    moduleTitle: "Exam Editing",
+    category: "exam",
+    title: "0417 full document production task",
+    scenario: "This is the closest Word Processing task to the document-production part of Paper 2. It combines source document editing, house style, columns, table editing, image placement, and proofing.",
+    supportDocument: [
+      "Open the prepared STEM article.",
+      "Format the title as bold, underlined and centred.",
+      "Add the subtitle Innovations in Science Education.",
+      "Apply bullets to the three teamwork lines.",
+      "Apply two columns to the body section.",
+      "Insert the rider image near the paragraph beginning Will the gender disparity...",
+      "Add Biology, 50 and 40 to the table and merge the first table row.",
+      "Teacher check: footer/page numbers, named styles, image wrap, no widows/orphans, no split table/list."
+    ],
+    goal: "Complete a full 0417-style document production edit.",
+    steps: [
+      "Work through the support instructions as a full exam-style sequence.",
+      "Use Apex checks for visible text, formatting, list, image, columns and table changes.",
+      "Use the teacher-review list for the presentation details that require human judgement."
+    ],
+    starterHtml: stemStyleStarter,
+    expected: {
+      textIncludes: ["Innovations in Science Education", "Biology", "50", "40"],
+      boldText: ["Tawara Schools STEM Development"],
+      underlineText: ["Tawara Schools STEM Development"],
+      alignments: [{ text: "Tawara Schools STEM Development", value: "center" }],
+      unorderedListItems: ["working in teams", "solving practical problems", "developing own solutions"],
+      columns: 2,
+      image: { alt: "cyclist", alignment: "center" },
+      table: {
+        minRows: 5,
+        minColumns: 3,
+        mergedFirstRowText: "Subject Choices Girls Boys"
+      }
+    },
+    teacherReview: [
+      "Check footer contains automated page number and candidate details in the correct positions.",
+      "Check named styles are created/modified and applied consistently.",
+      "Check image size, reflection/wrap and alignment against the instruction.",
+      "Check table/list are not split, columns align at the top, no widows/orphans, no blank pages."
+    ],
+    points: 70
+  }
+];
+
 const rawWordProcessingCards = [
   ...wordProcessingInstructionCards,
   ...generatedIntroTasks,
@@ -950,7 +1199,8 @@ const rawWordProcessingCards = [
   ...generatedTableTasks,
   ...extraTableCards,
   ...generatedExamEditingTasks,
-  ...extraExamCards
+  ...extraExamCards,
+  ...moduleExamChallengeCards
 ];
 
 function removeCopyableTypingText(card: WordProcessingInstructionCard): WordProcessingInstructionCard {
