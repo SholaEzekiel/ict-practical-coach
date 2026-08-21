@@ -27,6 +27,9 @@ export function SiteHeader() {
               <Link href="/subjects/ict/word-processing" className="block rounded-md px-3 py-2 hover:bg-mist">
                 ICT Word Processing
               </Link>
+              <Link href="/subjects/ict/website-authoring" className="block rounded-md px-3 py-2 hover:bg-mist">
+                ICT Website Authoring
+              </Link>
               <Link href="/subjects/ict/theory" className="block rounded-md px-3 py-2 hover:bg-mist">
                 ICT Theory
               </Link>

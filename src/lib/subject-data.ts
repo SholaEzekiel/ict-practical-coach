@@ -72,7 +72,7 @@ export const ictPracticeAreas = [
   },
   {
     title: "Website Authoring",
-    href: "/academies/website-authoring",
+    href: "/subjects/ict/website-authoring",
     summary: "HTML structure, CSS styles, tables, images, hyperlinks, metadata, and browser preview.",
     actions: ["edit HTML", "apply CSS", "check paths", "preview pages"]
   }
@@ -125,7 +125,8 @@ export const subjects: SubjectArea[] = [
     routes: [
       { label: "Open ICT", href: "/subjects/ict" },
       { label: "Start spreadsheet practice", href: "/subjects/ict/spreadsheets" },
-      { label: "Start word processing practice", href: "/subjects/ict/word-processing" }
+      { label: "Start word processing practice", href: "/subjects/ict/word-processing" },
+      { label: "Start website authoring practice", href: "/subjects/ict/website-authoring" }
     ]
   },
   {

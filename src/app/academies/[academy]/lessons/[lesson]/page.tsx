@@ -11,6 +11,7 @@ export function generateStaticParams() {
 
 export default function LessonPage({ params }: { params: { academy: string; lesson: string } }) {
   if (params.academy === "word-processing") redirect("/subjects/ict/word-processing/intro");
+  if (params.academy === "website-authoring") redirect("/subjects/ict/website-authoring/intro");
 
   const academy = academies.find((item) => item.slug === params.academy);
   const lesson = academy?.lessons.find((item) => item.id === params.lesson);
