@@ -34,184 +34,331 @@ export const websiteAuthoringModules: WebsiteAuthoringModule[] = [
   {
     id: "intro",
     title: "HTML Foundations",
-    description: "Practise page titles, headings, paragraphs, semantic structure, and source-text placement."
+    description: "Start from the document skeleton, then build headings, paragraphs, lists, sections, and comments."
   },
   {
     id: "text-media",
     title: "Text and Images",
-    description: "Add images, alternative text, captions, and image placement for exam-style web pages."
+    description: "Add original Apex source text, images, alternative text, captions, and semantic media structure."
   },
   {
     id: "links-navigation",
     title: "Links and Navigation",
-    description: "Create internal links, external links, navigation lists, and clear menu structures."
+    description: "Create anchor links, internal page links, email links, and navigation menus."
   },
   {
     id: "tables",
     title: "HTML Tables",
-    description: "Build tables from support data, add headings, and present rows clearly."
+    description: "Build tables from support data using rows, heading cells, data cells, captions, and scope."
   },
   {
     id: "css-layout",
     title: "CSS Layout",
-    description: "Apply selectors, colours, spacing, borders, widths, and simple responsive layout."
+    description: "Apply selectors, colours, spacing, borders, widths, simple layout, and responsive rules."
   },
   {
     id: "exam-build",
     title: "Exam Website Build",
-    description: "Combine HTML, CSS, links, images, tables, and teacher-reviewed finishing checks."
+    description: "Combine source text, structure, media, links, tables, CSS, preview checks, and teacher-reviewed evidence."
   }
 ];
 
-const blankHtml = `<main>\n  \n</main>`;
+const blankHtml = "";
 
-const baseCss = `body {\n  font-family: Arial, sans-serif;\n  color: #172026;\n}\n`;
+const htmlShell = `<!doctype html>
+<html>
+  <head>
+    <title>Apex Study Hub</title>
+  </head>
+  <body>
 
-const festivalSupport = [
-  "Support document: Tawara Cycling Festival",
-  "Main heading: Tawara Cycling Festival",
-  "Page subtitle: Cycling for every ability",
-  "The event is open to club members and visiting cyclists.",
-  "The routes pass through woodlands, heathland, wetland habitats and farmland."
-];
+  </body>
+</html>`;
 
-const festivalStarterHtml = `<main>
-  <h1>Tawara Cycling Festival</h1>
-  <p>The event is open to club members and visiting cyclists.</p>
-  <section>
-    <h2>The Trails</h2>
-    <p>The routes pass through woodlands, heathland, wetland habitats and farmland.</p>
-  </section>
-</main>`;
+const mainShell = `<!doctype html>
+<html>
+  <head>
+    <title>Apex Study Hub</title>
+  </head>
+  <body>
+    <main>
 
-const tableStarterHtml = `<main>
-  <h1>Trail Details</h1>
-  <table>
-    <tr><td>Distance</td><td>Lunch</td><td>Fee</td></tr>
-    <tr><td>25 miles</td><td>No</td><td>15.00</td></tr>
-    <tr><td>50 miles</td><td>No</td><td>20.00</td></tr>
-  </table>
-</main>`;
+    </main>
+  </body>
+</html>`;
+
+const apexStarterHtml = `<!doctype html>
+<html>
+  <head>
+    <title>Apex Study Hub Open Day</title>
+  </head>
+  <body>
+    <header>
+      <h1>Apex Study Hub Open Day</h1>
+    </header>
+    <main>
+      <section id="welcome">
+        <h2>Welcome</h2>
+        <p>Apex Study Hub is preparing a student open day for families who want structured digital practice.</p>
+      </section>
+    </main>
+  </body>
+</html>`;
+
+const apexPageHtml = `<!doctype html>
+<html>
+  <head>
+    <title>Apex Study Hub Open Day</title>
+  </head>
+  <body>
+    <header>
+      <h1>Apex Study Hub Open Day</h1>
+      <p>Practical digital skills for confident learners.</p>
+    </header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="#sessions">Sessions</a>
+      <a href="#register">Register</a>
+    </nav>
+    <main>
+      <section id="sessions">
+        <h2>Practice Sessions</h2>
+        <p>Students rotate through short spreadsheet, document, and web design activities.</p>
+      </section>
+    </main>
+  </body>
+</html>`;
+
+const tableStarterHtml = `<!doctype html>
+<html>
+  <head>
+    <title>Apex Workshop Timetable</title>
+  </head>
+  <body>
+    <main>
+      <h1>Apex Workshop Timetable</h1>
+      <table>
+        <tr>
+          <th>Session</th>
+          <th>Room</th>
+          <th>Time</th>
+        </tr>
+        <tr>
+          <td>Spreadsheet Sprint</td>
+          <td>Lab 1</td>
+          <td>09:30</td>
+        </tr>
+      </table>
+    </main>
+  </body>
+</html>`;
+
+const baseCss = `body {
+  font-family: Arial, sans-serif;
+  color: #172026;
+}
+`;
 
 const card = (item: WebsiteAuthoringCard) => item;
 
+const introSupport = [
+  "Project brief: Apex Study Hub Open Day",
+  "Page heading: Apex Study Hub Open Day",
+  "Subtitle: Practical digital skills for confident learners.",
+  "Section heading: Practice Sessions",
+  "Paragraph: Students rotate through short spreadsheet, document, and web design activities."
+];
+
 const introCards: WebsiteAuthoringCard[] = [
   card({
-    id: "web-intro-title",
+    id: "web-intro-doctype",
     moduleId: "intro",
     moduleTitle: "HTML Foundations",
-    title: "Add the main page heading",
-    scenario: "A source document has been supplied for a cycling festival web page.",
-    supportDocument: festivalSupport,
-    goal: "Add the main heading Tawara Cycling Festival inside an h1 element.",
-    steps: ["Click in the HTML editor.", "Add an h1 element inside main.", "Use the heading text from the support document."],
+    title: "Start an HTML document",
+    scenario: "A new Apex page needs the correct opening instruction so the browser treats it as modern HTML.",
+    supportDocument: ["Required first line: <!doctype html>"],
+    goal: "Type the doctype declaration at the top of the HTML editor.",
+    steps: ["Click in the HTML editor.", "Place the cursor on the first line.", "Type <!doctype html> exactly."],
     starterHtml: blankHtml,
     starterCss: baseCss,
-    expected: { requiredTags: ["h1"], htmlIncludes: ["Tawara Cycling Festival"] },
+    expected: { htmlIncludes: ["<!doctype html>"] },
     points: 10
   }),
   card({
-    id: "web-intro-subtitle",
+    id: "web-intro-html-tags",
     moduleId: "intro",
     moduleTitle: "HTML Foundations",
-    title: "Add a subtitle paragraph",
-    scenario: "The home page needs a short line under the main heading.",
-    supportDocument: festivalSupport,
-    goal: "Add the subtitle Cycling for every ability as a paragraph.",
-    steps: ["Find the main heading.", "Add a p element below it.", "Use the subtitle from the support document."],
-    starterHtml: `<main>\n  <h1>Tawara Cycling Festival</h1>\n</main>`,
+    title: "Add the html element",
+    scenario: "The page now needs one root element to contain everything in the document.",
+    supportDocument: ["Opening tag: <html>", "Closing tag: </html>"],
+    goal: "Create the html element below the doctype.",
+    steps: ["Keep <!doctype html> on the first line.", "Type an opening <html> tag below it.", "Type a closing </html> tag after a blank line."],
+    starterHtml: "<!doctype html>\n",
     starterCss: baseCss,
-    expected: { requiredTags: ["p"], htmlIncludes: ["Cycling for every ability"] },
+    expected: { requiredTags: ["html"], htmlIncludes: ["<!doctype html>"] },
+    points: 10
+  }),
+  card({
+    id: "web-intro-head-body",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Add head and body",
+    scenario: "A browser needs hidden page information in head and visible page content in body.",
+    supportDocument: ["The head stores page information.", "The body stores visible page content."],
+    goal: "Add head and body elements inside html.",
+    steps: ["Click between <html> and </html>.", "Add a <head></head> pair first.", "Add a <body></body> pair after the head."],
+    starterHtml: "<!doctype html>\n<html>\n\n</html>",
+    starterCss: baseCss,
+    expected: { requiredTags: ["head", "body"] },
+    points: 10
+  }),
+  card({
+    id: "web-intro-title-element",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Set the browser tab title",
+    scenario: "The browser tab should identify the Apex page before students add visible content.",
+    supportDocument: ["Browser tab title: Apex Study Hub Open Day"],
+    goal: "Add a title element inside head.",
+    steps: ["Find the head element.", "Inside head, type <title>Apex Study Hub Open Day</title>.", "Check that title is not placed inside body."],
+    starterHtml: "<!doctype html>\n<html>\n  <head>\n\n  </head>\n  <body>\n\n  </body>\n</html>",
+    starterCss: baseCss,
+    expected: { requiredTags: ["title"], title: "Apex Study Hub Open Day", htmlIncludes: ["Apex Study Hub Open Day"] },
+    points: 10
+  }),
+  card({
+    id: "web-intro-main-element",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Add the main content area",
+    scenario: "The page needs a clear main area for the important content.",
+    supportDocument: ["Use <main> for the main content on the page."],
+    goal: "Add a main element inside body.",
+    steps: ["Find the body element.", "Click between <body> and </body>.", "Type <main></main> inside the body."],
+    starterHtml: htmlShell,
+    starterCss: baseCss,
+    expected: { requiredTags: ["main"] },
+    points: 10
+  }),
+  card({
+    id: "web-intro-h1-heading",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Add the main heading",
+    scenario: "Now that the page structure is ready, add the page's main visible heading.",
+    supportDocument: introSupport,
+    goal: "Add Apex Study Hub Open Day as an h1 heading inside main.",
+    steps: ["Find the main element.", "Click between <main> and </main>.", "Type <h1>Apex Study Hub Open Day</h1>."],
+    starterHtml: mainShell,
+    starterCss: baseCss,
+    expected: { requiredTags: ["h1"], htmlIncludes: ["Apex Study Hub Open Day"] },
+    points: 10
+  }),
+  card({
+    id: "web-intro-paragraph",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Add a paragraph",
+    scenario: "A heading introduces the page, but a paragraph gives readers the first useful information.",
+    supportDocument: introSupport,
+    goal: "Add the subtitle as a paragraph below the h1 heading.",
+    steps: ["Find the h1 heading.", "On the next line, add a p element.", "Place the subtitle text between <p> and </p>."],
+    starterHtml: mainShell.replace("\n\n    </main>", "\n      <h1>Apex Study Hub Open Day</h1>\n\n    </main>"),
+    starterCss: baseCss,
+    expected: { requiredTags: ["p"], htmlIncludes: ["Practical digital skills for confident learners."] },
     points: 10
   }),
   ...[
-    ["web-intro-section-trails", "The Trails", "Create a section heading for trail information."],
-    ["web-intro-section-register", "Registration and Participation", "Create a section heading for registration information."],
-    ["web-intro-section-entertainment", "Entertainment", "Create a section heading for entertainment information."],
-    ["web-intro-paragraph-members", "The event is open to club members and visiting cyclists.", "Add the audience paragraph."],
-    ["web-intro-paragraph-routes", "The routes pass through woodlands, heathland, wetland habitats and farmland.", "Add the route description paragraph."],
-    ["web-intro-paragraph-safety", "Cyclists must start within twenty minutes of the listed start time.", "Add the safety timing paragraph."]
-  ].map(([id, text, goal]) => card({
+    ["web-intro-section", "Create a section", "Use a section element for a related group of content.", "section"],
+    ["web-intro-h2", "Add a section heading", "Use h2 for the Practice Sessions section heading.", "h2"],
+    ["web-intro-second-paragraph", "Add source text to the section", "Add the practice sessions paragraph inside the section.", "p"],
+    ["web-intro-header", "Add a page header", "Use header to group the page heading and subtitle.", "header"],
+    ["web-intro-footer", "Add a simple footer", "Use footer for the copyright line.", "footer"],
+    ["web-intro-comment", "Add an HTML comment", "Use a comment to label the main content area.", "<!-- main content -->"]
+  ].map(([id, title, goal, tag]) => card({
     id,
     moduleId: "intro",
     moduleTitle: "HTML Foundations",
-    title: goal,
-    scenario: "Practise placing source text into a meaningful HTML structure.",
-    supportDocument: ["Support document: Cycling Festival", text],
+    title,
+    scenario: "Practise one building block before moving to full page tasks.",
+    supportDocument: introSupport,
     goal,
-    steps: ["Choose the correct place in the HTML.", "Use a heading element for a section title or a paragraph element for body text.", "Check the preview shows the new content."],
-    starterHtml: festivalStarterHtml,
+    steps: ["Read the required element in the goal.", "Find the correct place in the HTML.", "Add the tag and text, then check the preview."],
+    starterHtml: apexStarterHtml,
     starterCss: baseCss,
-    expected: { htmlIncludes: [text], requiredTags: goal.includes("heading") ? ["h2"] : ["p"] },
+    expected: tag.startsWith("<!--") ? { htmlIncludes: [tag] } : { requiredTags: [tag] },
     points: 10
   })),
   card({
-    id: "web-intro-0417-challenge",
+    id: "web-intro-foundation-challenge",
     moduleId: "intro",
     moduleTitle: "HTML Foundations",
-    title: "0417 page setup challenge",
-    scenario: "Exam tasks often start with a partially prepared page and source text to insert in the right structure.",
-    supportDocument: festivalSupport,
-    goal: "Build the basic page structure with heading, subtitle, and trails section.",
-    steps: ["Use h1 for the main heading.", "Use p for the subtitle.", "Use section and h2 for The Trails."],
+    title: "Build the page foundation",
+    scenario: "This checkpoint combines the first skills: doctype, html, head, title, body, main, heading, and paragraph.",
+    supportDocument: introSupport,
+    goal: "Build a basic Apex page from a blank editor.",
+    steps: ["Start with <!doctype html>.", "Add html, head, title, body, and main.", "Inside main, add the h1 and subtitle paragraph from the brief."],
     starterHtml: blankHtml,
     starterCss: baseCss,
-    expected: { requiredTags: ["main", "h1", "p", "section", "h2"], htmlIncludes: ["Tawara Cycling Festival", "Cycling for every ability", "The Trails"] },
-    teacherReview: ["Check the student chose suitable structural tags, not only visible text."],
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "p"],
+      htmlIncludes: ["<!doctype html>", "Apex Study Hub Open Day", "Practical digital skills for confident learners."],
+      title: "Apex Study Hub Open Day"
+    },
+    teacherReview: ["Check indentation and tag nesting so the student can explain the structure."],
     points: 25
   })
 ];
 
 const textMediaCards: WebsiteAuthoringCard[] = [
   ...[
-    ["web-media-image", "Insert the rider image", "cyclist"],
-    ["web-media-alt", "Set useful alternative text", "cyclist"],
-    ["web-media-caption", "Add a caption for the image", "Rider on the festival route"]
-  ].map(([id, title, text]) => card({
+    ["web-media-add-image", "Insert an image", "Use /assets/apex-study-card.svg as the image source.", "Apex study practice card"],
+    ["web-media-alt-text", "Add alternative text", "Set the alt attribute to Apex study practice card.", "Apex study practice card"],
+    ["web-media-caption", "Add an image caption", "Add the caption Guided practice workspace.", "Guided practice workspace"],
+    ["web-media-figure", "Use a figure element", "Wrap the image and caption in a figure element.", "figure"],
+    ["web-media-figcaption", "Use a figcaption element", "Place the caption inside figcaption.", "figcaption"],
+    ["web-media-width", "Prepare the image for styling", "Add a class called hero-image to the image.", "hero-image"],
+    ["web-media-second-section", "Add an image section", "Create a section for the image area.", "Visual preview"]
+  ].map(([id, title, goal, requiredText]) => card({
     id,
     moduleId: "text-media",
     moduleTitle: "Text and Images",
     title,
-    scenario: "The festival page needs a relevant image and accessible text.",
-    supportDocument: ["Image file: j2321rider.jpg", "Caption: Rider on the festival route", "Alt text: cyclist"],
-    goal: title,
-    steps: ["Add or edit the img element.", "Use /assets/j2321rider.jpg as the image source.", "Check the preview and image attributes."],
-    starterHtml: festivalStarterHtml,
+    scenario: "The Apex web page needs a clear image area with useful text for users and screen readers.",
+    supportDocument: [
+      "Image source: /assets/apex-study-card.svg",
+      "Alternative text: Apex study practice card",
+      "Caption: Guided practice workspace",
+      "Section heading: Visual preview"
+    ],
+    goal,
+    steps: ["Find the correct place inside main.", "Add or edit the required image-related element.", "Check the preview and the attribute spelling."],
+    starterHtml: apexPageHtml,
     starterCss: baseCss,
-    expected: { images: [{ srcIncludes: "j2321rider.jpg", alt: "cyclist" }], htmlIncludes: title.includes("Caption") ? [text] : undefined },
-    points: 15
-  })),
-  ...[
-    ["web-media-figure", "Wrap the image in a figure element", "figure"],
-    ["web-media-figcaption", "Use a figcaption element", "figcaption"],
-    ["web-media-section-image", "Place image in the trails section", "img"]
-  ].map(([id, title, tag]) => card({
-    id,
-    moduleId: "text-media",
-    moduleTitle: "Text and Images",
-    title,
-    scenario: "Exam website tasks often check whether images are placed logically and labelled clearly.",
-    supportDocument: ["Image file: j2321rider.jpg", "Caption: Rider on the festival route"],
-    goal: title,
-    steps: ["Find the correct place in the HTML.", "Use the appropriate image or caption element.", "Check the preview still reads clearly."],
-    starterHtml: `${festivalStarterHtml}\n<img src="/assets/j2321rider.jpg" alt="cyclist">`,
-    starterCss: baseCss,
-    expected: { requiredTags: [tag], images: [{ srcIncludes: "j2321rider.jpg", alt: "cyclist" }] },
+    expected: {
+      requiredTags: goal.includes("figure") ? ["figure"] : goal.includes("figcaption") ? ["figcaption"] : goal.includes("section") ? ["section", "h2"] : ["img"],
+      images: goal.includes("image source") || goal.includes("alt") ? [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] : undefined,
+      htmlIncludes: requiredText === "figure" || requiredText === "figcaption" ? undefined : [requiredText]
+    },
     points: 15
   })),
   card({
-    id: "web-media-0417-challenge",
+    id: "web-media-challenge",
     moduleId: "text-media",
     moduleTitle: "Text and Images",
-    title: "0417 image placement challenge",
-    scenario: "A typical web authoring task asks students to insert a supplied image, set alt text, and position it with CSS.",
-    supportDocument: ["Image file: j2321rider.jpg", "Alt text: cyclist", "Caption: Rider on the festival route"],
-    goal: "Add the rider image with alt text and a caption.",
-    steps: ["Insert the image into the page.", "Set the alt attribute.", "Add a caption below the image."],
-    starterHtml: festivalStarterHtml,
-    starterCss: `${baseCss}\nimg {\n  max-width: 260px;\n}\n`,
-    expected: { requiredTags: ["img"], images: [{ srcIncludes: "j2321rider.jpg", alt: "cyclist" }], htmlIncludes: ["Rider on the festival route"] },
-    teacherReview: ["Check image position and proportional sizing against the intended page design."],
+    title: "Build the media block",
+    scenario: "A practical task may ask for a supplied image, meaningful alt text, and a caption in a suitable place.",
+    supportDocument: ["Use the Apex image, alt text, caption, and a section heading called Visual preview."],
+    goal: "Create a complete image block using section, figure, img, and figcaption.",
+    steps: ["Create a section called Visual preview.", "Inside it, add a figure.", "Inside figure, add the image and figcaption."],
+    starterHtml: apexPageHtml,
+    starterCss: `${baseCss}\n.hero-image {\n  max-width: 320px;\n}\n`,
+    expected: {
+      requiredTags: ["section", "figure", "img", "figcaption"],
+      images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }],
+      htmlIncludes: ["Visual preview", "Guided practice workspace"]
+    },
+    teacherReview: ["Check that the image is relevant, proportionally sized, and not distorted."],
     points: 30
   })
 ];
@@ -219,79 +366,96 @@ const textMediaCards: WebsiteAuthoringCard[] = [
 const linkCards: WebsiteAuthoringCard[] = [
   ...[
     ["web-link-home", "Create a Home link", "Home", "index.html"],
-    ["web-link-trails", "Create a Trails link", "Trails", "#trails"],
-    ["web-link-register", "Create a Register link", "Register", "#registration"],
+    ["web-link-practice", "Create a Practice link", "Practice", "practice.html"],
+    ["web-link-sessions", "Create a Sessions section link", "Sessions", "#sessions"],
+    ["web-link-register", "Create a Register section link", "Register", "#register"],
     ["web-link-contact", "Create a Contact link", "Contact", "contact.html"],
-    ["web-link-image", "Link to the image file", "Rider image", "/assets/j2321rider.jpg"],
-    ["web-link-mail", "Create an email link", "Email organiser", "mailto:info@example.com"]
+    ["web-link-email", "Create an email link", "Email Apex", "mailto:hello@apexstudyhub.example"],
+    ["web-link-image", "Create an image asset link", "Image file", "/assets/apex-study-card.svg"]
   ].map(([id, title, text, href]) => card({
     id,
     moduleId: "links-navigation",
     moduleTitle: "Links and Navigation",
     title,
-    scenario: "Navigation links must point to the correct pages or sections.",
+    scenario: "The page needs links that send students to the correct page, section, or contact target.",
     supportDocument: [`Link text: ${text}`, `Target: ${href}`],
     goal: title,
-    steps: ["Find or add the navigation area.", "Create an anchor element.", "Set the href to the target in the support document."],
-    starterHtml: `<nav>\n  \n</nav>\n${festivalStarterHtml}`,
+    steps: ["Find or add the nav element.", "Create an a element with the required link text.", "Set href to the exact target shown in the brief."],
+    starterHtml: apexPageHtml,
     starterCss: baseCss,
-    expected: { links: [{ text, href }] },
+    expected: { requiredTags: ["a"], links: [{ text, href }] },
     points: 15
   })),
   card({
-    id: "web-link-0417-challenge",
+    id: "web-link-navigation-challenge",
     moduleId: "links-navigation",
     moduleTitle: "Links and Navigation",
-    title: "0417 navigation challenge",
-    scenario: "A web page needs a small navigation menu with working internal links.",
-    supportDocument: ["Menu: Home, Trails, Registration", "Targets: index.html, #trails, #registration"],
-    goal: "Create a three-item navigation menu.",
-    steps: ["Use nav for the menu.", "Add three links.", "Check each href matches the support document."],
-    starterHtml: festivalStarterHtml.replace("<section>", `<section id="trails">`).replace("<h2>The Trails</h2>", `<h2>The Trails</h2><section id="registration"><h2>Registration</h2></section>`),
+    title: "Build a navigation menu",
+    scenario: "Apex needs a simple menu that links to the home page and two sections on the same page.",
+    supportDocument: ["Menu: Home, Sessions, Register", "Targets: index.html, #sessions, #register"],
+    goal: "Create a three-link navigation menu.",
+    steps: ["Use nav for the menu container.", "Add three a elements.", "Check each href target matches the brief."],
+    starterHtml: apexStarterHtml.replace("</main>", `  <section id="register"><h2>Register</h2></section>\n    </main>`),
     starterCss: baseCss,
-    expected: { requiredTags: ["nav", "a"], links: [{ text: "Home", href: "index.html" }, { text: "Trails", href: "#trails" }, { text: "Registration", href: "#registration" }] },
-    teacherReview: ["Check the menu is clear, consistent and accessible."],
+    expected: {
+      requiredTags: ["nav", "a"],
+      links: [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }]
+    },
+    teacherReview: ["Check menu order, readability, and that internal links point to existing section ids."],
     points: 30
   })
 ];
 
-const tableSpecs: Array<[string, string, string[]]> = [
-    ["web-table-heading", "Create table headings", ["Distance", "Lunch", "Fee"]],
-    ["web-table-25", "Add the 25 mile row", ["25 miles", "No", "15.00"]],
-    ["web-table-50", "Add the 50 mile row", ["50 miles", "No", "20.00"]],
-    ["web-table-75", "Add the 75 mile row", ["75 miles", "Yes", "25.00"]],
-    ["web-table-100", "Add the 100 mile row", ["100 miles", "Yes", "25.00"]],
-    ["web-table-150", "Add the 150 mile row", ["150 miles", "Yes", "32.00"]]
-];
+const tableTasks: Array<[string, string, string[]]> = [
+    ["web-table-element", "Create a table element", ["table"]],
+    ["web-table-row", "Add a table row", ["tr"]],
+    ["web-table-headings", "Add heading cells", ["Session", "Room", "Time"]],
+    ["web-table-first-row", "Add the first data row", ["Spreadsheet Sprint", "Lab 1", "09:30"]],
+    ["web-table-second-row", "Add the second data row", ["Document Design", "Lab 2", "10:15"]],
+    ["web-table-third-row", "Add the third data row", ["Website Starter", "Lab 3", "11:00"]],
+    ["web-table-caption", "Add a table caption", ["Apex workshop timetable"]],
+    ["web-table-scope", "Add scope to heading cells", ["scope=\"col\""]]
+  ];
 
 const tableCards: WebsiteAuthoringCard[] = [
-  ...tableSpecs.map(([id, title, values]) => card({
+  ...tableTasks.map(([id, title, values]) => card({
     id,
     moduleId: "tables",
     moduleTitle: "HTML Tables",
     title,
-    scenario: "Trail details are supplied as source data and must be placed into an HTML table.",
-    supportDocument: [`Table data: ${(values as string[]).join(" | ")}`],
+    scenario: "Workshop data must be presented in a clear HTML table.",
+    supportDocument: [
+      "Headers: Session, Room, Time",
+      "Rows: Spreadsheet Sprint/Lab 1/09:30; Document Design/Lab 2/10:15; Website Starter/Lab 3/11:00"
+    ],
     goal: title,
-    steps: ["Find the table in the HTML.", "Use tr for a row and th or td for cells.", "Check the preview shows the data in separate cells."],
-    starterHtml: tableStarterHtml,
+    steps: ["Find the table area or create one inside main.", "Use tr for each row.", "Use th for headings and td for normal data."],
+    starterHtml: title.includes("Create") ? apexStarterHtml : tableStarterHtml,
     starterCss: baseCss,
-    expected: { htmlIncludes: values, tableHeaders: title.includes("heading") ? values : undefined, requiredTags: ["table", "tr"] },
+    expected: {
+      requiredTags: values.length === 1 && ["table", "tr"].includes(values[0]) ? [values[0]] : ["table", "tr"],
+      tableHeaders: title.includes("heading") ? values : undefined,
+      htmlIncludes: values
+    },
     points: 15
   })),
   card({
-    id: "web-table-0417-challenge",
+    id: "web-table-build-challenge",
     moduleId: "tables",
     moduleTitle: "HTML Tables",
-    title: "0417 table build challenge",
-    scenario: "A web authoring question may provide CSV-style data and require a formatted HTML table.",
-    supportDocument: ["Headers: Distance, Lunch, Fee, Climb", "Rows: 25/No/15.00/949; 50/No/20.00/1640; 75/Yes/25.00/2112"],
-    goal: "Build a trail details table with headings and three data rows.",
-    steps: ["Use th cells for the heading row.", "Add the three data rows.", "Teacher should check the table is readable and fits the page."],
-    starterHtml: `<main><h1>Trail Details</h1></main>`,
+    title: "Build the workshop table",
+    scenario: "This task mirrors exam table work without using a real exam source.",
+    supportDocument: ["Create a table with headings Session, Room, Time and three data rows from the Apex workshop timetable."],
+    goal: "Build a complete table with headings, data rows, and a caption.",
+    steps: ["Use table, caption, tr, th, and td.", "Enter all three workshop rows.", "Check headings are th cells, not ordinary td cells."],
+    starterHtml: apexStarterHtml,
     starterCss: baseCss,
-    expected: { requiredTags: ["table", "tr", "th", "td"], tableHeaders: ["Distance", "Lunch", "Fee", "Climb"], htmlIncludes: ["25", "50", "75", "949", "1640", "2112"] },
-    teacherReview: ["Check table readability, consistent cell spacing and suitable borders."],
+    expected: {
+      requiredTags: ["table", "caption", "tr", "th", "td"],
+      tableHeaders: ["Session", "Room", "Time"],
+      htmlIncludes: ["Spreadsheet Sprint", "Document Design", "Website Starter"]
+    },
+    teacherReview: ["Check the table is readable and semantically correct."],
     points: 35
   })
 ];
@@ -299,96 +463,107 @@ const tableCards: WebsiteAuthoringCard[] = [
 const cssCards: WebsiteAuthoringCard[] = [
   ...[
     ["web-css-body-font", "Set the body font", "body", "font-family"],
+    ["web-css-body-background", "Set the page background", "body", "background"],
+    ["web-css-main-width", "Set the main page width", "main", "max-width"],
     ["web-css-heading-color", "Style the main heading colour", "h1", "color"],
+    ["web-css-nav-display", "Arrange the navigation", "nav", "display"],
+    ["web-css-nav-gap", "Space the navigation links", "nav", "gap"],
+    ["web-css-section-padding", "Add section padding", "section", "padding"],
     ["web-css-image-width", "Control image width", "img", "max-width"],
     ["web-css-table-border", "Add table borders", "table", "border"],
-    ["web-css-nav-spacing", "Space navigation links", "nav", "gap"],
-    ["web-css-section-padding", "Add section padding", "section", "padding"],
-    ["web-css-page-width", "Set page width", "main", "max-width"],
-    ["web-css-background", "Set page background", "body", "background"]
+    ["web-css-cell-padding", "Add cell padding", "td", "padding"],
+    ["web-css-media-query", "Add a responsive media query", "@media", "max-width"]
   ].map(([id, title, selector, property]) => card({
     id,
     moduleId: "css-layout",
     moduleTitle: "CSS Layout",
     title,
-    scenario: "The HTML is present; now style it with CSS selectors and properties.",
+    scenario: "The HTML is present. Use CSS selectors and properties to control the visual layout.",
     supportDocument: [`Selector: ${selector}`, `Property: ${property}`],
     goal: title,
-    steps: ["Open the CSS editor.", "Find or add the selector.", "Add the requested property."],
-    starterHtml: `${festivalStarterHtml}<img src="/assets/j2321rider.jpg" alt="cyclist">${tableStarterHtml}`,
+    steps: ["Open the CSS tab.", "Find or create the selector shown in the brief.", "Add the requested CSS property with a sensible value."],
+    starterHtml: `${apexPageHtml}
+<figure>
+  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <figcaption>Guided practice workspace</figcaption>
+</figure>
+${tableStarterHtml}`,
     starterCss: baseCss,
     expected: { cssIncludes: [selector, property] },
     points: 15
   })),
   card({
-    id: "web-css-0417-challenge",
+    id: "web-css-house-style-challenge",
     moduleId: "css-layout",
     moduleTitle: "CSS Layout",
-    title: "0417 CSS house style challenge",
-    scenario: "Exam web tasks often require a consistent house style across headings, images, navigation and tables.",
-    supportDocument: ["Use a readable sans-serif font.", "Constrain main page width.", "Add visible table borders.", "Make images responsive."],
-    goal: "Apply a consistent CSS house style to the page.",
-    steps: ["Style body and main.", "Add table borders.", "Set image max-width."],
-    starterHtml: `${festivalStarterHtml}<img src="/assets/j2321rider.jpg" alt="cyclist">${tableStarterHtml}`,
+    title: "Apply the Apex house style",
+    scenario: "A practical website task usually needs a consistent style across text, navigation, images, and tables.",
+    supportDocument: ["Use a readable sans-serif font.", "Constrain the main content width.", "Add spacing to sections.", "Make images responsive.", "Add visible table borders."],
+    goal: "Apply a consistent CSS house style to the Apex page.",
+    steps: ["Style body and main.", "Style nav and section spacing.", "Style images and tables so the preview is readable."],
+    starterHtml: `${apexPageHtml}
+<figure>
+  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <figcaption>Guided practice workspace</figcaption>
+</figure>
+${tableStarterHtml}`,
     starterCss: baseCss,
-    expected: { cssIncludes: ["body", "font-family", "main", "max-width", "table", "border", "img", "max-width"] },
-    teacherReview: ["Check colour contrast, spacing and overall suitability for the audience."],
+    expected: { cssIncludes: ["body", "font-family", "main", "max-width", "section", "padding", "img", "max-width", "table", "border"] },
+    teacherReview: ["Check colour contrast, spacing, consistency, and suitability for the target audience."],
     points: 35
   })
 ];
 
 const examCards: WebsiteAuthoringCard[] = [
   card({
-    id: "web-exam-festival-page",
+    id: "web-exam-apex-homepage",
     moduleId: "exam-build",
     moduleTitle: "Exam Website Build",
-    title: "0417 festival website task",
-    scenario: "This combines the main website authoring skills: structure, source text, image, links, table and CSS.",
+    title: "Apex homepage build",
+    scenario: "This final task combines the main website authoring skills in an original Apex project.",
     supportDocument: [
-      "Create a page for Tawara Cycling Festival.",
-      "Include heading, subtitle, trails section, rider image, navigation menu and trail details table.",
-      "Apply CSS for readable font, page width, image width and table borders.",
-      "Teacher check: file names, relative paths, audience suitability, browser preview and evidence screenshots."
+      "Create a homepage for Apex Study Hub Open Day.",
+      "Include title, heading, subtitle, navigation, sessions section, image block, workshop table, and register section.",
+      "Apply CSS for readable font, page width, image width, navigation spacing, section padding, and table borders.",
+      "Teacher check: file names, relative paths, browser preview, spelling, audience suitability, and evidence screenshots."
     ],
-    goal: "Build a complete exam-style festival web page.",
-    steps: ["Complete the HTML structure.", "Add image, navigation and table.", "Apply the CSS house style.", "Use teacher review for file/path/evidence checks."],
-    starterHtml: `<main>\n  \n</main>`,
+    goal: "Build a complete Apex-style web page from the brief.",
+    steps: ["Build the HTML document structure.", "Add source text, links, image block, and table.", "Apply the CSS house style.", "Use teacher review for file/path/evidence checks."],
+    starterHtml: blankHtml,
     starterCss: baseCss,
     expected: {
-      requiredTags: ["main", "h1", "h2", "nav", "a", "img", "table", "tr", "th", "td"],
-      htmlIncludes: ["Tawara Cycling Festival", "Cycling for every ability", "The Trails", "Distance", "Lunch", "Fee"],
-      images: [{ srcIncludes: "j2321rider.jpg", alt: "cyclist" }],
-      links: [{ text: "Home", href: "index.html" }, { text: "Trails", href: "#trails" }],
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "h2", "nav", "a", "figure", "img", "figcaption", "table", "tr", "th", "td"],
+      htmlIncludes: ["Apex Study Hub Open Day", "Practical digital skills", "Practice Sessions", "Register", "Session", "Room", "Time"],
+      images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }],
+      links: [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }],
       cssIncludes: ["font-family", "max-width", "border"]
     },
     teacherReview: [
-      "Check file names and relative paths match the question.",
-      "Check the page works in a browser and images are not broken.",
-      "Check layout, contrast, spelling and suitability for the audience."
+      "Check file names and relative paths match the task brief.",
+      "Check the page works in a browser and image paths are not broken.",
+      "Check layout, contrast, spelling, and suitability for students and parents."
     ],
     points: 70
   }),
-  ...["source structure", "image evidence", "navigation evidence", "table evidence", "css evidence"].map((name, index) => card({
-    id: `web-exam-${name.replaceAll(" ", "-")}`,
+  ...[
+    ["source structure", { requiredTags: ["main", "h1", "section"], htmlIncludes: ["Apex Study Hub Open Day"] }],
+    ["image evidence", { images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] }],
+    ["navigation evidence", { links: [{ text: "Home", href: "index.html" }] }],
+    ["table evidence", { requiredTags: ["table"], htmlIncludes: ["Session"] }],
+    ["css evidence", { cssIncludes: ["body", "font-family"] }]
+  ].map(([name, expected]) => card({
+    id: `web-exam-${String(name).replaceAll(" ", "-")}`,
     moduleId: "exam-build",
     moduleTitle: "Exam Website Build",
     title: `Exam practice: ${name}`,
-    scenario: "Practise one part of the final website build before attempting the full task.",
-    supportDocument: ["Use the festival source text and page assets.", "Check your browser preview after editing."],
+    scenario: "Practise one part of the final website build before attempting the full Apex homepage task.",
+    supportDocument: ["Use the Apex page brief and assets.", "Check your browser preview after editing."],
     goal: `Complete the ${name} part of the page.`,
     steps: ["Read the support document.", "Edit the HTML or CSS.", "Check the preview and use teacher review for presentation."],
-    starterHtml: festivalStarterHtml,
+    starterHtml: apexPageHtml,
     starterCss: baseCss,
-    expected: index === 0
-      ? { requiredTags: ["main", "h1", "section"], htmlIncludes: ["Tawara Cycling Festival"] }
-      : index === 1
-        ? { images: [{ srcIncludes: "j2321rider.jpg", alt: "cyclist" }] }
-        : index === 2
-          ? { links: [{ text: "Home", href: "index.html" }] }
-          : index === 3
-            ? { requiredTags: ["table"], htmlIncludes: ["Distance"] }
-            : { cssIncludes: ["body", "font-family"] },
-    teacherReview: ["Check that the result would satisfy the style and evidence requirements in a practical paper."],
+    expected: expected as WebsiteExpectedResult,
+    teacherReview: ["Check that the result would satisfy practical-paper style and evidence requirements."],
     points: 25
   }))
 ];

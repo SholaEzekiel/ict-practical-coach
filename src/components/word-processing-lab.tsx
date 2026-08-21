@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Editor } from "@tinymce/tinymce-react";
+import type { Editor as TinyMCEEditor } from "tinymce";
 import {
   AlignCenter,
   AlignJustify,
@@ -11,13 +13,17 @@ import {
   Bold,
   CheckCircle2,
   Columns2,
+  FileText,
+  Hash,
   Image as ImageIcon,
   Italic,
   List,
   ListOrdered,
   Merge,
   Pilcrow,
+  Ruler,
   Table2,
+  TextCursorInput,
   Underline
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
@@ -38,7 +44,7 @@ function normalise(value: string) {
 }
 
 function hasText(root: HTMLElement, text: string) {
-  return normalise(root.innerText).includes(normalise(text));
+  return normalise(root.textContent || "").includes(normalise(text));
 }
 
 function matchingElements(root: HTMLElement, text: string) {
@@ -201,23 +207,16 @@ function validateDocument(root: HTMLElement, card: WordProcessingInstructionCard
   };
 }
 
-function command(name: string, value?: string) {
-  document.execCommand(name, false, value);
+function createDocumentRoot(html: string, classes = "") {
+  const root = document.createElement("div");
+  root.className = `word-document ${classes}`;
+  root.innerHTML = html;
+  return root;
 }
 
-function insertTable() {
-  command(
-    "insertHTML",
-    `<table><tbody><tr><td>Club</td><td>Teacher</td><td>Room</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table><p></p>`
-  );
-}
-
-function insertRiderImage() {
-  command("insertHTML", `<p style="text-align:center"><img src="/assets/j2321rider.jpg" alt="cyclist" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
-}
-
-function sortFirstTable(editor: HTMLElement | null) {
-  const table = editor?.querySelector("table");
+function sortFirstTableContent(html: string) {
+  const root = createDocumentRoot(html);
+  const table = root.querySelector("table");
   if (!table) return;
   const tbody = table.querySelector("tbody") || table;
   const rows = Array.from(tbody.querySelectorAll("tr"));
@@ -230,39 +229,66 @@ function sortFirstTable(editor: HTMLElement | null) {
   tbody.innerHTML = "";
   if (heading) tbody.appendChild(heading);
   bodyRows.forEach((row) => tbody.appendChild(row));
+  return root.innerHTML;
 }
 
-function mergeFirstTableRow(editor: HTMLElement | null) {
-  const table = editor?.querySelector("table");
+function mergeFirstTableRowContent(html: string) {
+  const root = createDocumentRoot(html);
+  const table = root.querySelector("table");
   const firstRow = table?.querySelector("tr");
-  if (!table || !firstRow) return;
+  if (!table || !firstRow) return html;
   const cells = Array.from(firstRow.querySelectorAll("td, th")) as HTMLTableCellElement[];
-  if (cells.length < 2) return;
+  if (cells.length < 2) return html;
   const mergedText = cells.map((cell) => cell.textContent?.trim()).filter(Boolean).join(" ");
   firstRow.innerHTML = `<td colspan="${cells.length}" style="text-align:center">${mergedText}</td>`;
+  return root.innerHTML;
 }
 
 export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<TinyMCEEditor | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [completed, setCompleted] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [wordCount, setWordCount] = useState(0);
+  const [content, setContent] = useState(cards[0]?.starterHtml || "");
+  const [documentClasses, setDocumentClasses] = useState("");
 
   const card = cards[activeIndex];
   const currentComplete = completed.includes(card.id);
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
   useEffect(() => {
-    if (!editorRef.current || !card) return;
-    editorRef.current.innerHTML = card.starterHtml;
-    editorRef.current.classList.remove("columns-2", "columns-3");
+    if (!card) return;
+    setContent(card.starterHtml);
+    setDocumentClasses("");
+    setFeedback(null);
+    refreshWordCount(card.starterHtml);
   }, [card]);
 
+  useEffect(() => {
+    const body = editorRef.current?.getBody();
+    if (body) body.className = `word-document ${documentClasses}`;
+  }, [documentClasses]);
+
+  function refreshWordCount(html = content) {
+    const root = createDocumentRoot(html);
+    const text = root.textContent || "";
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    setWordCount(words.length);
+  }
+
+  function setEditorContent(nextContent: string) {
+    setContent(nextContent);
+    editorRef.current?.setContent(nextContent);
+    refreshWordCount(nextContent);
+  }
+
   function runCheck() {
-    if (!editorRef.current) return;
-    const result = validateDocument(editorRef.current, card);
+    const root = createDocumentRoot(content, documentClasses);
+    refreshWordCount();
+    const result = validateDocument(root, card);
     setFeedback(result);
     if (result.ok) {
       setCompleted((items) => (items.includes(card.id) ? items : [...items, card.id]));
@@ -291,15 +317,67 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   function applyColumns(count: 2 | 3) {
-    if (!editorRef.current) return;
-    editorRef.current.classList.remove("columns-2", "columns-3");
-    editorRef.current.classList.add(`columns-${count}`);
+    setDocumentClasses((classes) => {
+      const next = classes.split(" ").filter((item) => item && item !== "columns-2" && item !== "columns-3");
+      next.push(`columns-${count}`);
+      return next.join(" ");
+    });
+  }
+
+  function runEditorCommand(name: string, value?: string) {
+    editorRef.current?.execCommand(name, false, value);
+    const nextContent = editorRef.current?.getContent() || content;
+    setContent(nextContent);
+    refreshWordCount(nextContent);
+  }
+
+  function insertContent(html: string) {
+    editorRef.current?.insertContent(html);
+    const nextContent = editorRef.current?.getContent() || content;
+    setContent(nextContent);
+    refreshWordCount(nextContent);
+  }
+
+  function toggleDocumentClass(className: string) {
+    setDocumentClasses((classes) => {
+      const items = classes.split(" ").filter(Boolean);
+      return items.includes(className) ? items.filter((item) => item !== className).join(" ") : [...items, className].join(" ");
+    });
+  }
+
+  function insertHeader() {
+    insertContent(`<header class="doc-header">Apex Study Hub</header><p></p>`);
+  }
+
+  function insertFooter() {
+    insertContent(`<footer class="doc-footer">Apex Study Hub | Page <span class="page-number">1</span></footer><p></p>`);
+  }
+
+  function insertPageNumber() {
+    insertContent(`<span class="page-number">1</span>`);
+  }
+
+  function insertStudyImage() {
+    insertContent(`<p style="text-align:center"><img src="/assets/apex-study-card.svg" alt="apex study workspace" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
+  }
+
+  function insertTable() {
+    insertContent(`<table><tbody><tr><td>Club</td><td>Teacher</td><td>Room</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table><p></p>`);
+  }
+
+  function sortFirstTable() {
+    const nextContent = sortFirstTableContent(content);
+    if (nextContent) setEditorContent(nextContent);
+  }
+
+  function mergeFirstTableRow() {
+    setEditorContent(mergeFirstTableRowContent(content));
   }
 
   if (!card) return null;
 
   return (
-    <div className="mx-auto grid h-[calc(100vh-120px)] min-h-[720px] max-w-[1600px] gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
+    <div className="mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1600px] gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
       <aside className="flex min-h-0 flex-col rounded-lg border border-line bg-white shadow-sm">
         <div className="border-b border-line p-5">
           <Link href="/subjects/ict/word-processing" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean">
@@ -387,37 +465,99 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           <p className="mt-1 text-sm text-slate-600">Use the toolbar, edit the document, then check the final result.</p>
         </div>
         <div className="flex flex-wrap items-center gap-1 border-b border-line bg-slate-50 px-4 py-2">
-          {toolbarButton("Bold", Bold, () => command("bold"))}
-          {toolbarButton("Italic", Italic, () => command("italic"))}
-          {toolbarButton("Underline", Underline, () => command("underline"))}
+          {toolbarButton("Bold", Bold, () => runEditorCommand("Bold"))}
+          {toolbarButton("Italic", Italic, () => runEditorCommand("Italic"))}
+          {toolbarButton("Underline", Underline, () => runEditorCommand("Underline"))}
           <span className="mx-2 h-8 w-px bg-line" />
-          {toolbarButton("Heading 1", Pilcrow, () => command("formatBlock", "h1"))}
-          {toolbarButton("Align left", AlignLeft, () => command("justifyLeft"))}
-          {toolbarButton("Centre align", AlignCenter, () => command("justifyCenter"))}
-          {toolbarButton("Right align", AlignRight, () => command("justifyRight"))}
-          {toolbarButton("Justify", AlignJustify, () => command("justifyFull"))}
+          {toolbarButton("Heading 1", Pilcrow, () => runEditorCommand("FormatBlock", "h1"))}
+          {toolbarButton("Align left", AlignLeft, () => runEditorCommand("JustifyLeft"))}
+          {toolbarButton("Centre align", AlignCenter, () => runEditorCommand("JustifyCenter"))}
+          {toolbarButton("Right align", AlignRight, () => runEditorCommand("JustifyRight"))}
+          {toolbarButton("Justify", AlignJustify, () => runEditorCommand("JustifyFull"))}
           <span className="mx-2 h-8 w-px bg-line" />
-          {toolbarButton("Bullet list", List, () => command("insertUnorderedList"))}
-          {toolbarButton("Numbered list", ListOrdered, () => command("insertOrderedList"))}
+          {toolbarButton("Bullet list", List, () => runEditorCommand("InsertUnorderedList"))}
+          {toolbarButton("Numbered list", ListOrdered, () => runEditorCommand("InsertOrderedList"))}
           {toolbarButton("Insert table", Table2, insertTable)}
-          {toolbarButton("Insert rider image", ImageIcon, insertRiderImage)}
+          {toolbarButton("Insert study image", ImageIcon, insertStudyImage)}
           {toolbarButton("Two columns", Columns2, () => applyColumns(2))}
-          {toolbarButton("Merge first table row", Merge, () => mergeFirstTableRow(editorRef.current))}
+          {toolbarButton("Merge first table row", Merge, mergeFirstTableRow)}
+          <span className="mx-2 h-8 w-px bg-line" />
+          {toolbarButton("Toggle wider margins", Ruler, () => toggleDocumentClass("page-margin-wide"))}
+          {toolbarButton("Toggle landscape page", FileText, () => toggleDocumentClass("page-landscape"))}
+          {toolbarButton("Insert header", TextCursorInput, insertHeader)}
+          {toolbarButton("Insert footer", Pilcrow, insertFooter)}
+          {toolbarButton("Insert page number", Hash, insertPageNumber)}
+          {toolbarButton("Toggle paragraph spacing", Columns2, () => toggleDocumentClass("paragraph-spacing-relaxed"))}
           <button
             type="button"
             onMouseDown={(event) => event.preventDefault()}
-            onClick={() => sortFirstTable(editorRef.current)}
+            onClick={sortFirstTable}
             className="rounded-md px-3 py-2 text-sm font-bold text-ink hover:bg-slate-100"
           >
             Sort A-Z
           </button>
+          <span className="ml-auto rounded-md bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm">
+            {wordCount} words
+          </span>
         </div>
         <div className="h-full overflow-auto bg-slate-100 p-6">
-          <div
-            ref={editorRef}
-            contentEditable
-            suppressContentEditableWarning
-            className="word-document mx-auto min-h-[900px] w-full max-w-[850px] bg-white p-10 shadow-sm outline-none"
+          <Editor
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            licenseKey="gpl"
+            value={content}
+            onInit={(_, editor) => {
+              editorRef.current = editor;
+              editor.getBody().className = `word-document ${documentClasses}`;
+              refreshWordCount(editor.getContent());
+            }}
+            onEditorChange={(value) => {
+              setContent(value);
+              refreshWordCount(value);
+            }}
+            init={{
+              height: "100%",
+              min_height: 760,
+              menubar: false,
+              branding: false,
+              promotion: false,
+              statusbar: false,
+              plugins: "lists table link image wordcount code",
+              toolbar:
+                "undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | table image link | code",
+              font_family_formats: "Arial=arial,helvetica,sans-serif;Calibri=calibri,arial,sans-serif;Times New Roman=times new roman,times,serif",
+              fontsize_formats: "10pt 11pt 12pt 14pt 18pt 24pt 36pt",
+              body_class: `word-document ${documentClasses}`,
+              content_style: `
+                body.word-document {
+                  background: #fff;
+                  color: #111827;
+                  font-family: Arial, Helvetica, sans-serif;
+                  font-size: 16px;
+                  line-height: 1.55;
+                  margin: 0 auto;
+                  max-width: 850px;
+                  min-height: 900px;
+                  padding: 40px;
+                }
+                body.word-document.page-margin-wide { padding-left: 64px; padding-right: 64px; }
+                body.word-document.page-landscape { max-width: 1120px; min-height: 720px; }
+                body.word-document.paragraph-spacing-relaxed p { margin-bottom: 20px; }
+                body.word-document.columns-2 { column-count: 2; column-gap: 32px; }
+                body.word-document.columns-3 { column-count: 3; column-gap: 24px; }
+                body.word-document h1 { margin: 0 0 16px; font-size: 28px; font-weight: 700; }
+                body.word-document h2 { margin: 0 0 12px; font-size: 22px; font-weight: 700; }
+                body.word-document p { margin: 0 0 12px; }
+                body.word-document table { margin: 16px 0; width: 100%; border-collapse: collapse; }
+                body.word-document td, body.word-document th { min-width: 120px; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
+                body.word-document img { display: inline-block; margin: 12px 0; max-width: 100%; }
+                .doc-header, .doc-footer { border-bottom: 1px solid #cbd5e1; color: #475569; font-size: 13px; margin-bottom: 16px; padding-bottom: 6px; text-align: right; }
+                .doc-footer { border-bottom: 0; border-top: 1px solid #cbd5e1; margin-bottom: 0; margin-top: 20px; padding-bottom: 0; padding-top: 6px; }
+                .page-number { border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block; min-width: 24px; padding: 0 4px; text-align: center; }
+              `,
+              table_default_attributes: { border: "1" },
+              table_default_styles: { borderCollapse: "collapse", width: "100%" },
+              automatic_uploads: false
+            }}
           />
         </div>
       </section>

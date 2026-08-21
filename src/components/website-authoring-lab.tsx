@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import MonacoEditor from "@monaco-editor/react";
+import grapesjs from "grapesjs";
+import type { Editor as GrapesEditor } from "grapesjs";
 import { ArrowLeft, CheckCircle2, Code2, Eye, FileCode2 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
@@ -86,10 +89,62 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const card = cards[activeIndex];
   const [html, setHtml] = useState(card?.starterHtml || "");
   const [css, setCss] = useState(card?.starterCss || "");
+  const visualEditorRef = useRef<GrapesEditor | null>(null);
+  const visualContainerRef = useRef<HTMLDivElement>(null);
+  const syncingFromCodeRef = useRef(false);
 
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
-  const preview = `<!doctype html><html><head><style>${css}</style></head><body>${html}</body></html>`;
+
+  useEffect(() => {
+    if (!visualContainerRef.current || visualEditorRef.current) return;
+
+    const editor = grapesjs.init({
+      container: visualContainerRef.current,
+      height: "100%",
+      storageManager: false,
+      fromElement: false,
+      components: html,
+      style: css,
+      blockManager: {
+        appendTo: undefined,
+        blocks: [
+          { id: "section", label: "Section", content: "<section><h2>Section heading</h2><p>Section text</p></section>" },
+          { id: "heading", label: "Heading", content: "<h1>Apex Study Hub Open Day</h1>" },
+          { id: "paragraph", label: "Paragraph", content: "<p>Practical digital skills for confident learners.</p>" },
+          { id: "link", label: "Link", content: '<a href="index.html">Home</a>' },
+          { id: "image", label: "Image", content: '<img src="/assets/apex-study-card.svg" alt="Apex study practice card">' },
+          {
+            id: "table",
+            label: "Table",
+            content: "<table><tr><th>Session</th><th>Room</th><th>Time</th></tr><tr><td>Spreadsheet Sprint</td><td>Lab 1</td><td>09:30</td></tr></table>"
+          }
+        ]
+      }
+    });
+
+    editor.on("update", () => {
+      if (syncingFromCodeRef.current) return;
+      setHtml(editor.getHtml());
+    });
+
+    visualEditorRef.current = editor;
+
+    return () => {
+      editor.destroy();
+      visualEditorRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!visualEditorRef.current) return;
+    syncingFromCodeRef.current = true;
+    visualEditorRef.current.setComponents(html);
+    visualEditorRef.current.setStyle(css);
+    queueMicrotask(() => {
+      syncingFromCodeRef.current = false;
+    });
+  }, [html, css]);
 
   function loadCard(index: number) {
     const next = cards[index];
@@ -99,6 +154,14 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     setCss(next.starterCss);
     setMode("html");
     setFeedback(null);
+    if (visualEditorRef.current) {
+      syncingFromCodeRef.current = true;
+      visualEditorRef.current.setComponents(next.starterHtml);
+      visualEditorRef.current.setStyle(next.starterCss);
+      queueMicrotask(() => {
+        syncingFromCodeRef.current = false;
+      });
+    }
   }
 
   function checkWork() {
@@ -116,7 +179,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   if (!card) return null;
 
   return (
-    <div className="mx-auto grid h-[calc(100vh-120px)] min-h-[720px] max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]">
+    <div className="mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]">
       <aside className="flex min-h-0 flex-col rounded-lg border border-line bg-white shadow-sm">
         <div className="border-b border-line p-5">
           <Link href="/subjects/ict/website-authoring" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean">
@@ -191,11 +254,11 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
         </div>
       </aside>
 
-      <section className="min-h-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+      <section className="min-h-[520px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0">
         <div className="flex items-center justify-between border-b border-line p-4">
           <div>
             <h2 className="font-bold">Code editor</h2>
-            <p className="mt-1 text-sm text-slate-600">Edit the source, then check the preview.</p>
+            <p className="mt-1 text-sm text-slate-600">Edit source code with HTML and CSS tabs.</p>
           </div>
           <div className="inline-flex rounded-lg bg-slate-100 p-1">
             <button type="button" onClick={() => setMode("html")} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold ${mode === "html" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>
@@ -206,23 +269,39 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
             </button>
           </div>
         </div>
-        <textarea
-          value={mode === "html" ? html : css}
-          onChange={(event) => mode === "html" ? setHtml(event.target.value) : setCss(event.target.value)}
-          spellCheck={false}
-          className="h-full min-h-[620px] w-full resize-none border-0 bg-[#101820] p-5 font-mono text-sm leading-6 text-slate-100 outline-none"
-        />
+        <div className="h-full min-h-0 bg-[#101820]">
+          <MonacoEditor
+            key={mode}
+            height="100%"
+            language={mode}
+            theme="vs-dark"
+            value={mode === "html" ? html : css}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineHeight: 22,
+              wordWrap: "on",
+              tabSize: 2,
+              scrollBeyondLastLine: false,
+              automaticLayout: true
+            }}
+            onChange={(value) => {
+              if (mode === "html") setHtml(value || "");
+              else setCss(value || "");
+            }}
+          />
+        </div>
       </section>
 
-      <section className="min-h-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+      <section className="min-h-[560px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0">
         <div className="flex items-center gap-2 border-b border-line p-4">
           <Eye size={18} aria-hidden="true" />
           <div>
-            <h2 className="font-bold">Browser preview</h2>
-            <p className="mt-1 text-sm text-slate-600">The preview updates from your HTML and CSS.</p>
+            <h2 className="font-bold">Visual builder</h2>
+            <p className="mt-1 text-sm text-slate-600">Use the GrapesJS canvas to inspect and edit the page.</p>
           </div>
         </div>
-        <iframe title="Website preview" srcDoc={preview} className="h-full min-h-[650px] w-full bg-white" sandbox="" />
+        <div ref={visualContainerRef} className="website-builder h-full min-h-0 bg-white" />
       </section>
     </div>
   );

@@ -554,32 +554,32 @@ const generatedExamEditingTasks: WordProcessingInstructionCard[] = [
   }
 ];
 
-const cycleSupport = [
-  "Support document: Cycle Festival",
-  "The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.",
-  "A photograph of a rider is available for the article.",
+const showcaseSupport = [
+  "Support document: Apex Practice Showcase",
+  "The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.",
+  "A photograph of a learner is available for the article.",
   "The final article should be clear enough for a community newsletter."
 ];
 
 const typedStarter = `
-  <p>Cycle Festival</p>
-  <p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.</p>
+  <p>Apex Practice Showcase</p>
+  <p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>
   <p>Visitors should check start times before arriving.</p>
 `;
 
 const extendedIntroSpecs = [
-  ["wp-intro-cycle-title", "Create a cycle article title", "Type the article title from the support document.", "Cycle Festival", cycleSupport],
-  ["wp-intro-cycle-audience", "Add the audience sentence", "Enter the sentence about the community newsletter.", "The final article should be clear enough for a community newsletter.", cycleSupport],
-  ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", cycleSupport],
-  ["wp-intro-rider-photo-note", "Add an image note", "Enter the sentence that explains the photograph.", "A photograph of a rider is available for the article.", cycleSupport],
-  ["wp-intro-charity-rides", "Add the charity ride detail", "Type the detail about charity rides.", "Charity rides are included in the festival programme.", ["Support document: Cycle Festival", "Charity rides are included in the festival programme."]],
-  ["wp-intro-skills-zone", "Add the skills zone detail", "Type the sentence about the skills zone.", "The skills zone opens after the junior races.", ["Support document: Cycle Festival", "The skills zone opens after the junior races."]],
-  ["wp-intro-winners", "Add the winners presentation", "Type the winners presentation sentence.", "The winners presentation starts at 16:00.", ["Support document: Cycle Festival", "The winners presentation starts at 16:00."]],
-  ["wp-intro-safety", "Add a safety instruction", "Type the safety instruction.", "All riders must wear a helmet.", ["Support document: Safety Notice", "All riders must wear a helmet."]],
-  ["wp-intro-meeting-point", "Add the meeting point", "Type the meeting point sentence.", "Meet at the information desk before the ride.", ["Support document: Safety Notice", "Meet at the information desk before the ride."]],
-  ["wp-intro-results-heading", "Add a results heading", "Type the results heading.", "Race Results Summary", ["Support document: Results", "Race Results Summary"]],
-  ["wp-intro-fastest-group", "Add a race category", "Type the fastest race group.", "Scratch riders are the fastest group.", ["Support document: Race Categories", "Scratch riders are the fastest group."]],
-  ["wp-intro-slowest-group", "Add another race category", "Type the slowest race group.", "Limit riders start first.", ["Support document: Race Categories", "Limit riders start first."]]
+  ["wp-intro-showcase-title", "Create a showcase article title", "Type the article title from the support document.", "Apex Practice Showcase", showcaseSupport],
+  ["wp-intro-cycle-audience", "Add the audience sentence", "Enter the sentence about the community newsletter.", "The final article should be clear enough for a community newsletter.", showcaseSupport],
+  ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", showcaseSupport],
+  ["wp-intro-learner-photo-note", "Add an image note", "Enter the sentence that explains the photograph.", "A photograph of a learner is available for the article.", showcaseSupport],
+  ["wp-intro-charity-sessions", "Add the charity session detail", "Type the detail about guided practice sessions.", "Guided practice sessions are included in the showcase programme.", ["Support document: Apex Practice Showcase", "Guided practice sessions are included in the showcase programme."]],
+  ["wp-intro-skills-zone", "Add the skills lab detail", "Type the sentence about the skills lab.", "The skills lab opens after the starter challenges.", ["Support document: Apex Practice Showcase", "The skills lab opens after the starter challenges."]],
+  ["wp-intro-winners", "Add the progress showcase", "Type the progress showcase sentence.", "The progress showcase starts at 16:00.", ["Support document: Apex Practice Showcase", "The progress showcase starts at 16:00."]],
+  ["wp-intro-safety", "Add a safety instruction", "Type the safety instruction.", "All learners must bring their login details.", ["Support document: Safety Notice", "All learners must bring their login details."]],
+  ["wp-intro-meeting-point", "Add the meeting point", "Type the meeting point sentence.", "Meet at the information desk before the session.", ["Support document: Safety Notice", "Meet at the information desk before the session."]],
+  ["wp-intro-results-heading", "Add a results heading", "Type the results heading.", "Practice Results Summary", ["Support document: Results", "Practice Results Summary"]],
+  ["wp-intro-fastest-group", "Add a skill group", "Type the fastest race group.", "Advanced learners are the fastest group.", ["Support document: Skill Groups", "Advanced learners are the fastest group."]],
+  ["wp-intro-slowest-group", "Add another skill group", "Type the slowest race group.", "Foundation learners start first.", ["Support document: Skill Groups", "Foundation learners start first."]]
 ].map(([id, title, goal, text, supportDocument]) => ({
   id,
   moduleId: "intro",
@@ -596,20 +596,20 @@ const extendedIntroSpecs = [
 } as WordProcessingInstructionCard));
 
 const extraFormattingSpecs = [
-  ["wp-format-bold-cycle-title", "Cycle Festival", "Make the article title bold.", typedStarter, "bold"],
-  ["wp-format-italic-photo-note", "A photograph of a rider is available for the article.", "Italicise the photograph note.", `${typedStarter}<p>A photograph of a rider is available for the article.</p>`, "italic"],
+  ["wp-format-bold-showcase-title", "Apex Practice Showcase", "Make the article title bold.", typedStarter, "bold"],
+  ["wp-format-italic-photo-note", "A photograph of a learner is available for the article.", "Italicise the photograph note.", `${typedStarter}<p>A photograph of a learner is available for the article.</p>`, "italic"],
   ["wp-format-underline-start-times", "Visitors should check start times before arriving.", "Underline the start time warning.", typedStarter, "underline"],
-  ["wp-format-bold-winners", "winners presentation", "Make winners presentation bold.", typedStarter, "bold"],
-  ["wp-format-italic-skills", "skills zone", "Italicise skills zone.", typedStarter, "italic"],
-  ["wp-format-underline-helmet", "All riders must wear a helmet.", "Underline the helmet instruction.", `<p>Safety Notice</p><p>All riders must wear a helmet.</p>`, "underline"],
-  ["wp-format-bold-results", "Race Results Summary", "Make the results heading bold.", `<p>Race Results Summary</p><p>Limit riders start first.</p>`, "bold"],
-  ["wp-format-bold-fastest", "Scratch riders", "Make Scratch riders bold.", `<p>Scratch riders are the fastest group.</p>`, "bold"],
-  ["wp-format-italic-limit", "Limit riders", "Italicise Limit riders.", `<p>Limit riders start first.</p>`, "italic"],
+  ["wp-format-bold-winners", "progress showcase", "Make progress showcase bold.", typedStarter, "bold"],
+  ["wp-format-italic-skills", "skills lab", "Italicise skills lab.", typedStarter, "italic"],
+  ["wp-format-underline-login details", "All learners must bring their login details.", "Underline the login details instruction.", `<p>Safety Notice</p><p>All learners must bring their login details.</p>`, "underline"],
+  ["wp-format-bold-results", "Practice Results Summary", "Make the results heading bold.", `<p>Practice Results Summary</p><p>Foundation learners start first.</p>`, "bold"],
+  ["wp-format-bold-fastest", "Advanced learners", "Make Advanced learners bold.", `<p>Advanced learners are the fastest group.</p>`, "bold"],
+  ["wp-format-italic-foundation", "Foundation learners", "Italicise Foundation learners.", `<p>Foundation learners start first.</p>`, "italic"],
   ["wp-format-underline-community", "community newsletter", "Underline community newsletter.", typedStarter, "underline"],
-  ["wp-format-bold-information", "information desk", "Make information desk bold.", `<p>Meet at the information desk before the ride.</p>`, "bold"],
-  ["wp-format-italic-junior", "junior races", "Italicise junior races.", typedStarter, "italic"],
+  ["wp-format-bold-information", "information desk", "Make information desk bold.", `<p>Meet at the information desk before the session.</p>`, "bold"],
+  ["wp-format-italic-junior", "starter challenges", "Italicise starter challenges.", typedStarter, "italic"],
   ["wp-format-underline-final", "final article", "Underline final article.", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`, "underline"],
-  ["wp-format-bold-charity", "charity rides", "Make charity rides bold.", typedStarter, "bold"],
+  ["wp-format-bold-charity", "guided practice sessions", "Make guided practice sessions bold.", typedStarter, "bold"],
   ["wp-format-italic-arriving", "before arriving", "Italicise before arriving.", typedStarter, "italic"]
 ].map(([id, text, goal, starterHtml, kind]) => ({
   id,
@@ -618,7 +618,7 @@ const extraFormattingSpecs = [
   category: "format",
   title: goal,
   scenario: "An article has already been typed. Edit only the named word or phrase.",
-  supportDocument: cycleSupport,
+  supportDocument: showcaseSupport,
   goal,
   steps: [`Find the phrase ${text} in the document.`, `Select only that phrase.`, `Apply ${kind} formatting from the toolbar.`],
   starterHtml,
@@ -628,16 +628,16 @@ const extraFormattingSpecs = [
 
 const extraLayoutCards: WordProcessingInstructionCard[] = [
   ...[
-    ["wp-layout-center-cycle", "Cycle Festival", "Centre the article title.", "center", typedStarter],
-    ["wp-layout-justify-cycle-body", "The town cycle festival includes", "Justify the main article paragraph.", "justify", typedStarter],
-    ["wp-layout-right-photo-credit", "Photo: Town Cycling Club", "Right align the photo credit.", "right", `${typedStarter}<p>Photo: Town Cycling Club</p>`],
-    ["wp-layout-center-results", "Race Results Summary", "Centre the results heading.", "center", `<p>Race Results Summary</p><p>Limit riders start first.</p>`],
-    ["wp-layout-justify-safety", "All riders must wear a helmet", "Justify the safety paragraph.", "justify", `<p>Safety Notice</p><p>All riders must wear a helmet. Riders should follow marshal instructions throughout the event.</p>`],
-    ["wp-layout-right-ref-cycle", "Reference: CF/23", "Right align the document reference.", "right", `<p>Reference: CF/23</p><p>Cycle Festival</p>`],
-    ["wp-layout-center-notice", "Safety Notice", "Centre the safety heading.", "center", `<p>Safety Notice</p><p>All riders must wear a helmet.</p>`],
+    ["wp-layout-center-showcase", "Apex Practice Showcase", "Centre the article title.", "center", typedStarter],
+    ["wp-layout-justify-showcase-body", "The Apex practice showcase includes", "Justify the main article paragraph.", "justify", typedStarter],
+    ["wp-layout-right-photo-credit", "Photo: Apex Study Hub", "Right align the photo credit.", "right", `${typedStarter}<p>Photo: Apex Study Hub</p>`],
+    ["wp-layout-center-results", "Practice Results Summary", "Centre the results heading.", "center", `<p>Practice Results Summary</p><p>Foundation learners start first.</p>`],
+    ["wp-layout-justify-safety", "All learners must bring their login details", "Justify the safety paragraph.", "justify", `<p>Safety Notice</p><p>All learners must bring their login details. Learners should follow marshal instructions throughout the event.</p>`],
+    ["wp-layout-right-ref-showcase", "Reference: APX/26", "Right align the document reference.", "right", `<p>Reference: APX/26</p><p>Apex Practice Showcase</p>`],
+    ["wp-layout-center-notice", "Safety Notice", "Centre the safety heading.", "center", `<p>Safety Notice</p><p>All learners must bring their login details.</p>`],
     ["wp-layout-justify-newsletter", "The final article should be clear", "Justify the newsletter paragraph.", "justify", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`],
-    ["wp-layout-right-date-cycle", "Date: March 2023", "Right align the date.", "right", `<p>Date: March 2023</p><p>Cycle Festival</p>`],
-    ["wp-layout-center-awards", "Winners Presentation", "Centre the awards heading.", "center", `<p>Winners Presentation</p><p>The winners presentation starts at 16:00.</p>`]
+    ["wp-layout-right-date-showcase", "Date: August 2026", "Right align the date.", "right", `<p>Date: August 2026</p><p>Apex Practice Showcase</p>`],
+    ["wp-layout-center-awards", "Progress Showcase", "Centre the awards heading.", "center", `<p>Progress Showcase</p><p>The progress showcase starts at 16:00.</p>`]
   ].map(([id, text, goal, value, starterHtml]) => ({
     id,
     moduleId: "paragraph-layout",
@@ -645,7 +645,7 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     category: "layout",
     title: goal,
     scenario: "The text is already typed. Practise arranging paragraphs for a clear printed document.",
-    supportDocument: cycleSupport,
+    supportDocument: showcaseSupport,
     goal,
     steps: [`Click inside the paragraph containing ${text}.`, `Use the toolbar alignment button for ${value}.`, "Check the paragraph has moved to the correct position."],
     starterHtml,
@@ -653,14 +653,14 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     points: 15
   } as WordProcessingInstructionCard)),
   {
-    id: "wp-layout-two-columns-cycle",
+    id: "wp-layout-two-columns-showcase",
     moduleId: "paragraph-layout",
     moduleTitle: "Paragraph Layout",
     category: "layout",
     title: "Apply two-column layout",
     scenario: "The community newsletter article should use two columns like a magazine page.",
-    supportDocument: cycleSupport,
-    goal: "Apply two columns to the cycle festival article.",
+    supportDocument: showcaseSupport,
+    goal: "Apply two columns to the practice showcase article.",
     steps: ["Click inside the document.", "Click the two-column toolbar button.", "Check the article text flows into two columns."],
     starterHtml: `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`,
     expected: { columns: 2 },
@@ -672,12 +672,12 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     moduleTitle: "Paragraph Layout",
     category: "layout",
     title: "Insert and centre an image",
-    scenario: "The article needs the rider photograph placed neatly below the title.",
-    supportDocument: cycleSupport,
-    goal: "Insert the rider image and centre it.",
+    scenario: "The article needs the study workspace image placed neatly below the title.",
+    supportDocument: showcaseSupport,
+    goal: "Insert the study image and centre it.",
     steps: ["Click below the title.", "Click the image toolbar button.", "Check the image is centred in the document."],
-    starterHtml: `<h1>Cycle Festival</h1><p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation.</p>`,
-    expected: { image: { alt: "cyclist", alignment: "center" } },
+    starterHtml: `<h1>Apex Practice Showcase</h1><p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>`,
+    expected: { image: { alt: "apex study workspace", alignment: "center" } },
     points: 20
   },
   {
@@ -686,27 +686,27 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     moduleTitle: "Paragraph Layout",
     category: "layout",
     title: "Build a newsletter layout",
-    scenario: "The finished article should combine a rider image with a two-column body.",
-    supportDocument: cycleSupport,
-    goal: "Insert the rider image and apply two columns to the article.",
-    steps: ["Insert the rider image below the title.", "Click the two-column toolbar button.", "Check the article still reads clearly."],
-    starterHtml: `<h1>Cycle Festival</h1><p>The town cycle festival includes junior races, a skills zone, charity rides, and a winners presentation. Visitors should check start times before arriving. The final article should be clear enough for a community newsletter.</p>`,
-    expected: { image: { alt: "cyclist", alignment: "center" }, columns: 2 },
+    scenario: "The finished article should combine a study image with a two-column body.",
+    supportDocument: showcaseSupport,
+    goal: "Insert the study image and apply two columns to the article.",
+    steps: ["Insert the study image below the title.", "Click the two-column toolbar button.", "Check the article still reads clearly."],
+    starterHtml: `<h1>Apex Practice Showcase</h1><p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase. Visitors should check start times before arriving. The final article should be clear enough for a community newsletter.</p>`,
+    expected: { image: { alt: "apex study workspace", alignment: "center" }, columns: 2 },
     points: 25
   }
 ];
 
 const extraListSpecs = [
-  ["wp-list-cycle-events", "Festival events", ["Junior races", "Skills zone", "Charity rides", "Winners presentation"], "unordered"],
-  ["wp-list-rider-checks", "Rider checks", ["Wear a helmet", "Check start time", "Meet at the information desk"], "ordered"],
-  ["wp-list-source-files", "Source files", ["Festival article", "Rider photograph", "Race results"], "unordered"],
+  ["wp-list-showcase-events", "Apex events", ["Starter challenges", "Skills lab", "Guided practice sessions", "Winners presentation"], "unordered"],
+  ["wp-list-learner-checks", "Learner checks", ["Bring login details", "Check start time", "Meet at the information desk"], "ordered"],
+  ["wp-list-source-files", "Source files", ["Apex article", "Study workspace image", "Race results"], "unordered"],
   ["wp-list-editing-order", "Editing order", ["Open the source document", "Format the title", "Insert the image", "Check the final document"], "ordered"],
   ["wp-list-newsletter-items", "Newsletter contents", ["Main article", "Results table", "Safety note"], "unordered"],
-  ["wp-list-race-groups", "Race groups", ["Limit", "Block", "Scratch"], "unordered"],
+  ["wp-list-race-groups", "Skill groups", ["Foundation", "Intermediate", "Advanced"], "unordered"],
   ["wp-list-proofing", "Proofing checklist", ["Check spelling", "Check alignment", "Check table order"], "ordered"],
   ["wp-list-output", "Print output", ["Article", "Evidence document", "Final proof"], "ordered"],
-  ["wp-list-volunteer", "Volunteer tasks", ["Set up signs", "Guide riders", "Record winners"], "unordered"],
-  ["wp-list-safety", "Safety points", ["Helmet", "Water", "Marshal instructions"], "unordered"],
+  ["wp-list-volunteer", "Volunteer tasks", ["Set up signs", "Guide learners", "Record winners"], "unordered"],
+  ["wp-list-safety", "Safety points", ["Login details", "Water", "Marshal instructions"], "unordered"],
   ["wp-list-import", "Import sequence", ["Open document", "Place image", "Resize image"], "ordered"],
   ["wp-list-table-plan", "Table plan", ["Category", "Winners", "Points"], "unordered"],
   ["wp-list-columns-plan", "Column plan", ["Title above columns", "Body in columns", "Image near title"], "ordered"],
@@ -732,9 +732,9 @@ const raceTableStarter = `
   <table>
     <tbody>
       <tr><td>Category</td><td>Points</td><td>Notes</td></tr>
-      <tr><td>Scratch</td><td>16</td><td>fastest</td></tr>
-      <tr><td>Limit</td><td>2</td><td>slowest</td></tr>
-      <tr><td>Block</td><td>6</td><td>second to last</td></tr>
+      <tr><td>Advanced</td><td>16</td><td>fastest</td></tr>
+      <tr><td>Foundation</td><td>2</td><td>slowest</td></tr>
+      <tr><td>Intermediate</td><td>6</td><td>second to last</td></tr>
     </tbody>
   </table>
 `;
@@ -743,7 +743,7 @@ const extraTableCards: WordProcessingInstructionCard[] = [
   ...[
     ["wp-table-race-headers", "Race table headings", "Bold the race table headings.", raceTableStarter, ["Category", "Points", "Notes"]],
     ["wp-table-club-headers-extra", "Club table headings", "Bold the club table headings.", tableStarter, ["Club", "Teacher", "Room"]],
-    ["wp-table-winner-headers", "Winners table headings", "Bold Winner, Category, and Time.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Ana</td><td>Limit</td><td>09:30</td></tr></tbody></table>`, ["Winner", "Category", "Time"]]
+    ["wp-table-winner-headers", "Winners table headings", "Bold Winner, Category, and Time.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Ana</td><td>Foundation</td><td>09:30</td></tr></tbody></table>`, ["Winner", "Category", "Time"]]
   ].map(([id, title, goal, starterHtml, headers]) => ({
     id,
     moduleId: "tables",
@@ -759,9 +759,9 @@ const extraTableCards: WordProcessingInstructionCard[] = [
     points: 20
   } as WordProcessingInstructionCard)),
   ...[
-    ["wp-table-sort-race-categories", "Sort race categories", "Sort the category table alphabetically.", raceTableStarter, ["Block", "Limit", "Scratch"]],
+    ["wp-table-sort-race-categories", "Sort skill groups", "Sort the category table alphabetically.", raceTableStarter, ["Intermediate", "Foundation", "Advanced"]],
     ["wp-table-sort-club-extra", "Sort clubs again", "Sort the club table alphabetically.", tableStarter, ["Art", "Drama", "Robotics"]],
-    ["wp-table-sort-winners", "Sort winner names", "Sort the winners table alphabetically.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Zara</td><td>Scratch</td><td>10:10</td></tr><tr><td>Ana</td><td>Limit</td><td>09:30</td></tr><tr><td>Milo</td><td>Block</td><td>09:50</td></tr></tbody></table>`, ["Ana", "Milo", "Zara"]]
+    ["wp-table-sort-winners", "Sort winner names", "Sort the winners table alphabetically.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Zara</td><td>Advanced</td><td>10:10</td></tr><tr><td>Ana</td><td>Foundation</td><td>09:30</td></tr><tr><td>Milo</td><td>Intermediate</td><td>09:50</td></tr></tbody></table>`, ["Ana", "Milo", "Zara"]]
   ].map(([id, title, goal, starterHtml, sortedFirstColumn]) => ({
     id,
     moduleId: "tables",
@@ -777,14 +777,14 @@ const extraTableCards: WordProcessingInstructionCard[] = [
     points: 20
   } as WordProcessingInstructionCard)),
   ...[
-    ["wp-table-add-limit-row", "Add a Limit row", "Add the Limit race row to the table.", "Limit", "2", "slowest"],
-    ["wp-table-add-scratch-row", "Add a Scratch row", "Add the Scratch race row to the table.", "Scratch", "16", "fastest"],
-    ["wp-table-add-block-row", "Add a Block row", "Add the Block race row to the table.", "Block", "6", "second to last"],
-    ["wp-table-add-winner-row", "Add a winner row", "Add Ana, Limit, and 09:30 to the table.", "Ana", "Limit", "09:30"],
-    ["wp-table-add-rider-row", "Add a rider row", "Add Milo, Block, and 09:50 to the table.", "Milo", "Block", "09:50"],
-    ["wp-table-add-scratch-winner", "Add the Scratch winner", "Add Zara, Scratch, and 10:10 to the table.", "Zara", "Scratch", "10:10"],
+    ["wp-table-add-foundation-row", "Add a Foundation row", "Add the Foundation race row to the table.", "Foundation", "2", "slowest"],
+    ["wp-table-add-advanced-row", "Add a Advanced row", "Add the Advanced race row to the table.", "Advanced", "16", "fastest"],
+    ["wp-table-add-block-row", "Add a Intermediate row", "Add the Intermediate race row to the table.", "Intermediate", "6", "second to last"],
+    ["wp-table-add-winner-row", "Add a winner row", "Add Ana, Foundation, and 09:30 to the table.", "Ana", "Foundation", "09:30"],
+    ["wp-table-add-learner-row", "Add a learner row", "Add Milo, Intermediate, and 09:50 to the table.", "Milo", "Intermediate", "09:50"],
+    ["wp-table-add-advanced-winner", "Add the Advanced winner", "Add Zara, Advanced, and 10:10 to the table.", "Zara", "Advanced", "10:10"],
     ["wp-table-add-total-row", "Add the total row", "Add Total, 38, and all groups to the table.", "Total", "38", "all groups"],
-    ["wp-table-add-start-time", "Add a start time", "Add Limit, 09:00, and First start.", "Limit", "09:00", "First start"]
+    ["wp-table-add-start-time", "Add a start time", "Add Foundation, 09:00, and First start.", "Foundation", "09:00", "First start"]
   ].map(([id, title, goal, first, second, third]) => ({
     id,
     moduleId: "tables",
@@ -792,7 +792,7 @@ const extraTableCards: WordProcessingInstructionCard[] = [
     category: "table",
     title,
     scenario: "Use the support data to complete an existing table.",
-    supportDocument: ["Support document: Race Data", `${first} | ${second} | ${third}`],
+    supportDocument: ["Support document: Practice Data", `${first} | ${second} | ${third}`],
     goal,
     steps: ["Click inside an empty table row.", "Enter the three pieces of support data into the row.", "Check the data is in separate cells."],
     starterHtml: `<table><tbody><tr><td>Category</td><td>Points</td><td>Notes</td></tr><tr><td></td><td></td><td></td></tr></tbody></table>`,
@@ -803,17 +803,17 @@ const extraTableCards: WordProcessingInstructionCard[] = [
 
 const extraExamCards: WordProcessingInstructionCard[] = [
   {
-    id: "wp-exam-cycle-newsletter",
+    id: "wp-exam-showcase-newsletter",
     moduleId: "exam-editing",
     moduleTitle: "Exam Editing",
     category: "exam",
-    title: "Build the cycle newsletter article",
+    title: "Build the Apex newsletter article",
     scenario: "This is a longer practical task modelled on a support-document workflow.",
-    supportDocument: cycleSupport,
-    goal: "Create a bold centred title, insert the rider image, and apply two columns.",
-    steps: ["Format the title so it is bold and centred.", "Insert the rider image below the title.", "Apply two columns to the article."],
+    supportDocument: showcaseSupport,
+    goal: "Create a bold centred title, insert the study image, and apply two columns.",
+    steps: ["Format the title so it is bold and centred.", "Insert the study image below the title.", "Apply two columns to the article."],
     starterHtml: typedStarter,
-    expected: { boldText: ["Cycle Festival"], alignments: [{ text: "Cycle Festival", value: "center" }], image: { alt: "cyclist", alignment: "center" }, columns: 2 },
+    expected: { boldText: ["Apex Practice Showcase"], alignments: [{ text: "Apex Practice Showcase", value: "center" }], image: { alt: "apex study workspace", alignment: "center" }, columns: 2 },
     points: 30
   },
   {
@@ -821,13 +821,13 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     moduleId: "exam-editing",
     moduleTitle: "Exam Editing",
     category: "exam",
-    title: "Format and sort race results",
+    title: "Format and sort practice results",
     scenario: "A results table has been imported from a CSV-style support file and needs final formatting.",
-    supportDocument: ["Support document: Race Results", "Sort by Category ascending.", "Make the heading row bold."],
+    supportDocument: ["Support document: Practice Results", "Sort by Category ascending.", "Make the heading row bold."],
     goal: "Make the table headings bold and sort the first column alphabetically.",
     steps: ["Bold the heading row.", "Click in the table.", "Sort the first column from A to Z."],
     starterHtml: raceTableStarter,
-    expected: { boldText: ["Category", "Points", "Notes"], table: { headers: ["Category", "Points", "Notes"], sortedFirstColumn: ["Block", "Limit", "Scratch"] } },
+    expected: { boldText: ["Category", "Points", "Notes"], table: { headers: ["Category", "Points", "Notes"], sortedFirstColumn: ["Intermediate", "Foundation", "Advanced"] } },
     points: 30
   },
   {
@@ -837,14 +837,14 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     category: "exam",
     title: "Prepare a safety handout",
     scenario: "A safety handout must combine a heading, a justified paragraph, and a bullet checklist.",
-    supportDocument: ["Support document: Safety", "Heading: Rider Safety", "Items: Helmet, Water, Marshal instructions"],
+    supportDocument: ["Support document: Safety", "Heading: Learner Safety", "Items: Login details, Water, Marshal instructions"],
     goal: "Create a bold centred heading, justify the paragraph, and make the safety items a bullet list.",
     steps: ["Make the heading bold and centred.", "Justify the safety paragraph.", "Turn the three safety items into bullets."],
-    starterHtml: `<p>Rider Safety</p><p>All riders must wear a helmet. Riders should follow marshal instructions throughout the event.</p><p>Helmet</p><p>Water</p><p>Marshal instructions</p>`,
+    starterHtml: `<p>Learner Safety</p><p>All learners must bring their login details. Learners should follow marshal instructions throughout the event.</p><p>Login details</p><p>Water</p><p>Marshal instructions</p>`,
     expected: {
-      boldText: ["Rider Safety"],
-      alignments: [{ text: "Rider Safety", value: "center" }, { text: "All riders must wear", value: "justify" }],
-      unorderedListItems: ["Helmet", "Water", "Marshal instructions"]
+      boldText: ["Learner Safety"],
+      alignments: [{ text: "Learner Safety", value: "center" }, { text: "All learners must wear", value: "justify" }],
+      unorderedListItems: ["Login details", "Water", "Marshal instructions"]
     },
     points: 30
   },
@@ -858,10 +858,10 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     supportDocument: ["Support document: Edit Notes", "Title should be bold.", "Photo note should be italic.", "Start time warning should be underlined."],
     goal: "Apply bold, italic, and underline to the correct parts of the existing article.",
     steps: ["Make the title bold.", "Italicise the photograph note.", "Underline the start time warning."],
-    starterHtml: `${typedStarter}<p>A photograph of a rider is available for the article.</p>`,
+    starterHtml: `${typedStarter}<p>A photograph of a learner is available for the article.</p>`,
     expected: {
-      boldText: ["Cycle Festival"],
-      italicText: ["A photograph of a rider is available for the article."],
+      boldText: ["Apex Practice Showcase"],
+      italicText: ["A photograph of a learner is available for the article."],
       underlineText: ["Visitors should check start times before arriving."]
     },
     points: 30
@@ -873,11 +873,11 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     category: "exam",
     title: "Create a two-column results page",
     scenario: "A newsletter page must show article text and a sorted results table.",
-    supportDocument: ["Support document: Newsletter Page", "Use two columns.", "Sort race categories alphabetically."],
+    supportDocument: ["Support document: Newsletter Page", "Use two columns.", "Sort skill groups alphabetically."],
     goal: "Apply two columns and sort the results table.",
     steps: ["Click the two-column toolbar button.", "Click inside the results table.", "Click Sort A-Z."],
     starterHtml: `${typedStarter}${raceTableStarter}`,
-    expected: { columns: 2, table: { sortedFirstColumn: ["Block", "Limit", "Scratch"] } },
+    expected: { columns: 2, table: { sortedFirstColumn: ["Intermediate", "Foundation", "Advanced"] } },
     points: 30
   },
   {
@@ -886,12 +886,12 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     moduleTitle: "Exam Editing",
     category: "exam",
     title: "Place an image with a caption",
-    scenario: "The rider image must be inserted and the caption must be included.",
-    supportDocument: ["Support document: Image", "Caption: Rider on the festival route"],
-    goal: "Insert the rider image and add the caption text.",
-    steps: ["Insert the rider image.", "Type the caption below the image.", "Centre the image."],
-    starterHtml: `<h1>Cycle Festival</h1><p></p>`,
-    expected: { image: { alt: "cyclist", alignment: "center" }, textIncludes: ["Rider on the festival route"] },
+    scenario: "The study image must be inserted and the caption must be included.",
+    supportDocument: ["Support document: Image", "Caption: Learner on the practice workspace"],
+    goal: "Insert the study image and add the caption text.",
+    steps: ["Insert the study image.", "Type the caption below the image.", "Centre the image."],
+    starterHtml: `<h1>Apex Practice Showcase</h1><p></p>`,
+    expected: { image: { alt: "apex study workspace", alignment: "center" }, textIncludes: ["Learner on the practice workspace"] },
     points: 30
   },
   {
@@ -901,26 +901,26 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     category: "exam",
     title: "Complete a support-document edit",
     scenario: "A prepared article needs the same mix of edits students often meet in practical papers.",
-    supportDocument: cycleSupport,
+    supportDocument: showcaseSupport,
     goal: "Bold and centre the title, justify the article paragraph, insert the image, and underline the start time warning.",
-    steps: ["Format the title.", "Justify the article paragraph.", "Insert the rider image and underline the warning sentence."],
+    steps: ["Format the title.", "Justify the article paragraph.", "Insert the study image and underline the warning sentence."],
     starterHtml: typedStarter,
     expected: {
-      boldText: ["Cycle Festival"],
+      boldText: ["Apex Practice Showcase"],
       underlineText: ["Visitors should check start times before arriving."],
-      alignments: [{ text: "Cycle Festival", value: "center" }, { text: "The town cycle festival includes", value: "justify" }],
-      image: { alt: "cyclist", alignment: "center" }
+      alignments: [{ text: "Apex Practice Showcase", value: "center" }, { text: "The Apex practice showcase includes", value: "justify" }],
+      image: { alt: "apex study workspace", alignment: "center" }
     },
     points: 35
   },
   ...[
     ["wp-exam-final-list", "Create the final checklist", ["No missing text", "No broken image", "No unsorted table"], "unordered"],
     ["wp-exam-numbered-process", "Create the editing process", ["Open source", "Format document", "Check output"], "ordered"],
-    ["wp-exam-bullet-events", "Create the events list", ["Junior races", "Skills zone", "Charity rides"], "unordered"],
+    ["wp-exam-bullet-events", "Create the events list", ["Starter challenges", "Skills lab", "Guided practice sessions"], "unordered"],
     ["wp-exam-numbered-proofing", "Create proofing steps", ["Read instructions", "Compare document", "Save final work"], "ordered"],
-    ["wp-exam-bullet-files", "Create source file list", ["festival document", "rider image", "results data"], "unordered"],
+    ["wp-exam-bullet-files", "Create source file list", ["Apex document", "study image", "results data"], "unordered"],
     ["wp-exam-numbered-evidence", "Create evidence steps", ["Take screenshot", "Paste evidence", "Label step"], "ordered"],
-    ["wp-exam-bullet-audience", "Create audience points", ["Parents", "Riders", "Visitors"], "unordered"],
+    ["wp-exam-bullet-audience", "Create audience points", ["Parents", "Learners", "Visitors"], "unordered"],
     ["wp-exam-numbered-layout", "Create layout sequence", ["Place title", "Insert image", "Apply columns"], "ordered"],
     ["wp-exam-bullet-output", "Create output list", ["Newsletter", "Results table", "Safety note"], "unordered"]
   ].map(([id, title, items, listType]) => ({
@@ -940,14 +940,14 @@ const extraExamCards: WordProcessingInstructionCard[] = [
 ];
 
 const stemStyleStarter = `
-  <p>Tawara Schools STEM Development</p>
+  <p>Apex Study Hub Skills Programme</p>
   <p>Innovations in Science Education</p>
   <p>working in teams</p>
   <p>solving practical problems</p>
   <p>developing own solutions</p>
-  <p>Why is a STEM approach to learning important?</p>
-  <p>STEM learning helps students connect science, technology, engineering and mathematics to practical tasks. Students work with real problems and present their solutions clearly.</p>
-  <p>STEM subjects</p>
+  <p>Why is a digital skills approach to learning important?</p>
+  <p>Digital skills learning helps students connect science, technology, engineering and mathematics to practical tasks. Students work with real problems and present their solutions clearly.</p>
+  <p>Digital skills subjects</p>
   <table>
     <tbody>
       <tr><td>Subject Choices</td><td>Girls</td><td>Boys</td></tr>
@@ -959,19 +959,19 @@ const stemStyleStarter = `
   <p>Will the gender disparity change as more practical projects are introduced?</p>
 `;
 
-const festivalArticleStarter = `
-  <p>Tawara Cycling Festival</p>
-  <p>We are delighted to announce the return of the Tawara Cycling Festival this summer. The event will be held on Sunday 27 August 2023 and is open to all club members and visiting cyclists.</p>
-  <p>The Trails</p>
-  <p>All trails start and finish at the lake. Cyclists must start within twenty minutes of the listed start time for their trail.</p>
+const showcaseArticleStarter = `
+  <p>Apex Practice Showcase</p>
+  <p>We are delighted to announce the return of the Apex Practice Showcase this summer. The event will be held on Sunday 27 August 2023 and is open to all club members and visiting apex study workspaces.</p>
+  <p>Practice Sessions</p>
+  <p>All practice sessions start and finish at the lake. Learners must start within twenty minutes of the listed start time for their practice session.</p>
   <p>Registration and Participation</p>
-  <p>Event registration and payment must be completed online prior to the festival. Cash transactions cannot be accepted.</p>
+  <p>Event registration and payment must be completed online prior to the showcase. Cash transactions cannot be accepted.</p>
   <p>Entertainment</p>
   <p>Activities will include:</p>
-  <p>bike handling for children</p>
-  <p>cycle maintenance sessions</p>
+  <p>keyboard shortcuts for beginners</p>
+  <p>file management mini lessons</p>
   <p>guided walks around the nature reserve</p>
-  <p>professional shows with stunt bike sessions</p>
+  <p>professional shows with live editing demonstrations</p>
 `;
 
 const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
@@ -983,9 +983,9 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     title: "0417 source document setup",
     scenario: "A practical paper gives you a prepared source document. Your first job is to open it, recognise the structure, and add the missing source text without changing the page setup.",
     supportDocument: [
-      "Source file: festival article",
-      "Add the subtitle Cycling for every ability below the title.",
-      "Add the sentence: Entries close on 20 August or earlier if a trail is fully subscribed.",
+      "Source file: Apex article",
+      "Add the subtitle Practical skills for every learner below the title.",
+      "Add the sentence: Entries close on 20 August or earlier if a practice session is fully subscribed.",
       "Teacher check: file saved with the correct name and format."
     ],
     goal: "Complete the missing subtitle and source sentence in the prepared document.",
@@ -995,12 +995,12 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "Add the missing entry deadline sentence in the registration section.",
       "Ask your teacher to review the save-name and file-format evidence."
     ],
-    starterHtml: festivalArticleStarter,
+    starterHtml: showcaseArticleStarter,
     expected: {
-      textIncludes: ["Cycling for every ability", "Entries close on 20 August or earlier if a trail is fully subscribed."]
+      textIncludes: ["Practical skills for every learner", "Entries close on 20 August or earlier if a practice session is fully subscribed."]
     },
     teacherReview: [
-      "Confirm the student understands that the source document is edited, not recreated from scratch.",
+      "Confirm the student understands that the source document is edited, not recreated from advanced.",
       "Confirm the save-name/file-format evidence would be acceptable in an exam."
     ],
     points: 35
@@ -1015,8 +1015,8 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     supportDocument: [
       "House style: title - sans-serif, 36 point, centre, bold, underlined.",
       "House style: subhead - sans-serif, 14 point, centre, all capitals, bold.",
-      "Apply title formatting to Tawara Schools STEM Development.",
-      "Apply subheading formatting to Why is a STEM approach to learning important?"
+      "Apply title formatting to Apex Study Hub Skills Programme.",
+      "Apply subheading formatting to Why is a digital skills approach to learning important?"
     ],
     goal: "Format the title and one subheading to match a 0417-style house style.",
     steps: [
@@ -1026,11 +1026,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     ],
     starterHtml: stemStyleStarter,
     expected: {
-      boldText: ["Tawara Schools STEM Development", "Why is a STEM approach to learning important?"],
-      underlineText: ["Tawara Schools STEM Development"],
+      boldText: ["Apex Study Hub Skills Programme", "Why is a digital skills approach to learning important?"],
+      underlineText: ["Apex Study Hub Skills Programme"],
       alignments: [
-        { text: "Tawara Schools STEM Development", value: "center" },
-        { text: "Why is a STEM approach", value: "center" }
+        { text: "Apex Study Hub Skills Programme", value: "center" },
+        { text: "Why is a digital skills approach", value: "center" }
       ]
     },
     teacherReview: [
@@ -1047,20 +1047,20 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     title: "0417 columns and image challenge",
     scenario: "A common document-production task changes only part of a document into columns and places an image beside a specific paragraph.",
     supportDocument: [
-      "Change from the subheading The Trails onwards into two equal columns.",
-      "Insert the rider image near the paragraph beginning All trails start...",
+      "Change from the subheading Practice Sessions onwards into two equal columns.",
+      "Insert the study image near the paragraph beginning All practice sessions start...",
       "The image should be aligned neatly and text should sit around it in the final printout."
     ],
-    goal: "Apply two columns and insert the rider image into the festival article.",
+    goal: "Apply two columns and insert the study image into the Apex article.",
     steps: [
       "Click inside the document and apply the two-column layout.",
-      "Place the cursor near the trails paragraph and insert the rider image.",
+      "Place the cursor near the practice sessions paragraph and insert the study image.",
       "Teacher should review image wrapping, exact position, and column start point."
     ],
-    starterHtml: festivalArticleStarter,
+    starterHtml: showcaseArticleStarter,
     expected: {
       columns: 2,
-      image: { alt: "cyclist", alignment: "center" }
+      image: { alt: "apex study workspace", alignment: "center" }
     },
     teacherReview: [
       "Check that columns should begin at the requested subheading, not necessarily at the top of the document.",
@@ -1077,23 +1077,23 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     scenario: "The exam may ask for a specific bullet style to be applied to a selected range of plain text.",
     supportDocument: [
       "Apply the bullet style to the activity lines only.",
-      "The list starts with bike handling for children.",
-      "The list ends with professional shows with stunt bike sessions.",
+      "The list starts with keyboard shortcuts for beginners.",
+      "The list ends with professional shows with live editing demonstrations.",
       "Teacher check: bullet shape and left-margin alignment."
     ],
-    goal: "Turn the activity lines in the festival article into a bullet list.",
+    goal: "Turn the activity lines in the Apex article into a bullet list.",
     steps: [
       "Select the activity lines only.",
       "Click the bullet list button.",
       "Do not include the heading Activities will include:"
     ],
-    starterHtml: festivalArticleStarter,
+    starterHtml: showcaseArticleStarter,
     expected: {
       unorderedListItems: [
-        "bike handling for children",
-        "cycle maintenance sessions",
+        "keyboard shortcuts for beginners",
+        "file management mini lessons",
         "guided walks around the nature reserve",
-        "professional shows with stunt bike sessions"
+        "professional shows with live editing demonstrations"
       ]
     },
     teacherReview: [
@@ -1115,7 +1115,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "Merge and centre the first row of the table.",
       "Teacher check: table style, borders, spacing after table, and whether data fits without wrapping."
     ],
-    goal: "Edit the STEM table by adding Biology and merging the heading row.",
+    goal: "Edit the digital skills table by adding Biology and merging the heading row.",
     steps: [
       "Add Biology, 50 and 40 above Chemistry.",
       "Use the merge toolbar button to merge the first table row.",
@@ -1146,12 +1146,12 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     title: "0417 full document production task",
     scenario: "This is the closest Word Processing task to the document-production part of Paper 2. It combines source document editing, house style, columns, table editing, image placement, and proofing.",
     supportDocument: [
-      "Open the prepared STEM article.",
+      "Open the prepared Digital skills article.",
       "Format the title as bold, underlined and centred.",
       "Add the subtitle Innovations in Science Education.",
       "Apply bullets to the three teamwork lines.",
       "Apply two columns to the body section.",
-      "Insert the rider image near the paragraph beginning Will the gender disparity...",
+      "Insert the study image near the paragraph beginning Will the gender disparity...",
       "Add Biology, 50 and 40 to the table and merge the first table row.",
       "Teacher check: footer/page numbers, named styles, image wrap, no widows/orphans, no split table/list."
     ],
@@ -1164,12 +1164,12 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     starterHtml: stemStyleStarter,
     expected: {
       textIncludes: ["Innovations in Science Education", "Biology", "50", "40"],
-      boldText: ["Tawara Schools STEM Development"],
-      underlineText: ["Tawara Schools STEM Development"],
-      alignments: [{ text: "Tawara Schools STEM Development", value: "center" }],
+      boldText: ["Apex Study Hub Skills Programme"],
+      underlineText: ["Apex Study Hub Skills Programme"],
+      alignments: [{ text: "Apex Study Hub Skills Programme", value: "center" }],
       unorderedListItems: ["working in teams", "solving practical problems", "developing own solutions"],
       columns: 2,
-      image: { alt: "cyclist", alignment: "center" },
+      image: { alt: "apex study workspace", alignment: "center" },
       table: {
         minRows: 5,
         minColumns: 3,
@@ -1230,3 +1230,5 @@ export function getWordProcessingCardsForModule(moduleId?: string) {
     .filter((card) => !moduleId || card.moduleId === moduleId)
     .sort((first, second) => (moduleOrder.get(first.moduleId) ?? 99) - (moduleOrder.get(second.moduleId) ?? 99));
 }
+
+

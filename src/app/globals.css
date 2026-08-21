@@ -1,3 +1,5 @@
+@import "grapesjs/dist/css/grapes.min.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,6 +57,27 @@ textarea {
   gap: 1rem;
 }
 
+.website-builder,
+.website-builder .gjs-editor,
+.website-builder .gjs-cv-canvas {
+  height: 100%;
+  min-height: 0;
+}
+
+.website-builder .gjs-editor {
+  height: 100%;
+}
+
+.website-builder .gjs-cv-canvas {
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.website-builder .gjs-frame-wrapper {
+  height: 100%;
+}
+
 .word-document {
   color: #111827;
   font-family: Arial, Helvetica, sans-serif;
@@ -76,6 +99,48 @@ textarea {
 
 .word-document p {
   margin: 0 0 0.75rem;
+}
+
+.word-document.page-margin-wide {
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+
+.word-document.page-landscape {
+  max-width: 1120px;
+  min-height: 720px;
+}
+
+.word-document.paragraph-spacing-relaxed p {
+  margin-bottom: 1.25rem;
+}
+
+.word-document .doc-header,
+.word-document .doc-footer {
+  border-bottom: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.35rem;
+  text-align: right;
+}
+
+.word-document .doc-footer {
+  border-bottom: 0;
+  border-top: 1px solid #cbd5e1;
+  margin-bottom: 0;
+  margin-top: 1.25rem;
+  padding-bottom: 0;
+  padding-top: 0.35rem;
+}
+
+.word-document .page-number {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  display: inline-block;
+  min-width: 1.5rem;
+  padding: 0 0.25rem;
+  text-align: center;
 }
 
 .word-document ul,
