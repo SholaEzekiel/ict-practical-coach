@@ -23,19 +23,52 @@ function normalise(value: string) {
   return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+function sourceHasTag(html: string, tag: string) {
+  const cleanTag = tag.toLowerCase();
+  if (cleanTag.startsWith("<!--")) return html.toLowerCase().includes(cleanTag);
+  return new RegExp(`<${cleanTag}(\\s|>|/)`, "i").test(html) && new RegExp(`</${cleanTag}>`, "i").test(html);
+}
+
+function getBodyInnerHtml(html: string) {
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  return match?.[1]?.trim() || "";
+}
+
+function hasPreviewableDocument(html: string) {
+  return /<!doctype\s+html>/i.test(html) && sourceHasTag(html, "html") && sourceHasTag(html, "head") && sourceHasTag(html, "body");
+}
+
+function replaceBodyInnerHtml(sourceHtml: string, nextBodyHtml: string) {
+  if (!hasPreviewableDocument(sourceHtml)) return sourceHtml;
+  return sourceHtml.replace(/(<body[^>]*>)([\s\S]*?)(<\/body>)/i, `$1\n${nextBodyHtml.trim() ? `    ${nextBodyHtml.trim()}\n  ` : "\n  "}$3`);
+}
+
 function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string): Feedback {
   const messages: string[] = [];
   const parser = new DOMParser();
   const document = parser.parseFromString(html, "text/html");
   const allText = normalise(document.body.textContent || "");
 
-  card.expected.title && document.querySelector("title")?.textContent !== card.expected.title && messages.push(`Set the page title to ${card.expected.title}.`);
+  if (card.expected.htmlIncludes?.some((text) => normalise(text).includes("<!doctype html>")) && !/<!doctype\s+html>/i.test(html)) {
+    messages.push("Add <!doctype html> as the first line.");
+  }
+
+  if (card.expected.title) {
+    const sourceTitle = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
+    if (sourceTitle !== card.expected.title) messages.push(`Set the page title to ${card.expected.title}.`);
+  }
 
   card.expected.htmlIncludes?.forEach((text) => {
+    if (normalise(text).includes("<!doctype html>")) return;
     if (!allText.includes(normalise(text)) && !normalise(html).includes(normalise(text))) messages.push(`Add this source text: ${text}`);
   });
 
   card.expected.requiredTags?.forEach((tag) => {
+    if (["html", "head", "body", "title", "main"].includes(tag) || tag.startsWith("<!--")) {
+      if (!sourceHasTag(html, tag)) messages.push(`Add a ${tag} element.`);
+      return;
+    }
+
     if (!document.querySelector(tag)) messages.push(`Add a ${tag} element.`);
   });
 
@@ -92,6 +125,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const visualEditorRef = useRef<GrapesEditor | null>(null);
   const visualContainerRef = useRef<HTMLDivElement>(null);
   const syncingFromCodeRef = useRef(false);
+  const previewReady = hasPreviewableDocument(html);
 
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
@@ -104,7 +138,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       height: "100%",
       storageManager: false,
       fromElement: false,
-      components: html,
+      components: hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "",
       style: css,
       blockManager: {
         appendTo: undefined,
@@ -125,7 +159,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
     editor.on("update", () => {
       if (syncingFromCodeRef.current) return;
-      setHtml(editor.getHtml());
+      setHtml((currentHtml) => replaceBodyInnerHtml(currentHtml, editor.getHtml()));
     });
 
     visualEditorRef.current = editor;
@@ -139,7 +173,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   useEffect(() => {
     if (!visualEditorRef.current) return;
     syncingFromCodeRef.current = true;
-    visualEditorRef.current.setComponents(html);
+    visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "");
     visualEditorRef.current.setStyle(css);
     queueMicrotask(() => {
       syncingFromCodeRef.current = false;
@@ -156,7 +190,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     setFeedback(null);
     if (visualEditorRef.current) {
       syncingFromCodeRef.current = true;
-      visualEditorRef.current.setComponents(next.starterHtml);
+      visualEditorRef.current.setComponents(hasPreviewableDocument(next.starterHtml) ? getBodyInnerHtml(next.starterHtml) : "");
       visualEditorRef.current.setStyle(next.starterCss);
       queueMicrotask(() => {
         syncingFromCodeRef.current = false;
@@ -301,7 +335,19 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
             <p className="mt-1 text-sm text-slate-600">Use the GrapesJS canvas to inspect and edit the page.</p>
           </div>
         </div>
-        <div ref={visualContainerRef} className="website-builder h-full min-h-0 bg-white" />
+        <div className="relative h-full min-h-0">
+          {!previewReady && (
+            <div className="absolute inset-0 z-10 grid place-items-center bg-white px-8 text-center">
+              <div className="max-w-sm rounded-lg border border-line bg-mist p-5">
+                <p className="font-bold text-ink">Preview starts after the HTML structure is ready.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Add the doctype, html, head, and body elements first. Random words will stay in the editor until the page has a proper structure.
+                </p>
+              </div>
+            </div>
+          )}
+          <div ref={visualContainerRef} className="website-builder h-full min-h-0 bg-white" />
+        </div>
       </section>
     </div>
   );

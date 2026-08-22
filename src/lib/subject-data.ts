@@ -60,13 +60,13 @@ export const ictPracticeAreas = [
   },
   {
     title: "Databases",
-    href: "/academies/databases",
+    href: "/subjects/ict/databases",
     summary: "Tables, fields, data types, keys, forms, queries, reports, and validation.",
     actions: ["set fields", "filter records", "build reports", "format output"]
   },
   {
     title: "Presentations",
-    href: "/academies/presentations",
+    href: "/subjects/ict/presentations",
     summary: "Slide layouts, master slides, objects, notes, hyperlinks, and print settings.",
     actions: ["choose layouts", "insert objects", "align content", "prepare outputs"]
   },
@@ -126,6 +126,8 @@ export const subjects: SubjectArea[] = [
       { label: "Open ICT", href: "/subjects/ict" },
       { label: "Start spreadsheet practice", href: "/subjects/ict/spreadsheets" },
       { label: "Start word processing practice", href: "/subjects/ict/word-processing" },
+      { label: "Start database practice", href: "/subjects/ict/databases" },
+      { label: "Start presentation practice", href: "/subjects/ict/presentations" },
       { label: "Start website authoring practice", href: "/subjects/ict/website-authoring" }
     ]
   },
