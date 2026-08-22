@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpenCheck, CheckCircle2, ChevronRight, ListChecks, XCircle } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, ChevronDown, ChevronRight, ListChecks, XCircle } from "lucide-react";
 import { businessGlossaryTerms, businessTheoryModules } from "@/lib/business-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 
@@ -16,6 +16,7 @@ function optionSet(correctIndex: number) {
 
 export function BusinessTheoryHub() {
   const [activeModuleId, setActiveModuleId] = useState(businessTheoryModules[0]?.id || "");
+  const [activeLessonId, setActiveLessonId] = useState(businessTheoryModules[0]?.lessons[0]?.id || "");
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const activeModule = businessTheoryModules.find((module) => module.id === activeModuleId) || businessTheoryModules[0];
@@ -30,7 +31,9 @@ export function BusinessTheoryHub() {
   const quizProgress = activeModule?.lessons.length ? ((quizIndex % activeModule.lessons.length) / activeModule.lessons.length) * 100 : 0;
 
   function chooseModule(moduleId: string) {
+    const nextModule = businessTheoryModules.find((module) => module.id === moduleId);
     setActiveModuleId(moduleId);
+    setActiveLessonId(nextModule?.lessons[0]?.id || "");
     setQuizIndex(0);
     setSelectedAnswer(null);
   }
@@ -41,31 +44,31 @@ export function BusinessTheoryHub() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <Card className="self-start">
-          <div className="flex items-center gap-2">
-            <BookOpenCheck size={20} className="text-ocean" aria-hidden="true" />
-            <h2 className="text-xl font-bold">Business modules</h2>
-          </div>
-          <div className="mt-5 space-y-2">
-            {businessTheoryModules.map((module) => (
-              <button
-                key={module.id}
-                type="button"
-                onClick={() => chooseModule(module.id)}
-                className={`flex w-full items-center justify-between rounded-lg border px-3 py-3 text-left text-sm font-bold transition ${
-                  activeModule?.id === module.id ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
-                }`}
-              >
-                <span>{module.moduleId}. {module.moduleTitle}</span>
-                <ChevronRight size={16} aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-        </Card>
+    <div className="space-y-6">
+      <Card>
+        <div className="flex items-center gap-2">
+          <BookOpenCheck size={20} className="text-ocean" aria-hidden="true" />
+          <h2 className="text-xl font-bold">Business modules</h2>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {businessTheoryModules.map((module) => (
+            <button
+              key={module.id}
+              type="button"
+              onClick={() => chooseModule(module.id)}
+              className={`flex min-w-0 items-center justify-between rounded-lg border px-4 py-4 text-left font-bold transition ${
+                activeModule?.id === module.id ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
+              }`}
+            >
+              <span className="min-w-0 break-words">{module.moduleId}. {module.moduleTitle}</span>
+              <ChevronRight size={17} className="ml-3 flex-none" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      </Card>
 
-        <div className="space-y-5">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-5 min-w-0">
           <Card>
             <Pill>Revision Notes</Pill>
             <h2 className="mt-4 text-3xl font-bold">{activeModule?.moduleTitle}</h2>
@@ -76,26 +79,29 @@ export function BusinessTheoryHub() {
             </div>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-3">
             {activeModule?.lessons.map((lesson) => (
-              <Card key={lesson.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-bold">{lesson.title}</h3>
-                  <Pill>Note</Pill>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-slate-700">{lesson.definition}</p>
-                <div className="mt-4 rounded-lg bg-mist p-3 text-sm leading-6 text-slate-700">
-                  <p className="font-bold text-ink">Use in answers</p>
-                  <p>Define the term clearly, then apply it to the business situation in the question.</p>
-                </div>
-              </Card>
+              <section key={lesson.id} className="overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setActiveLessonId((current) => current === lesson.id ? "" : lesson.id)}
+                  className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                >
+                  <span className="min-w-0 break-words text-lg font-bold">{lesson.title}</span>
+                  <ChevronDown size={18} className={`flex-none text-ocean transition ${activeLessonId === lesson.id ? "rotate-180" : ""}`} aria-hidden="true" />
+                </button>
+                {activeLessonId === lesson.id && (
+                  <div className="border-t border-line px-4 py-4">
+                    <p className="text-sm leading-6 text-slate-700">{lesson.definition}</p>
+                  </div>
+                )}
+              </section>
             ))}
           </div>
         </div>
-      </div>
 
-      <Card>
-        <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-start">
+        <Card className="self-start">
+          <div className="grid gap-6 lg:items-start">
           <div>
             <div className="flex items-center gap-2">
               <ListChecks size={20} className="text-ocean" aria-hidden="true" />
@@ -147,6 +153,7 @@ export function BusinessTheoryHub() {
           </div>
         </div>
       </Card>
+      </div>
     </div>
   );
 }

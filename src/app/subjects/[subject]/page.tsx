@@ -17,6 +17,28 @@ export default function SubjectPage({ params }: { params: { subject: string } })
   const isIct = subject.slug === "ict";
   const areas = isIct ? ictPracticeAreas : businessPracticeAreas;
 
+  if (!isIct) {
+    return (
+      <Section className="max-w-7xl">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Pill>Business</Pill>
+            <h1 className="mt-4 text-4xl font-bold text-ink">Business revision notes</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
+              Short modular notes and glossary quizzes for quick revision.
+            </p>
+          </div>
+          <Link href="/subjects" className="inline-flex items-center gap-2 font-semibold text-ocean">
+            All subjects <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="mt-8">
+          <BusinessTheoryHub />
+        </div>
+      </Section>
+    );
+  }
+
   return (
     <Section>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Database, FileInput, KeyRound, Link2, Rows3, Search, Tags } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Database, FileInput, KeyRound, Link2, Printer, Rows3, Search, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { getDatabaseCardsForModule, getDatabaseModule, sourceTables } from "@/lib/database-instruction-cards";
 import type { DatabaseCard, DatabaseExpectedResult, DatabaseTable } from "@/lib/database-instruction-cards";
@@ -18,6 +18,72 @@ function cloneTable(table: DatabaseTable) {
     fields: table.fields.map((field) => ({ ...field })),
     rows: table.rows.map((row) => ({ ...row }))
   };
+}
+
+function parseCsv(text: string) {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (char === "\"" && quoted && next === "\"") {
+      cell += "\"";
+      index += 1;
+    } else if (char === "\"") {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(cell.trim());
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function inferType(values: string[]) {
+  const clean = values.filter(Boolean);
+  if (clean.length && clean.every((value) => ["yes", "no", "true", "false"].includes(value.toLowerCase()))) return "Boolean";
+  if (clean.length && clean.every((value) => !Number.isNaN(Number(value)))) return "Number";
+  if (clean.length && clean.every((value) => !Number.isNaN(Date.parse(value)))) return "Date/Time";
+  return "Text";
+}
+
+function tableFromCsv(name: string, text: string): DatabaseTable | null {
+  const rows = parseCsv(text);
+  const headers = rows[0]?.map((header, index) => header || `Field${index + 1}`);
+  if (!headers?.length) return null;
+  const dataRows = rows.slice(1).map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] || ""])));
+  return {
+    name,
+    fields: headers.map((header, index) => ({
+      name: header,
+      type: inferType(dataRows.map((row) => row[header])),
+      primary: index === 0
+    })),
+    rows: dataRows
+  };
+}
+
+function compareValue(rawValue: string, operator: string, expected: string) {
+  const value = rawValue || "";
+  if (!expected) return true;
+  if (operator === "contains") return value.toLowerCase().includes(expected.toLowerCase());
+  if (operator === "greater than") return Number(value) > Number(expected);
+  if (operator === "less than") return Number(value) < Number(expected);
+  return value.toLowerCase() === expected.toLowerCase();
 }
 
 function validateDatabase(card: DatabaseCard, tables: DatabaseTable[], selectedTable: string, query: QueryState, report: ReportState): Feedback {
@@ -81,7 +147,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const [completed, setCompleted] = useState<string[]>([]);
   const [tables, setTables] = useState<DatabaseTable[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
-  const [panel, setPanel] = useState<"import" | "design" | "query" | "report" | "labels">("import");
+  const [panel, setPanel] = useState<"import" | "design" | "query" | "report" | "form" | "labels">("import");
   const [query, setQuery] = useState<QueryState>(defaultQuery);
   const [report, setReport] = useState<ReportState>(defaultReport);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -90,12 +156,42 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const fields = selected?.fields || [];
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
+  const queryRows = useMemo(() => {
+    const rows = selected?.rows || [];
+    const filtered = query.field ? rows.filter((row) => compareValue(row[query.field], query.operator, query.value)) : rows;
+    const sorted = [...filtered];
+    if (query.sortField) {
+      sorted.sort((first, second) => {
+        const firstValue = first[query.sortField] || "";
+        const secondValue = second[query.sortField] || "";
+        const result = Number.isNaN(Number(firstValue)) || Number.isNaN(Number(secondValue))
+          ? firstValue.localeCompare(secondValue)
+          : Number(firstValue) - Number(secondValue);
+        return query.sortDirection === "Descending" ? -result : result;
+      });
+    }
+    return sorted;
+  }, [query, selected]);
+
+  const sqlPreview = selected
+    ? `SELECT ${report.fields.length ? report.fields.join(", ") : "*"} FROM ${selected.name}${query.field ? ` WHERE ${query.field} ${query.operator} "${query.value}"` : ""}${query.sortField ? ` ORDER BY ${query.sortField} ${query.sortDirection === "Descending" ? "DESC" : "ASC"}` : ""};`
+    : "Import or select a table to generate a query.";
 
   function importTable(name: string) {
     const source = sourceTables.find((table) => table.name === name);
     if (!source) return;
     setTables((items) => items.some((table) => table.name === name) ? items : [...items, cloneTable(source)]);
     setSelectedTable(name);
+    setPanel("design");
+  }
+
+  async function importCsvFile(file: File) {
+    const text = await file.text();
+    const name = file.name.replace(/\.csv$/i, "").replace(/[^a-z0-9_ -]/gi, "").trim() || "imported_table";
+    const table = tableFromCsv(name, text);
+    if (!table) return;
+    setTables((items) => [...items.filter((item) => item.name !== table.name), table]);
+    setSelectedTable(table.name);
     setPanel("design");
   }
 
@@ -108,6 +204,10 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
 
   function toggleReportField(name: string) {
     setReport((current) => ({ ...current, fields: current.fields.includes(name) ? current.fields.filter((field) => field !== name) : [...current.fields, name] }));
+  }
+
+  function printCurrentPanel() {
+    window.print();
   }
 
   function checkWork() {
@@ -157,7 +257,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         <div className="border-r border-line bg-slate-50 p-4">
           <h2 className="flex items-center gap-2 font-bold"><Database size={18} /> Database objects</h2>
           <div className="mt-4 space-y-2">
-            {["import", "design", "query", "report", "labels"].map((item) => (
+            {["import", "design", "query", "report", "form", "labels"].map((item) => (
               <button key={item} type="button" onClick={() => setPanel(item as typeof panel)} className={`block w-full rounded-lg px-3 py-2 text-left text-sm font-bold capitalize ${panel === item ? "bg-ocean text-white" : "bg-white text-slate-700 hover:bg-mist"}`}>{item.replace("-", " ")}</button>
             ))}
           </div>
@@ -169,15 +269,17 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         </div>
 
         <div className="min-h-0 overflow-auto p-5">
-          {panel === "import" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><FileInput size={20} /> Import source files</h2><p className="mt-2 text-slate-600">Use the supplied Apex CSV-style files.</p><div className="mt-5 grid gap-4 md:grid-cols-2">{sourceTables.map((table) => <button key={table.name} type="button" onClick={() => importTable(table.name)} className="rounded-lg border border-line bg-mist p-5 text-left hover:border-ocean"><p className="font-bold">{table.name}.csv</p><p className="mt-2 text-sm text-slate-600">{table.fields.map((field) => field.name).join(", ")}</p></button>)}</div></section>}
+          {panel === "import" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><FileInput size={20} /> Import source files</h2><p className="mt-2 text-slate-600">Import a real CSV file, or load an Apex practice source file.</p><label className="mt-5 block rounded-lg border border-dashed border-ocean bg-mist p-5 text-sm font-bold text-ocean"><input type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && importCsvFile(event.target.files[0])} className="sr-only" />Click to import a CSV file from your computer</label><div className="mt-5 grid gap-4 md:grid-cols-2">{sourceTables.map((table) => <button key={table.name} type="button" onClick={() => importTable(table.name)} className="rounded-lg border border-line bg-white p-5 text-left hover:border-ocean"><p className="font-bold">{table.name}.csv</p><p className="mt-2 text-sm text-slate-600">{table.fields.map((field) => field.name).join(", ")}</p></button>)}</div></section>}
 
           {panel === "design" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><KeyRound size={20} /> Field design</h2>{selected ? <div className="mt-5 overflow-hidden rounded-lg border border-line"><table className="w-full text-sm"><thead className="bg-mist text-left"><tr><th className="p-3">Field name</th><th className="p-3">Data type</th><th className="p-3">Primary key</th></tr></thead><tbody>{fields.map((field) => <tr key={field.name} className="border-t border-line"><td className="p-3 font-bold">{field.name}</td><td className="p-3"><select value={field.type} onChange={(event) => updateField(field.name, { type: event.target.value })} className="rounded-md border border-line px-2 py-1"><option>Text</option><option>Number</option><option>Date/Time</option><option>Boolean</option><option>Currency</option></select></td><td className="p-3"><input type="radio" checked={field.primary} onChange={() => updateField(field.name, { primary: true })} /></td></tr>)}</tbody></table></div> : <p className="mt-5 text-slate-600">Import and select a table first.</p>}</section>}
 
-          {panel === "query" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><Search size={20} /> Query builder</h2><div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"><label className="text-sm font-bold">Field<select value={query.field} onChange={(event) => setQuery({ ...query, field: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option value="">Choose field</option>{tables.flatMap((table) => table.fields).map((field) => <option key={`${field.name}-${field.type}`}>{field.name}</option>)}</select></label><label className="text-sm font-bold">Operator<select value={query.operator} onChange={(event) => setQuery({ ...query, operator: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>equals</option><option>contains</option><option>greater than</option><option>less than</option></select></label><label className="text-sm font-bold">Value<input value={query.value} onChange={(event) => setQuery({ ...query, value: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3" /></label><label className="text-sm font-bold">Join<select value={query.join} onChange={(event) => setQuery({ ...query, join: event.target.value as QueryState["join"] })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>AND</option><option>OR</option></select></label><label className="text-sm font-bold">Sort field<input value={query.sortField} onChange={(event) => setQuery({ ...query, sortField: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3" /></label><label className="text-sm font-bold">Sort direction<select value={query.sortDirection} onChange={(event) => setQuery({ ...query, sortDirection: event.target.value as QueryState["sortDirection"] })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>Ascending</option><option>Descending</option></select></label></div><label className="mt-4 block text-sm font-bold">Relationship field<input value={query.relationship} onChange={(event) => setQuery({ ...query, relationship: event.target.value })} className="mt-2 block w-full max-w-md rounded-lg border border-line p-3" placeholder="LearnerID" /></label></section>}
+          {panel === "query" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><Search size={20} /> Query builder</h2><div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"><label className="text-sm font-bold">Field<select value={query.field} onChange={(event) => setQuery({ ...query, field: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option value="">Choose field</option>{fields.map((field) => <option key={`${field.name}-${field.type}`}>{field.name}</option>)}</select></label><label className="text-sm font-bold">Operator<select value={query.operator} onChange={(event) => setQuery({ ...query, operator: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>equals</option><option>contains</option><option>greater than</option><option>less than</option></select></label><label className="text-sm font-bold">Value<input value={query.value} onChange={(event) => setQuery({ ...query, value: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3" /></label><label className="text-sm font-bold">Join<select value={query.join} onChange={(event) => setQuery({ ...query, join: event.target.value as QueryState["join"] })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>AND</option><option>OR</option></select></label><label className="text-sm font-bold">Sort field<select value={query.sortField} onChange={(event) => setQuery({ ...query, sortField: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option value="">No sort</option>{fields.map((field) => <option key={`${field.name}-sort`}>{field.name}</option>)}</select></label><label className="text-sm font-bold">Sort direction<select value={query.sortDirection} onChange={(event) => setQuery({ ...query, sortDirection: event.target.value as QueryState["sortDirection"] })} className="mt-2 block w-full rounded-lg border border-line p-3"><option>Ascending</option><option>Descending</option></select></label></div><label className="mt-4 block text-sm font-bold">Relationship field<input value={query.relationship} onChange={(event) => setQuery({ ...query, relationship: event.target.value })} className="mt-2 block w-full max-w-md rounded-lg border border-line p-3" placeholder="LearnerID" /></label><div className="mt-5 rounded-lg border border-line bg-mist p-4"><p className="text-sm font-bold text-ink">Generated query</p><code className="mt-2 block overflow-x-auto whitespace-pre-wrap text-sm text-slate-700">{sqlPreview}</code></div><div className="mt-5 overflow-auto rounded-lg border border-line"><table className="w-full min-w-[640px] text-sm"><thead className="bg-mist text-left"><tr>{fields.map((field) => <th key={field.name} className="p-3">{field.name}</th>)}</tr></thead><tbody>{queryRows.map((row, index) => <tr key={index} className="border-t border-line">{fields.map((field) => <td key={field.name} className="p-3">{row[field.name]}</td>)}</tr>)}</tbody></table></div></section>}
 
-          {panel === "report" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><Rows3 size={20} /> Report preview</h2><label className="mt-5 block text-sm font-bold">Report title<input value={report.title} onChange={(event) => setReport({ ...report, title: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3" /></label><div className="mt-5 grid gap-3 md:grid-cols-3">{tables.flatMap((table) => table.fields).map((field) => <label key={`${field.name}-report`} className="rounded-lg border border-line p-3 text-sm font-bold"><input type="checkbox" checked={report.fields.includes(field.name)} onChange={() => toggleReportField(field.name)} className="mr-2" />{field.name}</label>)}</div><div className="mt-6 rounded-lg border border-line bg-white p-5"><h3 className="text-lg font-bold">{report.title || "Untitled report"}</h3><p className="mt-2 text-sm text-slate-600">Fields: {report.fields.join(", ") || "none selected"}</p></div></section>}
+          {panel === "report" && <section><div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-xl font-bold"><Rows3 size={20} /> Report preview</h2><button type="button" onClick={printCurrentPanel} className="inline-flex items-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-bold text-white"><Printer size={16} /> Print</button></div><label className="mt-5 block text-sm font-bold">Report title<input value={report.title} onChange={(event) => setReport({ ...report, title: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3" /></label><div className="mt-5 grid gap-3 md:grid-cols-3">{fields.map((field) => <label key={`${field.name}-report`} className="rounded-lg border border-line p-3 text-sm font-bold"><input type="checkbox" checked={report.fields.includes(field.name)} onChange={() => toggleReportField(field.name)} className="mr-2" />{field.name}</label>)}</div><div className="mt-6 overflow-auto rounded-lg border border-line bg-white p-5"><h3 className="text-lg font-bold">{report.title || "Untitled report"}</h3><table className="mt-4 w-full min-w-[560px] text-sm"><thead><tr>{(report.fields.length ? report.fields : fields.map((field) => field.name)).map((field) => <th key={field} className="border border-line bg-mist p-2 text-left">{field}</th>)}</tr></thead><tbody>{queryRows.map((row, index) => <tr key={index}>{(report.fields.length ? report.fields : fields.map((field) => field.name)).map((field) => <td key={field} className="border border-line p-2">{row[field]}</td>)}</tr>)}</tbody></table></div></section>}
 
-          {panel === "labels" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><Tags size={20} /> Labels</h2><label className="mt-5 block max-w-md text-sm font-bold">Label field<select value={report.labelField} onChange={(event) => setReport({ ...report, labelField: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option value="">Choose field</option>{tables.flatMap((table) => table.fields).map((field) => <option key={`${field.name}-label`}>{field.name}</option>)}</select></label><div className="mt-6 grid gap-3 md:grid-cols-3">{(selected?.rows || []).map((row, index) => <div key={index} className="rounded-lg border border-dashed border-line bg-mist p-4 text-sm font-bold">{report.labelField ? row[report.labelField] || report.labelField : "Label preview"}</div>)}</div></section>}
+          {panel === "form" && <section><div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-xl font-bold"><Rows3 size={20} /> Record form</h2><button type="button" onClick={printCurrentPanel} className="inline-flex items-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-bold text-white"><Printer size={16} /> Print</button></div><p className="mt-2 text-slate-600">Preview the selected table as printable data-entry forms.</p><div className="mt-5 grid gap-4 md:grid-cols-2">{queryRows.map((row, index) => <article key={index} className="rounded-lg border border-line bg-white p-5 shadow-sm"><h3 className="font-bold">{selected?.name || "Record"} {index + 1}</h3><dl className="mt-4 space-y-3">{fields.map((field) => <div key={field.name} className="grid grid-cols-[140px_1fr] gap-3 border-b border-line pb-2 text-sm"><dt className="font-bold text-slate-600">{field.name}</dt><dd>{row[field.name]}</dd></div>)}</dl></article>)}</div></section>}
+
+          {panel === "labels" && <section><div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-xl font-bold"><Tags size={20} /> Labels</h2><button type="button" onClick={printCurrentPanel} className="inline-flex items-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-bold text-white"><Printer size={16} /> Print</button></div><label className="mt-5 block max-w-md text-sm font-bold">Label field<select value={report.labelField} onChange={(event) => setReport({ ...report, labelField: event.target.value })} className="mt-2 block w-full rounded-lg border border-line p-3"><option value="">Choose field</option>{fields.map((field) => <option key={`${field.name}-label`}>{field.name}</option>)}</select></label><div className="mt-6 grid gap-3 md:grid-cols-3">{queryRows.map((row, index) => <div key={index} className="rounded-lg border border-dashed border-line bg-mist p-4 text-sm font-bold">{report.labelField ? row[report.labelField] || report.labelField : "Label preview"}</div>)}</div></section>}
 
           <div className="mt-8 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-slate-700">
             <p className="flex items-center gap-2 font-bold text-ink"><Link2 size={16} /> Exam habit</p>
