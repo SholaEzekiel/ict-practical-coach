@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { BusinessTheoryHub } from "@/components/business-theory-hub";
 import { IctImageTrainer } from "@/components/ict-image-trainer";
 import { Card, Pill, Section } from "@/components/ui";
 import { businessPracticeAreas, ictPracticeAreas, subjects } from "@/lib/subject-data";
@@ -55,14 +56,7 @@ export default function SubjectPage({ params }: { params: { subject: string } })
             {subject.learningModel.map((step, index) => <li key={step}>{index + 1}. {step}</li>)}
           </ol>
         </Card>
-        {isIct ? <IctImageTrainer /> : (
-          <Card>
-            <h2 className="text-xl font-semibold">Business response trainer</h2>
-            <p className="mt-3 leading-7 text-slate-600">
-              Once the Business syllabus and sample papers are attached, this area will become a full practice flow for terms, application, analysis, and evaluation.
-            </p>
-          </Card>
-        )}
+        {isIct ? <IctImageTrainer /> : <BusinessTheoryHub />}
       </div>
     </Section>
   );
