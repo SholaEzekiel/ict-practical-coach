@@ -64,31 +64,8 @@ function makeWorkbook(name: string, cellEntries: Array<[string, CellValue]> = []
   };
 }
 
-const formattingSeed: Array<[string, CellValue]> = [
-  ["A1", "Club Attendance Summary"],
-  ["A3", "Club"], ["B3", "Attendance"], ["C3", "Sessions"], ["D3", "Average"],
-  ["A4", "Drama"], ["B4", 18], ["C4", 6], ["D4", 3],
-  ["A5", "Robotics"], ["B5", 22], ["C5", 6], ["D5", 3.666666667],
-  ["A6", "Coding"], ["B6", 16], ["C6", 5], ["D6", 3.2],
-  ["A7", "Art"], ["B7", 20], ["C7", 5], ["D7", 4],
-  ["A8", "Total"], ["B8", 76],
-  ["A12", "Library Borrowing"], ["A14", "Category"], ["B14", "Borrowed"],
-  ["A15", "Fiction"], ["B15", 34], ["A16", "History"], ["B16", 18], ["A17", "Science"], ["B17", 26], ["A18", "Art"], ["B18", 12],
-  ["D12", "Canteen Sales"], ["D14", "Item"], ["E14", "Sold"],
-  ["D15", "Sandwich"], ["E15", 45], ["D16", "Juice"], ["E16", 38], ["D17", "Fruit"], ["E17", 24], ["D18", "Water"], ["E18", 52],
-  ["G14", "Completion"], ["H15", 0.72], ["H16", 0.68], ["H17", 0.81], ["H18", 0.59],
-  ["F22", "Trip Register"], ["F24", "Name"], ["G24", "Class"], ["H24", "Paid"], ["F25", "Amara"], ["G25", "10A"], ["H25", "Yes"],
-  ["A22", "ICT Stock Check"], ["A24", "Item"], ["B24", "In stock"], ["C24", "Needed"], ["A25", "Keyboard"], ["B25", 14], ["C25", 20], ["A26", "Mouse"], ["B26", 18], ["C26", 18], ["A27", "Monitor"], ["B27", 9], ["C27", 12], ["A28", "Cable"], ["B28", 42], ["C28", 40],
-  ["A32", "Mini Budget"], ["B32", "Income"], ["C32", "Cost"], ["A33", "Tickets"], ["B33", 240], ["C33", 60], ["A34", "Refreshments"], ["B34", 90], ["C34", 45], ["A35", "Printing"], ["B35", 0], ["C35", 28],
-  ["E32", "Name"], ["F32", "Present"], ["G32", "Late"], ["E33", "Lina"], ["F33", "Yes"], ["G33", "No"], ["E34", "Omar"], ["F34", "Yes"], ["G34", "Yes"], ["E35", "Tariq"], ["F35", "No"], ["G35", "No"],
-  ["I32", "Learner"], ["J32", "Book title"], ["K32", "Pages read"], ["I33", "Amina"], ["J33", "River Run"], ["K33", 42], ["I34", "Joel"], ["J34", "Sky Map"], ["K34", 38], ["I35", "Priya"], ["J35", "Code Club"], ["K35", 51],
-  ["A40", "Club Schedule"], ["A41", "Club"], ["B41", "Day"], ["C41", "Room"], ["A42", "Drama"], ["B42", "Monday"], ["C42", "Hall"], ["A43", "Robotics"], ["B43", "Tuesday"], ["C43", "Lab 1"],
-  ["E40", "Device Loan"], ["E41", "Tablet"], ["F41", "Maya"], ["E42", "Camera"], ["F42", "Ben"], ["E43", "Laptop"], ["F43", "Sofia"],
-  ["M40", "Final Format Check"], ["M41", "Skill"], ["N41", "Done"], ["O41", "Score"], ["M42", "Bold"], ["N42", "Yes"], ["O42", 2], ["M43", "Fill"], ["N43", "Yes"], ["O43", 2]
-];
-
 function getStarterWorkbook(moduleId?: string) {
-  if (moduleId === "formatting") return makeWorkbook("Formatting", formattingSeed);
+  if (moduleId === "formatting") return makeWorkbook("Formatting");
   if (moduleId === "free-practice") return makeWorkbook("Free Practice", [["A1", "Paste or import data to begin"]]);
   return makeWorkbook(getSpreadsheetModule(moduleId)?.title || "Spreadsheet Practice");
 }

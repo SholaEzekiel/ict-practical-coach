@@ -34,12 +34,15 @@ export type SpreadsheetInstructionCard = {
         horizontalAlign?: "left" | "center" | "right";
         background?: boolean;
         fontColor?: boolean;
+        fontFamilyIncludes?: string[];
         fontSizeAtLeast?: number;
         wrapText?: boolean;
         border?: boolean;
         numberPatternIncludes?: string[];
       };
     }>;
+    rows?: Array<{ row: number; minHeight?: number; maxHeight?: number }>;
+    columns?: Array<{ column: string; minWidth?: number; maxWidth?: number }>;
   };
   commonMistakes: string[];
   feedback: {
@@ -156,11 +159,11 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
   });
 }
 
-function formatCard(id: string, goal: string, scenario: string, range: string, command: string, cells: SpreadsheetInstructionCard["autoCheck"]["cells"], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing") {
+function formatCardForModule(moduleId: string, id: string, goal: string, scenario: string, range: string, command: string, cells: SpreadsheetInstructionCard["autoCheck"]["cells"], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing", extraChecks: Omit<SpreadsheetInstructionCard["autoCheck"], "cells"> = {}) {
   return baseCard({
     id,
-    moduleId: "formatting",
-    moduleTitle: "Formatting",
+    moduleId,
+    moduleTitle: moduleTitle(moduleId),
     category: "formatting",
     skill: command,
     studentGoal: goal,
@@ -172,7 +175,7 @@ function formatCard(id: string, goal: string, scenario: string, range: string, c
     expectedSelection: range,
     expectedAction: command.toLowerCase().replace(/\s+/g, "-"),
     expectedResult: `${range} uses ${command}.`,
-    autoCheck: { cells },
+    autoCheck: { cells, ...extraChecks },
     commonMistakes: ["Selecting the wrong range", "Changing the value instead of formatting", "Applying the command to only one cell"],
     feedback: {
       wrongSelection: `Select ${range}.`,
@@ -181,6 +184,56 @@ function formatCard(id: string, goal: string, scenario: string, range: string, c
     },
     hints: ["Select the range first.", "If a toolbar button is hidden, open the three dots / More menu."],
     difficulty
+  });
+}
+
+function formatCard(id: string, goal: string, scenario: string, range: string, command: string, cells: SpreadsheetInstructionCard["autoCheck"]["cells"], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing", extraChecks: Omit<SpreadsheetInstructionCard["autoCheck"], "cells"> = {}) {
+  return formatCardForModule("formatting", id, goal, scenario, range, command, cells, difficulty, extraChecks);
+}
+
+function formatTaskCard(args: {
+  id: string;
+  goal: string;
+  scenario: string;
+  setup: Array<[string, string | number]>;
+  range: string;
+  command: string;
+  checks: SpreadsheetInstructionCard["autoCheck"]["cells"];
+  difficulty?: SpreadsheetInstructionCard["difficulty"];
+  extraChecks?: Omit<SpreadsheetInstructionCard["autoCheck"], "cells">;
+  extraSteps?: string[];
+}) {
+  const setupSteps = args.setup.flatMap(([cell, value]) => [`Click ${cell}.`, `Type exactly "${value}".`, "Press Enter."]);
+  return baseCard({
+    id: args.id,
+    moduleId: "formatting",
+    moduleTitle: "Formatting",
+    category: "formatting",
+    skill: args.command,
+    studentGoal: args.goal,
+    scenario: args.scenario,
+    studentSteps: [
+      ...setupSteps,
+      `Select ${args.range}.`,
+      `Use the toolbar or three dots / More menu to choose ${args.command}.`,
+      ...(args.extraSteps || []),
+      "Click Check my result."
+    ],
+    instruction: args.goal,
+    meaning: "First enter only the data needed for this task, then format the selected cells.",
+    clickPath: ["Worksheet grid", "Named cells", "Toolbar", args.command],
+    expectedSelection: args.range,
+    expectedAction: args.command.toLowerCase().replace(/\s+/g, "-"),
+    expectedResult: `${args.range} uses ${args.command}.`,
+    autoCheck: { cells: args.checks, ...(args.extraChecks || {}) },
+    commonMistakes: ["Formatting before entering the setup data", "Selecting the wrong range", "Changing the value instead of the format"],
+    feedback: {
+      wrongSelection: `Enter the setup data, then select ${args.range}.`,
+      wrongTool: `Use ${args.command} from the toolbar or More menu.`,
+      wrongResult: `Check the setup data and make sure ${args.range} visibly uses ${args.command}.`
+    },
+    hints: ["Do the setup cells first.", "Select the exact range before choosing the formatting command."],
+    difficulty: args.difficulty || "developing"
   });
 }
 
@@ -240,34 +293,310 @@ const dataEntryCards = [
 ];
 
 const formattingCards = [
-  formatCard("sheet-format-title-bold", "Make the main title bold.", "The report title must stand out at the top of the sheet.", "A1", "Bold", [{ cell: "A1", value: "Club Attendance Summary", format: { bold: true } }], "beginner"),
-  formatCard("sheet-format-title-centre", "Centre the title across the table.", "The title should sit neatly above the four-column table.", "A1:D1", "Merge & Centre", [{ cell: "A1", value: "Club Attendance Summary", format: { horizontalAlign: "center" } }]),
-  formatCard("sheet-format-headings-bold", "Make the table headings bold.", "The reader should easily distinguish headings from values.", "A3:D3", "Bold", ["A3", "B3", "C3", "D3"].map((cell) => ({ cell, format: { bold: true } }))),
-  formatCard("sheet-format-heading-fill", "Shade the heading row.", "A light background helps the heading row stand out.", "A3:D3", "Fill colour", ["A3", "B3", "C3", "D3"].map((cell) => ({ cell, format: { background: true } }))),
-  formatCard("sheet-format-attendance-decimal", "Show attendance with two decimal places.", "The attendance officer wants consistent decimal formatting.", "B4:B7", "Two decimal places", ["B4", "B5", "B6", "B7"].map((cell) => ({ cell, format: { numberPatternIncludes: [".00", "0.00"] } }))),
-  formatCard("sheet-format-session-number", "Show sessions as whole numbers.", "Session counts should not display decimal places.", "C4:C7", "Zero decimal places", ["C4", "C5", "C6", "C7"].map((cell) => ({ cell, format: { numberPatternIncludes: ["0"] } }))),
-  formatCard("sheet-format-currency", "Format canteen sales values as currency.", "The canteen sales column should show money clearly.", "E15:E18", "Currency", ["E15", "E16", "E17", "E18"].map((cell) => ({ cell, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } }))),
-  formatCard("sheet-format-percent", "Format completion values as percentages.", "The coordinator wants completion values shown with percent signs.", "H15:H18", "Percent style", ["H15", "H16", "H17", "H18"].map((cell) => ({ cell, format: { numberPatternIncludes: ["%"] } }))),
-  formatCard("sheet-format-item-italic", "Italicise canteen item names.", "The canteen manager wants item names styled differently from numbers.", "D15:D18", "Italic", ["D15", "D16", "D17", "D18"].map((cell) => ({ cell, format: { italic: true } }))),
-  formatCard("sheet-format-library-underline", "Underline library categories.", "The librarian wants category names emphasized.", "A15:A18", "Underline", ["A15", "A16", "A17", "A18"].map((cell) => ({ cell, format: { underline: true } }))),
-  formatCard("sheet-format-paid-centre", "Centre the Paid value.", "The trip register should align Yes/No entries neatly.", "H25", "Centre align", [{ cell: "H25", value: "Yes", format: { horizontalAlign: "center" } }]),
-  formatCard("sheet-format-stock-bold-needed", "Bold the needed stock values.", "The ICT technician wants target stock numbers to stand out.", "C25:C28", "Bold", ["C25", "C26", "C27", "C28"].map((cell) => ({ cell, format: { bold: true } }))),
-  formatCard("sheet-format-wrap-stock", "Wrap the stock headings.", "The ICT technician wants long headings to stay inside their cells.", "A24:C24", "Wrap Text", ["A24", "B24", "C24"].map((cell) => ({ cell, format: { wrapText: true } }))),
-  formatCard("sheet-format-border-club-table", "Add borders to the club table.", "The club report needs clear cell boundaries before printing.", "A3:D8", "Borders", ["A3", "D3", "A8", "D8"].map((cell) => ({ cell, format: { border: true } }))),
-  formatCard("sheet-format-title-font-size", "Increase the title font size.", "The main title should be larger than the table text.", "A1", "Font size", [{ cell: "A1", value: "Club Attendance Summary", format: { fontSizeAtLeast: 14 } }]),
-  formatCard("sheet-format-title-font-colour", "Change the title font colour.", "The title should have a different font colour from the table body.", "A1", "Font colour", [{ cell: "A1", value: "Club Attendance Summary", format: { fontColor: true } }]),
-  formatCard("sheet-format-library-fill", "Shade the library headings.", "The librarian wants the category and borrowed headings separated from the values.", "A14:B14", "Fill colour", ["A14", "B14"].map((cell) => ({ cell, format: { background: true } }))),
-  formatCard("sheet-format-stock-centre-numbers", "Centre the stock numbers.", "The stock table should align number entries neatly.", "B25:C28", "Centre align", ["B25", "C25", "B26", "C26", "B27", "C27", "B28", "C28"].map((cell) => ({ cell, format: { horizontalAlign: "center" } }))),
-  formatCard("sheet-format-task-budget-entry-bold", "Create and bold a budget heading.", "The events team has sent a mini budget for formatting practice.", "A32:C32", "Bold", [{ cell: "A32", value: "Mini Budget", format: { bold: true } }, { cell: "B32", value: "Income", format: { bold: true } }, { cell: "C32", value: "Cost", format: { bold: true } }], "developing"),
-  formatCard("sheet-format-task-budget-currency", "Format budget figures as currency.", "The budget values should clearly show money.", "B33:C35", "Currency", ["B33", "C33", "B34", "C34", "B35", "C35"].map((cell) => ({ cell, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } })), "developing"),
-  formatCard("sheet-format-task-register-fill", "Shade a register heading row.", "The attendance register needs a clear heading row.", "E32:G32", "Fill colour", ["E32", "F32", "G32"].map((cell) => ({ cell, format: { background: true } })), "developing"),
-  formatCard("sheet-format-task-register-centre", "Centre Yes and No entries.", "The tutor wants the register responses aligned neatly.", "F33:G35", "Centre align", ["F33", "G33", "F34", "G34", "F35", "G35"].map((cell) => ({ cell, format: { horizontalAlign: "center" } })), "developing"),
-  formatCard("sheet-format-task-reading-wrap", "Wrap reading log headings.", "The reading log has longer headings that must fit inside cells.", "I32:K32", "Wrap Text", ["I32", "J32", "K32"].map((cell) => ({ cell, format: { wrapText: true } })), "developing"),
-  formatCard("sheet-format-task-reading-border", "Add borders to the reading log.", "The reading log should print as a clear table.", "I32:K35", "Borders", ["I32", "K32", "I35", "K35"].map((cell) => ({ cell, format: { border: true } })), "developing"),
-  formatCard("sheet-format-task-schedule-font", "Increase the schedule title size.", "The club schedule title should stand out from the table.", "A40", "Font size", [{ cell: "A40", value: "Club Schedule", format: { fontSizeAtLeast: 14 } }], "developing"),
-  formatCard("sheet-format-task-schedule-colour", "Change the schedule title colour.", "The title should use a different font colour from the table.", "A40", "Font colour", [{ cell: "A40", value: "Club Schedule", format: { fontColor: true } }], "developing"),
-  formatCard("sheet-format-task-device-italic", "Italicise device names.", "The ICT technician wants device names styled differently from borrower names.", "E41:E43", "Italic", ["E41", "E42", "E43"].map((cell) => ({ cell, format: { italic: true } })), "developing"),
-  formatCard("sheet-format-task-final-table", "Format the final practice table.", "Use several earlier formatting habits on one compact table.", "M40:O43", "Bold and fill", [{ cell: "M40", value: "Final Format Check", format: { bold: true, background: true } }, { cell: "M41", value: "Skill", format: { bold: true, background: true } }, { cell: "N41", value: "Done", format: { bold: true, background: true } }, { cell: "O41", value: "Score", format: { bold: true, background: true } }], "confident")
+  formatTaskCard({
+    id: "sheet-format-title-bold",
+    goal: "Create a bold report title.",
+    scenario: "Apex Study Hub needs a short attendance sheet with a clear title.",
+    setup: [["A1", "Club Attendance Summary"]],
+    range: "A1",
+    command: "Bold",
+    checks: [{ cell: "A1", value: "Club Attendance Summary", format: { bold: true } }],
+    difficulty: "beginner"
+  }),
+  formatTaskCard({
+    id: "sheet-format-title-merge-centre",
+    goal: "Merge and centre a title.",
+    scenario: "The title must sit above four columns without being repeated.",
+    setup: [["A3", "Weekly Club Register"], ["A5", "Club"], ["B5", "Learners"], ["C5", "Sessions"], ["D5", "Average"]],
+    range: "A3:D3",
+    command: "Merge & Centre",
+    checks: [{ cell: "A3", value: "Weekly Club Register", format: { horizontalAlign: "center" } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-headings-bold",
+    goal: "Make table headings bold.",
+    scenario: "A small register needs headings that are easy to separate from the records.",
+    setup: [["A7", "Name"], ["B7", "Class"], ["C7", "Paid"], ["A8", "Amara"], ["B8", "10A"], ["C8", "Yes"]],
+    range: "A7:C7",
+    command: "Bold",
+    checks: ["A7", "B7", "C7"].map((cell) => ({ cell, format: { bold: true } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-heading-fill",
+    goal: "Shade a heading row.",
+    scenario: "The office wants the heading row to stand out when the sheet is printed.",
+    setup: [["A10", "Item"], ["B10", "Stock"], ["C10", "Needed"], ["A11", "Mouse"], ["B11", 18], ["C11", 20]],
+    range: "A10:C10",
+    command: "Fill colour",
+    checks: ["A10", "B10", "C10"].map((cell) => ({ cell, format: { background: true } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-title-font-family",
+    goal: "Change the title font.",
+    scenario: "The display title should use a standard sans-serif font.",
+    setup: [["E1", "Apex Revision Timetable"]],
+    range: "E1",
+    command: "Font family",
+    checks: [{ cell: "E1", value: "Apex Revision Timetable", format: { fontFamilyIncludes: ["arial", "calibri", "aptos"] } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-title-font-size",
+    goal: "Increase a title font size.",
+    scenario: "A title should be visibly larger than the normal worksheet text.",
+    setup: [["E3", "Homework Tracker"]],
+    range: "E3",
+    command: "Font size",
+    checks: [{ cell: "E3", value: "Homework Tracker", format: { fontSizeAtLeast: 14 } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-title-font-colour",
+    goal: "Change a title font colour.",
+    scenario: "The teacher wants the title to use a different text colour from the table.",
+    setup: [["E5", "Device Loan List"]],
+    range: "E5",
+    command: "Font colour",
+    checks: [{ cell: "E5", value: "Device Loan List", format: { fontColor: true } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-note-italic",
+    goal: "Italicise a note.",
+    scenario: "A draft note should look different from the final table values.",
+    setup: [["E7", "Check totals before printing"]],
+    range: "E7",
+    command: "Italic",
+    checks: [{ cell: "E7", value: "Check totals before printing", format: { italic: true } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-total-underline",
+    goal: "Underline a total label.",
+    scenario: "The final total row label should be emphasized.",
+    setup: [["E9", "Total"], ["F9", 96]],
+    range: "E9",
+    command: "Underline",
+    checks: [{ cell: "E9", value: "Total", format: { underline: true } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-centre-short-values",
+    goal: "Centre short values.",
+    scenario: "Yes and No entries should line up neatly in their column.",
+    setup: [["A14", "Learner"], ["B14", "Submitted"], ["A15", "Nora"], ["B15", "Yes"], ["A16", "Eli"], ["B16", "No"]],
+    range: "B15:B16",
+    command: "Centre align",
+    checks: ["B15", "B16"].map((cell) => ({ cell, format: { horizontalAlign: "center" as const } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-right-align-numbers",
+    goal: "Right-align score values.",
+    scenario: "Numeric scores should align to the right of their cells.",
+    setup: [["D14", "House"], ["E14", "Points"], ["D15", "Red"], ["E15", 58], ["D16", "Blue"], ["E16", 64]],
+    range: "E15:E16",
+    command: "Right align",
+    checks: ["E15", "E16"].map((cell) => ({ cell, format: { horizontalAlign: "right" as const } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-two-decimals",
+    goal: "Show values with two decimal places.",
+    scenario: "Average scores should display consistently.",
+    setup: [["A20", "Average"], ["A21", 18], ["A22", 22], ["A23", 16]],
+    range: "A21:A23",
+    command: "Two decimal places",
+    checks: ["A21", "A22", "A23"].map((cell) => ({ cell, format: { numberPatternIncludes: [".00", "0.00"] } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-zero-decimals",
+    goal: "Show counts as whole numbers.",
+    scenario: "Session counts should not show unnecessary decimal places.",
+    setup: [["C20", "Sessions"], ["C21", 6], ["C22", 5], ["C23", 7]],
+    range: "C21:C23",
+    command: "Zero decimal places",
+    checks: ["C21", "C22", "C23"].map((cell) => ({ cell, format: { numberPatternIncludes: ["0"] } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-currency",
+    goal: "Format prices as currency.",
+    scenario: "The school shop price list should clearly show money.",
+    setup: [["E20", "Item"], ["F20", "Price"], ["E21", "Pen"], ["F21", 1.5], ["E22", "Notebook"], ["F22", 3]],
+    range: "F21:F22",
+    command: "Currency",
+    checks: ["F21", "F22"].map((cell) => ({ cell, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-percent",
+    goal: "Format completion values as percentages.",
+    scenario: "Progress values should show percent signs.",
+    setup: [["H20", "Task"], ["I20", "Complete"], ["H21", "Spreadsheet"], ["I21", 0.72], ["H22", "Database"], ["I22", 0.68]],
+    range: "I21:I22",
+    command: "Percent style",
+    checks: ["I21", "I22"].map((cell) => ({ cell, format: { numberPatternIncludes: ["%"] } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-wrap-text",
+    goal: "Wrap long headings.",
+    scenario: "Long headings must stay readable inside their cells.",
+    setup: [["A27", "Student full name"], ["B27", "Homework submitted on time"], ["C27", "Teacher comment"], ["A28", "Maya"], ["B28", "Yes"], ["C28", "Good improvement"]],
+    range: "A27:C27",
+    command: "Wrap Text",
+    checks: ["A27", "B27", "C27"].map((cell) => ({ cell, format: { wrapText: true } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-borders",
+    goal: "Add borders to a table.",
+    scenario: "A short register should print with clear cell boundaries.",
+    setup: [["E27", "Club"], ["F27", "Room"], ["E28", "Drama"], ["F28", "Hall"], ["E29", "Coding"], ["F29", "Lab 1"]],
+    range: "E27:F29",
+    command: "Borders",
+    checks: ["E27", "F27", "E29", "F29"].map((cell) => ({ cell, format: { border: true } }))
+  }),
+  formatTaskCard({
+    id: "sheet-format-row-height",
+    goal: "Increase row height.",
+    scenario: "The worksheet title row needs extra height for readability.",
+    setup: [["A33", "Apex Study Hub Open Day"]],
+    range: "Row 33",
+    command: "Row height",
+    checks: [{ cell: "A33", value: "Apex Study Hub Open Day" }],
+    extraChecks: { rows: [{ row: 33, minHeight: 28 }] },
+    extraSteps: ["Right-click row 33 or use the row menu, then increase the row height."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-column-width",
+    goal: "Widen a column.",
+    scenario: "The activity name should fit without being cut off.",
+    setup: [["C33", "After-school robotics workshop"]],
+    range: "Column C",
+    command: "Column width",
+    checks: [{ cell: "C33", value: "After-school robotics workshop" }],
+    extraChecks: { columns: [{ column: "C", minWidth: 130 }] },
+    extraSteps: ["Drag the boundary on the right of column C until the text fits."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-column-reduce",
+    goal: "Reduce a column width.",
+    scenario: "A short code column should not take too much space.",
+    setup: [["E33", "Code"], ["E34", "A1"], ["E35", "B2"]],
+    range: "Column E",
+    command: "Column width",
+    checks: [{ cell: "E33", value: "Code" }],
+    extraChecks: { columns: [{ column: "E", maxWidth: 70 }] },
+    extraSteps: ["Drag the boundary on the right of column E to make the column narrower."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-fill-and-font-colour",
+    goal: "Use fill colour and font colour together.",
+    scenario: "A warning label should be easy to notice.",
+    setup: [["H33", "Deadline today"]],
+    range: "H33",
+    command: "Fill colour and font colour",
+    checks: [{ cell: "H33", value: "Deadline today", format: { background: true, fontColor: true } }]
+  }),
+  formatTaskCard({
+    id: "sheet-format-budget-heading",
+    goal: "Format a budget heading row.",
+    scenario: "The events team needs a mini budget table prepared for printing.",
+    setup: [["A38", "Item"], ["B38", "Income"], ["C38", "Cost"], ["A39", "Tickets"], ["B39", 240], ["C39", 60], ["A40", "Printing"], ["B40", 0], ["C40", 28]],
+    range: "A38:C38",
+    command: "Bold and fill colour",
+    checks: ["A38", "B38", "C38"].map((cell) => ({ cell, format: { bold: true, background: true } })),
+    difficulty: "developing"
+  }),
+  formatTaskCard({
+    id: "sheet-format-budget-currency",
+    goal: "Format budget figures as currency.",
+    scenario: "Income and cost values should show as money.",
+    setup: [["A43", "Item"], ["B43", "Income"], ["C43", "Cost"], ["A44", "Tickets"], ["B44", 240], ["C44", 60], ["A45", "Printing"], ["B45", 0], ["C45", 28]],
+    range: "B44:C45",
+    command: "Currency",
+    checks: ["B44", "C44", "B45", "C45"].map((cell) => ({ cell, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } })),
+    difficulty: "developing"
+  }),
+  formatTaskCard({
+    id: "sheet-format-register-combined",
+    goal: "Format a register table.",
+    scenario: "A teacher wants a small register with bold headings, shaded headings, and centred responses.",
+    setup: [["E38", "Name"], ["F38", "Present"], ["G38", "Late"], ["E39", "Lina"], ["F39", "Yes"], ["G39", "No"], ["E40", "Omar"], ["F40", "Yes"], ["G40", "Yes"]],
+    range: "E38:G40",
+    command: "Bold, fill colour, and centre align",
+    checks: [
+      ...["E38", "F38", "G38"].map((cell) => ({ cell, format: { bold: true, background: true } })),
+      ...["F39", "G39", "F40", "G40"].map((cell) => ({ cell, format: { horizontalAlign: "center" as const } }))
+    ],
+    difficulty: "developing",
+    extraSteps: ["Bold and shade only the headings in E38:G38.", "Centre the Yes and No entries in F39:G40."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-reading-table",
+    goal: "Format a reading log.",
+    scenario: "A reading log needs wrapped headings and borders before it is shared.",
+    setup: [["I38", "Learner name"], ["J38", "Book title"], ["K38", "Pages read this week"], ["I39", "Amina"], ["J39", "River Run"], ["K39", 42], ["I40", "Joel"], ["J40", "Sky Map"], ["K40", 38]],
+    range: "I38:K40",
+    command: "Wrap Text and Borders",
+    checks: [
+      ...["I38", "J38", "K38"].map((cell) => ({ cell, format: { wrapText: true } })),
+      ...["I38", "K38", "I40", "K40"].map((cell) => ({ cell, format: { border: true } }))
+    ],
+    difficulty: "developing",
+    extraSteps: ["Wrap the headings in I38:K38.", "Add borders to the whole table I38:K40."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-schedule-title",
+    goal: "Format a schedule title.",
+    scenario: "The club schedule title should look like a heading, not normal table text.",
+    setup: [["A48", "Club Schedule"], ["A50", "Club"], ["B50", "Day"], ["C50", "Room"]],
+    range: "A48:C48",
+    command: "Merge & Centre, font size, and font colour",
+    checks: [{ cell: "A48", value: "Club Schedule", format: { horizontalAlign: "center", fontSizeAtLeast: 14, fontColor: true } }],
+    difficulty: "developing"
+  }),
+  formatTaskCard({
+    id: "sheet-format-device-list",
+    goal: "Format a device loan list.",
+    scenario: "The ICT room wants device names styled and borrower details readable.",
+    setup: [["E48", "Device Loan"], ["E50", "Device"], ["F50", "Borrower"], ["E51", "Tablet"], ["F51", "Maya"], ["E52", "Camera"], ["F52", "Ben"]],
+    range: "E50:F52",
+    command: "Bold headings and italic device names",
+    checks: [
+      { cell: "E50", value: "Device", format: { bold: true } },
+      { cell: "F50", value: "Borrower", format: { bold: true } },
+      { cell: "E51", value: "Tablet", format: { italic: true } },
+      { cell: "E52", value: "Camera", format: { italic: true } }
+    ],
+    difficulty: "developing",
+    extraSteps: ["Bold the headings in E50:F50.", "Italicise the device names in E51:E52."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-progress-table",
+    goal: "Format a progress table.",
+    scenario: "Course progress must show percentages and a clear heading row.",
+    setup: [["H48", "Module"], ["I48", "Complete"], ["H49", "Spreadsheets"], ["I49", 0.75], ["H50", "Documents"], ["I50", 0.6]],
+    range: "H48:I50",
+    command: "Bold, fill colour, and Percent style",
+    checks: [
+      { cell: "H48", value: "Module", format: { bold: true, background: true } },
+      { cell: "I48", value: "Complete", format: { bold: true, background: true } },
+      { cell: "I49", value: 0.75, format: { numberPatternIncludes: ["%"] } },
+      { cell: "I50", value: 0.6, format: { numberPatternIncludes: ["%"] } }
+    ],
+    difficulty: "developing",
+    extraSteps: ["Bold and shade H48:I48.", "Format I49:I50 as percentages."]
+  }),
+  formatTaskCard({
+    id: "sheet-format-final-attendance-report",
+    goal: "Complete a formatted attendance report.",
+    scenario: "This final formatting task combines the skills used across the module.",
+    setup: [["A55", "Attendance Report"], ["A57", "Club"], ["B57", "Learners"], ["C57", "Budget"], ["D57", "Complete"], ["A58", "Drama"], ["B58", 18], ["C58", 45], ["D58", 0.8], ["A59", "Coding"], ["B59", 22], ["C59", 60], ["D59", 0.9]],
+    range: "A55:D59",
+    command: "Combined formatting",
+    checks: [
+      { cell: "A55", value: "Attendance Report", format: { horizontalAlign: "center", bold: true, fontSizeAtLeast: 14 } },
+      ...["A57", "B57", "C57", "D57"].map((cell) => ({ cell, format: { bold: true, background: true, border: true } })),
+      { cell: "C58", value: 45, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } },
+      { cell: "C59", value: 60, format: { numberPatternIncludes: ["$", "£", "₦", "€", "currency"] } },
+      { cell: "D58", value: 0.8, format: { numberPatternIncludes: ["%"] } },
+      { cell: "D59", value: 0.9, format: { numberPatternIncludes: ["%"] } }
+    ],
+    difficulty: "confident",
+    extraSteps: ["Merge and centre A55:D55, then make the title bold and larger.", "Bold and shade A57:D57.", "Add borders to A57:D59.", "Format C58:C59 as currency and D58:D59 as percentages."]
+  })
 ];
 
 const formulaDataCards = [
@@ -411,9 +740,9 @@ const layoutCards = [
   entryCard("layout", "sheet-layout-gridlines-note", "Record printed gridlines.", "Turn on printed gridlines, then record the setting.", [["D3", "Print gridlines on"]]),
   entryCard("layout", "sheet-layout-fit-note", "Record fit-to-page setting.", "Set the sheet to fit one page wide, then record the setting.", [["D4", "Fit one page wide"]]),
   entryCard("layout", "sheet-layout-margins-note", "Record narrow margins.", "Set narrow margins, then record the setting.", [["D5", "Narrow margins"]]),
-  formatCard("sheet-layout-bold-title", "Bold the print report title.", "The printed report title should stand out.", "A1", "Bold", [{ cell: "A1", value: "Printable Club Report", format: { bold: true } }]),
-  formatCard("sheet-layout-title-height", "Increase the title font size for printing.", "The title should be easy to read on a printed report.", "A1", "Font size", [{ cell: "A1", value: "Printable Club Report", format: { fontSizeAtLeast: 14 } }]),
-  formatCard("sheet-layout-table-borders", "Add borders to the printable table.", "The printed table needs clear boundaries.", "A3:B6", "Borders", ["A3", "B3", "A6", "B6"].map((cell) => ({ cell, format: { border: true } })))
+  formatCardForModule("layout", "sheet-layout-bold-title", "Bold the print report title.", "The printed report title should stand out.", "A1", "Bold", [{ cell: "A1", value: "Printable Club Report", format: { bold: true } }]),
+  formatCardForModule("layout", "sheet-layout-title-height", "Increase the title font size for printing.", "The title should be easy to read on a printed report.", "A1", "Font size", [{ cell: "A1", value: "Printable Club Report", format: { fontSizeAtLeast: 14 } }]),
+  formatCardForModule("layout", "sheet-layout-table-borders", "Add borders to the printable table.", "The printed table needs clear boundaries.", "A3:B6", "Borders", ["A3", "B3", "A6", "B6"].map((cell) => ({ cell, format: { border: true } })))
 ];
 
 export const allSpreadsheetInstructionCards: SpreadsheetInstructionCard[] = [

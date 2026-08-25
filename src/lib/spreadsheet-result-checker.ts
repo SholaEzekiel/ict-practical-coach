@@ -12,6 +12,7 @@ type CellExpectation = {
     horizontalAlign?: "left" | "center" | "right";
     background?: boolean;
     fontColor?: boolean;
+    fontFamilyIncludes?: string[];
     fontSizeAtLeast?: number;
     wrapText?: boolean;
     border?: boolean;
@@ -21,7 +22,11 @@ type CellExpectation = {
 
 type WorkbookSnapshot = {
   sheetOrder?: string[];
-  sheets?: Record<string, { cellData?: Record<string, Record<string, { v?: unknown; f?: string | null; s?: unknown }>> }>;
+  sheets?: Record<string, {
+    cellData?: Record<string, Record<string, { v?: unknown; f?: string | null; s?: unknown }>>;
+    rowData?: Record<string, Record<string, unknown>>;
+    columnData?: Record<string, Record<string, unknown>>;
+  }>;
   styles?: Record<string, unknown>;
   resources?: Array<{ name?: string; data?: string | Record<string, unknown> }>;
 };
@@ -120,6 +125,26 @@ function hasTruthyStyle(style: Record<string, unknown>, keys: string[]) {
   return String(value).toLowerCase() !== "false" && String(value) !== "0";
 }
 
+function dimensionNumber(value: unknown) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const numberValue = Number(value.replace(/[^\d.-]/g, ""));
+    return Number.isFinite(numberValue) ? numberValue : undefined;
+  }
+  return undefined;
+}
+
+function readDimension(record: Record<string, unknown> | undefined, keys: string[]) {
+  if (!record) return undefined;
+
+  for (const key of keys) {
+    const value = dimensionNumber(record[key]);
+    if (value !== undefined) return value;
+  }
+
+  return undefined;
+}
+
 function formatMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
   if (!expected.format) return { ok: true, message: "" };
 
@@ -145,6 +170,12 @@ function formatMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
 
   if (format.fontColor && !hasTruthyStyle(style, ["cl", "color", "fontColor"])) {
     return { ok: false, message: `${expected.cell} should have a font colour.` };
+  }
+
+  if (format.fontFamilyIncludes?.length) {
+    const family = String(styleValue(style, ["ff", "fontFamily", "font", "fontFace", "font-family"]) ?? "").toLowerCase();
+    const found = format.fontFamilyIncludes.some((part) => family.includes(part.toLowerCase()));
+    if (!found) return { ok: false, message: `${expected.cell} should use the requested font family.` };
   }
 
   if (format.fontSizeAtLeast) {
@@ -175,6 +206,53 @@ function formatMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
     const numberFormat = String(styleValue(style, ["n", "numberFormat", "numFmt", "pattern", "format"]) ?? "").toLowerCase();
     const found = format.numberPatternIncludes.some((part) => numberFormat.includes(part.toLowerCase()));
     if (!found) return { ok: false, message: `${expected.cell} should use the requested number format.` };
+  }
+
+  return { ok: true, message: "" };
+}
+
+function columnLetterToIndex(column: string) {
+  return column
+    .trim()
+    .toUpperCase()
+    .split("")
+    .reduce((total, letter) => total * 26 + letter.charCodeAt(0) - 64, 0) - 1;
+}
+
+function checkRows(snapshot: WorkbookSnapshot, rows: Array<{ row: number; minHeight?: number; maxHeight?: number }> = []) {
+  const sheet = getActiveSheet(snapshot);
+
+  for (const expected of rows) {
+    const record = sheet?.rowData?.[String(expected.row - 1)];
+    const height = readDimension(record, ["h", "height", "ah", "customHeight"]);
+
+    if (expected.minHeight !== undefined && (height === undefined || height < expected.minHeight)) {
+      return { ok: false, message: `Row ${expected.row} should be taller.` };
+    }
+
+    if (expected.maxHeight !== undefined && (height === undefined || height > expected.maxHeight)) {
+      return { ok: false, message: `Row ${expected.row} should be shorter.` };
+    }
+  }
+
+  return { ok: true, message: "" };
+}
+
+function checkColumns(snapshot: WorkbookSnapshot, columns: Array<{ column: string; minWidth?: number; maxWidth?: number }> = []) {
+  const sheet = getActiveSheet(snapshot);
+
+  for (const expected of columns) {
+    const columnIndex = columnLetterToIndex(expected.column);
+    const record = sheet?.columnData?.[String(columnIndex)];
+    const width = readDimension(record, ["w", "width", "customWidth"]);
+
+    if (expected.minWidth !== undefined && (width === undefined || width < expected.minWidth)) {
+      return { ok: false, message: `Column ${expected.column.toUpperCase()} should be wider.` };
+    }
+
+    if (expected.maxWidth !== undefined && (width === undefined || width > expected.maxWidth)) {
+      return { ok: false, message: `Column ${expected.column.toUpperCase()} should be narrower.` };
+    }
   }
 
   return { ok: true, message: "" };
@@ -245,6 +323,26 @@ export function validateSpreadsheetResult(card: SpreadsheetInstructionCard, snap
         nextStep: card.feedback.wrongResult
       };
     }
+  }
+
+  const rowResult = checkRows(workbookSnapshot, card.autoCheck.rows);
+  if (!rowResult.ok) {
+    return {
+      isCorrect: false,
+      canAutoCheck: true,
+      message: rowResult.message,
+      nextStep: card.feedback.wrongResult
+    };
+  }
+
+  const columnResult = checkColumns(workbookSnapshot, card.autoCheck.columns);
+  if (!columnResult.ok) {
+    return {
+      isCorrect: false,
+      canAutoCheck: true,
+      message: columnResult.message,
+      nextStep: card.feedback.wrongResult
+    };
   }
 
   return {
