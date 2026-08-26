@@ -5,7 +5,7 @@ import Link from "next/link";
 import MonacoEditor from "@monaco-editor/react";
 import grapesjs from "grapesjs";
 import type { Editor as GrapesEditor } from "grapesjs";
-import { ArrowLeft, CheckCircle2, Code2, Eye, FileCode2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
@@ -119,15 +119,16 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const [completed, setCompleted] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [mode, setMode] = useState<"html" | "css">("html");
+  const [instructionsOpen, setInstructionsOpen] = useState(true);
   const card = cards[activeIndex];
   const [html, setHtml] = useState(card?.starterHtml || "");
   const [css, setCss] = useState(card?.starterCss || "");
   const visualEditorRef = useRef<GrapesEditor | null>(null);
   const visualContainerRef = useRef<HTMLDivElement>(null);
+  const editorPasteCleanupRef = useRef<(() => void) | null>(null);
   const syncingFromCodeRef = useRef(false);
   const previewReady = hasPreviewableDocument(html);
 
-  const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
   useEffect(() => {
@@ -171,6 +172,12 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   }, []);
 
   useEffect(() => {
+    return () => {
+      editorPasteCleanupRef.current?.();
+    };
+  }, []);
+
+  useEffect(() => {
     if (!visualEditorRef.current) return;
     syncingFromCodeRef.current = true;
     visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "");
@@ -206,89 +213,125 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   }
 
   function nextCard() {
-    if (!currentComplete || activeIndex === cards.length - 1) return;
+    if (activeIndex === cards.length - 1) return;
     loadCard(activeIndex + 1);
+  }
+
+  function previousCard() {
+    if (activeIndex === 0) return;
+    loadCard(activeIndex - 1);
   }
 
   if (!card) return null;
 
+  const layoutClass = instructionsOpen
+    ? "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]"
+    : "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[72px_minmax(0,1fr)_minmax(360px,0.85fr)]";
+
   return (
-    <div className="mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]">
+    <div className={layoutClass}>
       <aside className="flex min-h-0 flex-col rounded-lg border border-line bg-white shadow-sm">
-        <div className="border-b border-line p-5">
-          <Link href="/subjects/ict/website-authoring" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean">
-            <ArrowLeft size={16} aria-hidden="true" /> Website Authoring modules
-          </Link>
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-ocean">{module?.title}</span>
-            <span className="text-sm font-semibold text-slate-600">{activeIndex + 1}/{cards.length}</span>
-          </div>
-          <h1 className="mt-4 text-2xl font-bold text-ink">{card.title}</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{card.scenario}</p>
-          <div className="mt-4">
-            <div className="mb-2 flex justify-between text-sm font-medium">
-              <span>Progress</span>
-              <span>{completed.length}/{cards.length}</span>
+        <button
+          type="button"
+          onClick={() => setInstructionsOpen((value) => !value)}
+          className="flex items-center justify-between gap-2 border-b border-line p-4 text-sm font-bold text-ocean hover:bg-mist"
+          aria-expanded={instructionsOpen}
+        >
+          <span>{instructionsOpen ? "Hide guide" : "Guide"}</span>
+          {instructionsOpen ? <PanelLeftClose size={18} aria-hidden="true" /> : <PanelLeftOpen size={18} aria-hidden="true" />}
+        </button>
+
+        {instructionsOpen && (
+          <>
+            <div className="border-b border-line p-5">
+              <Link href="/subjects/ict/website-authoring" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean">
+                <ArrowLeft size={16} aria-hidden="true" /> Website Authoring modules
+              </Link>
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-ocean">{module?.title}</span>
+                <span className="text-sm font-semibold text-slate-600">{activeIndex + 1}/{cards.length}</span>
+              </div>
+              <h1 className="mt-4 text-2xl font-bold text-ink">{card.title}</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{card.scenario}</p>
+              <div className="mt-4">
+                <div className="mb-2 flex justify-between text-sm font-medium">
+                  <span>Progress</span>
+                  <span>{completed.length}/{cards.length}</span>
+                </div>
+                <ProgressBar value={progress} />
+              </div>
             </div>
-            <ProgressBar value={progress} />
-          </div>
-        </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
-          <section className="rounded-lg border border-line bg-mist p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
-            <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>
-          </section>
+            <div
+              className="min-h-0 flex-1 select-none space-y-4 overflow-y-auto p-5"
+              onCopy={(event) => event.preventDefault()}
+              onCut={(event) => event.preventDefault()}
+              onContextMenu={(event) => event.preventDefault()}
+            >
+              <section className="rounded-lg border border-line bg-mist p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
+                <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>
+              </section>
 
-          <section className="rounded-lg border border-line bg-white p-4">
-            <h3 className="font-bold">Support document</h3>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-              {card.supportDocument.map((line) => <p key={line}>{line}</p>)}
+              <section className="rounded-lg border border-line bg-white p-4">
+                <h3 className="font-bold">Support document</h3>
+                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                  {card.supportDocument.map((line) => <p key={line} className="break-words [overflow-wrap:anywhere]">{line}</p>)}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-line bg-white p-4">
+                <h3 className="font-bold">Steps</h3>
+                <ol className="mt-3 space-y-3">
+                  {card.steps.map((step, index) => (
+                    <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
+                      <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span>
+                      <span className="min-w-0 break-words [overflow-wrap:anywhere]">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+
+              {card.teacherReview && (
+                <section className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+                  <h3 className="font-bold">Teacher review</h3>
+                  <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                    {card.teacherReview.map((item) => <li key={item} className="break-words [overflow-wrap:anywhere]">{item}</li>)}
+                  </ul>
+                </section>
+              )}
+
+              {feedback && (
+                <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                  <h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3>
+                  <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+                    {feedback.messages.map((message) => <li key={message} className="break-words [overflow-wrap:anywhere]">{message}</li>)}
+                  </ul>
+                </section>
+              )}
             </div>
-          </section>
 
-          <section className="rounded-lg border border-line bg-white p-4">
-            <h3 className="font-bold">Steps</h3>
-            <ol className="mt-3 space-y-3">
-              {card.steps.map((step, index) => (
-                <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700">
-                  <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          {card.teacherReview && (
-            <section className="rounded-lg border border-sky-200 bg-sky-50 p-4">
-              <h3 className="font-bold">Teacher review</h3>
-              <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
-                {card.teacherReview.map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            </section>
-          )}
-
-          {feedback && (
-            <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-              <h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-                {feedback.messages.map((message) => <li key={message}>{message}</li>)}
-              </ul>
-            </section>
-          )}
-        </div>
-
-        <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-line p-5">
-          <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
-            <CheckCircle2 size={18} aria-hidden="true" /> Check final result
-          </button>
-          <button type="button" onClick={nextCard} disabled={!currentComplete || activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
-            Next
-          </button>
-        </div>
+            <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-line p-5">
+              <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
+                <CheckCircle2 size={18} aria-hidden="true" /> Check final result
+              </button>
+              <button
+                type="button"
+                onClick={previousCard}
+                disabled={activeIndex === 0}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:text-slate-300"
+              >
+                <ChevronLeft size={18} aria-hidden="true" /> Previous
+              </button>
+              <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
+                Next
+              </button>
+            </div>
+          </>
+        )}
       </aside>
 
-      <section className="min-h-[520px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0">
+      <section className="min-h-[520px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0" onPaste={(event) => event.preventDefault()}>
         <div className="flex items-center justify-between border-b border-line p-4">
           <div>
             <h2 className="font-bold">Code editor</h2>
@@ -317,7 +360,27 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               wordWrap: "on",
               tabSize: 2,
               scrollBeyondLastLine: false,
-              automaticLayout: true
+              automaticLayout: true,
+              contextmenu: false
+            }}
+            onMount={(editor, monaco) => {
+              editorPasteCleanupRef.current?.();
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => null);
+
+              const keyDisposable = editor.onKeyDown((event) => {
+                const browserEvent = event.browserEvent;
+                if ((browserEvent.ctrlKey || browserEvent.metaKey) && browserEvent.key.toLowerCase() === "v") {
+                  event.preventDefault();
+                  browserEvent.preventDefault();
+                }
+              });
+              const editorNode = editor.getDomNode();
+              const preventPaste = (event: ClipboardEvent) => event.preventDefault();
+              editorNode?.addEventListener("paste", preventPaste);
+              editorPasteCleanupRef.current = () => {
+                keyDisposable.dispose();
+                editorNode?.removeEventListener("paste", preventPaste);
+              };
             }}
             onChange={(value) => {
               if (mode === "html") setHtml(value || "");
