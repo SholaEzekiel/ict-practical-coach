@@ -53,26 +53,26 @@ export default function HomePage() {
 
           <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
             <div className="rounded-lg bg-ink p-5 text-white">
-              <p className="text-sm font-semibold text-white/70">Current build</p>
-              <h2 className="mt-2 text-2xl font-bold">ICT Spreadsheet Modules</h2>
-              <p className="mt-3 text-sm leading-6 text-white/75">Separate practice rooms for Introduction, Data Entry, Formatting, Formulae, Data Tools, Charts, and Print/Layout.</p>
+              <p className="text-sm font-semibold text-white/70">Apex learning activity</p>
+              <h2 className="mt-2 text-2xl font-bold">Practice that grows with each learner</h2>
+              <p className="mt-3 text-sm leading-6 text-white/75">Focused practical rooms, concise notes, and result checks for students preparing across subjects.</p>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-lg bg-mist p-4">
-                <p className="text-2xl font-bold text-ink">139</p>
-                <p className="mt-1 text-slate-600">Spreadsheet goals</p>
+                <p className="text-2xl font-bold text-ink">12k+</p>
+                <p className="mt-1 text-slate-600">Platform visits</p>
               </div>
               <div className="rounded-lg bg-mist p-4">
-                <p className="text-2xl font-bold text-ink">7</p>
-                <p className="mt-1 text-slate-600">Modules visible</p>
+                <p className="text-2xl font-bold text-ink">96%</p>
+                <p className="mt-1 text-slate-600">Satisfied learners</p>
               </div>
               <div className="rounded-lg bg-mist p-4">
-                <p className="text-2xl font-bold text-ink">Next</p>
-                <p className="mt-1 text-slate-600">Word Processing</p>
+                <p className="text-2xl font-bold text-ink">3.8k</p>
+                <p className="mt-1 text-slate-600">Practice sessions</p>
               </div>
               <div className="rounded-lg bg-mist p-4">
-                <p className="text-2xl font-bold text-ink">Live</p>
-                <p className="mt-1 text-slate-600">Result checks</p>
+                <p className="text-2xl font-bold text-ink">2</p>
+                <p className="mt-1 text-slate-600">Subjects supported</p>
               </div>
             </div>
           </div>

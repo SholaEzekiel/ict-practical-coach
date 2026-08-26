@@ -44,6 +44,14 @@ export type SpreadsheetInstructionCard = {
     rows?: Array<{ row: number; minHeight?: number; maxHeight?: number }>;
     columns?: Array<{ column: string; minWidth?: number; maxWidth?: number }>;
   };
+  chartCheck?: {
+    type: "column" | "bar" | "pie";
+    sourceRange: string;
+    title: string;
+    categoryLabel?: string;
+    valueLabel?: string;
+    legend?: boolean;
+  };
   commonMistakes: string[];
   feedback: {
     wrongSelection?: string;
@@ -721,16 +729,66 @@ const dataToolCards = [
 ];
 
 const chartCards = [
-  entryCard("chart", "sheet-chart-source", "Create chart source data.", "Build the label and value range needed for a column chart.", [["A1", "Club"], ["B1", "Attendance"], ["A2", "Drama"], ["B2", 18], ["A3", "Robotics"], ["B3", 22], ["A4", "Coding"], ["B4", 16], ["A5", "Art"], ["B5", 20]], "developing"),
-  entryCard("chart", "sheet-chart-title", "Add a chart title cell.", "Prepare the exact title that should be used on the chart.", [["D1", "Club Attendance Chart"]]),
-  entryCard("chart", "sheet-chart-axis-labels", "Add chart axis label cells.", "Prepare labels for the category and value axes.", [["D3", "Club"], ["E3", "Attendance"]]),
-  entryCard("chart", "sheet-chart-source-note", "Identify the chart source range.", "Record the exact source range so the chart can be checked.", [["D5", "A1:B5"]]),
-  entryCard("chart", "sheet-chart-column-evidence", "Create a column chart evidence note.", "After creating a column chart from A1:B5, record the chart type used.", [["D7", "Column chart"]], "developing"),
-  entryCard("chart", "sheet-chart-bar-evidence", "Create a bar chart evidence note.", "After changing or creating a bar chart from A1:B5, record the chart type used.", [["D8", "Bar chart"]], "developing"),
-  entryCard("chart", "sheet-chart-pie-source", "Create pie chart source data.", "Prepare a smaller source range suitable for a pie chart.", [["A8", "Category"], ["B8", "Borrowed"], ["A9", "Fiction"], ["B9", 34], ["A10", "History"], ["B10", 18], ["A11", "Science"], ["B11", 26]]),
-  entryCard("chart", "sheet-chart-pie-evidence", "Create a pie chart evidence note.", "After creating a pie chart from A8:B11, record the chart type used.", [["D10", "Pie chart"]], "developing"),
-  entryCard("chart", "sheet-chart-data-labels-note", "Record that data labels are shown.", "After turning on data labels, record the label setting for checking.", [["D12", "Data labels shown"]], "developing")
+  chartCard("sheet-chart-attendance-column", "Create a column chart for club attendance.", "The activities lead wants to compare clubs quickly, so the chart should make the tallest attendance values easy to spot.", [["A1", "Club"], ["B1", "Attendance"], ["A2", "Drama"], ["B2", 18], ["A3", "Robotics"], ["B3", 22], ["A4", "Coding"], ["B4", 16], ["A5", "Art"], ["B5", 20]], "column", "A1:B5", "Club Attendance", "Club", "Attendance"),
+  chartCard("sheet-chart-borrowing-bar", "Create a bar chart for library borrowing.", "A librarian wants to compare borrowing by category using horizontal bars.", [["D1", "Category"], ["E1", "Borrowed"], ["D2", "Fiction"], ["E2", 34], ["D3", "History"], ["E3", 18], ["D4", "Science"], ["E4", 26], ["D5", "Art"], ["E5", 12]], "bar", "D1:E5", "Books Borrowed", "Category", "Borrowed"),
+  chartCard("sheet-chart-budget-pie", "Create a pie chart for budget share.", "The event team wants to see which cost takes the largest part of the budget.", [["A8", "Cost"], ["B8", "Amount"], ["A9", "Printing"], ["B9", 28], ["A10", "Refreshments"], ["B10", 45], ["A11", "Prizes"], ["B11", 37]], "pie", "A8:B11", "Budget Share"),
+  chartCard("sheet-chart-sales-column", "Create a column chart for shop sales.", "The school shop manager wants to identify the strongest selling item at a glance.", [["D8", "Item"], ["E8", "Sold"], ["D9", "Pen"], ["E9", 28], ["D10", "Notebook"], ["E10", 14], ["D11", "Folder"], ["E11", 19], ["D12", "Ruler"], ["E12", 22]], "column", "D8:E12", "School Shop Sales", "Item", "Sold"),
+  chartCard("sheet-chart-progress-bar", "Create a bar chart for module completion.", "The tutor wants to compare completion rates across practice modules.", [["A15", "Module"], ["B15", "Complete"], ["A16", "Spreadsheet"], ["B16", 75], ["A17", "Documents"], ["B17", 60], ["A18", "Web"], ["B18", 45]], "bar", "A15:B18", "Module Completion", "Module", "Complete"),
+  chartCard("sheet-chart-attendance-pie", "Create a pie chart for attendance share.", "The coordinator wants to see how each club contributes to total attendance.", [["D15", "Club"], ["E15", "Attendance"], ["D16", "Drama"], ["E16", 18], ["D17", "Robotics"], ["E17", 22], ["D18", "Coding"], ["E18", 16], ["D19", "Art"], ["E19", 20]], "pie", "D15:E19", "Attendance Share"),
+  chartCard("sheet-chart-sessions-column-labels", "Create a labelled column chart for sessions.", "The head of activities wants the chart to explain what the axes mean.", [["A22", "Club"], ["B22", "Sessions"], ["A23", "Drama"], ["B23", 6], ["A24", "Robotics"], ["B24", 6], ["A25", "Coding"], ["B25", 5], ["A26", "Art"], ["B26", 5]], "column", "A22:B26", "Club Sessions", "Club", "Sessions", true),
+  chartCard("sheet-chart-house-points-bar", "Create a bar chart for house points.", "The PE department wants students to identify the leading house from a chart.", [["D22", "House"], ["E22", "Points"], ["D23", "Red"], ["E23", 58], ["D24", "Blue"], ["E24", 64], ["D25", "Green"], ["E25", 49], ["D26", "Yellow"], ["E26", 53]], "bar", "D22:E26", "House Points", "House", "Points", true),
+  chartCard("sheet-chart-final-choice", "Choose a suitable chart for revision attendance.", "This final task checks that data can be turned into a chart that helps a reader interpret the pattern.", [["A30", "Day"], ["B30", "Learners"], ["A31", "Monday"], ["B31", 24], ["A32", "Tuesday"], ["B32", 31], ["A33", "Wednesday"], ["B33", 18], ["A34", "Thursday"], ["B34", 27]], "column", "A30:B34", "Revision Attendance", "Day", "Learners", true)
 ];
+
+function chartCard(
+  id: string,
+  goal: string,
+  scenario: string,
+  cells: Array<[string, string | number]>,
+  type: NonNullable<SpreadsheetInstructionCard["chartCheck"]>["type"],
+  sourceRange: string,
+  title: string,
+  categoryLabel?: string,
+  valueLabel?: string,
+  legend = false
+) {
+  return baseCard({
+    id,
+    moduleId: "chart",
+    moduleTitle: "Charts",
+    category: "chart",
+    skill: `${type} chart`,
+    studentGoal: goal,
+    scenario,
+    studentSteps: [
+      ...cells.flatMap(([cell, value]) => [`Click ${cell}.`, `Type exactly "${value}".`, "Press Enter."]),
+      `In the chart panel, set Chart type to ${type}.`,
+      `Set Source range to ${sourceRange}.`,
+      `Set Chart title to ${title}.`,
+      ...(categoryLabel ? [`Set Category label to ${categoryLabel}.`] : []),
+      ...(valueLabel ? [`Set Value label to ${valueLabel}.`] : []),
+      ...(legend ? ["Turn on Show legend."] : []),
+      "Click Check my result."
+    ],
+    instruction: goal,
+    meaning: "A chart turns worksheet values into a visual comparison so patterns are easier to interpret.",
+    clickPath: ["Worksheet grid", "Chart practice panel", "Chart type", "Source range", "Generate preview"],
+    expectedSelection: sourceRange,
+    expectedAction: `${type}-chart`,
+    expectedResult: `${title} is shown as a ${type} chart using ${sourceRange}.`,
+    autoCheck: { cells: cells.map(([cell, value]) => ({ cell, value })) },
+    chartCheck: { type, sourceRange, title, categoryLabel, valueLabel, legend },
+    commonMistakes: ["Selecting only the values without labels", "Choosing a chart type that does not fit the question", "Leaving the chart title too vague"],
+    feedback: {
+      wrongSelection: `Use ${sourceRange} as the chart source range.`,
+      wrongTool: `Choose a ${type} chart in the chart practice panel.`,
+      wrongResult: `The chart panel must use ${type}, ${sourceRange}, and the title ${title}.`
+    },
+    hints: ["Use labels and values together.", "Column and bar charts compare categories; pie charts show parts of a whole."],
+    difficulty: "developing",
+    marks: 3
+  });
+}
 
 const layoutCards = [
   entryCard("layout", "sheet-layout-title", "Create the print report title.", "Start a clean printable worksheet.", [["A1", "Printable Club Report"]]),
