@@ -38,11 +38,6 @@ function hasPreviewableDocument(html: string) {
   return /<!doctype\s+html>/i.test(html) && sourceHasTag(html, "html") && sourceHasTag(html, "head") && sourceHasTag(html, "body");
 }
 
-function replaceBodyInnerHtml(sourceHtml: string, nextBodyHtml: string) {
-  if (!hasPreviewableDocument(sourceHtml)) return sourceHtml;
-  return sourceHtml.replace(/(<body[^>]*>)([\s\S]*?)(<\/body>)/i, `$1\n${nextBodyHtml.trim() ? `    ${nextBodyHtml.trim()}\n  ` : "\n  "}$3`);
-}
-
 function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string): Feedback {
   const messages: string[] = [];
   const parser = new DOMParser();
@@ -156,11 +151,6 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
           }
         ]
       }
-    });
-
-    editor.on("update", () => {
-      if (syncingFromCodeRef.current) return;
-      setHtml((currentHtml) => replaceBodyInnerHtml(currentHtml, editor.getHtml()));
     });
 
     visualEditorRef.current = editor;
@@ -311,21 +301,23 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               )}
             </div>
 
-            <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-line p-5">
-              <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
+            <div className="space-y-4 border-t border-line p-5">
+              <button type="button" onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
                 <CheckCircle2 size={18} aria-hidden="true" /> Check final result
               </button>
-              <button
-                type="button"
-                onClick={previousCard}
-                disabled={activeIndex === 0}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:text-slate-300"
-              >
-                <ChevronLeft size={18} aria-hidden="true" /> Previous
-              </button>
-              <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
-                Next
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={previousCard}
+                  disabled={activeIndex === 0}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-line bg-white px-5 py-3 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:text-slate-300"
+                >
+                  <ChevronLeft size={18} aria-hidden="true" /> Previous
+                </button>
+                <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="min-h-12 rounded-lg bg-ink px-6 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
+                  Next
+                </button>
+              </div>
             </div>
           </>
         )}
