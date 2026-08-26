@@ -268,6 +268,58 @@ const introCards: WebsiteAuthoringCard[] = [
     expected: { requiredTags: ["p"], htmlIncludes: ["Practical digital skills for confident learners."] },
     points: 10
   }),
+  card({
+    id: "web-intro-visible-page-repeat",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Build a visible page again",
+    scenario: "Apex needs a second simple page. Repeating the visible structure helps you type headings and paragraphs from memory.",
+    supportDocument: [
+      "Page title: Apex Practice Club",
+      "Main heading: Apex Practice Club",
+      "Paragraph: Students meet every Friday to improve practical ICT skills."
+    ],
+    goal: "Build a complete simple page with a heading and paragraph from a blank editor.",
+    steps: [
+      "Start with the doctype, html, head, title, body, and main structure.",
+      "Add the main heading inside main.",
+      "Add the paragraph below the heading and check the preview."
+    ],
+    starterHtml: blankHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "p"],
+      htmlIncludes: ["<!doctype html>", "Apex Practice Club", "Students meet every Friday to improve practical ICT skills."],
+      title: "Apex Practice Club"
+    },
+    points: 20
+  }),
+  card({
+    id: "web-intro-notice-repeat",
+    moduleId: "intro",
+    moduleTitle: "HTML Foundations",
+    title: "Build a study notice",
+    scenario: "The same structure is now needed for a different Apex notice, so you practise without copying the previous words.",
+    supportDocument: [
+      "Page title: Apex Study Notice",
+      "Main heading: Revision Clinic",
+      "Paragraph: Bring your workbook and complete one practical task before leaving."
+    ],
+    goal: "Create another visible HTML page from a clean start.",
+    steps: [
+      "Create the standard HTML document structure.",
+      "Set the title in the head.",
+      "Add the heading and paragraph inside main."
+    ],
+    starterHtml: blankHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "p"],
+      htmlIncludes: ["<!doctype html>", "Revision Clinic", "Bring your workbook and complete one practical task before leaving."],
+      title: "Apex Study Notice"
+    },
+    points: 20
+  }),
   ...[
     ["web-intro-section", "Create a section", "Use a section element for a related group of content.", "section"],
     ["web-intro-h2", "Add a section heading", "Use h2 for the Practice Sessions section heading.", "h2"],
@@ -360,6 +412,62 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     },
     teacherReview: ["Check that the image is relevant, proportionally sized, and not distorted."],
     points: 30
+  }),
+  card({
+    id: "web-media-profile-repeat",
+    moduleId: "text-media",
+    moduleTitle: "Text and Images",
+    title: "Build an image profile block",
+    scenario: "Apex wants a small feature block for the practice hub. Build the image structure again from a clean editor.",
+    supportDocument: [
+      "Page title: Apex Practice Feature",
+      "Heading: Practice of the Week",
+      "Image source: /assets/apex-study-card.svg",
+      "Alternative text: Apex practice feature card",
+      "Caption: Students practise one skill at a time."
+    ],
+    goal: "Build a page with a heading, figure, image, and caption from scratch.",
+    steps: [
+      "Create the standard HTML document structure.",
+      "Add the heading inside main.",
+      "Add figure, img, and figcaption using the support document."
+    ],
+    starterHtml: blankHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "figure", "img", "figcaption"],
+      images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex practice feature card" }],
+      htmlIncludes: ["Practice of the Week", "Students practise one skill at a time."],
+      title: "Apex Practice Feature"
+    },
+    points: 35
+  }),
+  card({
+    id: "web-media-section-repeat",
+    moduleId: "text-media",
+    moduleTitle: "Text and Images",
+    title: "Create a second media section",
+    scenario: "Students should recognise that the same image pattern can be reused for another section.",
+    supportDocument: [
+      "Section heading: Independent Study",
+      "Image source: /assets/apex-study-card.svg",
+      "Alternative text: Independent study practice card",
+      "Caption: Learners review the task before asking for help."
+    ],
+    goal: "Add a new section with an image and caption.",
+    steps: [
+      "Find the main element.",
+      "After the welcome section, add a new section with the heading.",
+      "Inside the section, add figure, img, and figcaption."
+    ],
+    starterHtml: apexStarterHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["section", "figure", "img", "figcaption"],
+      images: [{ srcIncludes: "apex-study-card.svg", alt: "Independent study practice card" }],
+      htmlIncludes: ["Independent Study", "Learners review the task before asking for help."]
+    },
+    points: 25
   })
 ];
 
@@ -457,6 +565,67 @@ const tableCards: WebsiteAuthoringCard[] = [
     },
     teacherReview: ["Check the table is readable and semantically correct."],
     points: 35
+  }),
+  card({
+    id: "web-table-top-players",
+    moduleId: "tables",
+    moduleTitle: "HTML Tables",
+    title: "Build a top players table",
+    scenario: "Apex wants students to present ranked information in a clear table, not as loose text.",
+    supportDocument: [
+      "Caption: Top practice players",
+      "Headers: Rank, Player, Score",
+      "Rows: 1/Amara/92; 2/Daniel/88; 3/Sofia/84; 4/Noah/81; 5/Lina/79"
+    ],
+    goal: "Build a five-row ranking table from a blank editor.",
+    steps: [
+      "Create the standard HTML document structure.",
+      "Inside main, add a heading and a table with a caption.",
+      "Use th for headings and td for the five player rows."
+    ],
+    starterHtml: blankHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "table", "caption", "tr", "th", "td"],
+      tableHeaders: ["Rank", "Player", "Score"],
+      htmlIncludes: ["Top practice players", "Amara", "Daniel", "Sofia", "Noah", "Lina"]
+    },
+    points: 40
+  }),
+  card({
+    id: "web-table-top-players-images",
+    moduleId: "tables",
+    moduleTitle: "HTML Tables",
+    title: "Build a players table with images",
+    scenario: "A harder table can include images, text, and numbers in the same structure.",
+    supportDocument: [
+      "Caption: Apex player gallery",
+      "Headers: Rank, Image, Player, Score",
+      "Use /assets/apex-study-card.svg for each image.",
+      "Alt text examples: Amara practice card, Daniel practice card, Sofia practice card, Noah practice card, Lina practice card"
+    ],
+    goal: "Create a table of five players with an image in each row.",
+    steps: [
+      "Start from a clean HTML document.",
+      "Build a table with the four headings shown.",
+      "Add five rows, including an img element with useful alt text in each row."
+    ],
+    starterHtml: blankHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "table", "caption", "tr", "th", "td", "img"],
+      tableHeaders: ["Rank", "Image", "Player", "Score"],
+      images: [
+        { srcIncludes: "apex-study-card.svg", alt: "Amara practice card" },
+        { srcIncludes: "apex-study-card.svg", alt: "Daniel practice card" },
+        { srcIncludes: "apex-study-card.svg", alt: "Sofia practice card" },
+        { srcIncludes: "apex-study-card.svg", alt: "Noah practice card" },
+        { srcIncludes: "apex-study-card.svg", alt: "Lina practice card" }
+      ],
+      htmlIncludes: ["Apex player gallery", "Amara", "Daniel", "Sofia", "Noah", "Lina"]
+    },
+    teacherReview: ["Check that images are inside the correct table cells and each image has meaningful alt text."],
+    points: 50
   })
 ];
 
@@ -511,6 +680,76 @@ ${tableStarterHtml}`,
     expected: { cssIncludes: ["body", "font-family", "main", "max-width", "section", "padding", "img", "max-width", "table", "border"] },
     teacherReview: ["Check colour contrast, spacing, consistency, and suitability for the target audience."],
     points: 35
+  }),
+  card({
+    id: "web-css-table-style-repeat",
+    moduleId: "css-layout",
+    moduleTitle: "CSS Layout",
+    title: "Style the ranking table",
+    scenario: "A finished table should be easier to read after CSS is applied.",
+    supportDocument: [
+      "Style table borders.",
+      "Add padding to th and td.",
+      "Give th a background colour.",
+      "Set img max-width so images do not dominate the table."
+    ],
+    goal: "Apply CSS to make the player table readable.",
+    steps: [
+      "Open the CSS tab.",
+      "Add rules for table, th, td, and img.",
+      "Check the preview shows clear borders, spacing, and controlled image sizes."
+    ],
+    starterHtml: `<!doctype html>
+<html>
+  <head>
+    <title>Apex Player Gallery</title>
+  </head>
+  <body>
+    <main>
+      <h1>Apex Player Gallery</h1>
+      <table>
+        <caption>Apex player gallery</caption>
+        <tr><th>Rank</th><th>Image</th><th>Player</th><th>Score</th></tr>
+        <tr><td>1</td><td><img src="/assets/apex-study-card.svg" alt="Amara practice card"></td><td>Amara</td><td>92</td></tr>
+        <tr><td>2</td><td><img src="/assets/apex-study-card.svg" alt="Daniel practice card"></td><td>Daniel</td><td>88</td></tr>
+        <tr><td>3</td><td><img src="/assets/apex-study-card.svg" alt="Sofia practice card"></td><td>Sofia</td><td>84</td></tr>
+      </table>
+    </main>
+  </body>
+</html>`,
+    starterCss: baseCss,
+    expected: { cssIncludes: ["table", "border", "th", "background", "td", "padding", "img", "max-width"] },
+    teacherReview: ["Check that table content is readable and images are not distorted."],
+    points: 35
+  }),
+  card({
+    id: "web-css-page-repeat",
+    moduleId: "css-layout",
+    moduleTitle: "CSS Layout",
+    title: "Style a fresh page from scratch",
+    scenario: "This final CSS repetition checks that students can style a different Apex page, not only the first example.",
+    supportDocument: [
+      "Use body font-family.",
+      "Use main max-width.",
+      "Use section padding.",
+      "Use h1 color.",
+      "Use a border on the notice box."
+    ],
+    goal: "Create a simple page and apply the requested CSS styles.",
+    steps: [
+      "Build a page with h1, section, h2, and paragraph in HTML.",
+      "Open CSS and add the listed selectors and properties.",
+      "Check that the preview visibly changes."
+    ],
+    starterHtml: blankHtml,
+    starterCss: "",
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "section", "h2", "p"],
+      cssIncludes: ["body", "font-family", "main", "max-width", "section", "padding", "h1", "color", "border"],
+      htmlIncludes: ["Apex", "Practice"]
+    },
+    teacherReview: ["Check that the student can explain which CSS rule changed which part of the page."],
+    points: 45
   })
 ];
 

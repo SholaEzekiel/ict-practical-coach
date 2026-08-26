@@ -507,15 +507,15 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
         {instructionsOpen && (
           <>
-            <div className="border-b border-line p-4">
+            <div className="border-b border-line px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <Pill>{currentModule?.title || card.category}</Pill>
                 <span className="text-sm font-semibold text-slate-500">{activeIndex + 1}/{moduleCardsForRoute.length}</span>
               </div>
-              <h1 className="mt-3 text-xl font-bold">Spreadsheet practice</h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Complete each goal to unlock the next task.</p>
-              <div className="mt-4">
-                <div className="mb-2 flex justify-between text-sm">
+              <h1 className="mt-2 text-lg font-bold">Spreadsheet practice</h1>
+              <p className="mt-1 text-sm leading-5 text-slate-600">Complete each goal to unlock the next task.</p>
+              <div className="mt-3">
+                <div className="mb-1.5 flex justify-between text-sm">
                   <span>Module progress</span>
                   <span>{completedModuleCards}/{moduleCardsForRoute.length}</span>
                 </div>

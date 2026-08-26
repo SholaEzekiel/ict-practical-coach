@@ -224,7 +224,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
         <button
           type="button"
           onClick={() => setInstructionsOpen((value) => !value)}
-          className="flex items-center justify-between gap-2 border-b border-line p-4 text-sm font-bold text-ocean hover:bg-mist"
+          className="flex items-center justify-between gap-2 border-b border-line p-3 text-sm font-semibold text-ocean hover:bg-mist"
           aria-expanded={instructionsOpen}
         >
           <span>{instructionsOpen ? "Hide guide" : "Guide"}</span>
@@ -233,18 +233,18 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
         {instructionsOpen && (
           <>
-            <div className="border-b border-line p-5">
+            <div className="border-b border-line px-4 py-3">
               <Link href="/subjects/ict/website-authoring" className="inline-flex items-center gap-2 text-sm font-semibold text-ocean">
                 <ArrowLeft size={16} aria-hidden="true" /> Website Authoring modules
               </Link>
-              <div className="mt-5 flex items-center justify-between gap-3">
+              <div className="mt-3 flex items-center justify-between gap-3">
                 <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-ocean">{module?.title}</span>
                 <span className="text-sm font-semibold text-slate-600">{activeIndex + 1}/{cards.length}</span>
               </div>
-              <h1 className="mt-4 text-2xl font-bold text-ink">{card.title}</h1>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{card.scenario}</p>
-              <div className="mt-4">
-                <div className="mb-2 flex justify-between text-sm font-medium">
+              <h1 className="mt-2 text-xl font-bold leading-7 text-ink">{card.title}</h1>
+              <p className="mt-1 text-sm leading-5 text-slate-600">{card.scenario}</p>
+              <div className="mt-3">
+                <div className="mb-1.5 flex justify-between text-sm font-medium">
                   <span>Progress</span>
                   <span>{completed.length}/{cards.length}</span>
                 </div>
@@ -258,8 +258,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               onCut={(event) => event.preventDefault()}
               onContextMenu={(event) => event.preventDefault()}
             >
-              <section className="rounded-lg border border-line bg-mist p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
+              <section className="rounded-lg border border-line bg-gradient-to-br from-mist to-white p-4">
+                <p className="text-sm font-semibold text-ocean">Goal</p>
                 <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>
               </section>
 
@@ -301,20 +301,20 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               )}
             </div>
 
-            <div className="space-y-4 border-t border-line p-5">
-              <button type="button" onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
+            <div className="border-t border-line bg-white p-4">
+              <button type="button" onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
                 <CheckCircle2 size={18} aria-hidden="true" /> Check final result
               </button>
-              <div className="flex justify-end gap-3">
+              <div className="mt-3 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={previousCard}
                   disabled={activeIndex === 0}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-line bg-white px-5 py-3 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:text-slate-300"
+                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                 >
-                  <ChevronLeft size={18} aria-hidden="true" /> Previous
+                  <ChevronLeft size={16} aria-hidden="true" /> Previous
                 </button>
-                <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="min-h-12 rounded-lg bg-ink px-6 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
+                <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">
                   Next
                 </button>
               </div>
