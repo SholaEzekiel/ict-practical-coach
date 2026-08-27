@@ -8,6 +8,7 @@ export type WebsiteExpectedResult = {
   htmlIncludes?: string[];
   requiredTags?: string[];
   images?: Array<{ srcIncludes?: string; alt?: string }>;
+  uploadedPaths?: string[];
   links?: Array<{ text?: string; href?: string }>;
   cssIncludes?: string[];
   tableHeaders?: string[];
@@ -334,13 +335,13 @@ const introCards: WebsiteAuthoringCard[] = [
     points: 20
   }),
   ...[
-    ["web-intro-section", "Create a section", "Use a section element for a related group of content.", "section"],
-    ["web-intro-h2", "Add a section heading", "Use h2 for the Practice Sessions section heading.", "h2"],
-    ["web-intro-second-paragraph", "Add source text to the section", "Add the practice sessions paragraph inside the section.", "p"],
-    ["web-intro-header", "Add a page header", "Use header to group the page heading and subtitle.", "header"],
-    ["web-intro-footer", "Add a simple footer", "Use footer for the copyright line.", "footer"],
-    ["web-intro-comment", "Add an HTML comment", "Use a comment to label the main content area.", "<!-- main content -->"]
-  ].map(([id, title, goal, tag]) => card({
+    ["web-intro-section", "Create a section", "Use a section element for a related group of content.", "section", "Inside main, wrap the Practice Sessions heading and paragraph in <section></section>."],
+    ["web-intro-h2", "Add a section heading", "Use h2 for the Practice Sessions section heading.", "h2", "Inside the section, type <h2>Practice Sessions</h2> before the paragraph."],
+    ["web-intro-second-paragraph", "Add source text to the section", "Add the practice sessions paragraph inside the section.", "p", "Below the h2, type the Practice Sessions paragraph inside <p></p>."],
+    ["web-intro-header", "Add a page header", "Use header to group the page heading and subtitle.", "header", "Move or place the h1 and subtitle paragraph inside <header></header>."],
+    ["web-intro-footer", "Add a simple footer", "Use footer for the copyright line.", "footer", "Before </body>, add <footer>Apex Study Hub practice page</footer>."],
+    ["web-intro-comment", "Add an HTML comment", "Use a comment to label the main content area.", "<!-- main content -->", "Above the main element, type <!-- main content -->."]
+  ].map(([id, title, goal, tag, action]) => card({
     id,
     moduleId: "intro",
     moduleTitle: "HTML Foundations",
@@ -348,7 +349,7 @@ const introCards: WebsiteAuthoringCard[] = [
     scenario: "Practise one building block before moving to full page tasks.",
     supportDocument: introSupport,
     goal,
-    steps: ["Read the required element in the goal.", "Find the correct place in the HTML.", "Add the tag and text, then check the preview."],
+    steps: ["Use the existing Apex page as your starting file.", action, "Check that the source has the correct opening and closing tags."],
     starterHtml: apexStarterHtml,
     starterCss: baseCss,
     expected: tag.startsWith("<!--") ? { htmlIncludes: [tag] } : { requiredTags: [tag] },
@@ -377,7 +378,7 @@ const introCards: WebsiteAuthoringCard[] = [
 
 const textMediaCards: WebsiteAuthoringCard[] = [
   ...[
-    ["web-media-add-image", "Insert an image", "Use /assets/apex-study-card.svg as the image source.", "Apex study practice card"],
+    ["web-media-add-image", "Insert an image", "Upload apex-study-card.svg and use images/apex-study-card.svg as the image source.", "Apex study practice card"],
     ["web-media-alt-text", "Add alternative text", "Set the alt attribute to Apex study practice card.", "Apex study practice card"],
     ["web-media-caption", "Add an image caption", "Add the caption Guided practice workspace.", "Guided practice workspace"],
     ["web-media-figure", "Use a figure element", "Wrap the image and caption in a figure element.", "figure"],
@@ -391,13 +392,14 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     title,
     scenario: "The Apex web page needs a clear image area with useful text for users and screen readers.",
     supportDocument: [
-      "Image source: /assets/apex-study-card.svg",
+      "Upload file: apex-study-card.svg",
+      "Use this relative path: images/apex-study-card.svg",
       "Alternative text: Apex study practice card",
       "Caption: Guided practice workspace",
       "Section heading: Visual preview"
     ],
     goal,
-    steps: ["Find the correct place inside main.", "Add or edit the required image-related element.", "Check the preview and the attribute spelling."],
+    steps: ["Use Add activity file to upload the supplied image.", "Place the image block inside main, below the session text.", "Add or edit the image element using the shown relative path."],
     starterHtml: apexPageHtml,
     starterCss: baseCss,
     expected: {
@@ -413,9 +415,9 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     moduleTitle: "Text and Images",
     title: "Build the media block",
     scenario: "A practical task may ask for a supplied image, meaningful alt text, and a caption in a suitable place.",
-    supportDocument: ["Use the Apex image, alt text, caption, and a section heading called Visual preview."],
+    supportDocument: ["Upload file: apex-study-card.svg", "Use this relative path: images/apex-study-card.svg", "Use the Apex image, alt text, caption, and a section heading called Visual preview."],
     goal: "Create a complete image block using section, figure, img, and figcaption.",
-    steps: ["Create a section called Visual preview.", "Inside it, add a figure.", "Inside figure, add the image and figcaption."],
+    steps: ["Upload the supplied image and note the relative path.", "Create a section called Visual preview.", "Inside figure, add the image path, alt text, and figcaption."],
     starterHtml: apexPageHtml,
     starterCss: `${baseCss}\n.hero-image {\n  max-width: 320px;\n}\n`,
     expected: {
@@ -435,7 +437,8 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: [
       "Page title: Apex Practice Feature",
       "Heading: Practice of the Week",
-      "Image source: /assets/apex-study-card.svg",
+      "Upload file: apex-study-card.svg",
+      "Use this relative path: images/apex-study-card.svg",
       "Alternative text: Apex practice feature card",
       "Caption: Students practise one skill at a time."
     ],
@@ -443,7 +446,7 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     steps: [
       "Create the standard HTML document structure.",
       "Add the heading inside main.",
-      "Add figure, img, and figcaption using the support document."
+      "Upload the image, then add figure, img, and figcaption using the support document."
     ],
     starterHtml: blankHtml,
     starterCss: baseCss,
@@ -463,7 +466,8 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     scenario: "Students should recognise that the same image pattern can be reused for another section.",
     supportDocument: [
       "Section heading: Independent Study",
-      "Image source: /assets/apex-study-card.svg",
+      "Upload file: apex-study-card.svg",
+      "Use this relative path: images/apex-study-card.svg",
       "Alternative text: Independent study practice card",
       "Caption: Learners review the task before asking for help."
     ],
@@ -471,7 +475,7 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     steps: [
       "Find the main element.",
       "After the welcome section, add a new section with the heading.",
-      "Inside the section, add figure, img, and figcaption."
+      "Upload the image, then add figure, img, and figcaption."
     ],
     starterHtml: apexStarterHtml,
     starterCss: baseCss,
@@ -492,7 +496,7 @@ const linkCards: WebsiteAuthoringCard[] = [
     ["web-link-register", "Create a Register section link", "Register", "#register"],
     ["web-link-contact", "Create a Contact link", "Contact", "contact.html"],
     ["web-link-email", "Create an email link", "Email Apex", "mailto:hello@apexstudyhub.example"],
-    ["web-link-image", "Create an image asset link", "Image file", "/assets/apex-study-card.svg"]
+    ["web-link-image", "Create an image file link", "Image file", "images/apex-study-card.svg"]
   ].map(([id, title, text, href]) => card({
     id,
     moduleId: "links-navigation",
@@ -614,7 +618,8 @@ const tableCards: WebsiteAuthoringCard[] = [
     supportDocument: [
       "Caption: Apex player gallery",
       "Headers: Rank, Image, Player, Score",
-      "Use /assets/apex-study-card.svg for each image.",
+      "Upload file: apex-study-card.svg",
+      "Use images/apex-study-card.svg for each image.",
       "Alt text examples: Amara practice card, Daniel practice card, Sofia practice card, Noah practice card, Lina practice card"
     ],
     goal: "Create a table of five players with an image in each row.",
@@ -666,7 +671,7 @@ const cssCards: WebsiteAuthoringCard[] = [
     steps: ["Open the CSS tab.", "Find or create the selector shown in the brief.", "Add the requested CSS property with a sensible value."],
     starterHtml: `${apexPageHtml}
 <figure>
-  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <img src="images/apex-study-card.svg" alt="Apex study practice card">
   <figcaption>Guided practice workspace</figcaption>
 </figure>
 ${tableStarterHtml}`,
@@ -685,7 +690,7 @@ ${tableStarterHtml}`,
     steps: ["Style body and main.", "Style nav and section spacing.", "Style images and tables so the preview is readable."],
     starterHtml: `${apexPageHtml}
 <figure>
-  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <img src="images/apex-study-card.svg" alt="Apex study practice card">
   <figcaption>Guided practice workspace</figcaption>
 </figure>
 ${tableStarterHtml}`,
@@ -723,9 +728,9 @@ ${tableStarterHtml}`,
       <table>
         <caption>Apex player gallery</caption>
         <tr><th>Rank</th><th>Image</th><th>Player</th><th>Score</th></tr>
-        <tr><td>1</td><td><img src="/assets/apex-study-card.svg" alt="Amara practice card"></td><td>Amara</td><td>92</td></tr>
-        <tr><td>2</td><td><img src="/assets/apex-study-card.svg" alt="Daniel practice card"></td><td>Daniel</td><td>88</td></tr>
-        <tr><td>3</td><td><img src="/assets/apex-study-card.svg" alt="Sofia practice card"></td><td>Sofia</td><td>84</td></tr>
+        <tr><td>1</td><td><img src="images/apex-study-card.svg" alt="Amara practice card"></td><td>Amara</td><td>92</td></tr>
+        <tr><td>2</td><td><img src="images/apex-study-card.svg" alt="Daniel practice card"></td><td>Daniel</td><td>88</td></tr>
+        <tr><td>3</td><td><img src="images/apex-study-card.svg" alt="Sofia practice card"></td><td>Sofia</td><td>84</td></tr>
       </table>
     </main>
   </body>
@@ -809,7 +814,7 @@ const examCards: WebsiteAuthoringCard[] = [
     moduleTitle: "Exam Website Build",
     title: `Exam practice: ${name}`,
     scenario: "Practise one part of the final website build before attempting the full Apex homepage task.",
-    supportDocument: ["Use the Apex page brief and assets.", "Check your browser preview after editing."],
+    supportDocument: ["Use the Apex page brief and any activity files supplied for this task.", "Check your browser preview after editing."],
     goal: `Complete the ${name} part of the page.`,
     steps: ["Read the support document.", "Edit the HTML or CSS.", "Check the preview and use teacher review for presentation."],
     starterHtml: apexPageHtml,
@@ -839,8 +844,6 @@ const cleanPracticeTopics = [
 ] as const;
 
 const introGuidedSupplement = [
-  ["web-intro-meta-charset", "Add the character set", "The browser should read text using a modern character set.", ["Add <meta charset=\"UTF-8\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["charset=\"UTF-8\""] }],
-  ["web-intro-meta-viewport", "Add the viewport setting", "Mobile browsers need a viewport instruction for responsive pages.", ["Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["viewport", "width=device-width"] }],
   ["web-intro-h3-subheading", "Use a smaller heading", "A section sometimes needs a heading below h2.", ["Add an h3 heading that says Morning tasks."], { requiredTags: ["h3"], htmlIncludes: ["Morning tasks"] }],
   ["web-intro-h4-subheading", "Use an h4 heading", "Long pages need lower-level headings for smaller groups.", ["Add an h4 heading that says Teacher checks."], { requiredTags: ["h4"], htmlIncludes: ["Teacher checks"] }],
   ["web-intro-line-break", "Add a line break", "Some addresses need a controlled line break.", ["Add a br element between Apex Study Hub and Online Practice."], { requiredTags: ["br"], htmlIncludes: ["Apex Study Hub", "Online Practice"] }],
@@ -852,17 +855,35 @@ const introGuidedSupplement = [
   ["web-intro-unordered-list", "Build a bullet list", "Short items can be easier to read as a list.", ["Create a ul list with Spreadsheet, Documents, and Websites."], { requiredTags: ["ul", "li"], htmlIncludes: ["Spreadsheet", "Documents", "Websites"] }],
   ["web-intro-ordered-list", "Build a numbered list", "Steps should be coded as an ordered list.", ["Create an ol list with Read, Edit, Check."], { requiredTags: ["ol", "li"], htmlIncludes: ["Read", "Edit", "Check"] }],
   ["web-intro-nested-list", "Build a nested list", "A nested list shows detail under a main item.", ["Create a list where ICT contains Spreadsheet and Web Authoring as nested items."], { requiredTags: ["ul", "li"], htmlIncludes: ["ICT", "Spreadsheet", "Web Authoring"] }],
-  ["web-intro-comment-second", "Add a developer comment", "Comments help organise a source file without appearing in the browser.", ["Add the comment <!-- Apex page content --> above main."], { htmlIncludes: ["<!-- Apex page content -->"] }]
+  ["web-intro-comment-second", "Add a developer comment", "Comments help organise a source file without appearing in the browser.", ["Add the comment <!-- Apex page content --> above main."], { htmlIncludes: ["<!-- Apex page content -->"] }],
+  ["web-intro-meta-charset", "Add the character set", "You now know visible body content. Metadata is different: it belongs in head and helps the browser understand the page.", ["Add <meta charset=\"UTF-8\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["charset=\"UTF-8\""] }],
+  ["web-intro-meta-viewport", "Add the viewport setting", "A responsive page also needs viewport metadata inside head so phone and tablet browsers scale it correctly.", ["Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["viewport", "width=device-width"] }]
 ] as const;
+
+function introSupplementSteps(id: string, providedSteps: readonly string[]) {
+  if (id.includes("meta")) {
+    return ["Find the head element near the top of the document.", ...providedSteps, "Check that this code is inside head, not inside body."];
+  }
+  if (id.includes("list")) {
+    return ["Find the main content area.", ...providedSteps, "Check that each item is inside its own li element."];
+  }
+  if (id.includes("line-break")) {
+    return ["Find the address-style text area in main.", ...providedSteps, "Use br only for the line break, not for spacing out sections."];
+  }
+  if (id.includes("comment")) {
+    return ["Find the line above main.", ...providedSteps, "Check that the comment does not appear in the browser preview."];
+  }
+  return ["Find the visible content inside main.", ...providedSteps, "Check that the new element appears in the correct section of the preview."];
+}
 
 const introSupplementCards: WebsiteAuthoringCard[] = [
   ...introGuidedSupplement.map(([id, title, scenario, steps, expected]) => moduleCard("intro", "HTML Foundations", {
     id,
     title,
     scenario,
-    supportDocument: ["Use the Apex Study Hub page already started in the editor."],
+    supportDocument: ["Current file: index.html", "Project: Apex Study Hub Open Day", scenario],
     goal: title,
-    steps: ["Find the correct location in the HTML.", ...steps, "Check that the preview still shows the page normally."],
+    steps: introSupplementSteps(id, steps),
     starterHtml: apexStarterHtml,
     expected: expected as unknown as WebsiteExpectedResult,
     points: 15
@@ -893,8 +914,8 @@ const mediaGuidedSupplement = [
   ["media-source-section", "Add a source paragraph", "Add a paragraph that says Source image supplied by Apex Study Hub.", { requiredTags: ["p"], htmlIncludes: ["Source image supplied by Apex Study Hub"] }],
   ["media-two-images", "Add a second image", "Add a second Apex image with alt text Apex support document card.", { requiredTags: ["img"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex support document card" }] }],
   ["media-image-list", "Place image notes in a list", "Add a list with Image source, Alternative text, and Caption.", { requiredTags: ["ul", "li"], htmlIncludes: ["Image source", "Alternative text", "Caption"] }],
-  ["media-audio", "Add audio controls", "Add an audio element with controls and a source called apex-intro.mp3.", { requiredTags: ["audio", "source"], htmlIncludes: ["controls", "apex-intro.mp3"] }],
-  ["media-video", "Add video controls", "Add a video element with controls and a source called apex-tour.mp4.", { requiredTags: ["video", "source"], htmlIncludes: ["controls", "apex-tour.mp4"] }],
+  ["media-audio", "Add audio controls", "Upload apex-intro.mp3 and add an audio element with controls using media/apex-intro.mp3.", { requiredTags: ["audio", "source"], htmlIncludes: ["controls", "media/apex-intro.mp3"], uploadedPaths: ["media/apex-intro.mp3"] }],
+  ["media-video", "Add video controls", "Upload apex-tour.mp4 and add a video element with controls using media/apex-tour.mp4.", { requiredTags: ["video", "source"], htmlIncludes: ["controls", "media/apex-tour.mp4"], uploadedPaths: ["media/apex-tour.mp4"] }],
   ["media-fallback", "Add media fallback text", "Add fallback text that says Your browser cannot play this Apex media.", { htmlIncludes: ["Your browser cannot play this Apex media"] }],
   ["media-absolute-image", "Use an absolute image path example", "Add an image with src=\"https://example.com/apex-practice.png\" and useful alt text.", { requiredTags: ["img"], images: [{ srcIncludes: "https://example.com/apex-practice.png", alt: "Apex online practice preview" }] }],
   ["media-relative-path", "Use a relative image path", "Add an image source images/apex-card.png with alt text Apex card from images folder.", { requiredTags: ["img"], images: [{ srcIncludes: "images/apex-card.png", alt: "Apex card from images folder" }] }],
@@ -911,9 +932,9 @@ const mediaCleanTopics = cleanPracticeTopics.map(([slug, topic, sentence]) => mo
   id: `web-media-clean-${slug}`,
   title: `Clean Sheet Practice: ${topic} media page`,
   scenario: "Create a visible media block from a blank editor using semantic image elements.",
-  supportDocument: [`Page title: ${topic} Media`, `Heading: ${topic}`, `Paragraph: ${sentence}`, "Image: /assets/apex-study-card.svg", `Alt text: ${topic} practice image`, `Caption: ${topic} preview card`],
+  supportDocument: [`Page title: ${topic} Media`, `Heading: ${topic}`, `Paragraph: ${sentence}`, "Upload file: apex-study-card.svg", "Use this relative path: images/apex-study-card.svg", `Alt text: ${topic} practice image`, `Caption: ${topic} preview card`],
   goal: `Build a media page for ${topic}.`,
-  steps: ["Create the full HTML document structure.", "Add h1 and paragraph source text.", "Add figure, img, and figcaption with the supplied source, alt text, and caption."],
+  steps: ["Create the full HTML document structure.", "Upload the image file and use its relative path.", "Add figure, img, and figcaption with the supplied source, alt text, and caption."],
   starterHtml: blankHtml,
   expected: {
     requiredTags: ["html", "head", "title", "body", "main", "h1", "p", "figure", "img", "figcaption"],
@@ -929,12 +950,12 @@ const mediaSupplementCards: WebsiteAuthoringCard[] = [
     id: `web-media-${slug}`,
     title,
     scenario: "The page uses media to make information clearer, but the HTML must still be accessible.",
-    supportDocument: ["Image source: /assets/apex-study-card.svg", instruction],
+    supportDocument: ["Upload file: apex-study-card.svg", "Use this relative path when an image is required: images/apex-study-card.svg", instruction],
     goal: title,
     steps: ["Find the image or media area in main.", instruction, "Check the preview and spelling of attributes."],
     starterHtml: `${apexPageHtml}
 <figure>
-  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <img src="images/apex-study-card.svg" alt="Apex study practice card">
   <figcaption>Guided practice workspace</figcaption>
 </figure>`,
     expected: expected as unknown as WebsiteExpectedResult,
@@ -965,7 +986,7 @@ const linkGuidedSupplement = [
   ["multi-nav-ict", "Add ICT to a multi-link nav", "ICT", "ict.html", ""],
   ["button-style-link", "Create a classed call-to-action link", "Start practice", "start.html", "class=\"button-link\""],
   ["footer-contact", "Create a footer contact link", "Contact Apex", "contact.html", ""],
-  ["asset-link", "Link to the Apex image asset", "Open card image", "/assets/apex-study-card.svg", ""]
+  ["asset-link", "Link to an uploaded image file", "Open card image", "images/apex-study-card.svg", ""]
 ] as const;
 
 const linkSupplementCards: WebsiteAuthoringCard[] = [
@@ -975,7 +996,11 @@ const linkSupplementCards: WebsiteAuthoringCard[] = [
     scenario: "Navigation must take users to the right place without confusing the page structure.",
     supportDocument: [`Link text: ${text || "Image link only"}`, `Href: ${href}`, extra ? `Extra attribute: ${extra}` : "No extra attribute required."],
     goal: title,
-    steps: ["Find the nav, list, image, or footer area.", "Add the required a element and href.", "Check the link text, target, and any extra attribute."],
+    steps: [
+      text ? `Type the link text as ${text}.` : "Select or add the image that will become the clickable link.",
+      `Set the href attribute to ${href}.`,
+      extra ? `Add the extra attribute ${extra}.` : "Check that no extra attribute has been added unless the brief asks for it."
+    ],
     starterHtml: apexPageHtml,
     expected: {
       requiredTags: ["a"],
@@ -1031,7 +1056,13 @@ const tableSupplementCards: WebsiteAuthoringCard[] = [
     scenario: "Tables convert raw data into rows and columns so users can compare information quickly.",
     supportDocument: values.map((value) => `Required: ${value}`),
     goal: title,
-    steps: ["Find or create the table area.", "Add the required table structure or styling.", "Check that the browser preview shows structured data."],
+    steps: [
+      title.includes("CSS") || values.some((value) => ["border", "padding", "background", "width", "text-align"].includes(value))
+        ? "Open the CSS tab and find or create the table-related selector."
+        : "Find the existing table, or create a table inside main if there is not one yet.",
+      values.length > 1 ? `Add these required values: ${values.join(", ")}.` : `Add ${values[0]} in the correct table position.`,
+      "Check that rows, headings, and data cells are nested inside the table correctly."
+    ],
     starterHtml: tableStarterHtml,
     starterCss: baseCss,
     expected: {
@@ -1086,7 +1117,13 @@ const cssSupplementCards: WebsiteAuthoringCard[] = [
     scenario: "CSS controls presentation while HTML keeps the page structure meaningful.",
     supportDocument: [instruction],
     goal: title,
-    steps: ["Read whether the change belongs in HTML, CSS, or both.", "Make the requested change.", "Check that the page still previews correctly."],
+    steps: [
+      instruction.includes("HTML") || instruction.includes("class=") || instruction.includes("id=") || instruction.includes("<")
+        ? "Make the required HTML change first."
+        : "Open the CSS tab.",
+      instruction,
+      "Check the browser preview and confirm the page structure has not been damaged."
+    ],
     starterHtml: apexPageHtml,
     starterCss: baseCss,
     expected: expected as unknown as WebsiteExpectedResult,
@@ -1144,9 +1181,13 @@ const examSupplementCards: WebsiteAuthoringCard[] = [
     id: `web-exam-guided-${index + 1}`,
     title: `Exam build step: ${title}`,
     scenario: "Practise one part of a longer practical website task before attempting the full clean build.",
-    supportDocument: ["Project: Apex Study Hub Open Day", "Use the current Apex homepage starter and improve the named part."],
+    supportDocument: ["Project: Apex Study Hub Open Day", "Improve the named part of the current page. Upload apex-study-card.svg first when the step needs an image."],
     goal: title,
-    steps: ["Read the named part of the project.", "Edit the HTML or CSS so that part is present.", "Check the preview and run the result check."],
+    steps: [
+      `Focus only on this part of the build: ${title}.`,
+      index >= 5 && index < 8 ? "Upload the supplied image before adding or editing image code." : "Use the current Apex source as the working file.",
+      index >= 15 && index < 21 ? "Open the CSS tab and add the required style rule." : "Edit the matching HTML section and keep the rest of the page intact."
+    ],
     starterHtml: apexPageHtml,
     starterCss: baseCss,
     expected: index < 5
@@ -1174,7 +1215,8 @@ const examSupplementCards: WebsiteAuthoringCard[] = [
       "Navigation: Home/index.html, Sessions/#sessions, Contact/contact.html",
       "Table headings: Activity, Room, Time",
       "Rows: Coding/Lab 1/09:00; Documents/Lab 2/10:00; Websites/Lab 3/11:00",
-      "Image: /assets/apex-study-card.svg",
+      "Upload file: apex-study-card.svg",
+      "Use this relative path: images/apex-study-card.svg",
       `Alt text: ${topic} website image`,
       "CSS: body font-family, main max-width, nav display flex, section padding, img max-width, table border"
     ],

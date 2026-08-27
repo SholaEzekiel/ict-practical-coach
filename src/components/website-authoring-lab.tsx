@@ -5,7 +5,7 @@ import Link from "next/link";
 import MonacoEditor from "@monaco-editor/react";
 import grapesjs from "grapesjs";
 import type { Editor as GrapesEditor } from "grapesjs";
-import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen, Upload } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
@@ -17,6 +17,13 @@ type Feedback = {
 
 type WebsiteAuthoringLabProps = {
   moduleId?: string;
+};
+
+type ActivityFile = {
+  name: string;
+  type: string;
+  url: string;
+  virtualPath: string;
 };
 
 function normalise(value: string) {
@@ -38,7 +45,28 @@ function hasPreviewableDocument(html: string) {
   return /<!doctype\s+html>/i.test(html) && sourceHasTag(html, "html") && sourceHasTag(html, "head") && sourceHasTag(html, "body");
 }
 
-function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string): Feedback {
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getActivityPath(file: File) {
+  const safeName = file.name.trim().replace(/[^a-zA-Z0-9._-]/g, "-").toLowerCase();
+  const folder = file.type.startsWith("audio/") || file.type.startsWith("video/") ? "media" : "images";
+  return `${folder}/${safeName}`;
+}
+
+function resolveActivityFilePaths(source: string, files: ActivityFile[]) {
+  return files.reduce((current, file) => {
+    const escapedPath = escapeRegExp(file.virtualPath);
+    const escapedName = escapeRegExp(file.name.toLowerCase());
+    return current
+      .replace(new RegExp(`(["'])${escapedPath}\\1`, "gi"), `$1${file.url}$1`)
+      .replace(new RegExp(`(["'])(images|media)/${escapedName}\\1`, "gi"), `$1${file.url}$1`)
+      .replace(new RegExp(`url\\((["']?)${escapedPath}\\1\\)`, "gi"), `url($1${file.url}$1)`);
+  }, source);
+}
+
+function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, activityFiles: ActivityFile[]): Feedback {
   const messages: string[] = [];
   const parser = new DOMParser();
   const document = parser.parseFromString(html, "text/html");
@@ -75,6 +103,16 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string):
       return srcOk && altOk;
     });
     if (!found) messages.push("Add the required image with the correct source and alt text.");
+
+    if (expectedImage.srcIncludes && !/^https?:\/\//i.test(expectedImage.srcIncludes)) {
+      const uploadFound = activityFiles.some((file) => file.virtualPath.includes(expectedImage.srcIncludes || "") || expectedImage.srcIncludes?.includes(file.name.toLowerCase()));
+      if (!uploadFound) messages.push(`Upload the required media file so ${expectedImage.srcIncludes} can preview.`);
+    }
+  });
+
+  card.expected.uploadedPaths?.forEach((path) => {
+    const uploadFound = activityFiles.some((file) => normalise(file.virtualPath) === normalise(path));
+    if (!uploadFound) messages.push(`Upload ${path} in Activity files.`);
   });
 
   card.expected.links?.forEach((expectedLink) => {
@@ -118,11 +156,15 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const card = cards[activeIndex];
   const [html, setHtml] = useState(card?.starterHtml || "");
   const [css, setCss] = useState(card?.starterCss || "");
+  const [activityFiles, setActivityFiles] = useState<ActivityFile[]>([]);
   const visualEditorRef = useRef<GrapesEditor | null>(null);
   const visualContainerRef = useRef<HTMLDivElement>(null);
   const editorPasteCleanupRef = useRef<(() => void) | null>(null);
   const syncingFromCodeRef = useRef(false);
+  const activityFilesRef = useRef<ActivityFile[]>([]);
   const previewReady = hasPreviewableDocument(html);
+  const resolvedHtml = useMemo(() => resolveActivityFilePaths(html, activityFiles), [activityFiles, html]);
+  const resolvedCss = useMemo(() => resolveActivityFilePaths(css, activityFiles), [activityFiles, css]);
 
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
@@ -143,7 +185,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
           { id: "heading", label: "Heading", content: "<h1>Apex Study Hub Open Day</h1>" },
           { id: "paragraph", label: "Paragraph", content: "<p>Practical digital skills for confident learners.</p>" },
           { id: "link", label: "Link", content: '<a href="index.html">Home</a>' },
-          { id: "image", label: "Image", content: '<img src="/assets/apex-study-card.svg" alt="Apex study practice card">' },
+          { id: "image", label: "Image", content: '<img src="images/apex-study-card.svg" alt="Apex uploaded practice image">' },
           {
             id: "table",
             label: "Table",
@@ -168,14 +210,24 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   }, []);
 
   useEffect(() => {
+    activityFilesRef.current = activityFiles;
+  }, [activityFiles]);
+
+  useEffect(() => {
+    return () => {
+      activityFilesRef.current.forEach((file) => URL.revokeObjectURL(file.url));
+    };
+  }, []);
+
+  useEffect(() => {
     if (!visualEditorRef.current) return;
     syncingFromCodeRef.current = true;
-    visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "");
-    visualEditorRef.current.setStyle(css);
+    visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(resolvedHtml) : "");
+    visualEditorRef.current.setStyle(resolvedCss);
     queueMicrotask(() => {
       syncingFromCodeRef.current = false;
     });
-  }, [html, css]);
+  }, [css, html, resolvedCss, resolvedHtml]);
 
   function loadCard(index: number) {
     const next = cards[index];
@@ -187,7 +239,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     setFeedback(null);
     if (visualEditorRef.current) {
       syncingFromCodeRef.current = true;
-      visualEditorRef.current.setComponents(hasPreviewableDocument(next.starterHtml) ? getBodyInnerHtml(next.starterHtml) : "");
+      visualEditorRef.current.setComponents(hasPreviewableDocument(next.starterHtml) ? getBodyInnerHtml(resolveActivityFilePaths(next.starterHtml, activityFilesRef.current)) : "");
       visualEditorRef.current.setStyle(next.starterCss);
       queueMicrotask(() => {
         syncingFromCodeRef.current = false;
@@ -197,19 +249,37 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
   function checkWork() {
     if (!card) return;
-    const result = validateWebsite(card, html, css);
+    const result = validateWebsite(card, html, css, activityFiles);
     setFeedback(result);
     if (result.ok) setCompleted((items) => (items.includes(card.id) ? items : [...items, card.id]));
   }
 
   function previewWebsite() {
-    const safeCss = css.replace(/<\/style/gi, "<\\/style");
+    const safeCss = resolvedCss.replace(/<\/style/gi, "<\\/style");
     const source = hasPreviewableDocument(html)
-      ? html.replace(/<\/head>/i, `<style>${safeCss}</style></head>`)
-      : `<!doctype html><html><head><title>Apex Preview</title><style>${safeCss}</style></head><body>${html}</body></html>`;
+      ? resolvedHtml.replace(/<\/head>/i, `<style>${safeCss}</style></head>`)
+      : `<!doctype html><html><head><title>Apex Preview</title><style>${safeCss}</style></head><body>${resolvedHtml}</body></html>`;
     const previewUrl = URL.createObjectURL(new Blob([source], { type: "text/html" }));
     window.open(previewUrl, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60000);
+  }
+
+  function addActivityFiles(files: FileList | null) {
+    if (!files?.length) return;
+    const uploaded = Array.from(files).map((file) => ({
+      name: file.name.toLowerCase(),
+      type: file.type || "application/octet-stream",
+      url: URL.createObjectURL(file),
+      virtualPath: getActivityPath(file)
+    }));
+
+    setActivityFiles((current) => {
+      const nextPaths = new Set(uploaded.map((file) => file.virtualPath));
+      current.forEach((file) => {
+        if (nextPaths.has(file.virtualPath)) URL.revokeObjectURL(file.url);
+      });
+      return [...current.filter((file) => !nextPaths.has(file.virtualPath)), ...uploaded];
+    });
   }
 
   function nextCard() {
@@ -350,7 +420,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       </aside>
 
       <section className="min-h-[520px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0" onPaste={(event) => event.preventDefault()}>
-        <div className="flex items-center justify-between border-b border-line p-4">
+        <div className="border-b border-line p-4">
+          <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="font-bold">Code editor</h2>
             <p className="mt-1 text-sm text-slate-600">Edit source code with HTML and CSS tabs.</p>
@@ -365,6 +436,31 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <Code2 size={16} aria-hidden="true" /> CSS
               </button>
             </div>
+          </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-xs font-bold text-ocean hover:bg-mist">
+              <Upload size={15} aria-hidden="true" /> Add activity file
+              <input
+                type="file"
+                accept="image/*,audio/*,video/*"
+                multiple
+                className="sr-only"
+                onChange={(event) => {
+                  addActivityFiles(event.currentTarget.files);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
+            {activityFiles.length ? (
+              activityFiles.map((file) => (
+                <code key={file.virtualPath} className="rounded-md bg-mist px-2 py-1 text-xs font-semibold text-slate-700">
+                  {file.virtualPath}
+                </code>
+              ))
+            ) : (
+              <span className="text-xs text-slate-500">Upload images, audio, or video, then use the shown relative path in your HTML.</span>
+            )}
           </div>
         </div>
         <div className="h-full min-h-0 bg-[#101820]">
