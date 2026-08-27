@@ -202,8 +202,18 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     if (result.ok) setCompleted((items) => (items.includes(card.id) ? items : [...items, card.id]));
   }
 
+  function previewWebsite() {
+    const safeCss = css.replace(/<\/style/gi, "<\\/style");
+    const source = hasPreviewableDocument(html)
+      ? html.replace(/<\/head>/i, `<style>${safeCss}</style></head>`)
+      : `<!doctype html><html><head><title>Apex Preview</title><style>${safeCss}</style></head><body>${html}</body></html>`;
+    const previewUrl = URL.createObjectURL(new Blob([source], { type: "text/html" }));
+    window.open(previewUrl, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60000);
+  }
+
   function nextCard() {
-    if (activeIndex === cards.length - 1) return;
+    if (!completed.includes(card.id) || activeIndex === cards.length - 1) return;
     loadCard(activeIndex + 1);
   }
 
@@ -213,6 +223,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   }
 
   if (!card) return null;
+
+  const currentComplete = completed.includes(card.id);
 
   const layoutClass = instructionsOpen
     ? "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]"
@@ -305,7 +317,15 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               <button type="button" onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
                 <CheckCircle2 size={18} aria-hidden="true" /> Check final result
               </button>
-              <div className="mt-3 flex justify-end gap-2">
+              <div className="mt-3 flex items-center gap-2">
+                <span className="mr-auto text-sm font-semibold text-ink">{currentComplete ? card.points : 0} points</span>
+                <button
+                  type="button"
+                  onClick={previewWebsite}
+                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-ocean hover:bg-mist"
+                >
+                  <Eye size={16} aria-hidden="true" /> Preview
+                </button>
                 <button
                   type="button"
                   onClick={previousCard}
@@ -314,10 +334,16 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 >
                   <ChevronLeft size={16} aria-hidden="true" /> Previous
                 </button>
-                <button type="button" onClick={nextCard} disabled={activeIndex === cards.length - 1} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">
+                <button
+                  type="button"
+                  onClick={nextCard}
+                  disabled={!currentComplete || activeIndex === cards.length - 1}
+                  className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
+                >
                   Next
                 </button>
               </div>
+              {!currentComplete && <p className="mt-2 text-center text-xs text-slate-500">Complete this goal to unlock Next.</p>}
             </div>
           </>
         )}
@@ -329,13 +355,16 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
             <h2 className="font-bold">Code editor</h2>
             <p className="mt-1 text-sm text-slate-600">Edit source code with HTML and CSS tabs.</p>
           </div>
-          <div className="inline-flex rounded-lg bg-slate-100 p-1">
-            <button type="button" onClick={() => setMode("html")} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold ${mode === "html" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>
-              <FileCode2 size={16} aria-hidden="true" /> HTML
-            </button>
-            <button type="button" onClick={() => setMode("css")} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold ${mode === "css" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>
-              <Code2 size={16} aria-hidden="true" /> CSS
-            </button>
+          <div className="flex items-center gap-3">
+            <Link href="/subjects/ict/website-authoring" className="text-sm font-semibold text-ocean hover:underline">Modules</Link>
+            <div className="inline-flex rounded-lg bg-slate-100 p-1">
+              <button type="button" onClick={() => setMode("html")} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold ${mode === "html" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>
+                <FileCode2 size={16} aria-hidden="true" /> HTML
+              </button>
+              <button type="button" onClick={() => setMode("css")} className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold ${mode === "css" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>
+                <Code2 size={16} aria-hidden="true" /> CSS
+              </button>
+            </div>
           </div>
         </div>
         <div className="h-full min-h-0 bg-[#101820]">

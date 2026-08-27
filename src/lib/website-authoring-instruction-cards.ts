@@ -30,6 +30,11 @@ export type WebsiteAuthoringCard = {
   points: number;
 };
 
+type CardDraft = Omit<WebsiteAuthoringCard, "moduleId" | "moduleTitle" | "starterCss" | "points"> & {
+  starterCss?: string;
+  points?: number;
+};
+
 export const websiteAuthoringModules: WebsiteAuthoringModule[] = [
   {
     id: "intro",
@@ -160,6 +165,14 @@ const baseCss = `body {
 `;
 
 const card = (item: WebsiteAuthoringCard) => item;
+
+const moduleCard = (moduleId: string, moduleTitle: string, item: CardDraft): WebsiteAuthoringCard => card({
+  moduleId,
+  moduleTitle,
+  starterCss: baseCss,
+  points: 20,
+  ...item
+});
 
 const introSupport = [
   "Project brief: Apex Study Hub Open Day",
@@ -801,19 +814,401 @@ const examCards: WebsiteAuthoringCard[] = [
     steps: ["Read the support document.", "Edit the HTML or CSS.", "Check the preview and use teacher review for presentation."],
     starterHtml: apexPageHtml,
     starterCss: baseCss,
-    expected: expected as WebsiteExpectedResult,
+    expected: expected as unknown as WebsiteExpectedResult,
     teacherReview: ["Check that the result would satisfy practical-paper style and evidence requirements."],
     points: 25
   }))
 ];
 
+const cleanPracticeTopics = [
+  ["coding-league", "Apex Coding League", "Students compete by building small pages from memory."],
+  ["revision-breakfast", "Revision Breakfast", "Families receive quick guidance before morning lessons."],
+  ["digital-skills-fair", "Digital Skills Fair", "Learners visit stations for web, document, spreadsheet, and database practice."],
+  ["homework-clinic", "Homework Clinic", "Tutors help students correct practical work before submission."],
+  ["study-sprint", "Study Sprint", "A short challenge helps students practise accurate code under time pressure."],
+  ["ict-help-desk", "ICT Help Desk", "Students report problems and receive simple step-by-step support."],
+  ["parent-demo-day", "Parent Demo Day", "Parents see how Apex practical lessons build confidence."],
+  ["exam-warm-up", "Exam Warm-up", "Students complete one focused task before a full practice paper."],
+  ["keyboard-club", "Keyboard Club", "Learners improve accuracy by typing short structured pages."],
+  ["spreadsheet-challenge", "Spreadsheet Challenge", "A table of scores shows which teams completed spreadsheet tasks."],
+  ["document-design-club", "Document Design Club", "Students improve layout, readability, and professional formatting."],
+  ["website-showcase", "Website Showcase", "A showcase page presents student-built websites and feedback."],
+  ["data-detective", "Data Detective", "Learners compare information and present findings clearly."],
+  ["media-workshop", "Media Workshop", "Students use images, captions, and alternative text responsibly."],
+  ["accessibility-check", "Accessibility Check", "A short checklist reminds students to make pages readable for everyone."]
+] as const;
+
+const introGuidedSupplement = [
+  ["web-intro-meta-charset", "Add the character set", "The browser should read text using a modern character set.", ["Add <meta charset=\"UTF-8\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["charset=\"UTF-8\""] }],
+  ["web-intro-meta-viewport", "Add the viewport setting", "Mobile browsers need a viewport instruction for responsive pages.", ["Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> inside head."], { requiredTags: ["meta"], htmlIncludes: ["viewport", "width=device-width"] }],
+  ["web-intro-h3-subheading", "Use a smaller heading", "A section sometimes needs a heading below h2.", ["Add an h3 heading that says Morning tasks."], { requiredTags: ["h3"], htmlIncludes: ["Morning tasks"] }],
+  ["web-intro-h4-subheading", "Use an h4 heading", "Long pages need lower-level headings for smaller groups.", ["Add an h4 heading that says Teacher checks."], { requiredTags: ["h4"], htmlIncludes: ["Teacher checks"] }],
+  ["web-intro-line-break", "Add a line break", "Some addresses need a controlled line break.", ["Add a br element between Apex Study Hub and Online Practice."], { requiredTags: ["br"], htmlIncludes: ["Apex Study Hub", "Online Practice"] }],
+  ["web-intro-horizontal-rule", "Add a horizontal rule", "A divider can separate two visible sections.", ["Add an hr element below the welcome paragraph."], { requiredTags: ["hr"] }],
+  ["web-intro-strong", "Make key text important", "Important words should use meaningful HTML, not only visual style.", ["Wrap the words practical ICT in a strong element."], { requiredTags: ["strong"], htmlIncludes: ["practical ICT"] }],
+  ["web-intro-emphasis", "Emphasise a short phrase", "Some phrases need emphasis for meaning.", ["Wrap the words one skill at a time in an em element."], { requiredTags: ["em"], htmlIncludes: ["one skill at a time"] }],
+  ["web-intro-div", "Create a generic container", "A div can group content when no stronger semantic element fits.", ["Add a div with the text Practice card."], { requiredTags: ["div"], htmlIncludes: ["Practice card"] }],
+  ["web-intro-span", "Create an inline text container", "A span can mark a small part of a sentence.", ["Wrap the word focused in a span element."], { requiredTags: ["span"], htmlIncludes: ["focused"] }],
+  ["web-intro-unordered-list", "Build a bullet list", "Short items can be easier to read as a list.", ["Create a ul list with Spreadsheet, Documents, and Websites."], { requiredTags: ["ul", "li"], htmlIncludes: ["Spreadsheet", "Documents", "Websites"] }],
+  ["web-intro-ordered-list", "Build a numbered list", "Steps should be coded as an ordered list.", ["Create an ol list with Read, Edit, Check."], { requiredTags: ["ol", "li"], htmlIncludes: ["Read", "Edit", "Check"] }],
+  ["web-intro-nested-list", "Build a nested list", "A nested list shows detail under a main item.", ["Create a list where ICT contains Spreadsheet and Web Authoring as nested items."], { requiredTags: ["ul", "li"], htmlIncludes: ["ICT", "Spreadsheet", "Web Authoring"] }],
+  ["web-intro-comment-second", "Add a developer comment", "Comments help organise a source file without appearing in the browser.", ["Add the comment <!-- Apex page content --> above main."], { htmlIncludes: ["<!-- Apex page content -->"] }]
+] as const;
+
+const introSupplementCards: WebsiteAuthoringCard[] = [
+  ...introGuidedSupplement.map(([id, title, scenario, steps, expected]) => moduleCard("intro", "HTML Foundations", {
+    id,
+    title,
+    scenario,
+    supportDocument: ["Use the Apex Study Hub page already started in the editor."],
+    goal: title,
+    steps: ["Find the correct location in the HTML.", ...steps, "Check that the preview still shows the page normally."],
+    starterHtml: apexStarterHtml,
+    expected: expected as unknown as WebsiteExpectedResult,
+    points: 15
+  })),
+  ...cleanPracticeTopics.map(([slug, topic, sentence]) => moduleCard("intro", "HTML Foundations", {
+    id: `web-intro-clean-${slug}`,
+    title: `Clean Sheet Practice: ${topic} page`,
+    scenario: "Build the full page structure from a blank editor so the HTML foundation becomes familiar.",
+    supportDocument: [`Page title: ${topic}`, `Heading: ${topic}`, `Paragraph: ${sentence}`],
+    goal: `Create a complete HTML page for ${topic}.`,
+    steps: ["Start with the doctype.", "Add html, head, meta charset, meta viewport, title, body, and main.", "Inside main, add the heading and paragraph from the support document."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "meta", "title", "body", "main", "h1", "p"],
+      htmlIncludes: ["<!doctype html>", topic, sentence, "charset=\"UTF-8\"", "viewport"],
+      title: topic
+    },
+    points: 35
+  }))
+];
+
+const mediaGuidedSupplement = [
+  ["img-width-attribute", "Set image width", "Add width=\"320\" to the Apex image.", { requiredTags: ["img"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }], htmlIncludes: ["width=\"320\""] }],
+  ["img-height-attribute", "Set image height", "Add height=\"200\" to the Apex image.", { requiredTags: ["img"], htmlIncludes: ["height=\"200\""] }],
+  ["img-class", "Add an image class", "Add class=\"feature-image\" to the image.", { requiredTags: ["img"], htmlIncludes: ["class=\"feature-image\""] }],
+  ["image-inside-link", "Make an image a link", "Wrap the image in a link to index.html.", { requiredTags: ["a", "img"], links: [{ href: "index.html" }], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] }],
+  ["caption-detail", "Improve the caption", "Change the caption to Guided web practice at Apex.", { requiredTags: ["figcaption"], htmlIncludes: ["Guided web practice at Apex"] }],
+  ["media-source-section", "Add a source paragraph", "Add a paragraph that says Source image supplied by Apex Study Hub.", { requiredTags: ["p"], htmlIncludes: ["Source image supplied by Apex Study Hub"] }],
+  ["media-two-images", "Add a second image", "Add a second Apex image with alt text Apex support document card.", { requiredTags: ["img"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex support document card" }] }],
+  ["media-image-list", "Place image notes in a list", "Add a list with Image source, Alternative text, and Caption.", { requiredTags: ["ul", "li"], htmlIncludes: ["Image source", "Alternative text", "Caption"] }],
+  ["media-audio", "Add audio controls", "Add an audio element with controls and a source called apex-intro.mp3.", { requiredTags: ["audio", "source"], htmlIncludes: ["controls", "apex-intro.mp3"] }],
+  ["media-video", "Add video controls", "Add a video element with controls and a source called apex-tour.mp4.", { requiredTags: ["video", "source"], htmlIncludes: ["controls", "apex-tour.mp4"] }],
+  ["media-fallback", "Add media fallback text", "Add fallback text that says Your browser cannot play this Apex media.", { htmlIncludes: ["Your browser cannot play this Apex media"] }],
+  ["media-absolute-image", "Use an absolute image path example", "Add an image with src=\"https://example.com/apex-practice.png\" and useful alt text.", { requiredTags: ["img"], images: [{ srcIncludes: "https://example.com/apex-practice.png", alt: "Apex online practice preview" }] }],
+  ["media-relative-path", "Use a relative image path", "Add an image source images/apex-card.png with alt text Apex card from images folder.", { requiredTags: ["img"], images: [{ srcIncludes: "images/apex-card.png", alt: "Apex card from images folder" }] }],
+  ["media-table-image", "Put an image in a table", "Add a table with an image in one data cell.", { requiredTags: ["table", "tr", "td", "img"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex table image" }] }],
+  ["media-figure-class", "Class the figure", "Add class=\"media-card\" to the figure element.", { requiredTags: ["figure"], htmlIncludes: ["class=\"media-card\""] }],
+  ["media-accessibility-note", "Add an accessibility note", "Add the sentence Every image must have meaningful alternative text.", { htmlIncludes: ["Every image must have meaningful alternative text."] }],
+  ["media-thumbnail-list", "Create a media checklist", "Create an ordered list with Choose image, Add alt text, Check size.", { requiredTags: ["ol", "li"], htmlIncludes: ["Choose image", "Add alt text", "Check size"] }],
+  ["media-credit-comment", "Add a media comment", "Add the comment <!-- media block starts here -->.", { htmlIncludes: ["<!-- media block starts here -->"] }],
+  ["media-gallery-heading", "Add a gallery heading", "Add an h2 heading called Apex image gallery.", { requiredTags: ["h2"], htmlIncludes: ["Apex image gallery"] }],
+  ["media-gallery-paragraph", "Add gallery explanation", "Add a paragraph saying Images help users understand the activity before reading the full details.", { requiredTags: ["p"], htmlIncludes: ["Images help users understand the activity before reading the full details."] }]
+] as const;
+
+const mediaCleanTopics = cleanPracticeTopics.map(([slug, topic, sentence]) => moduleCard("text-media", "Text and Images", {
+  id: `web-media-clean-${slug}`,
+  title: `Clean Sheet Practice: ${topic} media page`,
+  scenario: "Create a visible media block from a blank editor using semantic image elements.",
+  supportDocument: [`Page title: ${topic} Media`, `Heading: ${topic}`, `Paragraph: ${sentence}`, "Image: /assets/apex-study-card.svg", `Alt text: ${topic} practice image`, `Caption: ${topic} preview card`],
+  goal: `Build a media page for ${topic}.`,
+  steps: ["Create the full HTML document structure.", "Add h1 and paragraph source text.", "Add figure, img, and figcaption with the supplied source, alt text, and caption."],
+  starterHtml: blankHtml,
+  expected: {
+    requiredTags: ["html", "head", "title", "body", "main", "h1", "p", "figure", "img", "figcaption"],
+    images: [{ srcIncludes: "apex-study-card.svg", alt: `${topic} practice image` }],
+    htmlIncludes: ["<!doctype html>", topic, sentence, `${topic} preview card`],
+    title: `${topic} Media`
+  },
+  points: 40
+}));
+
+const mediaSupplementCards: WebsiteAuthoringCard[] = [
+  ...mediaGuidedSupplement.map(([slug, title, instruction, expected]) => moduleCard("text-media", "Text and Images", {
+    id: `web-media-${slug}`,
+    title,
+    scenario: "The page uses media to make information clearer, but the HTML must still be accessible.",
+    supportDocument: ["Image source: /assets/apex-study-card.svg", instruction],
+    goal: title,
+    steps: ["Find the image or media area in main.", instruction, "Check the preview and spelling of attributes."],
+    starterHtml: `${apexPageHtml}
+<figure>
+  <img src="/assets/apex-study-card.svg" alt="Apex study practice card">
+  <figcaption>Guided practice workspace</figcaption>
+</figure>`,
+    expected: expected as unknown as WebsiteExpectedResult,
+    points: 20
+  })),
+  ...mediaCleanTopics
+];
+
+const linkGuidedSupplement = [
+  ["external-new-tab", "Open an external link in a new tab", "Apex guide", "https://example.com/apex-guide", "target=\"_blank\""],
+  ["relative-about", "Create a relative About page link", "About Apex", "about.html", ""],
+  ["relative-folder", "Link to a file in a folder", "Student guide", "docs/student-guide.html", ""],
+  ["download-file", "Link to a practice file", "Download practice file", "files/practice.csv", ""],
+  ["same-page-top", "Create a Back to top link", "Back to top", "#top", ""],
+  ["same-page-help", "Create a Help bookmark link", "Help", "#help", ""],
+  ["mailto-subject", "Create an email link with a subject", "Email support", "mailto:hello@apexstudyhub.example?subject=Website%20help", ""],
+  ["image-link-home", "Use an image as a home link", "", "index.html", ""],
+  ["footer-privacy", "Create a privacy link", "Privacy", "privacy.html", ""],
+  ["nav-lessons", "Create a lessons link", "Lessons", "lessons.html", ""],
+  ["nav-practice", "Create a practice link", "Practice room", "practice-room.html", ""],
+  ["bookmark-create", "Create a target section id", "Jump to checklist", "#checklist", "id=\"checklist\""],
+  ["link-title", "Add a title attribute to a link", "Start revision", "revision.html", "title=\"Start revision\""],
+  ["phone-link", "Create a phone link example", "Call Apex", "tel:+440000000000", ""],
+  ["relative-parent", "Link to a parent folder page", "Main index", "../index.html", ""],
+  ["link-list", "Create links inside a list", "ICT", "ict.html", ""],
+  ["multi-nav-home", "Add Home to a multi-link nav", "Home", "index.html", ""],
+  ["multi-nav-business", "Add Business to a multi-link nav", "Business", "business.html", ""],
+  ["multi-nav-ict", "Add ICT to a multi-link nav", "ICT", "ict.html", ""],
+  ["button-style-link", "Create a classed call-to-action link", "Start practice", "start.html", "class=\"button-link\""],
+  ["footer-contact", "Create a footer contact link", "Contact Apex", "contact.html", ""],
+  ["asset-link", "Link to the Apex image asset", "Open card image", "/assets/apex-study-card.svg", ""]
+] as const;
+
+const linkSupplementCards: WebsiteAuthoringCard[] = [
+  ...linkGuidedSupplement.map(([slug, title, text, href, extra]) => moduleCard("links-navigation", "Links and Navigation", {
+    id: `web-link-${slug}`,
+    title,
+    scenario: "Navigation must take users to the right place without confusing the page structure.",
+    supportDocument: [`Link text: ${text || "Image link only"}`, `Href: ${href}`, extra ? `Extra attribute: ${extra}` : "No extra attribute required."],
+    goal: title,
+    steps: ["Find the nav, list, image, or footer area.", "Add the required a element and href.", "Check the link text, target, and any extra attribute."],
+    starterHtml: apexPageHtml,
+    expected: {
+      requiredTags: ["a"],
+      links: text ? [{ text, href }] : [{ href }],
+      htmlIncludes: extra ? [extra] : undefined
+    },
+    points: 20
+  })),
+  ...cleanPracticeTopics.map(([slug, topic, sentence]) => moduleCard("links-navigation", "Links and Navigation", {
+    id: `web-link-clean-${slug}`,
+    title: `Clean Sheet Practice: ${topic} navigation page`,
+    scenario: "Build a small page and navigation menu from a blank editor.",
+    supportDocument: [`Title and heading: ${topic}`, `Paragraph: ${sentence}`, "Links: Home/index.html, Details/details.html, Contact/contact.html"],
+    goal: `Create a three-link navigation page for ${topic}.`,
+    steps: ["Create the full HTML document structure.", "Add a nav element with the three links.", "Add main content with the heading and paragraph."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "nav", "a", "main", "h1", "p"],
+      links: [{ text: "Home", href: "index.html" }, { text: "Details", href: "details.html" }, { text: "Contact", href: "contact.html" }],
+      htmlIncludes: ["<!doctype html>", topic, sentence],
+      title: topic
+    },
+    points: 40
+  }))
+];
+
+const tableGuidedSupplement = [
+  ["caption-top-five", "Add a ranking table caption", ["Top five Apex learners"], ["caption"]],
+  ["table-player-headings", "Create player table headings", ["Rank", "Learner", "Score"], ["table", "tr", "th"]],
+  ["table-player-row-one", "Add the first player row", ["1", "Amara", "92"], ["table", "tr", "td"]],
+  ["table-player-row-two", "Add the second player row", ["2", "Daniel", "88"], ["table", "tr", "td"]],
+  ["table-player-row-three", "Add the third player row", ["3", "Sofia", "84"], ["table", "tr", "td"]],
+  ["table-colspan-title", "Use colspan for a table title", ["colspan=\"3\"", "Apex Weekly Scores"], ["table", "th"]],
+  ["table-rowspan-label", "Use rowspan for a repeated label", ["rowspan=\"2\"", "Morning"], ["table", "td"]],
+  ["table-product-comparison", "Build comparison headings", ["Feature", "Basic", "Premium"], ["table", "th"]],
+  ["table-event-schedule", "Build schedule headings", ["Activity", "Location", "Start"], ["table", "th"]],
+  ["table-travel-planner", "Build travel headings", ["Destination", "Transport", "Cost"], ["table", "th"]],
+  ["table-image-cell", "Add an image cell", ["Apex table image"], ["table", "td", "img"]],
+  ["table-link-cell", "Add a link in a table cell", ["Open guide"], ["table", "td", "a"]],
+  ["table-border-css", "Add CSS table borders", ["table", "border"], ["table"]],
+  ["table-cell-padding-css", "Add CSS cell padding", ["td", "padding"], ["table"]],
+  ["table-header-bg-css", "Style table headings", ["th", "background"], ["table"]],
+  ["table-width-css", "Set table width", ["table", "width"], ["table"]],
+  ["table-align-css", "Align table text", ["text-align"], ["table"]],
+  ["table-nested-text", "Add heading text above a table", ["Apex comparison data"], ["h2", "table"]],
+  ["table-summary-paragraph", "Add a summary below a table", ["Use the table to compare the options."], ["p", "table"]]
+] as const;
+
+const tableSupplementCards: WebsiteAuthoringCard[] = [
+  ...tableGuidedSupplement.map(([slug, title, values, tags]) => moduleCard("tables", "HTML Tables", {
+    id: `web-${slug}`,
+    title,
+    scenario: "Tables convert raw data into rows and columns so users can compare information quickly.",
+    supportDocument: values.map((value) => `Required: ${value}`),
+    goal: title,
+    steps: ["Find or create the table area.", "Add the required table structure or styling.", "Check that the browser preview shows structured data."],
+    starterHtml: tableStarterHtml,
+    starterCss: baseCss,
+    expected: {
+      requiredTags: [...tags],
+      tableHeaders: title.includes("heading") || title.includes("Headings") ? [...values] : undefined,
+      htmlIncludes: values.some((value) => value.includes("\"")) ? [...values] : values.filter((value) => !["table", "border", "td", "padding", "th", "background", "width", "text-align"].includes(value)),
+      cssIncludes: values.some((value) => ["border", "padding", "background", "width", "text-align"].includes(value)) ? [...values] : undefined
+    },
+    points: 20
+  })),
+  ...cleanPracticeTopics.map(([slug, topic]) => moduleCard("tables", "HTML Tables", {
+    id: `web-table-clean-${slug}`,
+    title: `Clean Sheet Practice: ${topic} data table`,
+    scenario: "Build a complete table from a blank editor so the pattern becomes automatic.",
+    supportDocument: [`Page title: ${topic} Table`, `Heading: ${topic} Table`, "Caption: Apex comparison table", "Headers: Item, Detail, Status", "Rows: Plan/Ready/Green; Practice/In progress/Amber; Review/Needed/Red"],
+    goal: `Create a complete data table for ${topic}.`,
+    steps: ["Create the full HTML document structure.", "Inside main, add a heading and table with caption.", "Use tr, th, and td for all headings and rows."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "h1", "table", "caption", "tr", "th", "td"],
+      tableHeaders: ["Item", "Detail", "Status"],
+      htmlIncludes: ["<!doctype html>", "Apex comparison table", "Plan", "Practice", "Review"],
+      title: `${topic} Table`
+    },
+    points: 45
+  }))
+];
+
+const cssGuidedSupplement = [
+  ["inline-style", "Use inline CSS once", "Add style=\"color: #0f6f8c\" to the h1.", { htmlIncludes: ["style=\"color: #0f6f8c\""] }],
+  ["internal-style", "Add internal CSS", "Add a style element inside head.", { requiredTags: ["style"], htmlIncludes: ["<style"] }],
+  ["external-link", "Link an external stylesheet", "Add <link rel=\"stylesheet\" href=\"styles.css\"> inside head.", { requiredTags: ["link"], htmlIncludes: ["rel=\"stylesheet\"", "href=\"styles.css\""] }],
+  ["class-selector", "Use a class selector", "Add class=\"notice-card\" in HTML and .notice-card in CSS.", { htmlIncludes: ["class=\"notice-card\""], cssIncludes: [".notice-card"] }],
+  ["id-selector", "Use an id selector", "Add id=\"hero\" in HTML and #hero in CSS.", { htmlIncludes: ["id=\"hero\""], cssIncludes: ["#hero"] }],
+  ["css-comment", "Add a CSS comment", "Add /* Apex layout styles */ in CSS.", { cssIncludes: ["/* Apex layout styles */"] }],
+  ["margin", "Set margins", "Use margin in a CSS rule.", { cssIncludes: ["margin"] }],
+  ["border-radius", "Round a box slightly", "Use border-radius in a CSS rule.", { cssIncludes: ["border-radius"] }],
+  ["box-shadow", "Add a subtle shadow", "Use box-shadow in a CSS rule.", { cssIncludes: ["box-shadow"] }],
+  ["line-height", "Improve line height", "Use line-height for body or p text.", { cssIncludes: ["line-height"] }],
+  ["font-size", "Change font size", "Use font-size in a CSS rule.", { cssIncludes: ["font-size"] }],
+  ["font-weight", "Change font weight", "Use font-weight in a CSS rule.", { cssIncludes: ["font-weight"] }],
+  ["link-hover", "Add a hover selector", "Use a:hover in CSS.", { cssIncludes: ["a:hover"] }],
+  ["grid-layout", "Use a grid layout", "Use display: grid in CSS.", { cssIncludes: ["display", "grid"] }],
+  ["flex-layout", "Use a flex layout", "Use display: flex in CSS.", { cssIncludes: ["display", "flex"] }],
+  ["responsive-width", "Add responsive image sizing", "Use max-width: 100% for images.", { cssIncludes: ["img", "max-width", "100%"] }]
+] as const;
+
+const cssSupplementCards: WebsiteAuthoringCard[] = [
+  ...cssGuidedSupplement.map(([slug, title, instruction, expected]) => moduleCard("css-layout", "CSS Layout", {
+    id: `web-css-${slug}`,
+    title,
+    scenario: "CSS controls presentation while HTML keeps the page structure meaningful.",
+    supportDocument: [instruction],
+    goal: title,
+    steps: ["Read whether the change belongs in HTML, CSS, or both.", "Make the requested change.", "Check that the page still previews correctly."],
+    starterHtml: apexPageHtml,
+    starterCss: baseCss,
+    expected: expected as unknown as WebsiteExpectedResult,
+    points: 20
+  })),
+  ...cleanPracticeTopics.map(([slug, topic, sentence]) => moduleCard("css-layout", "CSS Layout", {
+    id: `web-css-clean-${slug}`,
+    title: `Clean Sheet Practice: ${topic} styled page`,
+    scenario: "Start with a blank editor, then build both the HTML and CSS for a small Apex page.",
+    supportDocument: [`Title and heading: ${topic}`, `Paragraph: ${sentence}`, "CSS must style body font, main width, h1 colour, section padding, and link hover."],
+    goal: `Build and style a complete page for ${topic}.`,
+    steps: ["Create the full HTML document with main, section, h1, p, and a link.", "Open the CSS tab.", "Add body, main, h1, section, and a:hover rules."],
+    starterHtml: blankHtml,
+    starterCss: "",
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "section", "h1", "p", "a"],
+      htmlIncludes: ["<!doctype html>", topic, sentence],
+      links: [{ text: "Start practice", href: "practice.html" }],
+      cssIncludes: ["body", "font-family", "main", "max-width", "h1", "color", "section", "padding", "a:hover"],
+      title: topic
+    },
+    points: 50
+  }))
+];
+
+const examGuidedSupplement = [
+  "Check source text placement",
+  "Build header and navigation",
+  "Create the welcome section",
+  "Create the sessions section",
+  "Create the register section",
+  "Add a support image",
+  "Add meaningful alt text",
+  "Add an image caption",
+  "Create a timetable table",
+  "Use a caption on the timetable",
+  "Add table heading cells",
+  "Add table data rows",
+  "Create internal bookmark links",
+  "Create a contact email link",
+  "Link to an external stylesheet",
+  "Apply body font styling",
+  "Apply main width styling",
+  "Style navigation links",
+  "Style section spacing",
+  "Style images responsively",
+  "Style table borders",
+  "Add a footer",
+  "Add HTML comments for evidence",
+  "Prepare final browser preview"
+] as const;
+
+const examSupplementCards: WebsiteAuthoringCard[] = [
+  ...examGuidedSupplement.map((title, index) => moduleCard("exam-build", "Exam Website Build", {
+    id: `web-exam-guided-${index + 1}`,
+    title: `Exam build step: ${title}`,
+    scenario: "Practise one part of a longer practical website task before attempting the full clean build.",
+    supportDocument: ["Project: Apex Study Hub Open Day", "Use the current Apex homepage starter and improve the named part."],
+    goal: title,
+    steps: ["Read the named part of the project.", "Edit the HTML or CSS so that part is present.", "Check the preview and run the result check."],
+    starterHtml: apexPageHtml,
+    starterCss: baseCss,
+    expected: index < 5
+      ? { requiredTags: ["header", "nav", "main", "section"], htmlIncludes: ["Apex Study Hub Open Day", "Practice Sessions"] }
+      : index < 8
+        ? { requiredTags: ["figure", "img", "figcaption"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] }
+        : index < 12
+          ? { requiredTags: ["table", "caption", "tr", "th", "td"], tableHeaders: ["Session", "Room", "Time"] }
+          : index < 15
+            ? { requiredTags: ["a"], links: [{ text: "Home", href: "index.html" }] }
+            : index < 21
+              ? { cssIncludes: ["body", "font-family", "main", "max-width", "section", "padding"] }
+              : { requiredTags: ["footer"], htmlIncludes: ["Apex"] },
+    teacherReview: ["Check that this part fits the overall page and evidence requirements."],
+    points: 30
+  })),
+  ...cleanPracticeTopics.map(([slug, topic, sentence]) => moduleCard("exam-build", "Exam Website Build", {
+    id: `web-exam-clean-${slug}`,
+    title: `Clean Sheet Practice: ${topic} mini-site`,
+    scenario: "This is a fuller exam-style practice: build a small page from source notes and finish it with CSS.",
+    supportDocument: [
+      `Site title: ${topic}`,
+      `Heading: ${topic}`,
+      `Intro: ${sentence}`,
+      "Navigation: Home/index.html, Sessions/#sessions, Contact/contact.html",
+      "Table headings: Activity, Room, Time",
+      "Rows: Coding/Lab 1/09:00; Documents/Lab 2/10:00; Websites/Lab 3/11:00",
+      "Image: /assets/apex-study-card.svg",
+      `Alt text: ${topic} website image`,
+      "CSS: body font-family, main max-width, nav display flex, section padding, img max-width, table border"
+    ],
+    goal: `Build a complete Apex mini-site page for ${topic}.`,
+    steps: ["Create the full HTML document from a blank editor.", "Add navigation, sections, image block, table, and footer.", "Open CSS and apply the listed house style."],
+    starterHtml: blankHtml,
+    starterCss: "",
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "header", "nav", "a", "main", "section", "h1", "p", "figure", "img", "figcaption", "table", "caption", "tr", "th", "td", "footer"],
+      links: [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Contact", href: "contact.html" }],
+      images: [{ srcIncludes: "apex-study-card.svg", alt: `${topic} website image` }],
+      tableHeaders: ["Activity", "Room", "Time"],
+      htmlIncludes: ["<!doctype html>", topic, sentence, "Coding", "Documents", "Websites"],
+      cssIncludes: ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "img", "max-width", "table", "border"],
+      title: topic
+    },
+    teacherReview: ["Check page suitability, source accuracy, layout, and that evidence screenshots would be clear."],
+    points: 80
+  }))
+];
+
 const allCards = [
   ...introCards,
+  ...introSupplementCards,
   ...textMediaCards,
+  ...mediaSupplementCards,
   ...linkCards,
+  ...linkSupplementCards,
   ...tableCards,
+  ...tableSupplementCards,
   ...cssCards,
-  ...examCards
+  ...cssSupplementCards,
+  ...examCards,
+  ...examSupplementCards
 ];
 
 const moduleOrder = new Map(websiteAuthoringModules.map((module, index) => [module.id, index]));
