@@ -213,7 +213,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   }
 
   function nextCard() {
-    if (!completed.includes(card.id) || activeIndex === cards.length - 1) return;
+    if (activeIndex === cards.length - 1) return;
     loadCard(activeIndex + 1);
   }
 
@@ -337,13 +337,13 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <button
                   type="button"
                   onClick={nextCard}
-                  disabled={!currentComplete || activeIndex === cards.length - 1}
+                  disabled={activeIndex === cards.length - 1}
                   className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                 >
                   Next
                 </button>
               </div>
-              {!currentComplete && <p className="mt-2 text-center text-xs text-slate-500">Complete this goal to unlock Next.</p>}
+              {!currentComplete && <p className="mt-2 text-center text-xs text-slate-500">Review mode: Next is temporarily unlocked.</p>}
             </div>
           </>
         )}
