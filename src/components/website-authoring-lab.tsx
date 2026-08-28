@@ -33,6 +33,9 @@ function normalise(value: string) {
 function sourceHasTag(html: string, tag: string) {
   const cleanTag = tag.toLowerCase();
   if (cleanTag.startsWith("<!--")) return html.toLowerCase().includes(cleanTag);
+  if (["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"].includes(cleanTag)) {
+    return new RegExp(`<${cleanTag}(\\s|>|/)`, "i").test(html);
+  }
   return new RegExp(`<${cleanTag}(\\s|>|/)`, "i").test(html) && new RegExp(`</${cleanTag}>`, "i").test(html);
 }
 
@@ -94,6 +97,25 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
 
     if (!document.querySelector(tag)) messages.push(`Add a ${tag} element.`);
   });
+
+  if (card.expected.requiredTags?.includes("ul") && !document.querySelector("ul li")) {
+    messages.push("Add li items inside the unordered list.");
+  }
+
+  if (card.expected.requiredTags?.includes("ol") && !document.querySelector("ol li")) {
+    messages.push("Add li items inside the ordered list.");
+  }
+
+  if (card.expected.requiredTags?.includes("figure") && card.expected.requiredTags.includes("figcaption") && !document.querySelector("figure figcaption")) {
+    messages.push("Place figcaption inside the figure element.");
+  }
+
+  if (card.expected.requiredTags?.includes("table")) {
+    if (card.expected.requiredTags.includes("tr") && !document.querySelector("table tr")) messages.push("Add tr rows inside the table.");
+    if (card.expected.requiredTags.includes("th") && !document.querySelector("table th")) messages.push("Add th heading cells inside the table.");
+    if (card.expected.requiredTags.includes("td") && !document.querySelector("table td")) messages.push("Add td data cells inside the table.");
+    if (card.expected.requiredTags.includes("caption") && !document.querySelector("table caption")) messages.push("Place the caption inside the table.");
+  }
 
   card.expected.images?.forEach((expectedImage) => {
     const images = Array.from(document.querySelectorAll("img"));
@@ -419,8 +441,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
         )}
       </aside>
 
-      <section className="min-h-[520px] overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0" onPaste={(event) => event.preventDefault()}>
-        <div className="border-b border-line p-4">
+      <section className="flex min-h-[520px] min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white shadow-sm xl:min-h-0" onPaste={(event) => event.preventDefault()}>
+        <div className="flex-none border-b border-line p-4">
           <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="font-bold">Code editor</h2>
@@ -463,7 +485,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
             )}
           </div>
         </div>
-        <div className="h-full min-h-0 bg-[#101820]">
+        <div className="min-h-0 flex-1 bg-[#101820]">
           <MonacoEditor
             key={mode}
             height="100%"

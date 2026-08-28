@@ -13,6 +13,9 @@ export type PresentationExpectedResult = {
   layout?: "title" | "title-content" | "two-content" | "image-content" | "comparison";
   theme?: "clean" | "ocean" | "leaf" | "contrast";
   imageAlt?: string;
+  objectTypes?: PresentationObject["type"][];
+  masterFooter?: string;
+  masterLogo?: boolean;
   notesInclude?: string;
   slideNumbers?: boolean;
 };
@@ -39,6 +42,30 @@ export type PresentationSlide = {
   layout: PresentationExpectedResult["layout"];
   imageAlt?: string;
   notes?: string;
+  objects?: PresentationObject[];
+  hideMaster?: boolean;
+};
+
+export type PresentationObject = {
+  id: string;
+  type: "title" | "body" | "bullets" | "image" | "shape" | "line";
+  text?: string;
+  alt?: string;
+  src?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotate?: number;
+  fontSize?: number;
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+  align?: "left" | "center" | "right";
+  fill?: string;
+  outline?: string;
+  lineWidth?: number;
+  layer?: number;
 };
 
 export const presentationModules: PresentationModule[] = [
@@ -95,25 +122,84 @@ const introCards: PresentationCard[] = [
     expected: { activeSlide: 0, slideTitle: "Apex Study Skills Evening", slideBodyIncludes: ["Practical revision support for families and learners."] },
     points: 10
   }),
-  ...["Add a second slide", "Choose a title and content layout", "Add a slide title", "Create three bullet points", "Reorder slide content", "Delete unused text"].map((title, index) => card({
-    id: `pres-intro-${index + 3}`,
+  card({
+    id: "pres-intro-second-slide",
     moduleId: "intro",
     moduleTitle: "Slide Foundations",
-    title,
-    scenario: "Practise one slide-building action before the full deck task.",
+    title: "Add a second slide",
+    scenario: "A presentation normally separates the opening title from the detailed information.",
     supportDocument: source,
-    goal: title,
-    steps: ["Use the slide pane and layout control.", "Edit only the selected slide.", "Check the title and content boxes before moving on."],
+    goal: "Create a second slide after the title slide.",
+    steps: ["Click the New button in the toolbar or slide pane.", "Check that a second thumbnail appears on the left.", "Select slide 2 before adding new content."],
     starterDeck: apexDeck,
-    expected: index === 0
-      ? { minSlides: 2 }
-      : index === 1
-        ? { activeSlide: 1, layout: "title-content" }
-        : index === 2
-          ? { activeSlide: 1, slideTitle: "Practice Stations" }
-          : { activeSlide: 1, bulletItems: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"] },
+    expected: { minSlides: 2 },
     points: 12
-  })),
+  }),
+  card({
+    id: "pres-intro-title-content-layout",
+    moduleId: "intro",
+    moduleTitle: "Slide Foundations",
+    title: "Choose a title and content layout",
+    scenario: "The second slide needs a title area and a content area for bullets.",
+    supportDocument: source,
+    goal: "Set slide 2 to Title and content layout.",
+    steps: ["Select slide 2 in the slide pane.", "Open the Layout dropdown in the toolbar.", "Choose Title and content."],
+    starterDeck: apexDeck,
+    expected: { activeSlide: 1, layout: "title-content" },
+    points: 12
+  }),
+  card({
+    id: "pres-intro-slide-title",
+    moduleId: "intro",
+    moduleTitle: "Slide Foundations",
+    title: "Add a slide title",
+    scenario: "Each information slide should tell the audience what the slide is about.",
+    supportDocument: source,
+    goal: "Add the title Practice Stations to slide 2.",
+    steps: ["Select slide 2.", "Click the title text object or add a Title object if needed.", "Type Practice Stations."],
+    starterDeck: apexDeck,
+    expected: { activeSlide: 1, slideTitle: "Practice Stations" },
+    points: 12
+  }),
+  card({
+    id: "pres-intro-bullets",
+    moduleId: "intro",
+    moduleTitle: "Slide Foundations",
+    title: "Create three bullet points",
+    scenario: "Bullets make presentation text easier to read than long paragraphs.",
+    supportDocument: source,
+    goal: "Add the three practice stations as bullet points.",
+    steps: ["Select slide 2.", "Use the bullet object or the properties panel bullet box.", "Enter Spreadsheet clinic, Document design desk, and Web authoring studio as separate bullets."],
+    starterDeck: apexDeck,
+    expected: { activeSlide: 1, bulletItems: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"] },
+    points: 12
+  }),
+  card({
+    id: "pres-intro-duplicate-slide",
+    moduleId: "intro",
+    moduleTitle: "Slide Foundations",
+    title: "Duplicate a slide",
+    scenario: "Duplicating a slide is faster when the next slide needs a similar layout.",
+    supportDocument: source,
+    goal: "Duplicate slide 2 so the deck has at least three slides.",
+    steps: ["Select slide 2 in the slide pane.", "Click Duplicate on the toolbar.", "Check that a new copied slide appears after slide 2."],
+    starterDeck: apexDeck,
+    expected: { minSlides: 3, bulletItems: ["Spreadsheet clinic"] },
+    points: 12
+  }),
+  card({
+    id: "pres-intro-delete-unused-slide",
+    moduleId: "intro",
+    moduleTitle: "Slide Foundations",
+    title: "Delete an unused slide",
+    scenario: "Exam work should not contain extra blank or repeated slides.",
+    supportDocument: source,
+    goal: "Practise deleting an unwanted slide while keeping at least two slides.",
+    steps: ["Create or select an unwanted slide.", "Click Delete on the toolbar.", "Check that the useful title and content slides remain."],
+    starterDeck: [...apexDeck, { title: "Unused", body: "", bullets: [], layout: "title-content" }],
+    expected: { minSlides: 2, slideTitle: "Practice Stations" },
+    points: 12
+  }),
   card({
     id: "pres-intro-checkpoint",
     moduleId: "intro",
@@ -135,26 +221,58 @@ const introCards: PresentationCard[] = [
 ];
 
 const contentCards: PresentationCard[] = [
-  ...[
-    ["pres-content-audience", "Add an audience slide", "Audience", ["Year 10 students", "Year 11 students", "Families"]],
-    ["pres-content-message", "Summarise the main message", "Why attend?", ["Short sessions", "Practical revision", "Confidence before exams"]],
-    ["pres-content-closing", "Add a closing slide", "Book a guided practice slot", ["Choose a subject", "Select a practice session", "Ask a teacher for feedback"]],
-    ["pres-content-notes", "Add speaker notes", "Practice Stations", ["Spreadsheet clinic"]]
-  ].map(([id, title, slideTitle, bullets]) => card({
-    id: id as string,
+  card({
+    id: "pres-content-audience",
     moduleId: "content",
     moduleTitle: "Text and Imported Source",
-    title: title as string,
+    title: "Add an audience slide",
     scenario: "A support document has been supplied. Convert the useful points into short slide content.",
     supportDocument: source,
-    goal: title as string,
-    steps: ["Read the support document.", "Choose the best slide for the information.", "Use short bullet points instead of copying long sentences."],
+    goal: "Create an Audience slide with three short bullet points.",
+    steps: ["Add a new slide.", "Set the slide title to Audience.", "Add Year 10 students, Year 11 students, and Families as separate bullet points."],
     starterDeck: apexDeck,
-    expected: id === "pres-content-notes"
-      ? { activeSlide: 1, notesInclude: "Spreadsheet clinic" }
-      : { slideTitle: slideTitle as string, bulletItems: bullets as string[] },
+    expected: { slideTitle: "Audience", bulletItems: ["Year 10 students", "Year 11 students", "Families"] },
     points: 15
-  })),
+  }),
+  card({
+    id: "pres-content-message",
+    moduleId: "content",
+    moduleTitle: "Text and Imported Source",
+    title: "Summarise the main message",
+    scenario: "Slides should turn source text into short points, not copy the whole paragraph.",
+    supportDocument: source,
+    goal: "Create a Why attend? slide from the main message.",
+    steps: ["Add a new slide.", "Set the title to Why attend?.", "Add Short sessions, Practical revision, and Confidence before exams as bullets."],
+    starterDeck: apexDeck,
+    expected: { slideTitle: "Why attend?", bulletItems: ["Short sessions", "Practical revision", "Confidence before exams"] },
+    points: 15
+  }),
+  card({
+    id: "pres-content-closing",
+    moduleId: "content",
+    moduleTitle: "Text and Imported Source",
+    title: "Add a closing slide",
+    scenario: "The final slide should tell the audience what to do next.",
+    supportDocument: source,
+    goal: "Create a booking slide with action bullets.",
+    steps: ["Add a new slide.", "Set the title to Book a guided practice slot.", "Add Choose a subject, Select a practice session, and Ask a teacher for feedback as bullets."],
+    starterDeck: apexDeck,
+    expected: { slideTitle: "Book a guided practice slot", bulletItems: ["Choose a subject", "Select a practice session", "Ask a teacher for feedback"] },
+    points: 15
+  }),
+  card({
+    id: "pres-content-notes",
+    moduleId: "content",
+    moduleTitle: "Text and Imported Source",
+    title: "Add speaker notes",
+    scenario: "Speaker notes help the presenter remember extra detail without crowding the slide.",
+    supportDocument: ["Speaker note must include: Spreadsheet clinic"],
+    goal: "Add a speaker note to the Practice Stations slide.",
+    steps: ["Select the Practice Stations slide.", "Use the Speaker notes box in the properties panel.", "Type a note that includes Spreadsheet clinic."],
+    starterDeck: apexDeck,
+    expected: { activeSlide: 1, notesInclude: "Spreadsheet clinic" },
+    points: 15
+  }),
   card({
     id: "pres-content-import-checkpoint",
     moduleId: "content",
@@ -189,51 +307,154 @@ const designCards: PresentationCard[] = [
     id: "pres-design-image",
     moduleId: "design",
     moduleTitle: "Design and Objects",
-    title: "Insert a relevant image",
-    scenario: "A slide about practical revision should include a relevant visual without covering the text.",
-    supportDocument: ["Image alternative text: Apex study practice card"],
-    goal: "Add the Apex image to a slide.",
-    steps: ["Select the slide that needs a visual.", "Click Insert image.", "Set the alt text to Apex study practice card."],
+    title: "Insert an uploaded image",
+    scenario: "A slide about practical revision should include a relevant image uploaded by the student.",
+    supportDocument: ["Image alternative text: Apex study workspace"],
+    goal: "Upload an image and set useful alt text.",
+    steps: ["Select the slide that needs a visual.", "Click Image in the properties panel and choose an image from your device.", "Set the image alt text to Apex study workspace."],
     starterDeck: apexDeck,
-    expected: { imageAlt: "Apex study practice card" },
+    expected: { imageAlt: "Apex study workspace", objectTypes: ["image"] },
     points: 15
   }),
-  ...["Use an image and content layout", "Use a comparison layout", "Keep bullet text short", "Apply a high contrast theme"].map((title, index) => card({
-    id: `pres-design-${index + 3}`,
+  card({
+    id: "pres-design-image-layout",
     moduleId: "design",
     moduleTitle: "Design and Objects",
-    title,
-    scenario: "Improve slide readability using layout, contrast, and object placement.",
+    title: "Use an image and content layout",
+    scenario: "The image and text need enough space so neither one covers the other.",
     supportDocument: source,
-    goal: title,
-    steps: ["Select the slide.", "Use the layout or theme control.", "Check the slide is easy to read."],
+    goal: "Set the selected slide to Image and content layout.",
+    steps: ["Select the slide with the uploaded image.", "Open the Layout dropdown.", "Choose Image and content."],
     starterDeck: apexDeck,
-    expected: index === 0 ? { layout: "image-content" } : index === 1 ? { layout: "comparison" } : index === 3 ? { theme: "contrast" } : { bulletItems: ["Spreadsheet clinic"] },
+    expected: { layout: "image-content" },
     teacherReview: ["Check that objects are aligned and no text is hidden."],
     points: 15
-  }))
+  }),
+  card({
+    id: "pres-design-shape",
+    moduleId: "design",
+    moduleTitle: "Design and Objects",
+    title: "Add a shape callout",
+    scenario: "Shapes can highlight important information without rewriting the whole slide.",
+    supportDocument: ["Use a shape to highlight: Book early"],
+    goal: "Add a shape object to the slide.",
+    steps: ["Click Shape in the properties panel.", "Move the shape to a clear empty area on the slide.", "Use the text box or teacher check to label the callout Book early."],
+    starterDeck: apexDeck,
+    expected: { objectTypes: ["shape"] },
+    teacherReview: ["Check that the shape supports the message and does not hide slide text."],
+    points: 15
+  }),
+  card({
+    id: "pres-design-textbox",
+    moduleId: "design",
+    moduleTitle: "Design and Objects",
+    title: "Add a text box",
+    scenario: "A separate text box is useful for short labels, reminders, or callouts.",
+    supportDocument: ["Text box wording: Book early"],
+    goal: "Add a text box object with the wording Book early.",
+    steps: ["Click Text in the properties panel.", "Select the new text box on the slide.", "Change its text to Book early."],
+    starterDeck: apexDeck,
+    expected: { slideBodyIncludes: ["Book early"], objectTypes: ["body"] },
+    points: 15
+  }),
+  card({
+    id: "pres-design-layer",
+    moduleId: "design",
+    moduleTitle: "Design and Objects",
+    title: "Move and layer objects",
+    scenario: "Presentation objects must be positioned so the audience can read the slide clearly.",
+    supportDocument: ["Use Forward and Backward when objects overlap."],
+    goal: "Add at least one shape and one text object for layering practice.",
+    steps: ["Add a Shape object.", "Add a Text object.", "Select an object and use Forward or Backward to practise layer order."],
+    starterDeck: apexDeck,
+    expected: { objectTypes: ["shape", "body"] },
+    teacherReview: ["Check that the student can move, resize, and layer the objects without hiding key content."],
+    points: 15
+  }),
+  card({
+    id: "pres-design-contrast",
+    moduleId: "design",
+    moduleTitle: "Design and Objects",
+    title: "Apply a high contrast theme",
+    scenario: "High contrast can make projected slides easier to read.",
+    supportDocument: ["Required theme: Contrast"],
+    goal: "Apply the Contrast theme.",
+    steps: ["Open the Theme dropdown.", "Choose Contrast.", "Check that text remains readable on every slide."],
+    starterDeck: apexDeck,
+    expected: { theme: "contrast" },
+    teacherReview: ["Check that contrast improves readability and does not make the slide too crowded."],
+    points: 15
+  })
 ];
 
 const outputCards: PresentationCard[] = [
-  ...[
-    ["pres-output-numbers", "Show slide numbers", { slideNumbers: true }],
-    ["pres-output-notes", "Add presenter notes", { notesInclude: "families" }],
-    ["pres-output-order", "Check slide order", { minSlides: 4 }],
-    ["pres-output-title-check", "Check deck title", { slideTitle: "Apex Study Skills Evening" }]
-  ].map(([id, title, expected]) => card({
-    id: id as string,
+  card({
+    id: "pres-output-numbers",
     moduleId: "output",
     moduleTitle: "Review and Output",
-    title: title as string,
+    title: "Show slide numbers",
     scenario: "Before printing or exporting, students must check structure, notes, numbering, and audience suitability.",
     supportDocument: source,
-    goal: title as string,
-    steps: ["Use the review controls.", "Check every slide in the slide pane.", "Use teacher review for print/export evidence."],
+    goal: "Turn on automatic slide numbers.",
+    steps: ["Find the Slide numbers checkbox in the properties panel.", "Turn it on.", "Check that each slide shows its own number automatically."],
     starterDeck: apexDeck,
-    expected: expected as PresentationExpectedResult,
+    expected: { slideNumbers: true },
     teacherReview: ["Teacher should check final slide show, handout view, and evidence requirements."],
     points: 15
-  }))
+  }),
+  card({
+    id: "pres-output-global-footer",
+    moduleId: "output",
+    moduleTitle: "Review and Output",
+    title: "Add a global footer",
+    scenario: "Repeated footer text should be added once through Global Design, not typed manually on every slide.",
+    supportDocument: ["Footer text: Apex Study Hub"],
+    goal: "Use Global Design to add the footer Apex Study Hub.",
+    steps: ["Click Global Design.", "Turn on Apply global design.", "Type Apex Study Hub in the Footer text box."],
+    starterDeck: apexDeck,
+    expected: { masterFooter: "Apex Study Hub" },
+    points: 15
+  }),
+  card({
+    id: "pres-output-global-logo",
+    moduleId: "output",
+    moduleTitle: "Review and Output",
+    title: "Add a repeated logo",
+    scenario: "A logo or repeated mark should appear automatically across slides when global design is used.",
+    supportDocument: ["Logo text: Apex"],
+    goal: "Use Global Design to show an Apex logo mark.",
+    steps: ["Click Global Design.", "Turn on Apply global design.", "Keep or type Apex in the Logo text box."],
+    starterDeck: apexDeck,
+    expected: { masterLogo: true },
+    points: 15
+  }),
+  card({
+    id: "pres-output-notes",
+    moduleId: "output",
+    moduleTitle: "Review and Output",
+    title: "Add presenter notes",
+    scenario: "Presenter notes hold reminders that are not displayed as slide text.",
+    supportDocument: ["Speaker note must include: families"],
+    goal: "Add presenter notes for the audience slide.",
+    steps: ["Select the slide that mentions the audience.", "Use the Speaker notes box.", "Add a note that includes the word families."],
+    starterDeck: apexDeck,
+    expected: { notesInclude: "families" },
+    points: 15
+  }),
+  card({
+    id: "pres-output-preview",
+    moduleId: "output",
+    moduleTitle: "Review and Output",
+    title: "Preview and prepare to print",
+    scenario: "The final deck should be checked in output view before saving or printing.",
+    supportDocument: ["Use Preview Slideshow, then Print / Save as PDF in the preview window."],
+    goal: "Create at least four slides ready for preview.",
+    steps: ["Check that the deck has at least four useful slides.", "Click Preview Slideshow.", "Use the preview window to inspect the output before printing or saving as PDF."],
+    starterDeck: apexDeck,
+    expected: { minSlides: 4 },
+    teacherReview: ["Confirm the preview window displays the whole deck and that print/PDF output is suitable."],
+    points: 15
+  })
 ];
 
 const examCards: PresentationCard[] = [
@@ -243,16 +464,29 @@ const examCards: PresentationCard[] = [
     moduleTitle: "Exam Presentation Build",
     title: "Apex presentation build",
     scenario: "Complete an original presentation task using support text, layouts, theme, image, notes, and final review.",
-    supportDocument: source,
+    supportDocument: [
+      ...source,
+      "Required image alt text: Apex study workspace",
+      "Required Global Design footer: Apex Study Hub",
+      "Required design object: one clear shape callout"
+    ],
     goal: "Create a complete Apex Study Skills Evening presentation.",
-    steps: ["Create at least four slides from the support document.", "Use suitable layouts, bullets, theme, image, and slide numbers.", "Add speaker notes and use teacher review for output evidence."],
+    steps: [
+      "Create at least four slides from the support document.",
+      "Use suitable layouts and add the three practice-station bullets.",
+      "Upload an image, set its alt text to Apex study workspace, and add one shape callout.",
+      "Use Global Design to add the Apex Study Hub footer, then turn on slide numbers.",
+      "Add speaker notes and use Preview Slideshow for final output evidence."
+    ],
     starterDeck: baseDeck,
     expected: {
       minSlides: 4,
       slideTitle: "Apex Study Skills Evening",
       bulletItems: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"],
-      imageAlt: "Apex study practice card",
-      slideNumbers: true
+      imageAlt: "Apex study workspace",
+      objectTypes: ["image", "shape"],
+      slideNumbers: true,
+      masterFooter: "Apex Study Hub"
     },
     teacherReview: ["Check slide order, consistency, no overlapping objects, spelling, notes, and output evidence."],
     points: 70
