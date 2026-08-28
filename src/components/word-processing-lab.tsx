@@ -459,7 +459,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
         </div>
       </aside>
 
-      <section className="min-h-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm">
+      <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-white shadow-sm">
         <div className="border-b border-line p-4">
           <h2 className="font-bold">Document workspace</h2>
           <p className="mt-1 text-sm text-slate-600">Use the toolbar, edit the document, then check the final result.</p>
@@ -500,7 +500,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             {wordCount} words
           </span>
         </div>
-        <div className="h-full overflow-auto bg-slate-100 p-6">
+        <div className="min-h-0 flex-1 overflow-auto bg-slate-100 p-6">
           <Editor
             tinymceScriptSrc="/tinymce/tinymce.min.js"
             licenseKey="gpl"
@@ -516,7 +516,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             }}
             init={{
               height: "100%",
-              min_height: 760,
+              min_height: 640,
               menubar: false,
               branding: false,
               promotion: false,

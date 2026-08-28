@@ -1217,7 +1217,48 @@ function removeCopyableTypingText(card: WordProcessingInstructionCard): WordProc
   };
 }
 
-export const allWordProcessingInstructionCards = rawWordProcessingCards.map(removeCopyableTypingText);
+function checkedRequirements(card: WordProcessingInstructionCard): string[] {
+  const expected = card.expected;
+  const requirements: string[] = [];
+
+  if (expected.textIncludes?.length) requirements.push(`required text: ${expected.textIncludes.join("; ")}`);
+  if (expected.boldText?.length) requirements.push(`bold text: ${expected.boldText.join("; ")}`);
+  if (expected.italicText?.length) requirements.push(`italic text: ${expected.italicText.join("; ")}`);
+  if (expected.underlineText?.length) requirements.push(`underlined text: ${expected.underlineText.join("; ")}`);
+  if (expected.alignments?.length) {
+    requirements.push(`alignment: ${expected.alignments.map((item) => `${item.text} -> ${item.value}`).join("; ")}`);
+  }
+  if (expected.unorderedListItems?.length) requirements.push(`bullet list items: ${expected.unorderedListItems.join("; ")}`);
+  if (expected.orderedListItems?.length) requirements.push(`numbered list items: ${expected.orderedListItems.join("; ")}`);
+  if (expected.image) {
+    const imageAlignment = expected.image.alignment === "center" ? "centred" : expected.image.alignment ? `${expected.image.alignment} aligned` : "";
+    requirements.push(`image: ${[
+      expected.image.alt ? `alt text ${expected.image.alt}` : "",
+      imageAlignment
+    ].filter(Boolean).join(", ")}`);
+  }
+  if (expected.columns) requirements.push(`${expected.columns} columns`);
+  if (expected.table) {
+    requirements.push(`table: ${[
+      expected.table.headers?.length ? `headers ${expected.table.headers.join(", ")}` : "",
+      expected.table.minRows ? `at least ${expected.table.minRows} rows` : "",
+      expected.table.minColumns ? `at least ${expected.table.minColumns} columns` : "",
+      expected.table.sortedFirstColumn?.length ? `first column order ${expected.table.sortedFirstColumn.join(", ")}` : "",
+      expected.table.mergedFirstRowText ? `merged first row ${expected.table.mergedFirstRowText}` : ""
+    ].filter(Boolean).join("; ")}`);
+  }
+
+  return requirements.length ? [`Checked requirements: ${requirements.join(" | ")}`] : [];
+}
+
+function exposeCheckedRequirements(card: WordProcessingInstructionCard): WordProcessingInstructionCard {
+  const additions = checkedRequirements(card).filter((line) => !card.supportDocument.includes(line));
+  return additions.length ? { ...card, supportDocument: [...card.supportDocument, ...additions] } : card;
+}
+
+export const allWordProcessingInstructionCards = rawWordProcessingCards
+  .map(exposeCheckedRequirements)
+  .map(removeCopyableTypingText);
 
 const moduleOrder = new Map(wordProcessingModules.map((module, index) => [module.id, index]));
 
