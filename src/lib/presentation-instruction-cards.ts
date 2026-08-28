@@ -85,6 +85,11 @@ const apexDeck: PresentationSlide[] = [
   { title: "Practice Stations", body: "", bullets: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"], layout: "title-content" }
 ];
 
+const audienceDeck: PresentationSlide[] = [
+  ...apexDeck,
+  { title: "Audience", body: "", bullets: ["Year 10 students", "Year 11 students", "Families"], layout: "title-content" }
+];
+
 const source = [
   "Deck topic: Apex Study Skills Evening",
   "Audience: Year 10 and Year 11 students and their families",
@@ -102,7 +107,7 @@ const introCards: PresentationCard[] = [
     moduleTitle: "Slide Foundations",
     title: "Create a title slide",
     scenario: "Apex needs the first slide for a short student information deck.",
-    supportDocument: source,
+    supportDocument: [...source, "Required layout: title-content, shown as Title and content."],
     goal: "Add the deck title to slide 1.",
     steps: ["Select slide 1 in the slide pane.", "Choose the Title layout.", "Type Apex Study Skills Evening in the title box."],
     starterDeck: baseDeck,
@@ -143,7 +148,7 @@ const introCards: PresentationCard[] = [
     scenario: "The second slide needs a title area and a content area for bullets.",
     supportDocument: source,
     goal: "Set slide 2 to Title and content layout.",
-    steps: ["Select slide 2 in the slide pane.", "Open the Layout dropdown in the toolbar.", "Choose Title and content."],
+    steps: ["Select slide 2 in the slide pane.", "Open the Layout dropdown in the toolbar.", "Choose Title and content, which uses the title-content layout."],
     starterDeck: apexDeck,
     expected: { activeSlide: 1, layout: "title-content" },
     points: 12
@@ -154,7 +159,7 @@ const introCards: PresentationCard[] = [
     moduleTitle: "Slide Foundations",
     title: "Add a slide title",
     scenario: "Each information slide should tell the audience what the slide is about.",
-    supportDocument: source,
+    supportDocument: [...source, "Keep the useful slide title: Practice Stations"],
     goal: "Add the title Practice Stations to slide 2.",
     steps: ["Select slide 2.", "Click the title text object or add a Title object if needed.", "Type Practice Stations."],
     starterDeck: apexDeck,
@@ -195,7 +200,7 @@ const introCards: PresentationCard[] = [
     scenario: "Exam work should not contain extra blank or repeated slides.",
     supportDocument: source,
     goal: "Practise deleting an unwanted slide while keeping at least two slides.",
-    steps: ["Create or select an unwanted slide.", "Click Delete on the toolbar.", "Check that the useful title and content slides remain."],
+    steps: ["Create or select an unwanted slide.", "Click Delete on the toolbar.", "Check that the useful Practice Stations title and content slides remain."],
     starterDeck: [...apexDeck, { title: "Unused", body: "", bullets: [], layout: "title-content" }],
     expected: { minSlides: 2, slideTitle: "Practice Stations" },
     points: 12
@@ -208,7 +213,7 @@ const introCards: PresentationCard[] = [
     scenario: "This checkpoint combines slide creation, layouts, titles, subtitle text, and bullet points.",
     supportDocument: source,
     goal: "Create a two-slide Apex starter deck.",
-    steps: ["Slide 1: use Title layout with title and subtitle.", "Slide 2: use Title and Content layout.", "Add the three session bullet points."],
+    steps: ["Slide 1: use Title layout with title and subtitle.", "Slide 2: use Title and Content layout with the title Practice Stations.", "Add the three session bullet points."],
     starterDeck: baseDeck,
     expected: {
       minSlides: 2,
@@ -227,7 +232,7 @@ const contentCards: PresentationCard[] = [
     moduleTitle: "Text and Imported Source",
     title: "Add an audience slide",
     scenario: "A support document has been supplied. Convert the useful points into short slide content.",
-    supportDocument: source,
+    supportDocument: [...source, "Required layout: image-content, shown as Image and content."],
     goal: "Create an Audience slide with three short bullet points.",
     steps: ["Add a new slide.", "Set the slide title to Audience.", "Add Year 10 students, Year 11 students, and Families as separate bullet points."],
     starterDeck: apexDeck,
@@ -324,8 +329,8 @@ const designCards: PresentationCard[] = [
     scenario: "The image and text need enough space so neither one covers the other.",
     supportDocument: source,
     goal: "Set the selected slide to Image and content layout.",
-    steps: ["Select the slide with the uploaded image.", "Open the Layout dropdown.", "Choose Image and content."],
-    starterDeck: apexDeck,
+    steps: ["Select the slide you want to format.", "Open the Layout dropdown.", "Choose Image and content, which uses the image-content layout."],
+    starterDeck: audienceDeck,
     expected: { layout: "image-content" },
     teacherReview: ["Check that objects are aligned and no text is hidden."],
     points: 15
@@ -449,7 +454,7 @@ const outputCards: PresentationCard[] = [
     scenario: "The final deck should be checked in output view before saving or printing.",
     supportDocument: ["Use Preview Slideshow, then Print / Save as PDF in the preview window."],
     goal: "Create at least four slides ready for preview.",
-    steps: ["Check that the deck has at least four useful slides.", "Click Preview Slideshow.", "Use the preview window to inspect the output before printing or saving as PDF."],
+    steps: ["Add slides until the deck has at least four useful slides.", "Click Preview Slideshow.", "Use the preview window to inspect the output before printing or saving as PDF."],
     starterDeck: apexDeck,
     expected: { minSlides: 4 },
     teacherReview: ["Confirm the preview window displays the whole deck and that print/PDF output is suitable."],

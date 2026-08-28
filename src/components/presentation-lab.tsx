@@ -123,6 +123,14 @@ function validateDeck(card: PresentationCard, slides: PresentationSlide[], activ
   const allNotes = prepared.map((slide) => normalise(slide.notes || "")).join(" ");
   const allImages = prepared.flatMap((slide) => slide.objects || []).filter((item) => item.type === "image");
   const allTypes = prepared.flatMap((slide) => slide.objects || []).map((item) => item.type);
+  const objectLabels: Record<PresentationObject["type"], string> = {
+    title: "title text object",
+    body: "text box object",
+    bullets: "bullet list object",
+    image: "image object",
+    shape: "shape object",
+    line: "line object"
+  };
 
   if (expected.minSlides && prepared.length < expected.minSlides) messages.push(`Create at least ${expected.minSlides} slides.`);
   if (expected.layout && selected.layout !== expected.layout) messages.push(`Set the selected slide layout to ${expected.layout.replace("-", " ")}.`);
@@ -134,7 +142,7 @@ function validateDeck(card: PresentationCard, slides: PresentationSlide[], activ
     if (!allBullets.includes(normalise(item))) messages.push(`Add ${item} as a bullet point.`);
   });
   expected.objectTypes?.forEach((type) => {
-    if (!allTypes.includes(type)) messages.push(`Add a ${type} object.`);
+    if (!allTypes.includes(type)) messages.push(`Add a ${objectLabels[type]}.`);
   });
   if (expected.theme && theme !== expected.theme) messages.push(`Apply the ${expected.theme} theme.`);
   if (expected.imageAlt && !allImages.some((item) => normalise(item.alt).includes(normalise(expected.imageAlt)))) messages.push(`Insert the image with alt text: ${expected.imageAlt}`);
@@ -561,7 +569,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
         </div>
         <div className="flex flex-wrap items-center gap-3 border-t border-line bg-white p-3">
           <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90"><CheckCircle2 size={18} aria-hidden="true" /> Check final result</button>
-          <span className="mr-auto font-bold">{completed.length * 10} points</span>
+          <span className="mr-auto font-bold">{cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0)} points</span>
           <button type="button" onClick={previousCard} disabled={activeIndex === 0} className="inline-flex items-center gap-2 rounded-lg border border-line px-4 py-3 font-bold disabled:cursor-not-allowed disabled:text-slate-300"><ChevronLeft size={18} /> Previous</button>
           <button type="button" onClick={nextCard} disabled={!currentComplete || activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Next</button>
         </div>
