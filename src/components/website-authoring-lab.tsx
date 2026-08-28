@@ -39,6 +39,11 @@ function sourceHasTag(html: string, tag: string) {
   return new RegExp(`<${cleanTag}(\\s|>|/)`, "i").test(html) && new RegExp(`</${cleanTag}>`, "i").test(html);
 }
 
+function sourceHasHeadTag(html: string, tag: string) {
+  const head = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i)?.[1] || "";
+  return sourceHasTag(head, tag);
+}
+
 function getBodyInnerHtml(html: string) {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   return match?.[1]?.trim() || "";
@@ -90,6 +95,11 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
   });
 
   card.expected.requiredTags?.forEach((tag) => {
+    if (tag === "meta") {
+      if (!sourceHasHeadTag(html, "meta")) messages.push("Add a meta element inside head.");
+      return;
+    }
+
     if (["html", "head", "body", "title", "main"].includes(tag) || tag.startsWith("<!--")) {
       if (!sourceHasTag(html, tag)) messages.push(`Add a ${tag} element.`);
       return;
@@ -145,6 +155,29 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
       return textOk && hrefOk;
     });
     if (!found) messages.push(`Add the link ${expectedLink.text || ""} to ${expectedLink.href || "the required target"}.`);
+  });
+
+  card.expected.containedLinks?.forEach((expectedLink) => {
+    const container = document.querySelector(expectedLink.container);
+    const links = Array.from(container?.querySelectorAll("a") || []);
+    const found = links.some((link) => {
+      const textOk = expectedLink.text ? normalise(link.textContent || "").includes(normalise(expectedLink.text)) : true;
+      const hrefOk = expectedLink.href ? link.getAttribute("href") === expectedLink.href : true;
+      return textOk && hrefOk;
+    });
+    if (!found) messages.push(`Place the link ${expectedLink.text || ""} inside ${expectedLink.container}.`);
+  });
+
+  card.expected.linkedImages?.forEach((expectedImageLink) => {
+    const links = Array.from(document.querySelectorAll("a"));
+    const found = links.some((link) => {
+      const hrefOk = expectedImageLink.href ? link.getAttribute("href") === expectedImageLink.href : true;
+      const image = link.querySelector("img");
+      const srcOk = expectedImageLink.srcIncludes ? image?.getAttribute("src")?.includes(expectedImageLink.srcIncludes) : true;
+      const altOk = expectedImageLink.alt ? normalise(image?.getAttribute("alt") || "") === normalise(expectedImageLink.alt) : true;
+      return hrefOk && Boolean(image) && srcOk && altOk;
+    });
+    if (!found) messages.push("Place the required image inside the correct link.");
   });
 
   card.expected.tableHeaders?.forEach((header) => {
