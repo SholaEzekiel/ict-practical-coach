@@ -72,6 +72,11 @@ export const wordProcessingModules: WordProcessingModule[] = [
     id: "exam-editing",
     title: "Exam Editing",
     description: "Combine support text, formatting, lists, tables, and proofreading in short practical tasks."
+  },
+  {
+    id: "free-practice",
+    title: "Free Practice",
+    description: "Open document practice for writing, formatting, previewing, printing, or saving as PDF."
   }
 ];
 
@@ -1200,7 +1205,29 @@ const rawWordProcessingCards = [
   ...extraTableCards,
   ...generatedExamEditingTasks,
   ...extraExamCards,
-  ...moduleExamChallengeCards
+  ...moduleExamChallengeCards,
+  {
+    id: "wp-free-practice",
+    moduleId: "free-practice",
+    moduleTitle: "Free Practice",
+    category: "Free Practice",
+    title: "Free Practice workspace",
+    scenario: "Use the document workspace without a guided validation target.",
+    supportDocument: [
+      "Type or paste your own document content.",
+      "Use the toolbar to practise formatting, lists, tables, images, headers, footers, page numbers, columns, and layout.",
+      "Use Preview / Print to inspect the final document and print or save it as PDF."
+    ],
+    goal: "Create, preview, and print your own document.",
+    steps: [
+      "Use the document editor and toolbar to build any practice document.",
+      "Add formatting, lists, tables, or images as needed.",
+      "Open Preview / Print and use the browser print dialog when ready."
+    ],
+    starterHtml: `<h1>Free Practice Document</h1><p>Start your own document here.</p>`,
+    expected: {},
+    points: 0
+  }
 ];
 
 function removeCopyableTypingText(card: WordProcessingInstructionCard): WordProcessingInstructionCard {

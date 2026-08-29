@@ -20,6 +20,7 @@ import {
   List,
   ListOrdered,
   Merge,
+  MonitorPlay,
   Pilcrow,
   Ruler,
   Table2,
@@ -295,6 +296,41 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     }
   }
 
+  function openDocumentPreview() {
+    const preview = window.open("", "apex-word-processing-preview");
+    if (!preview) return;
+
+    preview.document.open();
+    preview.document.write(`<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apex document preview</title>
+    <style>
+      body{margin:0;background:#eef3f7;color:#111827;font-family:Arial,Helvetica,sans-serif}
+      .toolbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid #d9e2ea}
+      .toolbar button{border:0;border-radius:8px;background:#0f6f8c;color:#fff;padding:10px 16px;font-weight:700;cursor:pointer}
+      .word-document{background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.16);margin:32px auto;max-width:850px;min-height:900px;padding:48px;line-height:1.55}
+      .word-document.page-margin-wide{padding-left:64px;padding-right:64px}
+      .word-document.page-landscape{max-width:1120px;min-height:720px}
+      .word-document.paragraph-spacing-relaxed p{margin-bottom:20px}
+      .word-document.columns-2{column-count:2;column-gap:32px}
+      .word-document.columns-3{column-count:3;column-gap:24px}
+      .word-document table{width:100%;border-collapse:collapse}
+      .word-document td,.word-document th{border:1px solid #9ca3af;padding:7px 10px}
+      .word-document img{max-width:100%;height:auto}
+      @media print{body{background:white}.toolbar{display:none}.word-document{box-shadow:none;margin:0;max-width:none;min-height:0;padding:0}}
+    </style>
+  </head>
+  <body>
+    <div class="toolbar"><strong>Apex document preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+    <main class="word-document ${documentClasses}">${content}</main>
+  </body>
+</html>`);
+    preview.document.close();
+  }
+
   function nextCard() {
     if (!currentComplete || activeIndex === cards.length - 1) return;
     setFeedback(null);
@@ -444,10 +480,14 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-line p-5">
+        <div className="flex flex-wrap items-center gap-3 border-t border-line p-5">
           <button type="button" onClick={runCheck} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90">
             <CheckCircle2 size={18} aria-hidden="true" /> Check final result
           </button>
+          <button type="button" onClick={openDocumentPreview} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ocean hover:bg-mist">
+            <MonitorPlay size={18} aria-hidden="true" /> Preview / Print
+          </button>
+          <span className="mr-auto text-sm font-semibold text-ink">{currentComplete ? card.points : 0} points</span>
           <button
             type="button"
             onClick={nextCard}

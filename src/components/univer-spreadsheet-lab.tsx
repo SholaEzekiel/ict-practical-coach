@@ -377,6 +377,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   }
 
   function nextCard() {
+    if (!currentCardComplete || activeIndex === moduleCardsForRoute.length - 1) return;
     setFeedback(null);
     setActiveIndex((value) => Math.min(value + 1, moduleCardsForRoute.length - 1));
   }
@@ -579,7 +580,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                   </button>
                   <button
                     onClick={nextCard}
-                    disabled={activeIndex === moduleCardsForRoute.length - 1}
+                    disabled={!currentCardComplete || activeIndex === moduleCardsForRoute.length - 1}
                     className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                   >
                     Next

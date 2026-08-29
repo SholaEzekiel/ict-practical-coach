@@ -8,7 +8,8 @@ const moduleIcons = {
   content: NotebookTabs,
   design: FileImage,
   output: MonitorPlay,
-  "exam-build": Layers3
+  "exam-build": Layers3,
+  "free-practice": MonitorPlay
 };
 
 export default function PresentationsPage() {

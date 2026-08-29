@@ -321,9 +321,11 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
   function previewWebsite() {
     const safeCss = resolvedCss.replace(/<\/style/gi, "<\\/style");
+    const toolbar = `<div class="apex-preview-toolbar"><strong>Apex web preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>`;
+    const toolbarCss = `.apex-preview-toolbar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid #d9e2ea;color:#14212b;font-family:Arial,sans-serif}.apex-preview-toolbar button{border:0;border-radius:8px;background:#0f6f8c;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer}@media print{.apex-preview-toolbar{display:none!important}}`;
     const source = hasPreviewableDocument(html)
-      ? resolvedHtml.replace(/<\/head>/i, `<style>${safeCss}</style></head>`)
-      : `<!doctype html><html><head><title>Apex Preview</title><style>${safeCss}</style></head><body>${resolvedHtml}</body></html>`;
+      ? resolvedHtml.replace(/<\/head>/i, `<style>${toolbarCss}${safeCss}</style></head>`).replace(/<body([^>]*)>/i, `<body$1>${toolbar}`)
+      : `<!doctype html><html><head><title>Apex Preview</title><style>${toolbarCss}${safeCss}</style></head><body>${toolbar}${resolvedHtml}</body></html>`;
     const previewUrl = URL.createObjectURL(new Blob([source], { type: "text/html" }));
     window.open(previewUrl, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60000);
@@ -472,13 +474,12 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <button
                   type="button"
                   onClick={nextCard}
-                  disabled={activeIndex === cards.length - 1}
+                  disabled={!currentComplete || activeIndex === cards.length - 1}
                   className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                 >
                   Next
                 </button>
               </div>
-              {!currentComplete && <p className="mt-2 text-center text-xs text-slate-500">Review mode: Next is temporarily unlocked.</p>}
             </div>
           </>
         )}

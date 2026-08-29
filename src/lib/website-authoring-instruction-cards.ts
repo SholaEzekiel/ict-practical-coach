@@ -79,6 +79,11 @@ export const websiteAuthoringModules: WebsiteAuthoringModule[] = [
     id: "exam-build",
     title: "Exam Website Build",
     description: "Combine source text, structure, media, links, tables, CSS, preview checks, and evidence."
+  },
+  {
+    id: "free-practice",
+    title: "Free Practice",
+    description: "Build any HTML/CSS page, upload activity files, preview it in the browser, and print or save as PDF."
   }
 ];
 
@@ -959,7 +964,37 @@ const allCards = [
   ...linksNavigationCards,
   ...tableCards,
   ...cssCards,
-  ...examBuildCards
+  ...examBuildCards,
+  moduleCard("free-practice", "Free Practice", {
+    id: "web-free-practice",
+    title: "Free Practice workspace",
+    scenario: "Use the full web authoring workspace without a guided validation target.",
+    supportDocument: [
+      "Create your own HTML and CSS.",
+      "Use Add activity file for images, audio, or video, then use the shown relative path in your code.",
+      "Use Preview to open the page in a browser tab, then print or save it as PDF."
+    ],
+    goal: "Build, preview, and print your own web page.",
+    steps: [
+      "Use the HTML and CSS tabs to create any practice page.",
+      "Upload any media files you want to include.",
+      "Click Preview to inspect the page in a browser and use Print / Save as PDF when ready."
+    ],
+    starterHtml: `<!doctype html>
+<html>
+  <head>
+    <title>Free Practice Page</title>
+  </head>
+  <body>
+    <main>
+      <h1>Free Practice Page</h1>
+      <p>Build your own page here.</p>
+    </main>
+  </body>
+</html>`,
+    expected: {},
+    points: 0
+  })
 ];
 
 const moduleOrder = new Map(websiteAuthoringModules.map((module, index) => [module.id, index]));

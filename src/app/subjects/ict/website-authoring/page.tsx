@@ -9,7 +9,8 @@ const moduleIcons = {
   "links-navigation": Link2,
   tables: Table2,
   "css-layout": Palette,
-  "exam-build": MonitorCheck
+  "exam-build": MonitorCheck,
+  "free-practice": Code2
 };
 
 export default function WebsiteAuthoringPage() {

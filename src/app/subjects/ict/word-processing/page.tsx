@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, FileText, ListChecks, Pilcrow, Rows3, Table2, Type } from "lucide-react";
+import { ArrowRight, FileText, ListChecks, MonitorPlay, Pilcrow, Rows3, Table2, Type } from "lucide-react";
 import { Pill, Section } from "@/components/ui";
 import { getWordProcessingCardsForModule, wordProcessingModules } from "@/lib/word-processing-instruction-cards";
 
@@ -9,7 +9,8 @@ const moduleIcons = {
   "paragraph-layout": Pilcrow,
   lists: ListChecks,
   tables: Table2,
-  "exam-editing": Rows3
+  "exam-editing": Rows3,
+  "free-practice": MonitorPlay
 };
 
 export default function WordProcessingPage() {

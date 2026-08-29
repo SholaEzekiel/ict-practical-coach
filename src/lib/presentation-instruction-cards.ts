@@ -73,7 +73,8 @@ export const presentationModules: PresentationModule[] = [
   { id: "content", title: "Text and Imported Source", description: "Turn support text into slide titles, subtitles, bullet points, and speaker notes." },
   { id: "design", title: "Design and Objects", description: "Apply consistent themes, add images, align objects, and make slides readable." },
   { id: "output", title: "Review and Output", description: "Use slide numbers, speaker notes, deck order, and teacher-reviewed print/export checks." },
-  { id: "exam-build", title: "Exam Presentation Build", description: "Complete a full original 0417-style presentation task from a support document." }
+  { id: "exam-build", title: "Exam Presentation Build", description: "Complete a full original 0417-style presentation task from a support document." },
+  { id: "free-practice", title: "Free Practice", description: "Create your own deck, import images, preview the slideshow, and print or save as PDF." }
 ];
 
 export const baseDeck: PresentationSlide[] = [
@@ -498,7 +499,31 @@ const examCards: PresentationCard[] = [
   })
 ];
 
-const allCards = [...introCards, ...contentCards, ...designCards, ...outputCards, ...examCards];
+const freePracticeCards: PresentationCard[] = [
+  card({
+    id: "pres-free-practice",
+    moduleId: "free-practice",
+    moduleTitle: "Free Practice",
+    title: "Free Practice workspace",
+    scenario: "Use the presentation editor without a guided validation target.",
+    supportDocument: [
+      "Create slides with the slide controls and layout menu.",
+      "Use the properties panel to add text, bullets, shapes, lines, and your own uploaded images.",
+      "Use Preview Slideshow to open the final output, then print or save as PDF."
+    ],
+    goal: "Create, preview, and print your own presentation.",
+    steps: [
+      "Build any practice deck using slides, layouts, objects, themes, and Global Design if useful.",
+      "Import your own images from the device when you need pictures.",
+      "Click Preview Slideshow to review the deck and use Print / Save as PDF when ready."
+    ],
+    starterDeck: baseDeck,
+    expected: {},
+    points: 0
+  })
+];
+
+const allCards = [...introCards, ...contentCards, ...designCards, ...outputCards, ...examCards, ...freePracticeCards];
 
 export function getPresentationModule(moduleId?: string) {
   return presentationModules.find((module) => module.id === moduleId);
