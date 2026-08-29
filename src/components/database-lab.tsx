@@ -86,11 +86,15 @@ function compareValue(rawValue: string, operator: string, expected: string) {
   return value.toLowerCase() === expected.toLowerCase();
 }
 
-function validateDatabase(card: DatabaseCard, tables: DatabaseTable[], selectedTable: string, query: QueryState, report: ReportState): Feedback {
+function validateDatabase(card: DatabaseCard, tables: DatabaseTable[], selectedTable: string, query: QueryState, report: ReportState, quizAnswer?: number): Feedback {
   const messages: string[] = [];
   const expected = card.expected;
   const allFields = tables.flatMap((table) => table.fields);
   const selected = tables.find((table) => table.name === selectedTable);
+
+  if (card.quiz && quizAnswer !== card.quiz.correctIndex) {
+    messages.push("Choose the correct knowledge-check answer.");
+  }
 
   expected.importedTables?.forEach((name) => {
     if (!tables.some((table) => table.name === name)) messages.push(`Import ${name}.csv.`);
@@ -150,6 +154,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const [panel, setPanel] = useState<"import" | "design" | "query" | "report" | "form" | "labels">("import");
   const [query, setQuery] = useState<QueryState>(defaultQuery);
   const [report, setReport] = useState<ReportState>(defaultReport);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const card = cards[activeIndex];
   const selected = tables.find((table) => table.name === selectedTable) || tables[0];
@@ -212,7 +217,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
 
   function checkWork() {
     if (!card) return;
-    const result = validateDatabase(card, tables, selectedTable, query, report);
+    const result = validateDatabase(card, tables, selectedTable, query, report, quizAnswers[card.id]);
     setFeedback(result);
     if (result.ok) setCompleted((items) => items.includes(card.id) ? items : [...items, card.id]);
   }
@@ -242,8 +247,29 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         </div>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
           <section className="rounded-lg border border-line bg-mist p-4"><p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p><h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2></section>
+          {card.accessPath && <section className="rounded-lg border border-line bg-white p-4"><h3 className="font-bold">Access path</h3><div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-bold text-ocean">{card.accessPath.map((item, index) => <span key={`${item}-${index}`} className="inline-flex items-center gap-2"><span className="rounded-md bg-mist px-2 py-1">{item}</span>{index < card.accessPath!.length - 1 && <span className="text-slate-400">→</span>}</span>)}</div></section>}
           <section className="rounded-lg border border-line bg-white p-4"><h3 className="font-bold">Support document</h3><div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">{card.supportDocument.map((line) => <p key={line}>{line}</p>)}</div></section>
           <section className="rounded-lg border border-line bg-white p-4"><h3 className="font-bold">Steps</h3><ol className="mt-3 space-y-3">{card.steps.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span><span>{step}</span></li>)}</ol></section>
+          {card.quiz && (
+            <section className="rounded-lg border border-line bg-white p-4">
+              <h3 className="font-bold">Knowledge check</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
+              <div className="mt-3 space-y-2">
+                {card.quiz.options.map((option, index) => (
+                  <label key={option} className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm font-semibold ${quizAnswers[card.id] === index ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700"}`}>
+                    <input
+                      type="radio"
+                      name={`quiz-${card.id}`}
+                      checked={quizAnswers[card.id] === index}
+                      onChange={() => setQuizAnswers((answers) => ({ ...answers, [card.id]: index }))}
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+              {feedback?.ok && quizAnswers[card.id] === card.quiz.correctIndex && <p className="mt-3 text-sm font-semibold text-emerald-700">{card.quiz.feedback}</p>}
+            </section>
+          )}
           {card.teacherReview && <section className="rounded-lg border border-sky-200 bg-sky-50 p-4"><h3 className="font-bold">Teacher review</h3><ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">{card.teacherReview.map((item) => <li key={item}>{item}</li>)}</ul></section>}
           {feedback && <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
         </div>
@@ -283,7 +309,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
 
           <div className="mt-8 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-slate-700">
             <p className="flex items-center gap-2 font-bold text-ink"><Link2 size={16} /> Exam habit</p>
-            <p className="mt-1">Final database evidence often needs design view, query criteria, report layout, and labels. Apex checks the result, then the teacher confirms presentation and evidence.</p>
+            <p className="mt-1">Final Access evidence often needs import settings, Design View, query criteria, report layout, labels, print preview, and exported output. Apex checks the process knowledge, then the teacher confirms the real Microsoft Access evidence.</p>
           </div>
         </div>
       </section>

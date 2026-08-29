@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Database, FileInput, KeyRound, Rows3, Search } from "lucide-react";
+import { ArrowRight, Database, FileInput, KeyRound, MonitorPlay, Rows3, Search } from "lucide-react";
 import { Pill, Section } from "@/components/ui";
 import { databaseModules, getDatabaseCardsForModule } from "@/lib/database-instruction-cards";
 
@@ -8,7 +8,8 @@ const moduleIcons = {
   "import-design": FileInput,
   queries: Search,
   "reports-labels": Rows3,
-  "exam-build": KeyRound
+  "exam-build": KeyRound,
+  "free-practice": MonitorPlay
 };
 
 export default function DatabasesPage() {
@@ -19,7 +20,7 @@ export default function DatabasesPage() {
           <Pill>ICT Databases</Pill>
           <h1 className="mt-4 text-4xl font-bold">Database modules</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-            Practise CSV import, table design, field types, keys, relationships, queries, reports, labels, and evidence-style checks.
+            Learn Microsoft Access database processes through step-by-step guidance, exam-style knowledge checks, reports, labels, and print evidence habits.
           </p>
         </div>
         <Link href="/subjects/ict" className="inline-flex items-center gap-2 font-semibold text-ocean">
