@@ -44,6 +44,11 @@ function sourceHasHeadTag(html: string, tag: string) {
   return sourceHasTag(head, tag);
 }
 
+function sourceHasBodyTag(html: string, tag: string) {
+  const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] || "";
+  return sourceHasTag(body, tag);
+}
+
 function getBodyInnerHtml(html: string) {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   return match?.[1]?.trim() || "";
@@ -100,8 +105,13 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
       return;
     }
 
-    if (["html", "head", "body", "title", "main"].includes(tag) || tag.startsWith("<!--")) {
+    if (["html", "head", "body", "title"].includes(tag) || tag.startsWith("<!--")) {
       if (!sourceHasTag(html, tag)) messages.push(`Add a ${tag} element.`);
+      return;
+    }
+
+    if (!sourceHasBodyTag(html, tag)) {
+      messages.push(`Place the ${tag} element inside body.`);
       return;
     }
 

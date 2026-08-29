@@ -160,6 +160,13 @@ const apexPageWithFooterHtml = apexPageHtml.replace(
   "\n    <footer>\n\n    </footer>\n  </body>"
 );
 
+function insertIntoSessionsSection(markup: string) {
+  return apexPageHtml.replace(
+    "        <p>Students rotate through short spreadsheet, document, and web design activities.</p>\n      </section>",
+    `        <p>Students rotate through short spreadsheet, document, and web design activities.</p>\n${markup}\n      </section>`
+  );
+}
+
 const tableStarterHtml = `<!doctype html>
 <html>
   <head>
@@ -448,7 +455,7 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Upload file if needed: apex-study-card.svg", "Image path: images/apex-study-card.svg", "Alternative text: Apex study practice card"],
     goal: "Set the image alt text to Apex study practice card.",
     steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Add alt=\"Apex study practice card\" and keep src in the same img tag."],
-    starterHtml: `${apexPageHtml}\n<img src="images/apex-study-card.svg">`,
+    starterHtml: insertIntoSessionsSection(`        <img src="images/apex-study-card.svg">`),
     expected: { requiredTags: ["img"], uploadedPaths: ["images/apex-study-card.svg"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] },
     points: 15
   }),
@@ -459,7 +466,7 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Upload file if needed: apex-study-card.svg", "Use <figure> around the image."],
     goal: "Wrap the image in a figure element.",
     steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Place <figure> before it and </figure> after it."],
-    starterHtml: `${apexPageHtml}\n<img src="images/apex-study-card.svg" alt="Apex study practice card">`,
+    starterHtml: insertIntoSessionsSection(`        <img src="images/apex-study-card.svg" alt="Apex study practice card">`),
     expected: { requiredTags: ["figure", "img"], uploadedPaths: ["images/apex-study-card.svg"] },
     points: 15
   }),
@@ -470,7 +477,9 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Upload file if needed: apex-study-card.svg", "Caption: Guided practice workspace"],
     goal: "Add Guided practice workspace inside figcaption.",
     steps: ["Upload the image file if it is not already listed.", "Find the figure element.", "Below the img, type <figcaption>Guided practice workspace</figcaption> and keep it inside figure."],
-    starterHtml: `${apexPageHtml}\n<figure>\n  <img src="images/apex-study-card.svg" alt="Apex study practice card">\n</figure>`,
+    starterHtml: insertIntoSessionsSection(`        <figure>
+          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+        </figure>`),
     expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["Guided practice workspace"] },
     points: 15
   }),
@@ -481,7 +490,10 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Upload file if needed: apex-study-card.svg", "Width: 320", "Height: 180"],
     goal: "Add width and height attributes to the img element.",
     steps: ["Upload the image file if it is not already listed.", "Find the img tag.", "Add width=\"320\" and height=\"180\" while keeping the alt text."],
-    starterHtml: `${apexPageHtml}\n<figure>\n  <img src="images/apex-study-card.svg" alt="Apex study practice card">\n  <figcaption>Guided practice workspace</figcaption>\n</figure>`,
+    starterHtml: insertIntoSessionsSection(`        <figure>
+          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+          <figcaption>Guided practice workspace</figcaption>
+        </figure>`),
     expected: { requiredTags: ["img"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["width=\"320\"", "height=\"180\""] },
     points: 15
   }),
@@ -492,7 +504,10 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Upload file if needed: apex-study-card.svg", "Section heading: Visual preview", "Caption: Guided practice workspace"],
     goal: "Create a section containing h2, figure, img, and figcaption.",
     steps: ["Upload the image file if it is not already listed.", "Inside main, add a section with <h2>Visual preview</h2>.", "Move or add the figure inside the section."],
-    starterHtml: `${apexPageHtml}\n<figure>\n  <img src="images/apex-study-card.svg" alt="Apex study practice card">\n  <figcaption>Guided practice workspace</figcaption>\n</figure>`,
+    starterHtml: insertIntoSessionsSection(`        <figure>
+          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+          <figcaption>Guided practice workspace</figcaption>
+        </figure>`),
     expected: { requiredTags: ["section", "h2", "figure", "img", "figcaption"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["Visual preview", "Guided practice workspace"] },
     points: 20
   }),
