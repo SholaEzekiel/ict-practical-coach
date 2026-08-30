@@ -58,12 +58,12 @@ export type DatabaseTable = {
 };
 
 export const databaseModules: DatabaseModule[] = [
-  { id: "intro", title: "Access Foundations", description: "Learn tables, fields, records, data types, primary keys, and relationships as Microsoft Access processes." },
-  { id: "import-design", title: "Import and Table Design", description: "Follow Access ribbon paths for CSV import, design view, data types, keys, validation, masks, and integrity." },
-  { id: "queries", title: "Queries and Sorting", description: "Learn criteria rows, AND/OR logic, wildcards, calculated fields, parameters, dates, and sorting." },
-  { id: "reports-labels", title: "Reports, Labels and Print", description: "Prepare report output, grouping, totals, visibility, labels, landscape fit, and export/print evidence." },
-  { id: "exam-build", title: "Exam Database Build", description: "Use mixed knowledge checks to recognise the correct Access process for common 0417 database tasks." },
-  { id: "free-practice", title: "Free Practice", description: "Open the database workspace for importing CSV files, trying query/report controls, and printing evidence." }
+  { id: "intro", title: "18.1 Database Concepts", description: "Learn flat-file and relational databases, fields, records, keys, relationships, and good form design before using the practical tools." },
+  { id: "import-design", title: "18.1 Create Database Structure", description: "Import source files, choose field types, set keys, understand relationships, and prepare data-entry forms." },
+  { id: "queries", title: "18.2 Manipulate Data", description: "Build query criteria, operators, wildcards, sorting, calculated fields, and summary functions." },
+  { id: "reports-labels", title: "18.3 Present Data", description: "Prepare reports, labels, headers, footers, layouts, formatting, print preview, and PDF evidence." },
+  { id: "exam-build", title: "Exam Database Build", description: "Combine 0417 database structure, manipulation, presentation, and evidence decisions in exam-style sequences." },
+  { id: "free-practice", title: "Free Practice", description: "Use the database workspace freely for imports, queries, reports, forms, labels, and PDF evidence." }
 ];
 
 export const sourceTables: DatabaseTable[] = [
@@ -95,330 +95,175 @@ export const sourceTables: DatabaseTable[] = [
       { BookingID: "502", LearnerID: "102", Session: "Database", Minutes: "60", Confirmed: "Yes" },
       { BookingID: "503", LearnerID: "103", Session: "Presentation", Minutes: "30", Confirmed: "No" }
     ]
+  },
+  {
+    name: "members",
+    fields: [
+      { name: "Customer_ID", type: "Text", primary: true },
+      { name: "Last_Name", type: "Text", primary: false },
+      { name: "City", type: "Text", primary: false },
+      { name: "Country", type: "Text", primary: false },
+      { name: "Join_Date", type: "Date/Time", primary: false },
+      { name: "Fees", type: "Currency", primary: false },
+      { name: "Active", type: "Boolean", primary: false }
+    ],
+    rows: [
+      { Customer_ID: "C001", Last_Name: "Santos", City: "Madrid", Country: "Spain", Join_Date: "2026-01-14", Fees: "85.50", Active: "Yes" },
+      { Customer_ID: "C002", Last_Name: "Cole", City: "Barcelona", Country: "Spain", Join_Date: "2026-02-03", Fees: "42.00", Active: "No" },
+      { Customer_ID: "C003", Last_Name: "Mensah", City: "Lagos", Country: "Nigeria", Join_Date: "2026-02-18", Fees: "120.00", Active: "Yes" },
+      { Customer_ID: "C004", Last_Name: "Chen", City: "Singapore", Country: "Singapore", Join_Date: "2026-03-01", Fees: "65.00", Active: "Yes" }
+    ]
+  },
+  {
+    name: "orders",
+    fields: [
+      { name: "Order_ID", type: "Number", primary: true },
+      { name: "Customer_ID", type: "Text", primary: false },
+      { name: "Item_Name", type: "Text", primary: false },
+      { name: "Units", type: "Number", primary: false },
+      { name: "Price", type: "Currency", primary: false },
+      { name: "Order_Value", type: "Currency", primary: false },
+      { name: "Order_Date", type: "Date/Time", primary: false },
+      { name: "Department", type: "Text", primary: false }
+    ],
+    rows: [
+      { Order_ID: "2001", Customer_ID: "C001", Item_Name: "Calculator", Units: "4", Price: "15.00", Order_Value: "60.00", Order_Date: "2026-04-11", Department: "ICT" },
+      { Order_ID: "2002", Customer_ID: "C002", Item_Name: "Camera", Units: "2", Price: "240.00", Order_Value: "480.00", Order_Date: "2026-04-13", Department: "Media" },
+      { Order_ID: "2003", Customer_ID: "C003", Item_Name: "Scanner", Units: "5", Price: "120.00", Order_Value: "600.00", Order_Date: "2026-04-15", Department: "ICT" },
+      { Order_ID: "2004", Customer_ID: "C004", Item_Name: "Projector", Units: "1", Price: "720.00", Order_Value: "720.00", Order_Date: "2026-04-17", Department: "Admin" }
+    ]
   }
 ];
 
-const support = [
-  "Source file 1: learners.csv with LearnerID, Name, Group, Target",
-  "Source file 2: bookings.csv with BookingID, LearnerID, Session, Minutes, Confirmed",
-  "Relationship: learners.LearnerID to bookings.LearnerID",
-  "Report title: Confirmed Apex Practice Sessions",
-  "Label field: Name"
+const sharedSupport = [
+  "Practice sources: learners.csv, bookings.csv, members.csv, and orders.csv.",
+  "Core relationship examples: learners.LearnerID to bookings.LearnerID, and members.Customer_ID to orders.Customer_ID.",
+  "Use Study mode for concepts and MCQs, then Practice mode for simulator-checked tasks.",
+  "Use Save PDF evidence for reports, forms, labels, and final output."
 ];
 
-const card = (item: DatabaseCard) => item;
+const q = (question: string, options: string[], correctIndex: number, feedback: string): DatabaseQuiz => ({ question, options, correctIndex, feedback });
 
-const knowledgeCards: DatabaseCard[] = [
-  card({
-    id: "db-access-import-csv",
-    moduleId: "intro",
-    moduleTitle: "Access Foundations",
-    title: "Import CSV data",
-    scenario: "A 0417 database task often begins by importing a CSV source file into Microsoft Access.",
-    supportDocument: ["Exam instruction: Import N26_CUST.csv and use the first row as field names.", "The first row contains headings such as Customer_ID, Join_Date, and Fees.", "If the first row is not treated as field names, those headings become an incorrect data record."],
-    goal: "Learn the Access steps for importing a CSV file with field names.",
-    steps: ["Open Access and choose External Data.", "Select New Data Source > From File > Text File.", "Browse to the CSV file and choose the import option.", "Tick First Row Contains Field Names, then finish the import."],
-    accessPath: ["External Data", "New Data Source", "From File", "Text File"],
-    quiz: { question: "What setting prevents CSV headings from being imported as ordinary records?", options: ["Append a copy of records", "First Row Contains Field Names", "Set Indexed to Yes", "Enforce validation constraints"], correctIndex: 1, feedback: "Correct. Access uses the first row to name the fields instead of importing it as data." },
-    expected: { knowledgeCheck: "mcq_1" },
-    points: 10
-  }),
-  card({
-    id: "db-access-records-fields",
-    moduleId: "intro",
-    moduleTitle: "Access Foundations",
-    title: "Recognise records and fields",
-    scenario: "Students need to understand the language used in database tasks before using Design View.",
-    supportDocument: ["A field is one category of data, like Customer_ID or Fees.", "A record is one complete row about one customer, product, learner, or booking.", "Access tables store records in rows and fields in columns."],
-    goal: "Identify the difference between a field and a record.",
-    steps: ["Open the imported table.", "Read the column headings as fields.", "Read each complete row as one record.", "Use this vocabulary when checking later task instructions."],
-    accessPath: ["Table", "Datasheet View", "Fields", "Records"],
-    quiz: { question: "In an Access table, what is a field?", options: ["One complete row of data", "A database password", "A column/category of data", "A printed report footer"], correctIndex: 2, feedback: "Correct. A field is a column/category such as Fees, Country, or Join_Date." },
-    expected: { knowledgeCheck: "mcq_records_fields" },
-    points: 10
-  }),
-  card({
-    id: "db-access-primary-key",
-    moduleId: "intro",
-    moduleTitle: "Access Foundations",
-    title: "Set a primary key",
-    scenario: "Many exam tasks ask students to identify the unique field used to identify each record.",
-    supportDocument: ["A primary key must uniquely identify each record.", "It should not be blank and should not repeat.", "Common examples include Customer_ID, BookingID, or StudentID."],
-    goal: "Learn the Access steps for assigning a primary key.",
-    steps: ["Open the table in Design View.", "Select the unique ID field row.", "Click the Primary Key icon on the ribbon.", "Save the table design."],
-    accessPath: ["Table", "Design View", "Primary Key"],
-    quiz: { question: "What rule applies to a primary key?", options: ["It must be the longest text field", "It must contain unique non-empty values", "It must always be currency", "It must be hidden before printing"], correctIndex: 1, feedback: "Correct. A primary key identifies each record uniquely and cannot be blank." },
-    expected: { knowledgeCheck: "mcq_3" },
-    points: 10
-  }),
-  card({
-    id: "db-access-text-number-types",
-    moduleId: "import-design",
-    moduleTitle: "Import and Table Design",
-    title: "Choose text and number types",
-    scenario: "Access data types control how values are stored, sorted, searched, and calculated.",
-    supportDocument: ["Use Number or Currency only for values that will be calculated.", "Use Short Text for values with leading zeros or symbols, such as phone numbers or product codes.", "Wrong data types can damage imported data."],
-    goal: "Decide when to use Short Text instead of Number.",
-    steps: ["Open the table in Design View.", "Find the field that looks numeric but is really an identifier.", "Set identifiers and phone numbers to Short Text.", "Use Number/Currency only for real calculations."],
-    accessPath: ["Table", "Design View", "Data Type"],
-    quiz: { question: "Why store international phone numbers such as +34600 as Short Text?", options: ["Text automatically fixes spelling", "Number fields can reject + and remove leading zeros", "Text always sorts fastest", "Number fields cannot be indexed"], correctIndex: 1, feedback: "Correct. Phone numbers are identifiers, not calculation values." },
-    expected: { knowledgeCheck: "mcq_2" },
-    points: 10
-  }),
-  card({
-    id: "db-access-date-currency",
-    moduleId: "import-design",
-    moduleTitle: "Import and Table Design",
-    title: "Map Date and Currency fields",
-    scenario: "Exam source files may include fields that must be corrected after import.",
-    supportDocument: ["Join_Date should use Date/Time.", "Fees or Order_Value should use Currency.", "Use Design View to inspect and correct each field type."],
-    goal: "Learn how to cast imported fields to Date/Time and Currency.",
-    steps: ["Right-click the table and open Design View.", "Set Join_Date to Date/Time.", "Set Fees to Currency.", "Save the table design before continuing."],
-    accessPath: ["Table", "Design View", "Data Type"],
-    quiz: { question: "Where do you change Join_Date to Date/Time and Fees to Currency?", options: ["Report Print Preview", "Table Design View", "Navigation Pane only", "Relationship Edit box"], correctIndex: 1, feedback: "Correct. Data types are changed in table Design View." },
-    expected: { knowledgeCheck: "mcq_date_currency" },
-    points: 10
-  }),
-  card({
-    id: "db-access-relationship",
-    moduleId: "import-design",
-    moduleTitle: "Import and Table Design",
-    title: "Create a relationship",
-    scenario: "Related tables must be linked so records can be queried and reported together.",
-    supportDocument: ["A one-to-many link connects a parent primary key to a child foreign key.", "Example: learners.LearnerID connects to bookings.LearnerID.", "The Relationships window is found under Database Tools."],
-    goal: "Learn the Access steps for creating a one-to-many relationship.",
-    steps: ["Click Database Tools > Relationships.", "Add both tables to the relationship window.", "Drag the parent primary key to the matching child foreign key.", "Click Create and save the relationship."],
-    accessPath: ["Database Tools", "Relationships", "Drag key field", "Create"],
-    quiz: { question: "How do you form a standard one-to-many table relationship?", options: ["Connect parent primary key to child foreign key", "Connect two unrelated text labels", "Delete the matching child field", "Export both tables as PDFs"], correctIndex: 0, feedback: "Correct. The parent key links to the matching child foreign key." },
-    expected: { knowledgeCheck: "mcq_4" },
-    points: 10
-  }),
-  card({
-    id: "db-access-referential-integrity",
-    moduleId: "import-design",
-    moduleTitle: "Import and Table Design",
-    title: "Enforce referential integrity",
-    scenario: "Referential integrity protects linked tables from orphan child records.",
-    supportDocument: ["An orphan record is a child record without a matching parent record.", "Access can enforce this rule in the Edit Relationships dialog.", "This is important for reliable exam query and report output."],
-    goal: "Learn how to turn on referential integrity.",
-    steps: ["Open Database Tools > Relationships.", "Double-click the relationship line.", "Tick Enforce Referential Integrity.", "Click OK and save the relationship layout."],
-    accessPath: ["Database Tools", "Relationships", "Edit Relationships", "Enforce Referential Integrity"],
-    quiz: { question: "What does Enforce Referential Integrity prevent?", options: ["Using more than one index", "Orphan child records without a matching parent key", "Printing landscape reports", "Using text criteria"], correctIndex: 1, feedback: "Correct. It stops child records that do not match a parent key." },
-    expected: { knowledgeCheck: "mcq_11" },
-    points: 10
-  }),
-  card({
-    id: "db-access-validation-rule",
-    moduleId: "import-design",
-    moduleTitle: "Import and Table Design",
-    title: "Use a validation rule",
-    scenario: "Validation rules stop invalid values entering a table field.",
-    supportDocument: ["Use validation rules for allowed ranges, such as scores from 0 to 50.", "The rule is set in field properties in Design View.", "A clear validation text helps users understand mistakes."],
-    goal: "Recognise the correct validation rule for a numeric range.",
-    steps: ["Open the table in Design View.", "Select the numeric field.", "Use the Validation Rule property.", "Enter a rule such as >=0 AND <=50."],
-    accessPath: ["Table", "Design View", "Field Properties", "Validation Rule"],
-    quiz: { question: "Which rule restricts a numeric score field from 0 to 50 inclusive?", options: ["0 OR 50", ">=0 AND <=50", "Between and", "Limit(0, 50)"], correctIndex: 1, feedback: "Correct. The two comparisons define the lower and upper boundaries." },
-    expected: { knowledgeCheck: "mcq_16" },
-    points: 10
-  }),
-  card({
-    id: "db-access-and-criteria",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Use AND criteria",
-    scenario: "An Access query can require more than one condition to be true.",
-    supportDocument: ["Criteria on the same horizontal row are treated as AND.", "Example: Country = Spain and Value > 500.", "Use Query Design to place criteria under the correct fields."],
-    goal: "Learn how AND criteria are arranged in Access Query Design.",
-    steps: ["Click Create > Query Design.", "Add the required table.", "Type Spain under Country and >500 under Value on the same Criteria row.", "Click Run to view matching records."],
-    accessPath: ["Create", "Query Design", "Criteria row", "Run"],
-    quiz: { question: "How do you specify an AND condition in an Access query grid?", options: ["Type AND in the field name", "Place criteria on different rows", "Place criteria on the same horizontal row", "Use the report footer"], correctIndex: 2, feedback: "Correct. Same-row criteria are processed as AND." },
-    expected: { knowledgeCheck: "mcq_5" },
-    points: 10
-  }),
-  card({
-    id: "db-access-or-criteria",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Use OR criteria",
-    scenario: "Some tasks ask for records matching one condition or another.",
-    supportDocument: ["Alternative criteria go on separate vertical rows.", "Example: City is Madrid OR Barcelona.", "Use the Criteria row and the Or row in Query Design."],
-    goal: "Learn how OR criteria are arranged in Access Query Design.",
-    steps: ["Open Query Design.", "Under City, type Madrid on the Criteria row.", "Type Barcelona on the Or row underneath.", "Run the query and check both cities are included."],
-    accessPath: ["Create", "Query Design", "Criteria row", "Or row"],
-    quiz: { question: "How are OR conditions structured in an Access query?", options: ["Separated by a comma on one line", "Placed on separate vertical rows", "Typed into the table title", "Only possible in reports"], correctIndex: 1, feedback: "Correct. Separate criteria rows create OR logic." },
-    expected: { knowledgeCheck: "mcq_12" },
-    points: 10
-  }),
-  card({
-    id: "db-access-wildcard",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Use a wildcard search",
-    scenario: "Wildcard searches find text that starts, ends, or contains a pattern.",
-    supportDocument: ["Use Like with an asterisk wildcard for unknown text.", "Like \"C*\" finds values starting with C.", "Like \"*club*\" finds values containing club."],
-    goal: "Recognise the correct wildcard criterion.",
-    steps: ["Open the query in Design View.", "Find the text field in the grid.", "Type Like \"C*\" in the Criteria row.", "Run the query to show matching records."],
-    accessPath: ["Query Design", "Criteria", "Like", "Run"],
-    quiz: { question: "Which criterion extracts items starting with S followed by any text?", options: ["= S?", "Like S*", "Like \"S*\"", "== [S]"], correctIndex: 2, feedback: "Correct. The quoted asterisk wildcard matches any following characters." },
-    expected: { knowledgeCheck: "mcq_6" },
-    points: 10
-  }),
-  card({
-    id: "db-access-calculated-field",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Create a calculated field",
-    scenario: "Access queries can calculate new values from existing fields.",
-    supportDocument: ["Calculated fields use a field name, colon, then expression.", "Example: Total_Cost: [Units] * [Price]", "Square brackets identify existing field names."],
-    goal: "Learn the syntax for a calculated field.",
-    steps: ["Open Query Design.", "Click an empty Field cell in the query grid.", "Type Total_Cost: [Units] * [Price].", "Run the query and format the result as Currency if required."],
-    accessPath: ["Query Design", "Field cell", "Expression", "Run"],
-    quiz: { question: "What is the correct syntax for a custom calculated query field?", options: ["FieldName = [A] * [B]", "FieldName: [A] * [B]", "[A] * [B] AS FieldName", "Calculate(FieldName, [A]*[B])"], correctIndex: 1, feedback: "Correct. Access uses an alias, colon, then expression." },
-    expected: { knowledgeCheck: "mcq_7" },
-    points: 10
-  }),
-  card({
-    id: "db-access-date-math",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Calculate elapsed days",
-    scenario: "Date calculations can be used to find time elapsed between two fields.",
-    supportDocument: ["Subtracting one Date/Time field from another returns elapsed days.", "Example: Days_Active: [End_Date] - [Start_Date]", "The result can be used in query output or reports."],
-    goal: "Understand how Access handles date subtraction.",
-    steps: ["Open Query Design.", "Add a new calculated field.", "Type Days_Active: [End_Date] - [Start_Date].", "Run the query and check the result is a number of days."],
-    accessPath: ["Query Design", "Calculated field", "Date fields", "Run"],
-    quiz: { question: "What value type results from subtracting two Date/Time fields?", options: ["A second date text string", "An integer representing elapsed days", "A currency value", "A relationship error"], correctIndex: 1, feedback: "Correct. Access returns the number of days between the dates." },
-    expected: { knowledgeCheck: "mcq_13" },
-    points: 10
-  }),
-  card({
-    id: "db-access-parameter-query",
-    moduleId: "queries",
-    moduleTitle: "Queries and Sorting",
-    title: "Use a parameter prompt",
-    scenario: "Parameter queries ask the user for a value when the query runs.",
-    supportDocument: ["Square brackets can create a prompt.", "Example: [Enter Value Here:] in the Criteria row.", "The prompt text should tell the user what to type."],
-    goal: "Recognise Access parameter prompt syntax.",
-    steps: ["Open Query Design.", "Choose the field to filter.", "In Criteria, type a prompt in square brackets.", "Run the query and enter the requested value."],
-    accessPath: ["Query Design", "Criteria", "Square brackets", "Run"],
-    quiz: { question: "Which syntax creates an Access runtime criteria prompt?", options: ["Prompt: \"Enter Value\"", "[Enter Value Here:]", "(Enter Value Here)", "Criteria.Request(Value)"], correctIndex: 1, feedback: "Correct. Text inside square brackets becomes a parameter prompt." },
-    expected: { knowledgeCheck: "mcq_18" },
-    points: 10
-  }),
-  card({
-    id: "db-access-multi-sort",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Apply multi-level sorting",
-    scenario: "Reports often need more than one sort level before printing.",
-    supportDocument: ["Use the Group, Sort, and Total pane in Report Design/Layout tools.", "Example: Last_Name ascending, Date descending.", "Sort order affects how printed records are grouped and read."],
-    goal: "Learn where multi-level report sorting is configured.",
-    steps: ["Open the report in Design View or Layout View.", "Open Group, Sort, and Total.", "Add Last_Name as Ascending.", "Add Date as Descending below it."],
-    accessPath: ["Report Design", "Group, Sort, and Total", "Ascending", "Descending"],
-    quiz: { question: "Where are multi-level report sorts configured?", options: ["Inside table validation properties", "Inside the Group, Sort, and Total pane", "Inside macro click triggers", "Inside Page Setup margins"], correctIndex: 1, feedback: "Correct. Report sorting is controlled in the report design tools." },
-    expected: { knowledgeCheck: "mcq_8" },
-    points: 10
-  }),
-  card({
-    id: "db-access-report-sum",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Add a report footer total",
-    scenario: "A printed Access report may need a total or summary at the bottom.",
-    supportDocument: ["Use a text box in the Report Footer section.", "Summary expressions begin with equals.", "Example: =Sum([Order_Value])"],
-    goal: "Recognise the correct footer aggregate expression.",
-    steps: ["Open the report in Design View.", "Add a text box in the Report Footer.", "Set the Control Source to =Sum([Order_Value]).", "Preview the report output."],
-    accessPath: ["Report Design", "Report Footer", "Text Box", "Control Source"],
-    quiz: { question: "Which expression displays a complete report total?", options: ["Sum([Value])", "=Sum([Value])", "Total: Sum(Value)", "=Total(Value)"], correctIndex: 1, feedback: "Correct. Report calculation expressions begin with equals." },
-    expected: { knowledgeCheck: "mcq_9" },
-    points: 10
-  }),
-  card({
-    id: "db-access-landscape-fit",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Fix landscape report output",
-    scenario: "A report must print clearly without clipped values or hash marks.",
-    supportDocument: ["Use Print Preview to check orientation and width.", "Choose Landscape for wide reports.", "If values show ###, widen the control or column in Layout View."],
-    goal: "Learn how to fix a wide report before printing.",
-    steps: ["Open Print Preview and choose Landscape.", "Switch to Layout View if data is clipped.", "Resize narrow columns or controls.", "Preview again and confirm no ### symbols remain."],
-    accessPath: ["Print Preview", "Landscape", "Layout View", "Resize columns"],
-    quiz: { question: "What do ### symbols usually mean on a printed Access report?", options: ["A broken relationship", "A value is truncated because the control is too narrow", "Missing primary data rows", "Invalid import format"], correctIndex: 1, feedback: "Correct. Widen the field/control so the value can display." },
-    expected: { knowledgeCheck: "mcq_10" },
-    points: 10
-  }),
-  card({
-    id: "db-access-report-group",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Group report data",
-    scenario: "Grouping makes long reports easier to read by separating records under headings.",
-    supportDocument: ["Report grouping is normally set in the Report Wizard or design grouping tools.", "Example: group records by Department first.", "Grouped output should show records under each group heading."],
-    goal: "Learn how to create a report grouping level.",
-    steps: ["Start the Report Wizard or open Report Design.", "Choose the field to group by, such as Department.", "Add it as a grouping level.", "Complete the report and preview the grouped output."],
-    accessPath: ["Report Wizard", "Grouping Levels", "Department", "Preview"],
-    quiz: { question: "What happens when a field is used as a report grouping level?", options: ["The field is hidden from the report", "Matching records appear under separate group headings", "The table field becomes a button", "The database exports automatically"], correctIndex: 1, feedback: "Correct. Grouping organises matching records under group headers." },
-    expected: { knowledgeCheck: "mcq_14" },
-    points: 10
-  }),
-  card({
-    id: "db-access-field-visibility",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Hide fields in final reports",
-    scenario: "Some system ID fields are needed for relationships but should not appear in the final printed report.",
-    supportDocument: ["Do not delete fields from the source table just to hide them on a report.", "Use the selected control's Format properties.", "Set Visible to No for fields that should not print."],
-    goal: "Learn the safe way to hide an ID field in a report.",
-    steps: ["Open the report in Design View.", "Select the ID field control.", "Open Property Sheet > Format.", "Set Visible to No and preview the report."],
-    accessPath: ["Report Design", "Property Sheet", "Format", "Visible: No"],
-    quiz: { question: "How can you hide an ID field in a final report without deleting source data?", options: ["Delete the field from the table", "Set the report control Visible property to No", "Change the text to white", "Put the field in criteria brackets"], correctIndex: 1, feedback: "Correct. The report control can be hidden while source data remains intact." },
-    expected: { knowledgeCheck: "mcq_15" },
-    points: 10
-  }),
-  card({
-    id: "db-access-export-rtf",
-    moduleId: "reports-labels",
-    moduleTitle: "Reports, Labels and Print",
-    title: "Export report evidence",
-    scenario: "Some database tasks ask for report output that can be opened in a word processor.",
-    supportDocument: ["Rich Text Format can preserve report structures for word processing.", "PDF is useful for fixed final output.", "Choose the export type required by the exam instruction."],
-    goal: "Recognise the report export format for word processing.",
-    steps: ["Open the report output.", "Choose External Data or Export options.", "Select the required output format.", "Save the exported evidence file."],
-    accessPath: ["Report", "External Data", "Export", "RTF/PDF"],
-    quiz: { question: "Which format preserves report structure for word processing programs?", options: [".exe", ".rtf", ".sys", ".wav"], correctIndex: 1, feedback: "Correct. RTF is the Rich Text Format used by word processors." },
-    expected: { knowledgeCheck: "mcq_19" },
-    points: 10
-  }),
-  card({
-    id: "db-access-final-mixed",
-    moduleId: "exam-build",
-    moduleTitle: "Exam Database Build",
-    title: "Final mixed Access process check",
-    scenario: "A final exam-style database task combines import, design, relationships, queries, reports, print settings, and evidence.",
-    supportDocument: ["Sequence: import source files, check field types, set keys, create relationships, build queries, prepare reports, print/export evidence.", "Use the question wording to decide whether you need Query Design, Report Design, Print Preview, or Relationships."],
-    goal: "Choose the correct first Access area for a relationship task.",
-    steps: ["Read the exam instruction carefully.", "Identify whether the task is about source data, query criteria, report output, or relationships.", "Choose the Access ribbon area that matches the task.", "Use the MCQ to confirm the correct process."],
-    accessPath: ["Read instruction", "Identify task type", "Choose Access area", "Complete evidence"],
-    quiz: { question: "An exam asks you to link Customer_ID in Customers to Customer_ID in Orders. Where should you go first?", options: ["Print Preview", "Database Tools > Relationships", "Report Footer", "External Data > PDF"], correctIndex: 1, feedback: "Correct. Table links are created from the Relationships window." },
-    expected: { knowledgeCheck: "mcq_final_relationship" },
-    teacherReview: ["Teacher can still check actual Microsoft Access screenshots, printouts, report layout, and exported evidence."],
-    points: 20
-  }),
-  card({
+function study(
+  id: string,
+  moduleId: string,
+  moduleTitle: string,
+  title: string,
+  scenario: string,
+  goal: string,
+  supportDocument: string[],
+  steps: string[],
+  quiz: DatabaseQuiz,
+  accessPath?: string[]
+): DatabaseCard {
+  return { id, moduleId, moduleTitle, title, scenario, supportDocument, goal, steps, accessPath, quiz, expected: { knowledgeCheck: id }, points: 10 };
+}
+
+function practical(item: DatabaseCard): DatabaseCard {
+  return item;
+}
+
+const introCards: DatabaseCard[] = [
+  study("db-intro-flat-file", "intro", "18.1 Database Concepts", "Flat-file databases", "Students first need to recognise a single-table database.", "Explain when a flat-file database is suitable.", ["A flat-file database stores all data in one table.", "It is simple and useful for small lists.", "It can repeat data and becomes harder to manage as records grow."], ["Read the definition of a flat-file database.", "Compare it with a simple class list.", "Answer the knowledge check."], q("Which description best matches a flat-file database?", ["Many linked tables", "One table of records and fields", "A printed report only", "A query with no source table"], 1, "Correct. A flat-file database stores data in one table."), ["Study", "Database types"]),
+  study("db-intro-relational", "intro", "18.1 Database Concepts", "Relational databases", "Larger database tasks usually split data into linked tables.", "Explain why relational databases use more than one table.", ["A relational database stores data in separate related tables.", "It reduces repeated data and supports accurate queries.", "Relationships connect matching key fields."], ["Study the idea of related tables.", "Notice how members and orders can be stored separately.", "Answer the knowledge check."], q("Why use a relational database instead of one repeated table?", ["To reduce repeated data and link related records", "To remove all primary keys", "To make reports impossible", "To store only images"], 0, "Correct. Related tables reduce duplication and improve data integrity."), ["Study", "Database types"]),
+  study("db-intro-choose-type", "intro", "18.1 Database Concepts", "Choose the database type", "Exam questions may ask students to compare database structures.", "Choose whether flat-file or relational design is better.", ["Use flat-file for small simple lists.", "Use relational when one record type links to another, such as customers and orders.", "Relational databases need keys and relationships."], ["Read the scenario.", "Check whether data repeats across records.", "Choose the more suitable structure."], q("A school stores learners and many bookings per learner. Which structure is best?", ["Flat-file only", "Relational database", "One report footer", "A label sheet"], 1, "Correct. One learner can have many bookings, so linked tables are better."), ["Study", "Compare"]),
+  study("db-intro-fields-records", "intro", "18.1 Database Concepts", "Fields and records", "Database instructions use field and record vocabulary constantly.", "Identify fields and records in a table.", ["A field is one category of data, such as Customer_ID.", "A record is one complete row about one person, item, or order.", "Tables store fields as columns and records as rows."], ["Read the column headings as fields.", "Read one full row as a record.", "Answer the knowledge check."], q("What is a database field?", ["One full row", "A column/category of data", "A report page", "A print setting"], 1, "Correct. A field is a column/category of data."), ["Table", "Fields", "Records"]),
+  study("db-intro-primary-key", "intro", "18.1 Database Concepts", "Primary keys", "A table needs a reliable way to identify each record.", "Explain the purpose of a primary key.", ["A primary key uniquely identifies a record.", "It should not be blank and should not repeat.", "Examples include Customer_ID, Order_ID, and LearnerID."], ["Study the primary key rule.", "Identify the field that contains unique IDs.", "Answer the knowledge check."], q("What must be true of a primary key?", ["It repeats often", "It is always a date", "It is unique and not blank", "It is hidden from every query"], 2, "Correct. A primary key uniquely identifies records."), ["Study", "Keys"]),
+  study("db-intro-foreign-key", "intro", "18.1 Database Concepts", "Foreign keys", "A child table needs a field that points back to the parent table.", "Explain the purpose of a foreign key.", ["A foreign key stores values that match a primary key in another table.", "It links child records to parent records.", "Example: orders.Customer_ID links to members.Customer_ID."], ["Find the parent table key.", "Find the matching child table field.", "Answer the knowledge check."], q("In orders.Customer_ID, what is Customer_ID when it links to members.Customer_ID?", ["A foreign key", "A report title", "A wildcard", "A page footer"], 0, "Correct. It is the child table foreign key."), ["Study", "Keys"]),
+  practical({ id: "db-intro-import-learners", moduleId: "intro", moduleTitle: "18.1 Database Concepts", title: "Import one practice table", scenario: "Students should see a table appear before they inspect fields and records.", supportDocument: ["Use the built-in learners.csv source file.", "The simulator validates that the learners table has been imported."], goal: "Import learners.csv into the database workspace.", steps: ["Switch to Practice mode.", "Open Import.", "Click learners.csv.", "Check that learners appears under Tables."], accessPath: ["Practice", "Import", "learners.csv"], expected: { importedTables: ["learners"] }, points: 10 }),
+  practical({ id: "db-intro-select-learners", moduleId: "intro", moduleTitle: "18.1 Database Concepts", title: "Select a table", scenario: "Design, query, report, form, and label actions depend on the selected table.", supportDocument: ["The selected table decides which fields appear in the tools.", "This short task validates table selection only."], goal: "Select the learners table.", steps: ["Switch to Practice mode.", "Open the Database tools rail.", "Click learners under Tables.", "Check your result."], accessPath: ["Practice", "Database tools", "Tables"], expected: { importedTables: ["learners"], selectedTable: "learners" }, points: 10 }),
+  practical({ id: "db-intro-primary-practice", moduleId: "intro", moduleTitle: "18.1 Database Concepts", title: "Confirm a primary key", scenario: "The imported learners table has a unique ID field.", supportDocument: ["LearnerID should be the primary key because it identifies each learner.", "Use Design to inspect or set the key."], goal: "Make LearnerID the primary key.", steps: ["Import learners.csv if needed.", "Open Design.", "Use the radio button beside LearnerID.", "Check your result."], accessPath: ["Practice", "Design", "Primary key"], expected: { importedTables: ["learners"], primaryKey: "LearnerID" }, points: 10 }),
+  practical({ id: "db-intro-import-bookings", moduleId: "intro", moduleTitle: "18.1 Database Concepts", title: "Import a related table", scenario: "A relational database needs at least two related tables.", supportDocument: ["bookings.csv contains LearnerID values that match learners.LearnerID.", "This creates a parent-child relationship opportunity."], goal: "Import bookings.csv after learners.csv.", steps: ["Open Import.", "Click bookings.csv.", "Check that both learners and bookings are listed.", "Do not create the relationship yet."], accessPath: ["Practice", "Import", "bookings.csv"], expected: { importedTables: ["learners", "bookings"] }, points: 10 }),
+  practical({ id: "db-intro-relationship-practice", moduleId: "intro", moduleTitle: "18.1 Database Concepts", title: "Record the relationship field", scenario: "Apex validates the linking field students identify.", supportDocument: ["The shared field is LearnerID.", "In Access, you would drag learners.LearnerID to bookings.LearnerID in Relationships."], goal: "Use LearnerID as the relationship field.", steps: ["Import learners and bookings.", "Open Query.", "Find Relationship field.", "Type LearnerID."], accessPath: ["Practice", "Query", "Relationship field"], expected: { importedTables: ["learners", "bookings"], relationship: "LearnerID" }, points: 10 }),
+  study("db-intro-good-form", "intro", "18.1 Database Concepts", "Good form design", "Data-entry forms should help users enter correct data clearly.", "Recognise good form design features.", ["Good forms use clear labels, readable fonts, enough spacing, and logical order.", "Radio buttons, checkboxes, and drop-down menus reduce typing errors.", "White space helps users scan grouped fields."], ["Study the form design principles.", "Decide which control suits fixed options.", "Answer the knowledge check."], q("Which control is best for a fixed Yes/No choice?", ["Checkbox", "Free text paragraph", "Report footer", "Wildcard"], 0, "Correct. A checkbox is suitable for a Boolean Yes/No field."), ["Forms", "Design principles"]),
+  study("db-intro-advantages", "intro", "18.1 Database Concepts", "Advantages and disadvantages", "Theory questions can ask students to justify database choices.", "Compare advantages and disadvantages of flat-file and relational databases.", ["Flat-file databases are simple but can repeat data.", "Relational databases are more complex but reduce duplication.", "Relationships improve consistency but must be designed carefully."], ["Compare both structures.", "Match each advantage to the correct structure.", "Answer the knowledge check."], q("Which is a disadvantage of a relational database?", ["It cannot use fields", "It is more complex to design correctly", "It cannot store records", "It has no keys"], 1, "Correct. Relational databases need careful design."), ["Study", "Evaluate"]),
+  study("db-intro-final-check", "intro", "18.1 Database Concepts", "Concept checkpoint", "Students now combine the main 18.1 concepts before moving to structure creation.", "Identify the safest relationship design.", ["A parent table contains the primary key.", "A child table stores the matching foreign key.", "The relationship uses the matching key field."], ["Read the relationship scenario.", "Identify parent, child, primary key, and foreign key.", "Answer the checkpoint."], q("members.Customer_ID links to orders.Customer_ID. Which statement is correct?", ["Both fields must be report footers", "members.Customer_ID is the parent key and orders.Customer_ID is the foreign key", "orders.Item_Name is the primary key", "The tables cannot be related"], 1, "Correct. That is the standard parent-child relationship."), ["Study", "Checkpoint"])
+];
+
+const importDesignCards: DatabaseCard[] = [
+  practical({ id: "db-structure-import-members", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Import members", scenario: "A database task normally starts by importing source data with field names.", supportDocument: ["Use members.csv.", "The first row contains field names in the source table."], goal: "Import members.csv.", steps: ["Open Practice mode.", "Open Import.", "Click members.csv.", "Check that members appears under Tables."], accessPath: ["External Data", "Text File", "First Row Contains Field Names"], expected: { importedTables: ["members"] }, points: 10 }),
+  practical({ id: "db-structure-import-orders", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Import orders", scenario: "Related data is imported as another table instead of repeated in one table.", supportDocument: ["Use orders.csv.", "It contains Order_ID and Customer_ID fields."], goal: "Import orders.csv.", steps: ["Open Import.", "Click orders.csv.", "Check that members and orders are both listed.", "Select orders."], accessPath: ["External Data", "Text File", "Import"], expected: { importedTables: ["members", "orders"], selectedTable: "orders" }, points: 10 }),
+  practical({ id: "db-structure-customer-id-text", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Use Text for coded IDs", scenario: "IDs may contain letters or leading zeros, so they are not calculation fields.", supportDocument: ["Customer_ID values such as C001 should remain Text.", "Do not convert them to Number."], goal: "Set Customer_ID to Text.", steps: ["Import members.csv.", "Open Design.", "Find Customer_ID.", "Set the data type to Text."], accessPath: ["Design", "Data Type", "Text"], expected: { importedTables: ["members"], fieldTypes: { Customer_ID: "Text" } }, points: 10 }),
+  practical({ id: "db-structure-date-time", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Use Date/Time", scenario: "Date fields need a date type so Access can sort, filter, and calculate them correctly.", supportDocument: ["Join_Date stores calendar dates.", "Use Date/Time for dates."], goal: "Set Join_Date to Date/Time.", steps: ["Open Design.", "Find Join_Date.", "Choose Date/Time.", "Check your result."], accessPath: ["Design", "Data Type", "Date/Time"], expected: { importedTables: ["members"], fieldTypes: { Join_Date: "Date/Time" } }, points: 10 }),
+  practical({ id: "db-structure-currency", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Use Currency", scenario: "Money fields should keep currency formatting and decimal accuracy.", supportDocument: ["Fees and Price are money fields.", "Currency is more suitable than plain Text."], goal: "Set Fees to Currency.", steps: ["Open Design.", "Find Fees.", "Choose Currency.", "Check your result."], accessPath: ["Design", "Data Type", "Currency"], expected: { importedTables: ["members"], fieldTypes: { Fees: "Currency" } }, points: 10 }),
+  practical({ id: "db-structure-boolean", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Use Boolean/Logical", scenario: "Yes/No values should be stored as logical data.", supportDocument: ["Active and Confirmed store Yes/No states.", "Boolean fields can display as Yes/No, True/False, or checkboxes in Access."], goal: "Set Active to Boolean.", steps: ["Open Design.", "Find Active.", "Choose Boolean.", "Check your result."], accessPath: ["Design", "Data Type", "Boolean"], expected: { importedTables: ["members"], fieldTypes: { Active: "Boolean" } }, points: 10 }),
+  practical({ id: "db-structure-order-types", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Check number and currency fields", scenario: "Different numeric-looking fields need different data types.", supportDocument: ["Units is a count, so Number is suitable.", "Order_Value is money, so Currency is suitable."], goal: "Set Units to Number and Order_Value to Currency.", steps: ["Import orders.csv.", "Open Design.", "Set Units to Number.", "Set Order_Value to Currency."], accessPath: ["Design", "Data Type"], expected: { importedTables: ["orders"], fieldTypes: { Units: "Number", Order_Value: "Currency" } }, points: 10 }),
+  practical({ id: "db-structure-primary-members", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Set the members primary key", scenario: "The members table needs one field to uniquely identify each customer.", supportDocument: ["Customer_ID is unique for each member.", "Set it as the primary key."], goal: "Set Customer_ID as the primary key.", steps: ["Select members.", "Open Design.", "Use the primary key radio button for Customer_ID.", "Check your result."], accessPath: ["Design", "Primary Key"], expected: { importedTables: ["members"], selectedTable: "members", primaryKey: "Customer_ID" }, points: 10 }),
+  practical({ id: "db-structure-primary-orders", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Set the orders primary key", scenario: "Each order also needs its own unique identifier.", supportDocument: ["Order_ID identifies each order.", "Customer_ID is not unique in orders because a customer can make many orders."], goal: "Set Order_ID as the primary key.", steps: ["Select orders.", "Open Design.", "Use the primary key radio button for Order_ID.", "Check your result."], accessPath: ["Design", "Primary Key"], expected: { importedTables: ["orders"], selectedTable: "orders", primaryKey: "Order_ID" }, points: 10 }),
+  practical({ id: "db-structure-foreign-key", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Identify the foreign key", scenario: "The child table stores the field that links back to the parent table.", supportDocument: ["orders.Customer_ID is the foreign key.", "It matches members.Customer_ID."], goal: "Enter Customer_ID as the relationship field.", steps: ["Import members and orders.", "Open Query.", "Find Relationship field.", "Type Customer_ID."], accessPath: ["Database Tools", "Relationships", "Customer_ID"], expected: { importedTables: ["members", "orders"], relationship: "Customer_ID" }, points: 10 }),
+  study("db-structure-integrity", "import-design", "18.1 Create Database Structure", "Referential integrity", "A relationship should protect child records from pointing to missing parent records.", "Explain why referential integrity matters.", ["Referential integrity prevents orphan child records.", "It is enabled in the Edit Relationships dialog in Access.", "Apex validates understanding with a knowledge check."], ["Study the meaning of orphan records.", "Connect it to parent and child tables.", "Answer the knowledge check."], q("What does referential integrity prevent?", ["Orphan child records", "Report titles", "CSV imports", "Landscape printing"], 0, "Correct. It stops child records without matching parent keys."), ["Database Tools", "Relationships"]),
+  study("db-structure-formats", "import-design", "18.1 Create Database Structure", "Numeric and display formats", "The syllabus includes percentage, decimal places, Boolean display, and date/time display choices.", "Choose suitable display formats for common fields.", ["Use decimal places for measured values or money.", "Use Percentage for rate fields.", "Boolean values can display as Yes/No, True/False, or Checkbox.", "Date/Time fields can display in short or long date formats."], ["Read each field purpose.", "Choose the display format that makes the meaning clear.", "Answer the knowledge check."], q("Which display is suitable for whether a booking is confirmed?", ["Checkbox or Yes/No", "Long paragraph", "Currency", "Report footer"], 0, "Correct. A Boolean display suits a confirmed/not-confirmed value."), ["Design", "Field Properties", "Format"]),
+  study("db-structure-form-controls", "import-design", "18.1 Create Database Structure", "Form controls", "Good forms reduce data-entry errors by using the right controls.", "Match form controls to the data being entered.", ["Use radio buttons for one option from a small group.", "Use checkboxes for true/false choices.", "Use drop-down menus for controlled lists.", "Use clear labels, readable fonts, spacing, and white space."], ["Study each control type.", "Match it to a field type.", "Answer the knowledge check."], q("Which control is best for one value from a fixed list like group name?", ["Drop-down menu", "Report footer", "Wildcard", "Primary key"], 0, "Correct. A drop-down reduces typing errors for fixed choices."), ["Create", "Form", "Controls"]),
+  practical({ id: "db-structure-final", moduleId: "import-design", moduleTitle: "18.1 Create Database Structure", title: "Structure checkpoint", scenario: "This checkpoint combines imports, data types, keys, and relationship setup.", supportDocument: ["Import members and orders.", "Check Text, Date/Time, Currency, Number, and Boolean data types.", "Identify Customer_ID as the relationship field."], goal: "Prepare the members/orders structure correctly.", steps: ["Import members.csv and orders.csv.", "Set Customer_ID as Text and Join_Date as Date/Time.", "Set Fees and Order_Value to Currency.", "Set the relationship field to Customer_ID."], accessPath: ["Import", "Design", "Relationships"], expected: { importedTables: ["members", "orders"], fieldTypes: { Customer_ID: "Text", Join_Date: "Date/Time", Fees: "Currency", Order_Value: "Currency" }, relationship: "Customer_ID" }, points: 20 })
+];
+
+const queryCards: DatabaseCard[] = [
+  practical({ id: "db-query-field", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Choose a query field", scenario: "A query starts by choosing the field to test.", supportDocument: ["Use members.csv.", "Country is the field that stores country names."], goal: "Set the query field to Country.", steps: ["Import members.csv.", "Open Query.", "Choose Country in the Field dropdown.", "Check your result."], accessPath: ["Create", "Query Design", "Field"], expected: { importedTables: ["members"], selectedTable: "members", queryField: "Country" }, points: 10 }),
+  practical({ id: "db-query-equals", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use equals criteria", scenario: "A simple query selects records matching one exact value.", supportDocument: ["Country equals Spain returns only Spanish members.", "Use equals for exact matches."], goal: "Find members where Country equals Spain.", steps: ["Open Query.", "Choose Country.", "Set operator to equals.", "Type Spain as the value."], accessPath: ["Query Design", "Criteria"], expected: { importedTables: ["members"], queryField: "Country", queryOperator: "equals", queryValue: "Spain" }, points: 10 }),
+  practical({ id: "db-query-greater", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use greater than", scenario: "Number and currency fields can be filtered with comparison operators.", supportDocument: ["Fees greater than 50 returns members with higher fees.", "Use greater than for values above a limit."], goal: "Find records where Fees is greater than 50.", steps: ["Choose Fees.", "Set operator to greater than.", "Type 50.", "Check your result."], accessPath: ["Query Design", "Criteria", ">"], expected: { importedTables: ["members"], queryField: "Fees", queryOperator: "greater than", queryValue: "50" }, points: 10 }),
+  practical({ id: "db-query-less", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use less than", scenario: "Less than is used for values below a limit.", supportDocument: ["Minutes less than 60 finds shorter sessions.", "Use the bookings table."], goal: "Find bookings where Minutes is less than 60.", steps: ["Import bookings.csv.", "Select bookings.", "Choose Minutes.", "Set operator to less than and value to 60."], accessPath: ["Query Design", "Criteria", "<"], expected: { importedTables: ["bookings"], selectedTable: "bookings", queryField: "Minutes", queryOperator: "less than", queryValue: "60" }, points: 10 }),
+  practical({ id: "db-query-and", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use AND logic", scenario: "AND means every condition must be true.", supportDocument: ["Access uses criteria on the same row for AND.", "The simulator validates the AND join selection."], goal: "Use AND for a two-condition query.", steps: ["Select members.", "Open Query.", "Set the join to AND.", "Use Country equals Spain as the first condition."], accessPath: ["Query Design", "Criteria row", "AND"], expected: { importedTables: ["members"], selectedTable: "members", queryField: "Country", queryOperator: "equals", queryValue: "Spain", queryJoin: "AND" }, points: 10 }),
+  practical({ id: "db-query-or", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use OR logic", scenario: "OR means either condition can be true.", supportDocument: ["Access places OR alternatives on separate rows.", "The simulator validates the OR join selection."], goal: "Use OR for alternative city criteria.", steps: ["Select members.", "Choose City.", "Set operator to equals.", "Type Madrid and set join to OR."], accessPath: ["Query Design", "Criteria row", "Or row"], expected: { importedTables: ["members"], selectedTable: "members", queryField: "City", queryOperator: "equals", queryValue: "Madrid", queryJoin: "OR" }, points: 10 }),
+  practical({ id: "db-query-wildcard", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Use a wildcard search", scenario: "Wildcard criteria find part of a text value.", supportDocument: ["In Access, Like \"C*\" finds text starting with C.", "The simulator uses contains to practise partial matching."], goal: "Find item names containing C.", steps: ["Import orders.csv.", "Select orders.", "Choose Item_Name.", "Set operator to contains and value to C."], accessPath: ["Query Design", "Like", "Wildcard"], expected: { importedTables: ["orders"], selectedTable: "orders", queryField: "Item_Name", queryOperator: "contains", queryValue: "C" }, points: 10 }),
+  practical({ id: "db-query-sort-asc", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Sort ascending", scenario: "Ascending sort orders text A to Z or numbers low to high.", supportDocument: ["Last_Name ascending is a common report/query order.", "Use the Sort field and direction controls."], goal: "Sort by Last_Name ascending.", steps: ["Select members.", "Open Query.", "Set Sort field to Last_Name.", "Set Sort direction to Ascending."], accessPath: ["Query Design", "Sort"], expected: { importedTables: ["members"], selectedTable: "members", sortField: "Last_Name", sortDirection: "Ascending" }, points: 10 }),
+  practical({ id: "db-query-sort-desc", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Sort descending", scenario: "Descending sort puts newest dates or largest numbers first.", supportDocument: ["Order_Date descending shows recent orders first.", "Use the Sort direction control."], goal: "Sort by Order_Date descending.", steps: ["Import orders.csv.", "Select orders.", "Set Sort field to Order_Date.", "Set Sort direction to Descending."], accessPath: ["Query Design", "Sort"], expected: { importedTables: ["orders"], selectedTable: "orders", sortField: "Order_Date", sortDirection: "Descending" }, points: 10 }),
+  study("db-query-not", "queries", "18.2 Manipulate Data", "NOT and not equal", "Some criteria exclude matching records.", "Recognise exclusion criteria.", ["NOT means exclude matching values.", "<> means not equal to.", "Example: <>\"Spain\" excludes Spain."], ["Study the operator meanings.", "Match the operator to the instruction.", "Answer the knowledge check."], q("Which Access criterion means not equal to Spain?", ["=\"Spain\"", "<>\"Spain\"", "Like \"Spain\"", ">=Spain"], 1, "Correct. <> means not equal."), ["Query Design", "Criteria"]),
+  study("db-query-calculated", "queries", "18.2 Manipulate Data", "Calculated fields", "Calculated fields create new values in a query.", "Recognise calculated field syntax.", ["A calculated field uses Name: expression.", "Example: Total_Cost: [Units] * [Price].", "Use +, -, *, and / for arithmetic."], ["Study the syntax.", "Identify the alias before the colon.", "Answer the knowledge check."], q("Which syntax creates a calculated field in Access?", ["Total_Cost: [Units] * [Price]", "Total_Cost = [Units] * [Price]", "[Units] * [Price] only", "SUM: Total_Cost"], 0, "Correct. Access uses an alias followed by a colon."), ["Query Design", "Expression"]),
+  study("db-query-functions", "queries", "18.2 Manipulate Data", "Summary functions", "Database tasks can use totals and summary functions.", "Recognise SUM, AVERAGE, MAXIMUM, MINIMUM, and COUNT.", ["SUM adds values.", "AVERAGE finds the mean.", "MAXIMUM and MINIMUM find extremes.", "COUNT counts records or values."], ["Match each function to its purpose.", "Decide which one fits the question.", "Answer the knowledge check."], q("Which function counts how many records match a query?", ["SUM", "AVERAGE", "COUNT", "MINIMUM"], 2, "Correct. COUNT counts records or values."), ["Query Design", "Totals"]),
+  study("db-query-date-math", "queries", "18.2 Manipulate Data", "Date calculations", "Access can calculate elapsed days from Date/Time fields.", "Recognise date subtraction output.", ["Subtracting one date from another gives elapsed days.", "Example: Days_Active: [End_Date] - [Start_Date].", "The result is a number."], ["Study the expression.", "Identify the two date fields.", "Answer the knowledge check."], q("What does [End_Date] - [Start_Date] usually return?", ["Elapsed days", "A Boolean checkbox", "A report title", "A relationship line"], 0, "Correct. Date subtraction returns elapsed days."), ["Query Design", "Calculated field"]),
+  practical({ id: "db-query-final", moduleId: "queries", moduleTitle: "18.2 Manipulate Data", title: "Manipulation checkpoint", scenario: "This checkpoint combines selection, criteria, and sorting.", supportDocument: ["Use orders.csv.", "Find ICT department orders and sort newest first.", "The simulator validates one displayed criterion and the sort state."], goal: "Build an ICT orders query sorted by newest order date.", steps: ["Import orders.csv.", "Select orders.", "Choose Department equals ICT.", "Sort by Order_Date descending."], accessPath: ["Query Design", "Criteria", "Sort"], expected: { importedTables: ["orders"], selectedTable: "orders", queryField: "Department", queryOperator: "equals", queryValue: "ICT", sortField: "Order_Date", sortDirection: "Descending" }, points: 20 })
+];
+
+const reportCards: DatabaseCard[] = [
+  practical({ id: "db-report-title", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Set a report title", scenario: "A report needs a clear title for final evidence.", supportDocument: ["Use Report preview.", "The title should match the exam instruction exactly."], goal: "Set the report title to Confirmed Apex Practice Sessions.", steps: ["Open Report.", "Find Report title.", "Type Confirmed Apex Practice Sessions.", "Check your result."], accessPath: ["Report", "Report title"], expected: { reportTitle: "Confirmed Apex Practice Sessions" }, points: 10 }),
+  practical({ id: "db-report-fields", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Choose report fields", scenario: "Reports should show only the required fields.", supportDocument: ["For a short report, include Name, Group, and Target.", "The simulator validates selected report fields."], goal: "Add Name, Group, and Target to the report.", steps: ["Import learners.csv.", "Select learners.", "Open Report.", "Tick Name, Group, and Target."], accessPath: ["Report", "Fields"], expected: { importedTables: ["learners"], selectedTable: "learners", reportFields: ["Name", "Group", "Target"] }, points: 10 }),
+  practical({ id: "db-report-order-fields", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Display order data", scenario: "Output must show all required data and labels in full.", supportDocument: ["Use orders.csv.", "Include Item_Name, Units, Price, and Order_Value."], goal: "Add the required order fields to the report.", steps: ["Import orders.csv.", "Select orders.", "Open Report.", "Tick Item_Name, Units, Price, and Order_Value."], accessPath: ["Report", "Fields"], expected: { importedTables: ["orders"], selectedTable: "orders", reportFields: ["Item_Name", "Units", "Price", "Order_Value"] }, points: 10 }),
+  practical({ id: "db-report-sort", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Prepare sorted report output", scenario: "Printed output is easier to read when records are sorted logically.", supportDocument: ["Sort Last_Name ascending for alphabetical output.", "The simulator validates the sort choice in Query."], goal: "Sort members by Last_Name ascending before reporting.", steps: ["Import members.csv.", "Select members.", "Open Query.", "Set Sort field to Last_Name and direction to Ascending."], accessPath: ["Query", "Sort", "Report"], expected: { importedTables: ["members"], selectedTable: "members", sortField: "Last_Name", sortDirection: "Ascending" }, points: 10 }),
+  study("db-report-sections", "reports-labels", "18.3 Present Data", "Headers and footers", "Reports use sections for repeated information and summaries.", "Identify report header, page header, page footer, and report footer.", ["Report Header appears once at the start.", "Page Header appears at the top of each page.", "Page Footer appears at the bottom of each page.", "Report Footer appears once at the end, often for totals."], ["Study the four report sections.", "Match each section to its purpose.", "Answer the knowledge check."], q("Where should a grand total normally be placed?", ["Report Footer", "Page Header", "Table primary key", "Import wizard"], 0, "Correct. A report footer appears once at the end."), ["Report Design", "Sections"]),
+  study("db-report-layouts", "reports-labels", "18.3 Present Data", "Tabular and columnar layouts", "Different output layouts suit different evidence types.", "Choose between tabular and columnar report layouts.", ["Tabular layout shows many records in rows and columns.", "Columnar layout shows one record's fields stacked vertically.", "Choose the layout that makes the required data readable."], ["Compare the two layouts.", "Match layout to scenario.", "Answer the knowledge check."], q("Which layout is best for many records with the same fields?", ["Tabular", "Columnar only", "Checkbox", "Relationship diagram"], 0, "Correct. Tabular reports suit many rows of records."), ["Report Wizard", "Layout"]),
+  study("db-report-align", "reports-labels", "18.3 Present Data", "Align numeric data", "Numeric output should be readable and comparable.", "Explain right and decimal alignment.", ["Text is often left-aligned.", "Numbers are often right-aligned.", "Decimals should line up by place value."], ["Read the alignment rules.", "Apply them to report output decisions.", "Answer the knowledge check."], q("How should most numeric report data be aligned?", ["Right-aligned", "Randomly spaced", "Hidden behind labels", "Always centred"], 0, "Correct. Right alignment helps compare numbers."), ["Report Layout", "Alignment"]),
+  study("db-report-formats", "reports-labels", "18.3 Present Data", "Format numeric output", "Reports often require currency symbols, percentages, and fixed decimal places.", "Choose correct numeric formatting for output.", ["Currency fields should show a currency symbol where required.", "Percentages should show a percent symbol.", "Decimal places should be consistent."], ["Study the three formatting types.", "Match each field to a suitable format.", "Answer the knowledge check."], q("Which format is suitable for a field storing 0.17 as a rate?", ["Percentage", "Long Text", "Primary Key", "Report Header"], 0, "Correct. A rate can be displayed as a percentage."), ["Report Layout", "Format"]),
+  practical({ id: "db-report-labels", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Create labels from a field", scenario: "Labels use one or more fields to produce repeated printed items.", supportDocument: ["Use learners.csv.", "Use Name as the label field."], goal: "Set Name as the label field.", steps: ["Import learners.csv.", "Select learners.", "Open Labels.", "Choose Name as the Label field."], accessPath: ["Labels", "Label field"], expected: { importedTables: ["learners"], selectedTable: "learners", labelField: "Name" }, points: 10 }),
+  practical({ id: "db-report-member-labels", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Create member labels", scenario: "A membership database can print labels using member names.", supportDocument: ["Use members.csv.", "Last_Name can be used for simple member labels."], goal: "Set Last_Name as the label field.", steps: ["Import members.csv.", "Select members.", "Open Labels.", "Choose Last_Name."], accessPath: ["Labels", "Label field"], expected: { importedTables: ["members"], selectedTable: "members", labelField: "Last_Name" }, points: 10 }),
+  study("db-report-print", "reports-labels", "18.3 Present Data", "Print preview and layout", "Before evidence is submitted, students must check that reports fit and display correctly.", "Recognise print preview checks.", ["Use Print Preview before printing or saving PDF.", "Wide reports may need landscape orientation.", "If values show ###, widen the control or column."], ["Study common print problems.", "Choose the correct fix.", "Answer the knowledge check."], q("What does ### usually mean in a report?", ["The value is clipped because the control is too narrow", "The primary key is missing", "The CSV file is empty", "The report has no title"], 0, "Correct. Widen the field or control."), ["Print Preview", "Landscape"]),
+  study("db-report-pdf", "reports-labels", "18.3 Present Data", "Save PDF evidence", "Apex database downloads should be PDF evidence for teacher review.", "Choose PDF for fixed final evidence.", ["PDF preserves the output appearance.", "Use Save PDF evidence in Apex or Export/Print to PDF in Access.", "Teacher review confirms the final Access output."], ["Open the output.", "Use Save PDF evidence or Print to PDF.", "Check the PDF shows the required fields clearly."], q("Which output format is best for fixed printable database evidence?", ["PDF", "CSV only", "HTML comment", "Input mask"], 0, "Correct. PDF preserves printable layout."), ["Report", "Save PDF evidence"]),
+  study("db-report-hide", "reports-labels", "18.3 Present Data", "Hide unwanted fields", "Reports should not show unnecessary system fields.", "Explain how to hide fields safely.", ["Do not delete source fields just to hide them on a report.", "Hide the report control or leave the field out of the report.", "Keep relationship IDs available in the database."], ["Identify the field that should not print.", "Decide whether to omit or hide it.", "Answer the knowledge check."], q("How can you stop an ID field showing in a report without deleting data?", ["Omit or hide the report control", "Delete the table field", "Break the relationship", "Change it to Currency"], 0, "Correct. Hide or omit it in the report output only."), ["Report Design", "Visible: No"]),
+  practical({ id: "db-report-final", moduleId: "reports-labels", moduleTitle: "18.3 Present Data", title: "Presentation checkpoint", scenario: "This checkpoint combines title, fields, sorting, labels, and PDF-ready output.", supportDocument: ["Use learners.csv.", "Create a report with learner fields and a clear title.", "Set a label field for mailing-style output."], goal: "Prepare a clear learner evidence output.", steps: ["Import learners.csv.", "Set the report title to Confirmed Apex Practice Sessions.", "Add Name, Group, and Target as report fields.", "Set Name as the label field."], accessPath: ["Report", "Labels", "Save PDF evidence"], expected: { importedTables: ["learners"], reportTitle: "Confirmed Apex Practice Sessions", reportFields: ["Name", "Group", "Target"], labelField: "Name" }, points: 20 })
+];
+
+const examCards: DatabaseCard[] = [
+  study("db-exam-classify", "exam-build", "Exam Database Build", "Read the database instruction", "Exam success starts with identifying whether the task is structure, manipulation, or presentation.", "Choose the correct database area from the wording.", ["Import/design/key tasks belong to 18.1.", "Query/sort/calculate tasks belong to 18.2.", "Report/label/print/output tasks belong to 18.3."], ["Read the command word.", "Identify the database area.", "Answer the knowledge check."], q("An instruction says create a query where Country is Spain. Which area is it?", ["Manipulate Data", "Create Database Structure", "Present Data", "Form design only"], 0, "Correct. Query criteria are data manipulation."), ["Exam instruction", "Classify task"]),
+  practical({ id: "db-exam-import", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Import exam source files", scenario: "A mixed exam task begins with source data.", supportDocument: ["Use members.csv and orders.csv.", "The checker validates both imports."], goal: "Import members.csv and orders.csv.", steps: ["Open Import.", "Click members.csv.", "Click orders.csv.", "Check your result."], accessPath: ["External Data", "Text File"], expected: { importedTables: ["members", "orders"] }, points: 10 }),
+  practical({ id: "db-exam-field-types", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Correct exam field types", scenario: "Wrong field types cause query and report problems later.", supportDocument: ["Customer_ID is Text.", "Join_Date is Date/Time.", "Fees and Order_Value are Currency."], goal: "Set the key exam field types correctly.", steps: ["Open Design.", "Set Customer_ID to Text.", "Set Join_Date to Date/Time.", "Set Fees and Order_Value to Currency."], accessPath: ["Design", "Data Type"], expected: { importedTables: ["members", "orders"], fieldTypes: { Customer_ID: "Text", Join_Date: "Date/Time", Fees: "Currency", Order_Value: "Currency" } }, points: 10 }),
+  practical({ id: "db-exam-relationship", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Prepare keys and relationship", scenario: "A relational build needs keys before reports and queries are trusted.", supportDocument: ["Customer_ID identifies members.", "Order_ID identifies orders.", "Customer_ID links the two tables."], goal: "Set the relationship field to Customer_ID.", steps: ["Check the primary keys in Design.", "Open Query.", "Find Relationship field.", "Type Customer_ID."], accessPath: ["Design", "Relationships"], expected: { importedTables: ["members", "orders"], relationship: "Customer_ID" }, points: 10 }),
+  practical({ id: "db-exam-country-query", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Build a country query", scenario: "Use an exact criterion to extract a required country.", supportDocument: ["Use members.csv.", "Country equals Spain is an exact match query."], goal: "Set Country equals Spain.", steps: ["Select members.", "Open Query.", "Choose Country.", "Set equals Spain."], accessPath: ["Query", "Criteria"], expected: { importedTables: ["members"], selectedTable: "members", queryField: "Country", queryOperator: "equals", queryValue: "Spain" }, points: 10 }),
+  practical({ id: "db-exam-value-query", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Build a value query", scenario: "Currency criteria are common in database practical papers.", supportDocument: ["Use orders.csv.", "Order_Value greater than 500 finds higher-value orders."], goal: "Set Order_Value greater than 500.", steps: ["Select orders.", "Open Query.", "Choose Order_Value.", "Set greater than 500."], accessPath: ["Query", "Criteria"], expected: { importedTables: ["orders"], selectedTable: "orders", queryField: "Order_Value", queryOperator: "greater than", queryValue: "500" }, points: 10 }),
+  practical({ id: "db-exam-sort", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Sort final query output", scenario: "Reports often rely on the query being sorted first.", supportDocument: ["Use Last_Name ascending for alphabetical order.", "Use Order_Date descending for newest first."], goal: "Sort by Last_Name ascending.", steps: ["Select members.", "Open Query.", "Set Sort field to Last_Name.", "Set direction to Ascending."], accessPath: ["Query", "Sort"], expected: { importedTables: ["members"], selectedTable: "members", sortField: "Last_Name", sortDirection: "Ascending" }, points: 10 }),
+  study("db-exam-calc", "exam-build", "Exam Database Build", "Choose a calculated field", "When the exam asks for a new calculated value, students must recognise the correct expression.", "Choose the correct expression syntax.", ["Use FieldName: [Field1] * [Field2].", "Use +, -, *, / for arithmetic.", "Format money results as Currency when required."], ["Read the required calculation.", "Choose the Access expression.", "Answer the knowledge check."], q("Which expression calculates total cost from Units and Price?", ["Total_Cost: [Units] * [Price]", "Total_Cost = Units x Price", "COUNT([Units] * [Price])", "LIKE Units Price"], 0, "Correct. This is valid calculated field syntax."), ["Query", "Calculated field"]),
+  practical({ id: "db-exam-report", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Build report evidence", scenario: "Final evidence should show the requested fields with a clear title.", supportDocument: ["Use orders.csv.", "Include Item_Name, Units, Price, and Order_Value.", "Use a title that describes the output."], goal: "Create an order report output.", steps: ["Select orders.", "Open Report.", "Set report title to Confirmed Apex Practice Sessions.", "Tick Item_Name, Units, Price, and Order_Value."], accessPath: ["Report", "Fields", "Title"], expected: { importedTables: ["orders"], selectedTable: "orders", reportTitle: "Confirmed Apex Practice Sessions", reportFields: ["Item_Name", "Units", "Price", "Order_Value"] }, points: 10 }),
+  practical({ id: "db-exam-label", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Build label evidence", scenario: "A labels task needs the correct source field.", supportDocument: ["Use members.csv.", "Last_Name can be used for simple member labels."], goal: "Set Last_Name as the label field.", steps: ["Select members.", "Open Labels.", "Choose Last_Name.", "Check your result."], accessPath: ["Labels", "Label field"], expected: { importedTables: ["members"], selectedTable: "members", labelField: "Last_Name" }, points: 10 }),
+  study("db-exam-print", "exam-build", "Exam Database Build", "Check before printing", "Teachers need readable evidence, not clipped output.", "Recognise print-preview checks before saving PDF.", ["Preview the report before final output.", "Use landscape for wide reports.", "Widen fields if data or labels are cut off.", "Use PDF for fixed evidence."], ["Study the print checklist.", "Identify the likely fix.", "Answer the knowledge check."], q("A report prints with Order_Value as ###. What should you do?", ["Widen the report control or column", "Delete Order_Value", "Change every record to Text", "Remove the report title"], 0, "Correct. The field is too narrow."), ["Print Preview", "PDF"]),
+  study("db-exam-form", "exam-build", "Exam Database Build", "Choose form controls", "Data-entry forms should reduce mistakes.", "Choose the right form control for the field.", ["Use labels for field names.", "Use checkboxes for Boolean values.", "Use drop-down lists for controlled choices.", "Keep spacing and font size readable."], ["Read the field purpose.", "Choose the best control.", "Answer the knowledge check."], q("Which form control suits an Active Yes/No field?", ["Checkbox", "Currency symbol", "Page footer", "Wildcard"], 0, "Correct. A checkbox suits a Boolean field."), ["Form", "Controls"]),
+  practical({ id: "db-exam-final-practical", moduleId: "exam-build", moduleTitle: "Exam Database Build", title: "Final practical checkpoint", scenario: "This final practical checks the complete simulator-supported database workflow.", supportDocument: ["Import members and orders.", "Correct key field types.", "Use Customer_ID as the relationship field.", "Create a query and report evidence output."], goal: "Complete a full database workflow in the Apex simulator.", steps: ["Import members.csv and orders.csv.", "Set Customer_ID to Text and Order_Value to Currency.", "Set Relationship field to Customer_ID.", "Create a report titled Confirmed Apex Practice Sessions with Item_Name, Units, Price, and Order_Value."], accessPath: ["Import", "Design", "Query", "Report", "PDF evidence"], expected: { importedTables: ["members", "orders"], fieldTypes: { Customer_ID: "Text", Order_Value: "Currency" }, relationship: "Customer_ID", reportTitle: "Confirmed Apex Practice Sessions", reportFields: ["Item_Name", "Units", "Price", "Order_Value"] }, teacherReview: ["Teacher should review the real Microsoft Access output for relationships, report layout, headers/footers, and print evidence."], points: 20 }),
+  study("db-exam-final-mcq", "exam-build", "Exam Database Build", "Final theory checkpoint", "Students should finish by recognising how the three syllabus areas fit together.", "Classify database tasks into 18.1, 18.2, or 18.3.", ["18.1 creates structure: import, tables, fields, keys, relationships, forms.", "18.2 manipulates data: queries, criteria, calculations, sorts.", "18.3 presents data: reports, labels, formatting, print/export."], ["Read each task type.", "Classify it into the correct syllabus area.", "Answer the final knowledge check."], q("Which area covers reports, labels, formatting, and print/export evidence?", ["18.3 Present Data", "18.1 Create Database Structure", "18.2 Manipulate Data", "Flat-file only"], 0, "Correct. Reports and print/export evidence belong to Present Data."), ["Final review", "18.1", "18.2", "18.3"])
+];
+
+const freePracticeCards: DatabaseCard[] = [
+  {
     id: "db-free-practice",
     moduleId: "free-practice",
     moduleTitle: "Free Practice",
     title: "Free Practice workspace",
-    scenario: "Use the database workspace to try imports, fields, queries, report previews, labels, and printing without a guided lock.",
-    supportDocument: support,
+    scenario: "Use the database workspace to try imports, fields, queries, reports, forms, labels, and PDF evidence without a guided lock.",
+    supportDocument: sharedSupport,
     goal: "Practise database workspace tools freely.",
-    steps: ["Import an Apex source table or your own CSV.", "Try field design, query, report, form, and labels panels.", "Use the Print button on report, form, or label views for evidence."],
+    steps: ["Import an Apex source table or your own CSV.", "Try field design, query, report, form, and labels panels.", "Use Save PDF evidence or Print page for final output."],
     expected: {},
     points: 0
-  })
+  }
 ];
 
-const allCards = knowledgeCards;
+const allCards = [...introCards, ...importDesignCards, ...queryCards, ...reportCards, ...examCards, ...freePracticeCards];
 
 export function getDatabaseModule(moduleId?: string) {
   return databaseModules.find((module) => module.id === moduleId);
