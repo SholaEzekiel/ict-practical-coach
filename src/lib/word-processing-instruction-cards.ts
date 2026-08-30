@@ -981,11 +981,11 @@ const showcaseArticleStarter = `
 
 const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
   {
-    id: "wp-intro-0417-source-document-challenge",
+    id: "wp-intro-exam-source-document-challenge",
     moduleId: "intro",
     moduleTitle: "Document Basics",
     category: "exam",
-    title: "0417 source document setup",
+    title: "Exam source document setup",
     scenario: "A practical paper gives you a prepared source document. Your first job is to open it, recognise the structure, and add the missing source text without changing the page setup.",
     supportDocument: [
       "Source file: Apex article",
@@ -1011,11 +1011,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     points: 35
   },
   {
-    id: "wp-format-0417-style-challenge",
+    id: "wp-format-exam-style-challenge",
     moduleId: "text-formatting",
     moduleTitle: "Text Formatting",
     category: "exam",
-    title: "0417 style and title challenge",
+    title: "Exam style and title challenge",
     scenario: "The exam often asks students to modify named styles and apply them to precise text. Apex checks visible formatting, while your teacher checks the named style setup.",
     supportDocument: [
       "House style: title - sans-serif, 36 point, centre, bold, underlined.",
@@ -1023,7 +1023,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "Apply title formatting to Apex Study Hub Skills Programme.",
       "Apply subheading formatting to Why is a digital skills approach to learning important?"
     ],
-    goal: "Format the title and one subheading to match a 0417-style house style.",
+    goal: "Format the title and one subheading to match an exam-style house style.",
     steps: [
       "Select the title and apply bold, underline and centre alignment.",
       "Make the subheading bold and centre aligned.",
@@ -1045,11 +1045,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     points: 40
   },
   {
-    id: "wp-layout-0417-columns-image-challenge",
+    id: "wp-layout-exam-columns-image-challenge",
     moduleId: "paragraph-layout",
     moduleTitle: "Paragraph Layout",
     category: "exam",
-    title: "0417 columns and image challenge",
+    title: "Exam columns and image challenge",
     scenario: "A common document-production task changes only part of a document into columns and places an image beside a specific paragraph.",
     supportDocument: [
       "Change from the subheading Practice Sessions onwards into two equal columns.",
@@ -1074,11 +1074,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     points: 40
   },
   {
-    id: "wp-list-0417-bullet-style-challenge",
+    id: "wp-list-exam-bullet-style-challenge",
     moduleId: "lists",
     moduleTitle: "Lists",
     category: "exam",
-    title: "0417 bullet style challenge",
+    title: "Exam bullet style challenge",
     scenario: "The exam may ask for a specific bullet style to be applied to a selected range of plain text.",
     supportDocument: [
       "Apply the bullet style to the activity lines only.",
@@ -1108,11 +1108,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     points: 35
   },
   {
-    id: "wp-table-0417-table-edit-challenge",
+    id: "wp-table-exam-table-edit-challenge",
     moduleId: "tables",
     moduleTitle: "Tables",
     category: "exam",
-    title: "0417 table edit challenge",
+    title: "Exam table edit challenge",
     scenario: "The exam often gives an existing table, then asks for a row insertion, merged heading row, centred text, and consistent table formatting.",
     supportDocument: [
       "Insert a new row above Chemistry.",
@@ -1144,11 +1144,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     points: 45
   },
   {
-    id: "wp-exam-0417-full-document-production",
+    id: "wp-exam-full-document-production",
     moduleId: "exam-editing",
     moduleTitle: "Exam Editing",
     category: "exam",
-    title: "0417 full document production task",
+    title: "Full exam document production task",
     scenario: "This is the closest Word Processing task to the document-production part of Paper 2. It combines source document editing, house style, columns, table editing, image placement, and proofing.",
     supportDocument: [
       "Open the prepared Digital skills article.",
@@ -1160,7 +1160,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "Add Biology, 50 and 40 to the table and merge the first table row.",
       "Teacher check: footer/page numbers, named styles, image wrap, no widows/orphans, no split table/list."
     ],
-    goal: "Complete a full 0417-style document production edit.",
+    goal: "Complete a full exam-style document production edit.",
     steps: [
       "Work through the support instructions as a full exam-style sequence.",
       "Use Apex checks for visible text, formatting, list, image, columns and table changes.",
@@ -1298,5 +1298,7 @@ export function getWordProcessingCardsForModule(moduleId?: string) {
     .filter((card) => !moduleId || card.moduleId === moduleId)
     .sort((first, second) => (moduleOrder.get(first.moduleId) ?? 99) - (moduleOrder.get(second.moduleId) ?? 99));
 }
+
+
 
 

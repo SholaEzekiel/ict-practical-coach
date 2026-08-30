@@ -73,7 +73,7 @@ export const presentationModules: PresentationModule[] = [
   { id: "content", title: "Text and Imported Source", description: "Turn support text into slide titles, subtitles, bullet points, and speaker notes." },
   { id: "design", title: "Design and Objects", description: "Apply consistent themes, add images, align objects, and make slides readable." },
   { id: "output", title: "Review and Output", description: "Use slide numbers, speaker notes, deck order, and teacher-reviewed print/export checks." },
-  { id: "exam-build", title: "Exam Presentation Build", description: "Complete a full original 0417-style presentation task from a support document." },
+  { id: "exam-build", title: "Exam Presentation Build", description: "Complete a full original exam-style presentation task from a support document." },
   { id: "free-practice", title: "Free Practice", description: "Create your own deck, import images, preview the slideshow, and print or save as PDF." }
 ];
 
@@ -532,3 +532,4 @@ export function getPresentationModule(moduleId?: string) {
 export function getPresentationCardsForModule(moduleId?: string) {
   return allCards.filter((card) => !moduleId || card.moduleId === moduleId);
 }
+

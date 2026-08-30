@@ -6,12 +6,12 @@ import { SiteHeader } from "@/components/site-header";
 import { PRODUCT_NAME, SHORT_DISCLAIMER } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `${PRODUCT_NAME} | Independent IGCSE Study Practice`,
+  title: `${PRODUCT_NAME} | Independent ICT Skills Practice`,
   description:
     "Independent exam-style study practice for ICT practical skills, theory revision, and future Business practice.",
   keywords: [
-    "IGCSE study practice",
-    "IGCSE ICT practical practice",
+    "ICT skills practice",
+    "international exam ICT practical practice",
     "ICT practical skills",
     "business studies practice",
     "spreadsheet practice",
@@ -35,3 +35,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

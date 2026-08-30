@@ -52,6 +52,12 @@ export type SpreadsheetInstructionCard = {
     valueLabel?: string;
     legend?: boolean;
   };
+  quiz?: {
+    question: string;
+    options: string[];
+    correctIndex: number;
+    feedback: string;
+  };
   commonMistakes: string[];
   feedback: {
     wrongSelection?: string;
@@ -790,17 +796,198 @@ function chartCard(
   });
 }
 
+function printStudyCard(
+  id: string,
+  goal: string,
+  scenario: string,
+  steps: string[],
+  question: string,
+  options: string[],
+  correctIndex: number,
+  feedback: string
+) {
+  return baseCard({
+    id,
+    moduleId: "layout",
+    moduleTitle: "Print and Layout",
+    category: "layout",
+    skill: "Print setup",
+    studentGoal: goal,
+    scenario,
+    studentSteps: steps,
+    instruction: goal,
+    meaning: "Print and layout settings control how spreadsheet evidence appears on paper or in a PDF.",
+    clickPath: steps,
+    expectedAction: "study-check",
+    expectedResult: feedback,
+    autoCheck: { cells: [] },
+    quiz: { question, options, correctIndex, feedback },
+    commonMistakes: ["Printing before using preview", "Leaving data clipped", "Forgetting that print settings affect evidence output"],
+    feedback: {
+      wrongTool: "Read the print setup steps, then choose the best answer.",
+      wrongResult: "Review the steps and choose the setting that matches the print instruction."
+    },
+    hints: ["Think about the final printed or PDF evidence.", "Most print tasks are about setup choices, not changing the worksheet data."],
+    difficulty: "beginner",
+    marks: 2
+  });
+}
+
 const layoutCards = [
-  entryCard("layout", "sheet-layout-title", "Create the print report title.", "Start a clean printable worksheet.", [["A1", "Printable Club Report"]]),
-  entryCard("layout", "sheet-layout-table", "Enter the print table.", "Add a compact table for print layout practice.", [["A3", "Club"], ["B3", "Attendance"], ["A4", "Drama"], ["B4", 18], ["A5", "Robotics"], ["B5", 22], ["A6", "Coding"], ["B6", 16]], "developing"),
-  entryCard("layout", "sheet-layout-print-area-note", "Record the print area.", "Use a note cell to confirm the print area used for the report.", [["D1", "Print area: A1:B6"]]),
-  entryCard("layout", "sheet-layout-orientation-note", "Record landscape orientation.", "Set the page orientation to landscape, then record the setting.", [["D2", "Landscape"]]),
-  entryCard("layout", "sheet-layout-gridlines-note", "Record printed gridlines.", "Turn on printed gridlines, then record the setting.", [["D3", "Print gridlines on"]]),
-  entryCard("layout", "sheet-layout-fit-note", "Record fit-to-page setting.", "Set the sheet to fit one page wide, then record the setting.", [["D4", "Fit one page wide"]]),
-  entryCard("layout", "sheet-layout-margins-note", "Record narrow margins.", "Set narrow margins, then record the setting.", [["D5", "Narrow margins"]]),
-  formatCardForModule("layout", "sheet-layout-bold-title", "Bold the print report title.", "The printed report title should stand out.", "A1", "Bold", [{ cell: "A1", value: "Printable Club Report", format: { bold: true } }]),
-  formatCardForModule("layout", "sheet-layout-title-height", "Increase the title font size for printing.", "The title should be easy to read on a printed report.", "A1", "Font size", [{ cell: "A1", value: "Printable Club Report", format: { fontSizeAtLeast: 14 } }]),
-  formatCardForModule("layout", "sheet-layout-table-borders", "Add borders to the printable table.", "The printed table needs clear boundaries.", "A3:B6", "Borders", ["A3", "B3", "A6", "B6"].map((cell) => ({ cell, format: { border: true } })))
+  printStudyCard(
+    "sheet-layout-exam-instruction",
+    "Read a spreadsheet print instruction.",
+    "A print task normally asks you to prepare spreadsheet evidence so it fits, shows the right information, and prints clearly.",
+    [
+      "Read the whole print instruction before changing the worksheet.",
+      "Underline the required output settings in your mind: orientation, gridlines, headings, print area, titles, headers, footers, and scaling.",
+      "Use Print Preview before printing or saving as PDF."
+    ],
+    "Why should Print Preview be checked before final output?",
+    ["It confirms how the evidence will look on paper or PDF", "It deletes unwanted worksheets", "It changes formulas into values", "It imports a CSV file"],
+    0,
+    "Correct. Print Preview confirms the final layout before printing or saving PDF."
+  ),
+  printStudyCard(
+    "sheet-layout-orientation",
+    "Choose portrait or landscape orientation.",
+    "Wide tables often need landscape orientation so columns do not split across pages.",
+    [
+      "Open Page Layout.",
+      "Open Page Setup or Orientation.",
+      "Choose Landscape when the table is wider than it is tall.",
+      "Check Print Preview to confirm the table fits across the page."
+    ],
+    "Which orientation is normally best for a wide table with many columns?",
+    ["Landscape", "Portrait", "Formula view", "Freeze panes"],
+    0,
+    "Correct. Landscape gives a wide table more horizontal space."
+  ),
+  printStudyCard(
+    "sheet-layout-fit-pages",
+    "Fit a worksheet to a required number of pages.",
+    "Some exam-style print instructions say the worksheet must fit on one page wide or a fixed number of pages.",
+    [
+      "Open Page Layout.",
+      "Find Scale to Fit.",
+      "Set Width to 1 page when all columns must fit across one page.",
+      "Set Height only when the instruction gives a page limit."
+    ],
+    "Which setting helps all columns fit across one printed page?",
+    ["Width: 1 page", "Height: 10 pages", "Show formulas", "Sort ascending"],
+    0,
+    "Correct. Width: 1 page scales columns to fit across one page."
+  ),
+  printStudyCard(
+    "sheet-layout-gridlines-headings",
+    "Show gridlines and row/column headings in printouts.",
+    "A printed spreadsheet may need gridlines, column letters, and row numbers so evidence is easy to check.",
+    [
+      "Open Page Layout.",
+      "Find Sheet Options.",
+      "Tick Print under Gridlines if gridlines are required.",
+      "Tick Print under Headings if row numbers and column letters are required."
+    ],
+    "Which Page Layout option prints the cell grid?",
+    ["Gridlines: Print", "Formulas: Show Formulas", "Font: Bold", "Data: Filter"],
+    0,
+    "Correct. Gridlines: Print makes the cell grid appear in the output."
+  ),
+  printStudyCard(
+    "sheet-layout-formula-view",
+    "Print formulas instead of results.",
+    "Sometimes evidence must show formulae so a teacher can check the method used.",
+    [
+      "Open the Formulas tab.",
+      "Choose Show Formulas in Formula Auditing.",
+      "Widen columns if formulas are clipped.",
+      "Use Print Preview to confirm formulas are readable."
+    ],
+    "Which command displays formulas in the worksheet cells?",
+    ["Show Formulas", "Wrap Text", "Print Titles", "Remove Duplicates"],
+    0,
+    "Correct. Show Formulas displays formulae instead of calculated results."
+  ),
+  printStudyCard(
+    "sheet-layout-values-after-formulas",
+    "Return to value display after formula evidence.",
+    "After checking formulas, students often need a normal value printout as well.",
+    [
+      "Turn Show Formulas off.",
+      "Select the worksheet or required columns.",
+      "Autofit columns if values show as ###.",
+      "Check that values, not formulas, are visible."
+    ],
+    "What usually fixes ### appearing instead of a value?",
+    ["Widen or autofit the column", "Delete the formula", "Change orientation to portrait", "Remove the title"],
+    0,
+    "Correct. ### usually means the column is too narrow to display the value."
+  ),
+  printStudyCard(
+    "sheet-layout-headers-footers",
+    "Add sheet headers and footers.",
+    "Headers and footers help identify printed evidence with names, page numbers, dates, or file details.",
+    [
+      "Open Insert.",
+      "Choose Header & Footer.",
+      "Add required text in the left, centre, or right header/footer area.",
+      "Use automatic page number where page numbers are required."
+    ],
+    "Why use an automatic page number in the footer?",
+    ["It updates correctly on each page", "It sorts the spreadsheet", "It creates a chart", "It imports text files"],
+    0,
+    "Correct. Automatic page numbers update for each printed page."
+  ),
+  printStudyCard(
+    "sheet-layout-print-area",
+    "Set a print area.",
+    "A print area prevents extra blank cells or unrelated data from appearing in the output.",
+    [
+      "Select the exact range that should be printed.",
+      "Open Page Layout.",
+      "Choose Print Area.",
+      "Choose Set Print Area."
+    ],
+    "What does Set Print Area control?",
+    ["The exact range that will print", "The font used in every cell", "The order of records", "The chart type"],
+    0,
+    "Correct. Set Print Area defines the worksheet range used for output."
+  ),
+  printStudyCard(
+    "sheet-layout-print-titles",
+    "Repeat header rows at the top of printed pages.",
+    "Long printed tables are easier to read when column headings repeat on each page.",
+    [
+      "Open Page Layout.",
+      "Choose Print Titles.",
+      "Set Rows to repeat at top to the heading row, such as $1:$1.",
+      "Check the second page in Print Preview."
+    ],
+    "Which setting repeats column headings on every printed page?",
+    ["Rows to repeat at top", "Show Formulas", "Landscape only", "Filter by colour"],
+    0,
+    "Correct. Rows to repeat at top keeps table headings visible across pages."
+  ),
+  printStudyCard(
+    "sheet-layout-final-checkpoint",
+    "Complete the print and layout checkpoint.",
+    "This final checkpoint combines the main print decisions: orientation, scaling, gridlines, headings, formulas, print area, headers, footers, and repeated title rows.",
+    [
+      "Read the print instruction and identify each required setting.",
+      "Choose orientation and scaling before printing.",
+      "Choose whether the output needs values or formulas.",
+      "Check headers, footers, print area, gridlines, headings, and repeated rows in Print Preview."
+    ],
+    "A worksheet must show formulas, fit all columns on one page wide, print gridlines, and repeat row 1 on every page. Which group of settings is needed?",
+    [
+      "Show Formulas, Width: 1 page, Gridlines: Print, Rows to repeat at top: $1:$1",
+      "Sort A to Z, Portrait only, Hide headings, Remove print area",
+      "Insert chart, Merge all cells, Turn formulas off, Delete row 1",
+      "Currency format, Filter by Spain, Bold title only, Save CSV"
+    ],
+    0,
+    "Correct. That set matches formula evidence, fit-to-width scaling, gridlines, and repeated header rows."
+  )
 ];
 
 export const allSpreadsheetInstructionCards: SpreadsheetInstructionCard[] = [

@@ -259,6 +259,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     valueLabel: "",
     legend: false
   });
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
 
   const moduleCardsForRoute = useMemo(() => getSpreadsheetCardsForModule(moduleId), [moduleId]);
   const currentModule = getSpreadsheetModule(moduleId);
@@ -345,6 +346,28 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
   function checkWork() {
     if (!card) return;
+
+    if (card.quiz) {
+      const selectedAnswer = quizAnswers[card.id];
+      const isCorrect = selectedAnswer === card.quiz.correctIndex;
+      const result = {
+        isCorrect,
+        canAutoCheck: true,
+        message: isCorrect ? "Correct answer." : "That answer is not correct yet.",
+        nextStep: isCorrect ? card.quiz.feedback : "Review the study steps, then choose the option that matches the print instruction."
+      };
+
+      setFeedback(result);
+
+      if (isCorrect && !completed.includes(card.id)) {
+        setCompleted((current) => [...current, card.id]);
+        setPoints((value) => value + card.marks * 10);
+        setCelebrating(true);
+        window.setTimeout(() => setCelebrating(false), 900);
+      }
+      return;
+    }
+
     const currentSnapshot = snapshot();
     const result = validateSpreadsheetResult(card, currentSnapshot);
 
@@ -543,6 +566,29 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                 </ol>
               </div>
 
+              {card.quiz && (
+                <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                  <p className="text-sm font-semibold text-ink">Knowledge check</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
+                  <div className="mt-3 grid gap-2">
+                    {card.quiz.options.map((option, index) => (
+                      <label
+                        key={option}
+                        className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm font-semibold ${quizAnswers[card.id] === index ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700"}`}
+                      >
+                        <input
+                          type="radio"
+                          name={`quiz-${card.id}`}
+                          checked={quizAnswers[card.id] === index}
+                          onChange={() => setQuizAnswers((answers) => ({ ...answers, [card.id]: index }))}
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {feedback && (
                 <div className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
                   <p className="font-semibold">{feedback.message}</p>
@@ -562,7 +608,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                   </div>
                 )}
                 <button onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
-                  {card.autoCheck ? <CheckCircle2 size={16} /> : <ClipboardCheck size={16} />}
+                  {card.autoCheck || card.quiz ? <CheckCircle2 size={16} /> : <ClipboardCheck size={16} />}
                   Check my result
                 </button>
               </div>

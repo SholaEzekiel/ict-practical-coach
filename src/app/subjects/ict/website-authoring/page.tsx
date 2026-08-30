@@ -21,7 +21,7 @@ export default function WebsiteAuthoringPage() {
           <Pill>ICT Website Authoring</Pill>
           <h1 className="mt-4 text-4xl font-bold">Website Authoring modules</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-            Practise HTML, CSS, images, links, tables, preview checks, and 0417-style website build tasks.
+            Practise HTML, CSS, images, links, tables, preview checks, and exam-style website build tasks.
           </p>
         </div>
         <Link href="/subjects/ict" className="inline-flex items-center gap-2 font-semibold text-ocean">
@@ -57,3 +57,4 @@ export default function WebsiteAuthoringPage() {
     </Section>
   );
 }
+
