@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, Printer, Rows3, Search, Tags } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { getDatabaseCardsForModule, getDatabaseModule, sourceTables } from "@/lib/database-instruction-cards";
 import type { DatabaseCard, DatabaseExpectedResult, DatabaseTable } from "@/lib/database-instruction-cards";
@@ -166,6 +166,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [mode, setMode] = useState<"study" | "practice">("study");
   const [instructionsOpen, setInstructionsOpen] = useState(true);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const card = cards[activeIndex];
   const selected = tables.find((table) => table.name === selectedTable) || tables[0];
   const fields = selected?.fields || [];
@@ -305,10 +306,18 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
     setFeedback(null);
   }
 
+  function openToolPanel(nextPanel: typeof panel) {
+    setPanel(nextPanel);
+    setToolsOpen(true);
+    setMode("practice");
+  }
+
   if (!card) return null;
 
   const layoutClass = instructionsOpen
-    ? "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[420px_minmax(0,1fr)]"
+    ? toolsOpen
+      ? "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[minmax(520px,0.9fr)_minmax(560px,1fr)]"
+      : "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[minmax(720px,1fr)_280px]"
     : "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[72px_minmax(0,1fr)]";
 
   return (
@@ -317,7 +326,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         {instructionsOpen ? (
           <>
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <button type="button" onClick={() => setInstructionsOpen(false)} className="inline-flex items-center gap-2 text-sm font-bold text-ocean">
+              <button type="button" onClick={() => { setInstructionsOpen(false); setToolsOpen(true); }} className="inline-flex items-center gap-2 text-sm font-bold text-ocean">
                 <PanelLeftClose size={17} /> Collapse Instructions
               </button>
             </div>
@@ -330,8 +339,8 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
                 <span className="text-sm font-semibold text-slate-600">{activeIndex + 1}/{cards.length}</span>
               </div>
               <div className="mt-4 grid grid-cols-2 rounded-lg bg-slate-100 p-1">
-                <button type="button" onClick={() => setMode("study")} className={`rounded-md px-3 py-2 text-sm font-bold ${mode === "study" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>Study</button>
-                <button type="button" onClick={() => setMode("practice")} className={`rounded-md px-3 py-2 text-sm font-bold ${mode === "practice" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>Practice</button>
+                <button type="button" onClick={() => { setMode("study"); setToolsOpen(false); }} className={`rounded-md px-3 py-2 text-sm font-bold ${mode === "study" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>Study</button>
+                <button type="button" onClick={() => { setMode("practice"); setToolsOpen(true); }} className={`rounded-md px-3 py-2 text-sm font-bold ${mode === "practice" ? "bg-white text-ocean shadow-sm" : "text-slate-600"}`}>Practice</button>
               </div>
               <h1 className="mt-4 text-2xl font-bold text-ink">{card.title}</h1>
               <p className="mt-2 text-sm leading-6 text-slate-600">{card.scenario}</p>
@@ -381,9 +390,40 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         )}
       </aside>
 
-      <section className="grid min-h-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[240px_minmax(0,1fr)]">
+      <section className={toolsOpen ? "grid min-h-0 overflow-hidden rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[220px_minmax(0,1fr)]" : "flex min-h-0 flex-col rounded-lg border border-line bg-white p-4 shadow-sm"}>
+        {!toolsOpen ? (
+          <div className="flex min-h-0 flex-col">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="flex items-center gap-2 font-bold"><Database size={18} /> Database tools</h2>
+                <p className="mt-2 text-sm leading-5 text-slate-600">Open only when you need to practise with tables, queries, reports, forms, or labels.</p>
+              </div>
+              <button type="button" onClick={() => setToolsOpen(true)} className="rounded-lg border border-line p-2 text-ocean" title="Expand database tools">
+                <PanelRightOpen size={18} />
+              </button>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {["import", "design", "query", "report", "form", "labels"].map((item) => (
+                <button key={item} type="button" onClick={() => openToolPanel(item as typeof panel)} className={`rounded-lg border px-3 py-3 text-left text-sm font-bold capitalize ${panel === item ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700 hover:bg-mist"}`}>{item.replace("-", " ")}</button>
+              ))}
+            </div>
+            <div className="mt-5 min-h-0 flex-1 overflow-y-auto">
+              <h3 className="text-sm font-bold text-slate-600">Tables</h3>
+              <div className="mt-2 space-y-2">
+                {tables.length === 0 && <p className="rounded-lg border border-dashed border-line bg-white p-3 text-sm text-slate-500">No tables imported yet.</p>}
+                {tables.map((table) => <button key={table.name} type="button" onClick={() => { setSelectedTable(table.name); setToolsOpen(true); }} className={`block w-full rounded-lg border p-3 text-left text-sm font-bold ${selectedTable === table.name ? "border-ocean bg-white text-ocean" : "border-line bg-white text-ink"}`}>{table.name}</button>)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
         <div className="border-r border-line bg-slate-50 p-4">
-          <h2 className="flex items-center gap-2 font-bold"><Database size={18} /> Database objects</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-bold"><Database size={18} /> Database objects</h2>
+            <button type="button" onClick={() => setToolsOpen(false)} className="rounded-lg border border-line p-2 text-ocean" title="Collapse database tools">
+              <PanelRightClose size={17} />
+            </button>
+          </div>
           <div className="mt-4 space-y-2">
             {["import", "design", "query", "report", "form", "labels"].map((item) => (
               <button key={item} type="button" onClick={() => setPanel(item as typeof panel)} className={`block w-full rounded-lg px-3 py-2 text-left text-sm font-bold capitalize ${panel === item ? "bg-ocean text-white" : "bg-white text-slate-700 hover:bg-mist"}`}>{item.replace("-", " ")}</button>
@@ -414,6 +454,8 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
             <p className="mt-1">Final Access evidence often needs import settings, Design View, query criteria, report layout, labels, print preview, and exported output. Apex checks the process knowledge, then the teacher confirms the real Microsoft Access evidence.</p>
           </div>
         </div>
+          </>
+        )}
       </section>
     </div>
   );
