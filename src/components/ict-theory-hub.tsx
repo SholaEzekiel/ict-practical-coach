@@ -50,80 +50,187 @@ type VisualCard = {
   alt: string;
 };
 
-function svgVisual(title: string, detail: string) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
-      <defs>
-        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stop-color="#eef6f8"/>
-          <stop offset="1" stop-color="#ffffff"/>
-        </linearGradient>
-      </defs>
-      <rect width="640" height="420" fill="url(#bg)"/>
-      <rect x="42" y="48" width="556" height="324" rx="28" fill="#ffffff" stroke="#cfe0e8" stroke-width="4"/>
-      <circle cx="170" cy="210" r="72" fill="#0f7490" opacity="0.14"/>
-      <circle cx="320" cy="210" r="72" fill="#d99b1d" opacity="0.14"/>
-      <circle cx="470" cy="210" r="72" fill="#16313f" opacity="0.12"/>
-      <path d="M228 210h64M348 210h64" stroke="#0f7490" stroke-width="12" stroke-linecap="round"/>
-      <text x="320" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#111820">${title}</text>
-      <text x="320" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#3a4758">${detail}</text>
-    </svg>
-  `.trim();
+type VisualSearch = {
+  title: string;
+  query: string;
+};
 
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+const visualSearchesByLesson: Record<string, VisualSearch[]> = {
+  "ict-1-hardware-software": [
+    { title: "Hardware", query: "computer hardware motherboard components" },
+    { title: "Software", query: "software code on computer screen" },
+    { title: "System unit", query: "desktop computer internal components" },
+    { title: "User workspace", query: "computer workstation software" }
+  ],
+  "ict-1-cpu-memory": [
+    { title: "Processor", query: "computer processor chip close up" },
+    { title: "Memory", query: "computer ram memory modules" },
+    { title: "Storage device", query: "solid state drive computer storage" },
+    { title: "Performance", query: "computer performance analytics screen" }
+  ],
+  "ict-1-interfaces": [
+    { title: "Operating system", query: "computer operating system desktop interface" },
+    { title: "GUI", query: "graphical user interface dashboard" },
+    { title: "CLI", query: "command line terminal code" },
+    { title: "User control", query: "person using laptop interface" }
+  ],
+  "ict-2-manual-input": [
+    { title: "Keyboard", query: "computer keyboard typing" },
+    { title: "Mouse", query: "computer mouse on desk" },
+    { title: "Touch screen", query: "person using touchscreen tablet" },
+    { title: "Manual entry", query: "data entry keyboard office" }
+  ],
+  "ict-2-direct-entry": [
+    { title: "Barcode", query: "barcode scanner retail" },
+    { title: "QR code", query: "qr code scanning phone" },
+    { title: "Card reader", query: "payment card reader terminal" },
+    { title: "Sensor input", query: "industrial sensor technology" }
+  ],
+  "ict-2-output": [
+    { title: "Monitor", query: "computer monitor display" },
+    { title: "Printer", query: "office printer paper" },
+    { title: "Speaker", query: "computer speaker audio" },
+    { title: "Projector", query: "digital projector presentation room" }
+  ],
+  "ict-3-magnetic": [
+    { title: "Hard disk", query: "hard disk drive platter" },
+    { title: "External drive", query: "external hard drive storage" },
+    { title: "Data archive", query: "data backup storage drives" },
+    { title: "Storage bay", query: "server storage hard drives" }
+  ],
+  "ict-3-solid-state": [
+    { title: "SSD", query: "solid state drive ssd" },
+    { title: "Flash memory", query: "usb flash drive storage" },
+    { title: "Memory card", query: "sd memory card camera" },
+    { title: "Portable storage", query: "portable ssd laptop" }
+  ],
+  "ict-3-optical-cloud": [
+    { title: "Optical discs", query: "cd dvd blu ray discs" },
+    { title: "Disc drive", query: "optical disc drive computer" },
+    { title: "Cloud files", query: "cloud storage laptop files" },
+    { title: "Data centre", query: "cloud server data center" }
+  ],
+  "ict-4-network-types": [
+    { title: "Local network", query: "office local area network computers" },
+    { title: "Wide network", query: "global network communication map" },
+    { title: "Connected devices", query: "devices connected to network" },
+    { title: "Collaboration", query: "team video conference computers" }
+  ],
+  "ict-4-hardware": [
+    { title: "Router", query: "wireless router close up" },
+    { title: "Switch", query: "network switch ethernet cables" },
+    { title: "Network cables", query: "ethernet cables network rack" },
+    { title: "Adapter", query: "network adapter computer hardware" }
+  ],
+  "ict-4-wired-wireless": [
+    { title: "Ethernet", query: "ethernet cable laptop connection" },
+    { title: "Wi-Fi", query: "wifi router home network" },
+    { title: "Mobile network", query: "mobile phone network signal" },
+    { title: "Fibre", query: "fiber optic cable network" }
+  ],
+  "ict-5-employment": [
+    { title: "Automation", query: "factory automation robots" },
+    { title: "Office systems", query: "automated office workflow computers" },
+    { title: "Digital jobs", query: "technology workers office laptops" },
+    { title: "Skills change", query: "online learning technology skills" }
+  ],
+  "ict-5-teleworking": [
+    { title: "Home office", query: "remote work home office laptop" },
+    { title: "Video meeting", query: "video conference laptop screen" },
+    { title: "Cloud teamwork", query: "online collaboration team laptop" },
+    { title: "Mobile work", query: "person working laptop cafe" }
+  ],
+  "ict-5-health": [
+    { title: "Ergonomics", query: "ergonomic computer workstation posture" },
+    { title: "Eye strain", query: "computer screen glasses workspace" },
+    { title: "Accessible tech", query: "assistive technology computer accessibility" },
+    { title: "Digital wellbeing", query: "healthy computer workstation" }
+  ],
+  "ict-6-expert-systems": [
+    { title: "Decision support", query: "medical diagnosis technology screen" },
+    { title: "Knowledge base", query: "artificial intelligence data visualization" },
+    { title: "Rules engine", query: "business analytics dashboard decision" },
+    { title: "Specialist advice", query: "doctor using medical computer" }
+  ],
+  "ict-6-transaction-systems": [
+    { title: "Booking", query: "online booking system laptop" },
+    { title: "Payment", query: "card payment terminal transaction" },
+    { title: "Stock update", query: "warehouse inventory barcode scanner" },
+    { title: "Ticketing", query: "digital ticket scanning" }
+  ],
+  "ict-6-control-systems": [
+    { title: "Sensors", query: "industrial sensors automation" },
+    { title: "Control room", query: "control room monitoring screens" },
+    { title: "Actuator", query: "robotic arm automation factory" },
+    { title: "Feedback loop", query: "smart thermostat control system" }
+  ],
+  "ict-7-analysis": [
+    { title: "Interview", query: "business interview notes laptop" },
+    { title: "Questionnaire", query: "survey form clipboard" },
+    { title: "Observation", query: "office workflow observation computer" },
+    { title: "Requirements", query: "requirements analysis sticky notes" }
+  ],
+  "ict-7-design-testing": [
+    { title: "Prototype", query: "wireframe user interface design" },
+    { title: "Test plan", query: "software testing checklist laptop" },
+    { title: "Documentation", query: "technical documentation laptop" },
+    { title: "User feedback", query: "user testing feedback session" }
+  ],
+  "ict-7-implementation": [
+    { title: "Direct changeover", query: "software deployment computer" },
+    { title: "Parallel running", query: "two computer systems comparison" },
+    { title: "Training", query: "computer training classroom" },
+    { title: "Evaluation", query: "project evaluation dashboard" }
+  ],
+  "ict-8-threats": [
+    { title: "Malware", query: "cyber security malware warning screen" },
+    { title: "Phishing", query: "phishing email laptop security" },
+    { title: "Data loss", query: "data breach cybersecurity" },
+    { title: "Unauthorised access", query: "hacker cybersecurity screen" }
+  ],
+  "ict-8-protection": [
+    { title: "Password", query: "password security login screen" },
+    { title: "Firewall", query: "network security firewall" },
+    { title: "Backup", query: "data backup external drive" },
+    { title: "Authentication", query: "two factor authentication phone" }
+  ],
+  "ict-8-encryption": [
+    { title: "Encrypted data", query: "encrypted data cybersecurity" },
+    { title: "Padlock", query: "secure website padlock browser" },
+    { title: "Keys", query: "encryption keys cybersecurity" },
+    { title: "Secure transfer", query: "secure data transfer network" }
+  ],
+  "ict-9-audience": [
+    { title: "Audience", query: "students using computers classroom" },
+    { title: "Purpose", query: "website planning notes laptop" },
+    { title: "Design choice", query: "web design layout screen" },
+    { title: "Presentation", query: "digital presentation audience" }
+  ],
+  "ict-9-netiquette": [
+    { title: "Email", query: "professional email laptop" },
+    { title: "Online respect", query: "online communication video call" },
+    { title: "Social media", query: "social media phone communication" },
+    { title: "Digital footprint", query: "digital identity security laptop" }
+  ]
+};
+
+function unsplashPhoto(query: string, lessonId: string, index: number) {
+  return `https://source.unsplash.com/640x420/?${encodeURIComponent(query)}&sig=${encodeURIComponent(`${lessonId}-${index}`)}`;
 }
 
 function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
-  if (lesson.id === "ict-3-optical-cloud") {
-    return [
-      {
-        title: "Concept overview",
-        alt: "Diagram comparing physical optical storage with online cloud storage",
-        imageUrl: svgVisual("Optical vs Cloud", "physical media and remote storage")
-      },
-      {
-        title: "Disc types",
-        alt: "Chart-style image comparing CD DVD and Blu-ray optical disc types",
-        imageUrl: svgVisual("CD / DVD / Blu-ray", "capacity increases by disc type")
-      },
-      {
-        title: "Actual Optical Disc",
-        alt: "Close view of an optical disc surface",
-        imageUrl: "https://images.unsplash.com/photo-1616688918152-cd3a45a23e68?q=80&w=900"
-      },
-      {
-        title: "Cloud storage",
-        alt: "Server racks used for cloud storage infrastructure",
-        imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=900"
-      }
-    ];
-  }
-
-  return [
-    {
-      title: "Concept overview",
-      alt: `Illustrated overview for ${lesson.title}`,
-      imageUrl: svgVisual(lesson.title, "main idea and vocabulary")
-    },
-    {
-      title: "Key comparison",
-      alt: `Comparison chart for ${lesson.title}`,
-      imageUrl: svgVisual(
-        lesson.compare ? lesson.compare.headers.join(" vs ") : "Compare",
-        "features, uses, benefits, limits"
-      )
-    },
-    {
-      title: "Real-World View",
-      alt: lesson.image ? lesson.image.alt : `Real-world visual example for ${lesson.title}`,
-      imageUrl: lesson.image?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=900"
-    },
-    {
-      title: "Use case",
-      alt: `Practical use case visual for ${lesson.title}`,
-      imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=900"
-    }
+  const searches = visualSearchesByLesson[lesson.id] || [
+    { title: "Concept", query: `${lesson.title} information technology` },
+    { title: "Equipment", query: `${lesson.title} computer equipment` },
+    { title: "Real use", query: `${lesson.title} technology workplace` },
+    { title: "Context", query: `${lesson.title} digital learning` }
   ];
+
+  return searches.slice(0, 4).map((visual, index) => ({
+    title: visual.title,
+    alt: `${visual.title} visual for ${lesson.title}`,
+    imageUrl: unsplashPhoto(visual.query, lesson.id, index + 1)
+  }));
 }
 
 function VisualTile({ visual, index }: { visual: VisualCard; index: number }) {
@@ -141,7 +248,7 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
   const visuals = lessonVisuals(lesson).slice(0, 4);
 
   return (
-    <aside className="grid min-h-[520px] rounded-lg border border-dashed border-line bg-slate-50 p-3">
+    <aside className="grid min-h-[500px] rounded-lg border border-dashed border-line bg-slate-50 p-2">
       <div className="grid grid-rows-4 gap-3 sm:grid-cols-2 sm:grid-rows-2 xl:grid-cols-1 xl:grid-rows-4">
       {visuals.map((visual, index) => (
         <VisualTile key={`${lesson.id}-${visual.title}`} visual={visual} index={index} />
@@ -153,7 +260,7 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
 
 function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div>
         <p className="text-base leading-7 text-slate-700">{lesson.summary}</p>
         <ul className="mt-5 space-y-3">
