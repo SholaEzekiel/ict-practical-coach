@@ -46,29 +46,54 @@ function LessonTable({ table }: { table: NonNullable<IctTheoryLesson["compare"]>
 
 type VisualCard = {
   title: string;
-  caption: string;
-  imageUrl?: string;
+  imageUrl: string;
+  alt: string;
 };
+
+function svgVisual(title: string, detail: string) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420">
+      <defs>
+        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#eef6f8"/>
+          <stop offset="1" stop-color="#ffffff"/>
+        </linearGradient>
+      </defs>
+      <rect width="640" height="420" fill="url(#bg)"/>
+      <rect x="42" y="48" width="556" height="324" rx="28" fill="#ffffff" stroke="#cfe0e8" stroke-width="4"/>
+      <circle cx="170" cy="210" r="72" fill="#0f7490" opacity="0.14"/>
+      <circle cx="320" cy="210" r="72" fill="#d99b1d" opacity="0.14"/>
+      <circle cx="470" cy="210" r="72" fill="#16313f" opacity="0.12"/>
+      <path d="M228 210h64M348 210h64" stroke="#0f7490" stroke-width="12" stroke-linecap="round"/>
+      <text x="320" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#111820">${title}</text>
+      <text x="320" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#3a4758">${detail}</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
   if (lesson.id === "ict-3-optical-cloud") {
     return [
       {
-        title: "Optical vs Cloud",
-        caption: "Optical discs are physical removable media; cloud storage keeps files on remote servers."
+        title: "Concept overview",
+        alt: "Diagram comparing physical optical storage with online cloud storage",
+        imageUrl: svgVisual("Optical vs Cloud", "physical media and remote storage")
       },
       {
-        title: "CD / DVD / Blu-ray",
-        caption: "CDs suit small files, DVDs hold more data, and Blu-ray discs support larger high-definition storage."
+        title: "Disc types",
+        alt: "Chart-style image comparing CD DVD and Blu-ray optical disc types",
+        imageUrl: svgVisual("CD / DVD / Blu-ray", "capacity increases by disc type")
       },
       {
         title: "Actual Optical Disc",
-        caption: "Recognise the reflective surface of a compact optical disc.",
+        alt: "Close view of an optical disc surface",
         imageUrl: "https://images.unsplash.com/photo-1616688918152-cd3a45a23e68?q=80&w=900"
       },
       {
-        title: "Cloud Storage Context",
-        caption: "Cloud files are stored in server infrastructure and accessed through network connections.",
+        title: "Cloud storage",
+        alt: "Server racks used for cloud storage infrastructure",
         imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=900"
       }
     ];
@@ -76,44 +101,39 @@ function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
 
   return [
     {
-      title: `${lesson.title} Map`,
-      caption: lesson.summary
+      title: "Concept overview",
+      alt: `Illustrated overview for ${lesson.title}`,
+      imageUrl: svgVisual(lesson.title, "main idea and vocabulary")
     },
     {
-      title: "Key Comparison",
-      caption: lesson.compare ? `${lesson.compare.headers.join(" vs ")} comparison for exam answers.` : "Break the topic into features, uses, benefits, and limits."
+      title: "Key comparison",
+      alt: `Comparison chart for ${lesson.title}`,
+      imageUrl: svgVisual(
+        lesson.compare ? lesson.compare.headers.join(" vs ") : "Compare",
+        "features, uses, benefits, limits"
+      )
     },
     {
       title: "Real-World View",
-      caption: lesson.image ? lesson.image.alt : `Recognise real examples connected to ${lesson.title.toLowerCase()}.`,
-      imageUrl: lesson.image?.url
+      alt: lesson.image ? lesson.image.alt : `Real-world visual example for ${lesson.title}`,
+      imageUrl: lesson.image?.url || "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=900"
     },
     {
-      title: "Exam Context",
-      caption: `Use ${lesson.title.toLowerCase()} vocabulary in short explanations and scenario answers.`
+      title: "Use case",
+      alt: `Practical use case visual for ${lesson.title}`,
+      imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=900"
     }
   ];
 }
 
 function VisualTile({ visual, index }: { visual: VisualCard; index: number }) {
-  if (visual.imageUrl) {
-    return (
-      <figure className="min-h-40 overflow-hidden rounded-lg border border-line bg-white">
-        <img src={visual.imageUrl} alt={visual.title} className="h-28 w-full object-cover" />
-        <figcaption className="p-3">
-          <p className="text-sm font-bold text-ink">{visual.title}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-600">{visual.caption}</p>
-        </figcaption>
-      </figure>
-    );
-  }
-
   return (
-    <div className="min-h-40 rounded-lg border border-line bg-gradient-to-br from-mist to-white p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-ocean">Visual {index + 1}</p>
-      <h4 className="mt-3 text-base font-bold text-ink">{visual.title}</h4>
-      <p className="mt-2 text-sm leading-6 text-slate-700">{visual.caption}</p>
-    </div>
+    <figure className="group relative min-h-36 overflow-hidden rounded-lg border border-line bg-white">
+      <img src={visual.imageUrl} alt={visual.alt} className="h-full min-h-36 w-full object-cover" />
+      <figcaption className="absolute inset-x-0 bottom-0 bg-ink/80 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white">
+        Visual {index + 1}: {visual.title}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -121,17 +141,19 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
   const visuals = lessonVisuals(lesson).slice(0, 4);
 
   return (
-    <aside className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+    <aside className="grid min-h-[520px] rounded-lg border border-dashed border-line bg-slate-50 p-3">
+      <div className="grid grid-rows-4 gap-3 sm:grid-cols-2 sm:grid-rows-2 xl:grid-cols-1 xl:grid-rows-4">
       {visuals.map((visual, index) => (
         <VisualTile key={`${lesson.id}-${visual.title}`} visual={visual} index={index} />
       ))}
+      </div>
     </aside>
   );
 }
 
 function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_460px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div>
         <p className="text-base leading-7 text-slate-700">{lesson.summary}</p>
         <ul className="mt-5 space-y-3">
