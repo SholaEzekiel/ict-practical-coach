@@ -57,6 +57,23 @@ function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
             </li>
           ))}
         </ul>
+        {lesson.studyBlocks && (
+          <div className="mt-6 grid gap-4">
+            {lesson.studyBlocks.map((block) => (
+              <section key={block.heading} className="rounded-lg border border-line bg-slate-50 p-4">
+                <h4 className="font-bold text-ink">{block.heading}</h4>
+                <ul className="mt-3 space-y-2">
+                  {block.points.map((point) => (
+                    <li key={point} className="flex gap-3 text-sm leading-6 text-slate-700">
+                      <span className="mt-2.5 h-1.5 w-1.5 flex-none bg-ocean" aria-hidden="true" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )}
         {lesson.compare && <LessonTable table={lesson.compare} />}
       </div>
 
