@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ImageIcon, ListChecks, XCircle } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { ictTheoryModules } from "@/lib/ict-theory-data";
 import type { IctTheoryLesson } from "@/lib/ict-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
@@ -44,9 +44,94 @@ function LessonTable({ table }: { table: NonNullable<IctTheoryLesson["compare"]>
   );
 }
 
+type VisualCard = {
+  title: string;
+  caption: string;
+  imageUrl?: string;
+};
+
+function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
+  if (lesson.id === "ict-3-optical-cloud") {
+    return [
+      {
+        title: "Optical vs Cloud",
+        caption: "Optical discs are physical removable media; cloud storage keeps files on remote servers."
+      },
+      {
+        title: "CD / DVD / Blu-ray",
+        caption: "CDs suit small files, DVDs hold more data, and Blu-ray discs support larger high-definition storage."
+      },
+      {
+        title: "Actual Optical Disc",
+        caption: "Recognise the reflective surface of a compact optical disc.",
+        imageUrl: "https://images.unsplash.com/photo-1616688918152-cd3a45a23e68?q=80&w=900"
+      },
+      {
+        title: "Cloud Storage Context",
+        caption: "Cloud files are stored in server infrastructure and accessed through network connections.",
+        imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=900"
+      }
+    ];
+  }
+
+  return [
+    {
+      title: `${lesson.title} Map`,
+      caption: lesson.summary
+    },
+    {
+      title: "Key Comparison",
+      caption: lesson.compare ? `${lesson.compare.headers.join(" vs ")} comparison for exam answers.` : "Break the topic into features, uses, benefits, and limits."
+    },
+    {
+      title: "Real-World View",
+      caption: lesson.image ? lesson.image.alt : `Recognise real examples connected to ${lesson.title.toLowerCase()}.`,
+      imageUrl: lesson.image?.url
+    },
+    {
+      title: "Exam Context",
+      caption: `Use ${lesson.title.toLowerCase()} vocabulary in short explanations and scenario answers.`
+    }
+  ];
+}
+
+function VisualTile({ visual, index }: { visual: VisualCard; index: number }) {
+  if (visual.imageUrl) {
+    return (
+      <figure className="min-h-40 overflow-hidden rounded-lg border border-line bg-white">
+        <img src={visual.imageUrl} alt={visual.title} className="h-28 w-full object-cover" />
+        <figcaption className="p-3">
+          <p className="text-sm font-bold text-ink">{visual.title}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-600">{visual.caption}</p>
+        </figcaption>
+      </figure>
+    );
+  }
+
+  return (
+    <div className="min-h-40 rounded-lg border border-line bg-gradient-to-br from-mist to-white p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-ocean">Visual {index + 1}</p>
+      <h4 className="mt-3 text-base font-bold text-ink">{visual.title}</h4>
+      <p className="mt-2 text-sm leading-6 text-slate-700">{visual.caption}</p>
+    </div>
+  );
+}
+
+function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
+  const visuals = lessonVisuals(lesson).slice(0, 4);
+
+  return (
+    <aside className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+      {visuals.map((visual, index) => (
+        <VisualTile key={`${lesson.id}-${visual.title}`} visual={visual} index={index} />
+      ))}
+    </aside>
+  );
+}
+
 function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_460px]">
       <div>
         <p className="text-base leading-7 text-slate-700">{lesson.summary}</p>
         <ul className="mt-5 space-y-3">
@@ -77,19 +162,7 @@ function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
         {lesson.compare && <LessonTable table={lesson.compare} />}
       </div>
 
-      {lesson.image ? (
-        <figure className="overflow-hidden rounded-lg border border-line bg-white">
-          <img src={lesson.image.url} alt={lesson.image.alt} className="h-56 w-full object-cover" />
-          <figcaption className="border-t border-line px-4 py-3 text-sm leading-6 text-slate-600">{lesson.image.alt}</figcaption>
-        </figure>
-      ) : (
-        <div className="grid min-h-56 place-items-center rounded-lg border border-dashed border-line bg-mist p-6 text-center">
-          <div>
-            <ImageIcon className="mx-auto text-ocean" size={34} aria-hidden="true" />
-            <p className="mt-3 text-sm font-semibold text-slate-600">Visual study card</p>
-          </div>
-        </div>
-      )}
+      <LessonVisualPanel lesson={lesson} />
     </div>
   );
 }
