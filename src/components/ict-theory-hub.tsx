@@ -214,8 +214,17 @@ const visualSearchesByLesson: Record<string, VisualSearch[]> = {
   ]
 };
 
-function unsplashPhoto(query: string, lessonId: string, index: number) {
-  return `https://source.unsplash.com/640x420/?${encodeURIComponent(query)}&sig=${encodeURIComponent(`${lessonId}-${index}`)}`;
+function realPhoto(query: string, lessonId: string, index: number) {
+  const keywords = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 4)
+    .join(",");
+  const lock = Array.from(`${lessonId}-${index}`).reduce((total, char) => total + char.charCodeAt(0), 0);
+
+  return `https://loremflickr.com/640/420/${encodeURIComponent(keywords)}?lock=${lock}`;
 }
 
 function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
@@ -229,7 +238,7 @@ function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
   return searches.slice(0, 4).map((visual, index) => ({
     title: visual.title,
     alt: `${visual.title} visual for ${lesson.title}`,
-    imageUrl: unsplashPhoto(visual.query, lesson.id, index + 1)
+    imageUrl: realPhoto(visual.query, lesson.id, index + 1)
   }));
 }
 
