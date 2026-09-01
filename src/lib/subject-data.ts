@@ -65,6 +65,12 @@ export const ictPracticeAreas = [
     actions: ["set fields", "filter records", "build reports", "format output"]
   },
   {
+    title: "Flowcharts and Algorithms",
+    href: "/subjects/ict/flowcharts",
+    summary: "Build algorithm flowcharts with standard blocks, connectors, branching, loops, and simulation checks.",
+    actions: ["add blocks", "connect paths", "test logic", "validate flow"]
+  },
+  {
     title: "Presentations",
     href: "/subjects/ict/presentations",
     summary: "Slide layouts, master slides, objects, notes, hyperlinks, and print settings.",
@@ -112,6 +118,7 @@ export const subjects: SubjectArea[] = [
       "Word processing",
       "Spreadsheets",
       "Databases",
+      "Flowcharts and algorithms",
       "Presentations",
       "Website authoring"
     ],
@@ -127,6 +134,7 @@ export const subjects: SubjectArea[] = [
       { label: "Start spreadsheet practice", href: "/subjects/ict/spreadsheets" },
       { label: "Start word processing practice", href: "/subjects/ict/word-processing" },
       { label: "Start database practice", href: "/subjects/ict/databases" },
+      { label: "Start flowchart practice", href: "/subjects/ict/flowcharts" },
       { label: "Start presentation practice", href: "/subjects/ict/presentations" },
       { label: "Start website authoring practice", href: "/subjects/ict/website-authoring" }
     ]
