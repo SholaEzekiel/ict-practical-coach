@@ -55,6 +55,8 @@ type VisualSearch = {
   query: string;
 };
 
+const visualFileNames = ["01-concept.jpg", "02-detail.jpg", "03-real-world.jpg", "04-context.jpg"];
+
 const visualSearchesByLesson: Record<string, VisualSearch[]> = {
   "ict-1-hardware-software": [
     { title: "Hardware", query: "computer hardware motherboard components" },
@@ -214,17 +216,8 @@ const visualSearchesByLesson: Record<string, VisualSearch[]> = {
   ]
 };
 
-function realPhoto(query: string, lessonId: string, index: number) {
-  const keywords = query
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 4)
-    .join(",");
-  const lock = Array.from(`${lessonId}-${index}`).reduce((total, char) => total + char.charCodeAt(0), 0);
-
-  return `https://loremflickr.com/640/420/${encodeURIComponent(keywords)}?lock=${lock}`;
+function localVisualPath(lessonId: string, index: number) {
+  return `/assets/ict-theory/${lessonId}/${visualFileNames[index - 1]}`;
 }
 
 function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
@@ -238,7 +231,7 @@ function lessonVisuals(lesson: IctTheoryLesson): VisualCard[] {
   return searches.slice(0, 4).map((visual, index) => ({
     title: visual.title,
     alt: `${visual.title} visual for ${lesson.title}`,
-    imageUrl: realPhoto(visual.query, lesson.id, index + 1)
+    imageUrl: localVisualPath(lesson.id, index + 1)
   }));
 }
 
