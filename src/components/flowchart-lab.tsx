@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import type { PointerEvent } from "react";
-import { useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, Download, MousePointer2, Play, Plus, RotateCcw, Square, Trash2, XCircle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, ListChecks, MousePointer2, Play, Plus, Redo2, RotateCcw, Square, Trash2, Undo2, XCircle } from "lucide-react";
 import { clsx } from "clsx";
 import { getFlowchartModule, flowchartModules } from "@/lib/flowchart-instruction-cards";
 import type { FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
@@ -83,8 +83,43 @@ function validateFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[], solutionNode
   return feedback;
 }
 
+type FlowSnapshot = {
+  nodes: FlowNodeSeed[];
+  edges: FlowEdgeSeed[];
+};
+
+function nodeSize(node: FlowNodeSeed) {
+  return node.type === "decision" ? { width: 92, height: 92 } : { width: 160, height: 68 };
+}
+
 function nodeCenter(node: FlowNodeSeed) {
-  return { x: node.x + 80, y: node.y + 34 };
+  const size = nodeSize(node);
+  return { x: node.x + size.width / 2, y: node.y + size.height / 2 };
+}
+
+function nodeAnchorPoint(node: FlowNodeSeed, target: FlowNodeSeed) {
+  const size = nodeSize(node);
+  const center = nodeCenter(node);
+  const targetCenter = nodeCenter(target);
+  const dx = targetCenter.x - center.x;
+  const dy = targetCenter.y - center.y;
+  if (dx === 0 && dy === 0) return center;
+
+  const halfWidth = size.width / 2;
+  const halfHeight = size.height / 2;
+  const scale = 1 / Math.max(Math.abs(dx) / halfWidth, Math.abs(dy) / halfHeight);
+  return {
+    x: center.x + dx * scale,
+    y: center.y + dy * scale
+  };
+}
+
+function snapshotOf(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]): FlowSnapshot {
+  return { nodes: cloneNodes(nodes), edges: cloneEdges(edges) };
+}
+
+function formatValue(value: unknown) {
+  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 export function FlowchartLab({ moduleId }: { moduleId: string }) {
@@ -100,6 +135,11 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const [feedback, setFeedback] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [historyPast, setHistoryPast] = useState<FlowSnapshot[]>([]);
+  const [historyFuture, setHistoryFuture] = useState<FlowSnapshot[]>([]);
+  const [showModelChecklist, setShowModelChecklist] = useState(false);
+  const [testRuns, setTestRuns] = useState<string[]>([]);
+  const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
   const progress = complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
@@ -108,25 +148,42 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     return module.inputs.map((input, index) => `Run ${index + 1}: ${JSON.stringify(input)} → ${JSON.stringify(module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)])}`).join("\n");
   }, [module]);
 
+  useEffect(() => {
+    setNodes(cloneNodes(module.starterNodes));
+    setEdges(cloneEdges(module.starterEdges));
+    setSelectedNodeId(module.starterNodes[0]?.id || null);
+    setConnectFromId(null);
+    setEdgeLabel("");
+    setFeedback([]);
+    setComplete(false);
+    setDraggingId(null);
+    setHistoryPast([]);
+    setHistoryFuture([]);
+    setShowModelChecklist(false);
+    setTestRuns([]);
+  }, [module.id, module.starterEdges, module.starterNodes]);
+
+  function rememberChange() {
+    setHistoryPast((current) => [...current, snapshotOf(nodes, edges)].slice(-30));
+    setHistoryFuture([]);
+    setFeedback([]);
+    setComplete(false);
+    setTestRuns([]);
+  }
+
   function resetModule() {
+    rememberChange();
     setNodes(cloneNodes(module.starterNodes));
     setEdges(cloneEdges(module.starterEdges));
     setSelectedNodeId(module.starterNodes[0]?.id || null);
     setConnectFromId(null);
     setFeedback([]);
     setComplete(false);
-  }
-
-  function loadSolution() {
-    setNodes(cloneNodes(module.solutionNodes));
-    setEdges(cloneEdges(module.solutionEdges));
-    setSelectedNodeId(module.solutionNodes[0]?.id || null);
-    setConnectFromId(null);
-    setFeedback(["Model flow loaded. Run validation to check the structure."]);
-    setComplete(false);
+    setTestRuns([]);
   }
 
   function addNode(type: FlowNodeType) {
+    rememberChange();
     const id = `${type}-${Date.now()}`;
     const label = type === "start" ? "START" : type === "stop" ? "STOP" : `${nodeLabels[type]} block`;
     const node = { id, type, label, x: 210 + (nodes.length % 3) * 35, y: 140 + nodes.length * 30 };
@@ -136,6 +193,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
   function deleteSelected() {
     if (!selectedNodeId) return;
+    rememberChange();
     setNodes((current) => current.filter((node) => node.id !== selectedNodeId));
     setEdges((current) => current.filter((edge) => edge.from !== selectedNodeId && edge.to !== selectedNodeId));
     setSelectedNodeId(null);
@@ -143,18 +201,29 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
   function updateSelectedLabel(label: string) {
     if (!selectedNodeId) return;
+    rememberChange();
     setNodes((current) => current.map((node) => node.id === selectedNodeId ? { ...node, label } : node));
   }
 
   function beginDrag(event: PointerEvent<HTMLButtonElement>, nodeId: string) {
     event.currentTarget.setPointerCapture(event.pointerId);
     setDraggingId(nodeId);
+    dragSnapshotRef.current = snapshotOf(nodes, edges);
   }
 
   function dragNode(event: PointerEvent<HTMLButtonElement>, nodeId: string) {
     if (draggingId !== nodeId) return;
     const rect = event.currentTarget.parentElement?.getBoundingClientRect();
     if (!rect) return;
+    if (dragSnapshotRef.current) {
+      const snapshot = dragSnapshotRef.current;
+      setHistoryPast((current) => [...current, snapshot].slice(-30));
+      setHistoryFuture([]);
+      setFeedback([]);
+      setComplete(false);
+      setTestRuns([]);
+      dragSnapshotRef.current = null;
+    }
     setNodes((current) => current.map((node) => node.id === nodeId ? {
       ...node,
       x: Math.max(20, Math.min(600, event.clientX - rect.left - 80)),
@@ -163,10 +232,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   }
 
   function connectTo(nodeId: string) {
-    if (!connectFromId || connectFromId === nodeId) {
-      setConnectFromId(nodeId);
-      return;
-    }
+    if (!connectFromId || connectFromId === nodeId) return;
+    rememberChange();
     const id = `edge-${Date.now()}`;
     setEdges((current) => [...current, { id, from: connectFromId, to: nodeId, label: edgeLabel.trim() }]);
     setConnectFromId(null);
@@ -175,8 +242,49 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
   function runValidation() {
     const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
-    setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Simulation outputs match the target results."]);
+    setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Use Run test data to compare the test inputs with the expected outputs."]);
     setComplete(result.length === 0);
+  }
+
+  function runTestData() {
+    const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
+    if (result.length) {
+      setFeedback(result);
+      setComplete(false);
+      setTestRuns(["Fix the flowchart structure first, then run the test data again."]);
+      return;
+    }
+
+    setComplete(true);
+    setFeedback(["Flowchart structure is valid. Test data matches the expected outputs for this practice task."]);
+    setTestRuns(module.inputs.map((input, index) => {
+      const output = module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)];
+      return `PASS Run ${index + 1}: input ${formatValue(input)} gives expected output ${formatValue(output)}`;
+    }));
+  }
+
+  function undo() {
+    const previous = historyPast.at(-1);
+    if (!previous) return;
+    setHistoryPast((current) => current.slice(0, -1));
+    setHistoryFuture((current) => [snapshotOf(nodes, edges), ...current].slice(0, 30));
+    setNodes(cloneNodes(previous.nodes));
+    setEdges(cloneEdges(previous.edges));
+    setComplete(false);
+    setFeedback(["Undid the last edit."]);
+    setTestRuns([]);
+  }
+
+  function redo() {
+    const next = historyFuture[0];
+    if (!next) return;
+    setHistoryFuture((current) => current.slice(1));
+    setHistoryPast((current) => [...current, snapshotOf(nodes, edges)].slice(-30));
+    setNodes(cloneNodes(next.nodes));
+    setEdges(cloneEdges(next.edges));
+    setComplete(false);
+    setFeedback(["Redid the last edit."]);
+    setTestRuns([]);
   }
 
   return (
@@ -252,6 +360,12 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                 <p className="text-sm text-slate-600">Add blocks, edit labels, drag to arrange, then connect the flow.</p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <button onClick={undo} disabled={historyPast.length === 0} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-ocean disabled:text-slate-300 disabled:hover:border-line">
+                  <Undo2 size={16} aria-hidden="true" /> Undo
+                </button>
+                <button onClick={redo} disabled={historyFuture.length === 0} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-ocean disabled:text-slate-300 disabled:hover:border-line">
+                  <Redo2 size={16} aria-hidden="true" /> Redo
+                </button>
                 {module.allowedBlocks.map((type) => {
                   const Icon = paletteIcons[type];
                   return (
@@ -266,7 +380,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
           <div className="min-h-0 flex-1 overflow-auto p-4">
             <div className="relative h-[860px] min-w-[760px] overflow-hidden rounded-lg border border-line bg-white" style={{ backgroundImage: "linear-gradient(#e7edf3 1px, transparent 1px), linear-gradient(90deg, #e7edf3 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
-              <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+              <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
                 <defs>
                   <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M 0 0 L 10 5 L 0 10 z" fill="#16313f" />
@@ -276,8 +390,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                   const from = nodes.find((node) => node.id === edge.from);
                   const to = nodes.find((node) => node.id === edge.to);
                   if (!from || !to) return null;
-                  const start = nodeCenter(from);
-                  const end = nodeCenter(to);
+                  const start = nodeAnchorPoint(from, to);
+                  const end = nodeAnchorPoint(to, from);
                   return (
                     <g key={edge.id}>
                       <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke="#16313f" strokeWidth="3" markerEnd="url(#arrow)" />
@@ -294,12 +408,15 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                   key={node.id}
                   onClick={() => {
                     setSelectedNodeId(node.id);
-                    connectTo(node.id);
+                    if (connectFromId) connectTo(node.id);
                   }}
                   onPointerDown={(event) => beginDrag(event, node.id)}
                   onPointerMove={(event) => dragNode(event, node.id)}
-                  onPointerUp={() => setDraggingId(null)}
-                  className={clsx("absolute grid h-[68px] w-40 place-items-center border-2 px-3 text-center text-sm font-bold shadow-sm transition", nodeStyles[node.type], selectedNodeId === node.id && "ring-4 ring-ocean/20", node.type === "decision" && "h-[92px] w-[92px]")}
+                  onPointerUp={() => {
+                    setDraggingId(null);
+                    dragSnapshotRef.current = null;
+                  }}
+                  className={clsx("absolute z-10 grid h-[68px] w-40 place-items-center border-2 px-3 text-center text-sm font-bold shadow-sm transition", nodeStyles[node.type], selectedNodeId === node.id && "ring-4 ring-ocean/20", node.type === "decision" && "h-[92px] w-[92px]")}
                   style={{ left: node.x, top: node.y }}
                 >
                   <span className={clsx("line-clamp-3", node.type === "decision" && "-rotate-45 text-xs")}>{node.label}</span>
@@ -322,8 +439,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
             <div className="grid gap-3">
-              <button onClick={loadSolution} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
-                <Download size={17} aria-hidden="true" /> Load model for review
+              <button onClick={() => setShowModelChecklist((current) => !current)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
+                <ListChecks size={17} aria-hidden="true" /> {showModelChecklist ? "Hide model checklist" : "Show model checklist"}
               </button>
               <button onClick={resetModule} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
                 <RotateCcw size={17} aria-hidden="true" /> Reset starter
@@ -346,9 +463,31 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
               </section>
             )}
 
+            {showModelChecklist && (
+              <section className="mt-5 rounded-lg border border-line p-4">
+                <h3 className="font-bold text-ink">Model checklist</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Use this to check your thinking. It does not change your flowchart.</p>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                  {module.solutionNodes.map((node) => (
+                    <li key={node.id}>Add {nodeLabels[node.type]}: {node.label}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             <section className="mt-5 rounded-lg border border-line p-4">
               <h3 className="flex items-center gap-2 font-bold text-ink"><Play size={17} aria-hidden="true" /> Simulation preview</h3>
               <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-ink p-3 text-xs leading-5 text-white">{simulationText}</pre>
+              <button onClick={runTestData} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
+                <Play size={17} aria-hidden="true" /> Run test data
+              </button>
+              {testRuns.length > 0 && (
+                <div className="mt-3 space-y-2 rounded-lg bg-slate-50 p-3">
+                  {testRuns.map((item) => (
+                    <p key={item} className={clsx("text-sm leading-6", item.startsWith("PASS") ? "text-leaf" : "text-red-700")}>{item}</p>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="mt-5 rounded-lg border border-line p-4">

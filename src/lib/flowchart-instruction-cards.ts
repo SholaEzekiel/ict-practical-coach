@@ -33,6 +33,122 @@ export type FlowchartModule = {
 
 export const flowchartModules: FlowchartModule[] = [
   {
+    id: "flowchart-symbols",
+    title: "Flowchart symbols",
+    description: "Learn what the basic flowchart shapes mean before solving a full algorithm.",
+    allowedBlocks: ["start", "input", "process", "output", "stop"],
+    scenario: "Build a simple flow that shows a student entering their name and seeing a greeting.",
+    inputs: ["Amina"],
+    expectedOutputs: ["Welcome Amina"],
+    steps: [
+      "Use START to show where the algorithm begins.",
+      "Use INPUT Name to collect the student's name.",
+      "Use PROCESS Message = \"Welcome \" + Name to build the greeting.",
+      "Use OUTPUT Message, then finish with STOP."
+    ],
+    support: [
+      "START and STOP are terminal blocks. They show the beginning and end.",
+      "INPUT collects data from the user or another source.",
+      "PROCESS changes data, calculates, or stores a new value.",
+      "OUTPUT displays the result."
+    ],
+    starterNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 420 }
+    ],
+    starterEdges: [],
+    solutionNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "input-name", type: "input", label: "INPUT Name", x: 190, y: 135 },
+      { id: "make-message", type: "process", label: "Message = \"Welcome \" + Name", x: 150, y: 230 },
+      { id: "output-message", type: "output", label: "OUTPUT Message", x: 190, y: 325 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 420 }
+    ],
+    solutionEdges: [
+      { id: "e1", from: "start", to: "input-name" },
+      { id: "e2", from: "input-name", to: "make-message" },
+      { id: "e3", from: "make-message", to: "output-message" },
+      { id: "e4", from: "output-message", to: "stop" }
+    ]
+  },
+  {
+    id: "everyday-sequence",
+    title: "Everyday sequence",
+    description: "Practise ordering simple instructions from first to last.",
+    allowedBlocks: ["start", "process", "output", "stop"],
+    scenario: "Create a flowchart for getting ready for an online lesson.",
+    inputs: [],
+    expectedOutputs: ["Ready for lesson"],
+    steps: [
+      "Start the flowchart with START.",
+      "Add PROCESS Turn on device.",
+      "Add PROCESS Open learning website.",
+      "Add OUTPUT Ready for lesson, then connect to STOP."
+    ],
+    support: [
+      "A sequence has no branching. Each block runs once in order.",
+      "Use process blocks for actions the learner performs.",
+      "Use an output block when the algorithm shows or announces a result."
+    ],
+    starterNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 430 }
+    ],
+    starterEdges: [],
+    solutionNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "device", type: "process", label: "Turn on device", x: 190, y: 135 },
+      { id: "website", type: "process", label: "Open learning website", x: 190, y: 230 },
+      { id: "ready", type: "output", label: "OUTPUT Ready for lesson", x: 190, y: 325 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 430 }
+    ],
+    solutionEdges: [
+      { id: "e1", from: "start", to: "device" },
+      { id: "e2", from: "device", to: "website" },
+      { id: "e3", from: "website", to: "ready" },
+      { id: "e4", from: "ready", to: "stop" }
+    ]
+  },
+  {
+    id: "input-process-output",
+    title: "Input, process, output",
+    description: "Use the basic IPO pattern before adding decisions or loops.",
+    allowedBlocks: ["start", "input", "process", "output", "stop"],
+    scenario: "Ask for a score out of 20 and output the percentage.",
+    inputs: [15],
+    expectedOutputs: [75],
+    steps: [
+      "Input Score before doing any calculation.",
+      "Use PROCESS Percentage = Score / 20 * 100.",
+      "Output Percentage after the calculation.",
+      "Connect the blocks in one clear top-to-bottom sequence."
+    ],
+    support: [
+      "IPO means Input, Process, Output.",
+      "The input value must exist before a process can calculate with it.",
+      "The output should display the calculated value, not the original value."
+    ],
+    starterNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "input-score", type: "input", label: "INPUT Score", x: 190, y: 140 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 420 }
+    ],
+    starterEdges: [{ id: "s1", from: "start", to: "input-score" }],
+    solutionNodes: [
+      { id: "start", type: "start", label: "START", x: 220, y: 40 },
+      { id: "input-score", type: "input", label: "INPUT Score", x: 190, y: 140 },
+      { id: "calc-percentage", type: "process", label: "Percentage = Score / 20 * 100", x: 150, y: 240 },
+      { id: "output-percentage", type: "output", label: "OUTPUT Percentage", x: 190, y: 340 },
+      { id: "stop", type: "stop", label: "STOP", x: 220, y: 440 }
+    ],
+    solutionEdges: [
+      { id: "e1", from: "start", to: "input-score" },
+      { id: "e2", from: "input-score", to: "calc-percentage" },
+      { id: "e3", from: "calc-percentage", to: "output-percentage" },
+      { id: "e4", from: "output-percentage", to: "stop" }
+    ]
+  },
+  {
     id: "linear-sequence",
     title: "Linear sequence",
     description: "Build a straight flow from input to process to output.",
