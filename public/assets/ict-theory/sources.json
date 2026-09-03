@@ -148,10 +148,11 @@
     "title": "Mouse",
     "query": "computer mouse on desk",
     "file": "public/assets/ict-theory/ict-2-manual-input/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/93452626@N00/22175505",
-    "bytes": 31438,
-    "width": 1024,
-    "height": 681
+    "sourceUrl": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46",
+    "bytes": 33788,
+    "width": 900,
+    "height": 602,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-manual-input",
@@ -159,10 +160,11 @@
     "title": "Touch screen",
     "query": "person using touchscreen tablet",
     "file": "public/assets/ict-theory/ict-2-manual-input/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/157635012@N07/48124824108",
-    "bytes": 28945,
-    "width": 1024,
-    "height": 683
+    "sourceUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
+    "bytes": 61007,
+    "width": 900,
+    "height": 600,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-manual-input",
@@ -236,10 +238,11 @@
     "title": "Printer",
     "query": "office printer paper",
     "file": "public/assets/ict-theory/ict-2-output/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/84412451@N00/4361204731",
-    "bytes": 91403,
-    "width": 575,
-    "height": 1024
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Printer_(50535314116).jpg",
+    "bytes": 81806,
+    "width": 1200,
+    "height": 675,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-output",
@@ -258,10 +261,11 @@
     "title": "Projector",
     "query": "digital projector presentation room",
     "file": "public/assets/ict-theory/ict-2-output/04-context.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/56507339@N02/5570764426",
-    "bytes": 11797,
-    "width": 240,
-    "height": 186
+    "sourceUrl": "https://images.unsplash.com/photo-1511578314322-379afb476865",
+    "bytes": 99275,
+    "width": 900,
+    "height": 601,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-3-magnetic",
@@ -357,10 +361,11 @@
     "title": "Optical discs",
     "query": "cd dvd blu ray discs",
     "file": "public/assets/ict-theory/ict-3-optical-cloud/01-concept.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/70928775@N00/4457914004",
-    "bytes": 46115,
-    "width": 1024,
-    "height": 819
+    "sourceUrl": "https://pxhere.com/en/photo/1136499",
+    "bytes": 119465,
+    "width": 1200,
+    "height": 853,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-3-optical-cloud",
@@ -390,10 +395,11 @@
     "title": "Data centre",
     "query": "cloud server data center",
     "file": "public/assets/ict-theory/ict-3-optical-cloud/04-context.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/44124348109@N01/3947982417",
-    "bytes": 12915,
-    "width": 240,
-    "height": 237
+    "sourceUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa",
+    "bytes": 71145,
+    "width": 900,
+    "height": 599,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-network-types",
@@ -401,10 +407,11 @@
     "title": "Local network",
     "query": "office local area network computers",
     "file": "public/assets/ict-theory/ict-4-network-types/01-concept.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/36972190@N06/9676968739",
-    "bytes": 40788,
-    "width": 1024,
-    "height": 683
+    "sourceUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31",
+    "bytes": 102201,
+    "width": 900,
+    "height": 505,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-network-types",
@@ -412,10 +419,11 @@
     "title": "Wide network",
     "query": "global network communication map",
     "file": "public/assets/ict-theory/ict-4-network-types/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/42221201@N04/14447856391",
-    "bytes": 30410,
-    "width": 500,
-    "height": 302
+    "sourceUrl": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8",
+    "bytes": 67850,
+    "width": 900,
+    "height": 600,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-network-types",
@@ -423,10 +431,11 @@
     "title": "Connected devices",
     "query": "devices connected to network",
     "file": "public/assets/ict-theory/ict-4-network-types/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/78855484@N03/7223384344",
-    "bytes": 17189,
-    "width": 496,
-    "height": 225
+    "sourceUrl": "https://images.unsplash.com/photo-1516321497487-e288fb19713f",
+    "bytes": 107469,
+    "width": 900,
+    "height": 600,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-network-types",
@@ -434,10 +443,11 @@
     "title": "Collaboration",
     "query": "team video conference computers",
     "file": "public/assets/ict-theory/ict-4-network-types/04-context.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/24662369@N07/5596130734",
-    "bytes": 70874,
-    "width": 735,
-    "height": 1024
+    "sourceUrl": "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b",
+    "bytes": 102213,
+    "width": 900,
+    "height": 675,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-hardware",
@@ -544,10 +554,11 @@
     "title": "Office systems",
     "query": "automated office workflow computers",
     "file": "public/assets/ict-theory/ict-5-employment/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/26208889@N05/3477316568",
-    "bytes": 10643,
-    "width": 240,
-    "height": 178
+    "sourceUrl": "https://images.unsplash.com/photo-1497366754035-f200968a6e72",
+    "bytes": 77543,
+    "width": 900,
+    "height": 601,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-5-employment",

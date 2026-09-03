@@ -262,7 +262,7 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
 
 function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
       <div>
         <p className="text-base leading-7 text-slate-700">{lesson.summary}</p>
         <ul className="mt-5 space-y-3">
