@@ -203,7 +203,7 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     ok: messages.length === 0,
     messages: messages.length === 0
       ? [
-          "Good work. The HTML/CSS matches the checks available in Apex.",
+          "Good work. The HTML/CSS matches the checks available in Peak Study.",
           ...(card.teacherReview?.length ? ["Your teacher should now review the listed presentation and evidence points."] : [])
         ]
       : messages
@@ -247,10 +247,10 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
         appendTo: undefined,
         blocks: [
           { id: "section", label: "Section", content: "<section><h2>Section heading</h2><p>Section text</p></section>" },
-          { id: "heading", label: "Heading", content: "<h1>Apex Study Hub Open Day</h1>" },
+          { id: "heading", label: "Heading", content: "<h1>Peak Study Hub Open Day</h1>" },
           { id: "paragraph", label: "Paragraph", content: "<p>Practical digital skills for confident learners.</p>" },
           { id: "link", label: "Link", content: '<a href="index.html">Home</a>' },
-          { id: "image", label: "Image", content: '<img src="images/apex-study-card.svg" alt="Apex uploaded practice image">' },
+          { id: "image", label: "Image", content: '<img src="images/peak-study-card.svg" alt="Peak uploaded practice image">' },
           {
             id: "table",
             label: "Table",
@@ -321,11 +321,11 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
   function previewWebsite() {
     const safeCss = resolvedCss.replace(/<\/style/gi, "<\\/style");
-    const toolbar = `<div class="apex-preview-toolbar"><strong>Apex web preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>`;
-    const toolbarCss = `.apex-preview-toolbar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid #d9e2ea;color:#14212b;font-family:Arial,sans-serif}.apex-preview-toolbar button{border:0;border-radius:8px;background:#0f6f8c;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer}@media print{.apex-preview-toolbar{display:none!important}}`;
+    const toolbar = `<div class="peak-preview-toolbar"><strong>Peak web preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>`;
+    const toolbarCss = `.peak-preview-toolbar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid #d9e2ea;color:#14212b;font-family:Arial,sans-serif}.peak-preview-toolbar button{border:0;border-radius:8px;background:#0f6f8c;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer}@media print{.peak-preview-toolbar{display:none!important}}`;
     const source = hasPreviewableDocument(html)
       ? resolvedHtml.replace(/<\/head>/i, `<style>${toolbarCss}${safeCss}</style></head>`).replace(/<body([^>]*)>/i, `<body$1>${toolbar}`)
-      : `<!doctype html><html><head><title>Apex Preview</title><style>${toolbarCss}${safeCss}</style></head><body>${toolbar}${resolvedHtml}</body></html>`;
+      : `<!doctype html><html><head><title>Peak Preview</title><style>${toolbarCss}${safeCss}</style></head><body>${toolbar}${resolvedHtml}</body></html>`;
     const previewUrl = URL.createObjectURL(new Blob([source], { type: "text/html" }));
     window.open(previewUrl, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(previewUrl), 60000);

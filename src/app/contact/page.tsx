@@ -11,7 +11,7 @@ export default function ContactPage() {
   return (
     <Section>
       <p className="text-sm font-semibold uppercase tracking-wide text-ocean">Reach Us</p>
-      <h1 className="mt-3 text-4xl font-bold">Contact Apex Study Hub</h1>
+      <h1 className="mt-3 text-4xl font-bold">Contact Peak Study Hub</h1>
       <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
         Use this page as the contact point for platform questions, subject requests, and future school or teacher enquiries.
       </p>

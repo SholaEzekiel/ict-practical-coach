@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="title desc">
+  <title id="title">Peak study practice card</title>
+  <desc id="desc">A clean study workspace graphic for Peak Study Hub practice tasks.</desc>
+  <rect width="720" height="460" fill="#f5f8fb"/>
+  <rect x="64" y="48" width="592" height="364" rx="22" fill="#ffffff" stroke="#d9e2ec" stroke-width="4"/>
+  <circle cx="360" cy="142" r="54" fill="#f59e0b"/>
+  <path d="M176 278 286 124l58 78 38-55 86 131H176Z" fill="#0f2a4d"/>
+  <path d="M286 124 176 278h124l44-76-58-78Zm58 78-44 76h168l-86-131-38 55Z" fill="#172026" opacity="0.55"/>
+  <path d="M246 277c38-58 76-72 121-109" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+  <text x="360" y="348" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#0f2a4d">PEAK <tspan fill="#f59e0b">LEARNING</tspan></text>
+  <text x="360" y="384" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="8" fill="#172026">LEARN PRACTISE ACHIEVE</text>
+</svg>

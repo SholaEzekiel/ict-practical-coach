@@ -82,7 +82,7 @@ export const baseDeck: PresentationSlide[] = [
 ];
 
 const apexDeck: PresentationSlide[] = [
-  { title: "Apex Study Skills Evening", body: "Practical revision support for families and learners.", bullets: [], layout: "title" },
+  { title: "Peak Study Skills Evening", body: "Practical revision support for families and learners.", bullets: [], layout: "title" },
   { title: "Practice Stations", body: "", bullets: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"], layout: "title-content" }
 ];
 
@@ -92,11 +92,11 @@ const audienceDeck: PresentationSlide[] = [
 ];
 
 const source = [
-  "Deck topic: Apex Study Skills Evening",
+  "Deck topic: Peak Study Skills Evening",
   "Audience: Year 10 and Year 11 students and their families",
   "Main message: short practical sessions help students revise with confidence",
   "Sessions: Spreadsheet clinic, Document design desk, Web authoring studio",
-  "Closing message: Book a guided practice slot with Apex Study Hub"
+  "Closing message: Book a guided practice slot with Peak Study Hub"
 ];
 
 const card = (item: PresentationCard) => item;
@@ -107,12 +107,12 @@ const introCards: PresentationCard[] = [
     moduleId: "intro",
     moduleTitle: "Slide Foundations",
     title: "Create a title slide",
-    scenario: "Apex needs the first slide for a short student information deck.",
+    scenario: "Peak needs the first slide for a short student information deck.",
     supportDocument: [...source, "Required layout: title-content, shown as Title and content."],
     goal: "Add the deck title to slide 1.",
-    steps: ["Select slide 1 in the slide pane.", "Choose the Title layout.", "Type Apex Study Skills Evening in the title box."],
+    steps: ["Select slide 1 in the slide pane.", "Choose the Title layout.", "Type Peak Study Skills Evening in the title box."],
     starterDeck: baseDeck,
-    expected: { activeSlide: 0, layout: "title", slideTitle: "Apex Study Skills Evening" },
+    expected: { activeSlide: 0, layout: "title", slideTitle: "Peak Study Skills Evening" },
     points: 10
   }),
   card({
@@ -124,8 +124,8 @@ const introCards: PresentationCard[] = [
     supportDocument: source,
     goal: "Add a subtitle to the title slide.",
     steps: ["Keep slide 1 selected.", "Click in the subtitle/body box.", "Type Practical revision support for families and learners."],
-    starterDeck: [{ ...baseDeck[0], title: "Apex Study Skills Evening" }],
-    expected: { activeSlide: 0, slideTitle: "Apex Study Skills Evening", slideBodyIncludes: ["Practical revision support for families and learners."] },
+    starterDeck: [{ ...baseDeck[0], title: "Peak Study Skills Evening" }],
+    expected: { activeSlide: 0, slideTitle: "Peak Study Skills Evening", slideBodyIncludes: ["Practical revision support for families and learners."] },
     points: 10
   }),
   card({
@@ -213,7 +213,7 @@ const introCards: PresentationCard[] = [
     title: "Build a two-slide starter deck",
     scenario: "This checkpoint combines slide creation, layouts, titles, subtitle text, and bullet points.",
     supportDocument: source,
-    goal: "Create a two-slide Apex starter deck.",
+    goal: "Create a two-slide Peak Study starter deck.",
     steps: ["Slide 1: use Title layout with title and subtitle.", "Slide 2: use Title and Content layout with the title Practice Stations.", "Add the three session bullet points."],
     starterDeck: baseDeck,
     expected: {
@@ -286,7 +286,7 @@ const contentCards: PresentationCard[] = [
     title: "Split source text across slides",
     scenario: "Exam tasks often provide source text. The student must select useful content and place it on suitable slides.",
     supportDocument: source,
-    goal: "Create at least four slides from the Apex support document.",
+    goal: "Create at least four slides from the Peak Study support document.",
     steps: ["Make one title slide.", "Make separate slides for audience, practice stations, and booking.", "Use concise bullet points."],
     starterDeck: baseDeck,
     expected: { minSlides: 4, bulletItems: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"] },
@@ -315,11 +315,11 @@ const designCards: PresentationCard[] = [
     moduleTitle: "Design and Objects",
     title: "Insert an uploaded image",
     scenario: "A slide about practical revision should include a relevant image uploaded by the student.",
-    supportDocument: ["Image alternative text: Apex study workspace"],
+    supportDocument: ["Image alternative text: Peak study workspace"],
     goal: "Upload an image and set useful alt text.",
-    steps: ["Select the slide that needs a visual.", "Click Image in the properties panel and choose an image from your device.", "Set the image alt text to Apex study workspace."],
+    steps: ["Select the slide that needs a visual.", "Click Image in the properties panel and choose an image from your device.", "Set the image alt text to Peak study workspace."],
     starterDeck: apexDeck,
-    expected: { imageAlt: "Apex study workspace", objectTypes: ["image"] },
+    expected: { imageAlt: "Peak study workspace", objectTypes: ["image"] },
     points: 15
   }),
   card({
@@ -414,11 +414,11 @@ const outputCards: PresentationCard[] = [
     moduleTitle: "Review and Output",
     title: "Add a global footer",
     scenario: "Repeated footer text should be added once through Global Design, not typed manually on every slide.",
-    supportDocument: ["Footer text: Apex Study Hub"],
-    goal: "Use Global Design to add the footer Apex Study Hub.",
-    steps: ["Click Global Design.", "Turn on Apply global design.", "Type Apex Study Hub in the Footer text box."],
+    supportDocument: ["Footer text: Peak Study Hub"],
+    goal: "Use Global Design to add the footer Peak Study Hub.",
+    steps: ["Click Global Design.", "Turn on Apply global design.", "Type Peak Study Hub in the Footer text box."],
     starterDeck: apexDeck,
-    expected: { masterFooter: "Apex Study Hub" },
+    expected: { masterFooter: "Peak Study Hub" },
     points: 15
   }),
   card({
@@ -427,9 +427,9 @@ const outputCards: PresentationCard[] = [
     moduleTitle: "Review and Output",
     title: "Add a repeated logo",
     scenario: "A logo or repeated mark should appear automatically across slides when global design is used.",
-    supportDocument: ["Logo text: Apex"],
-    goal: "Use Global Design to show an Apex logo mark.",
-    steps: ["Click Global Design.", "Turn on Apply global design.", "Keep or type Apex in the Logo text box."],
+    supportDocument: ["Logo text: Peak Study"],
+    goal: "Use Global Design to show an Peak Study logo mark.",
+    steps: ["Click Global Design.", "Turn on Apply global design.", "Keep or type Peak Study in the Logo text box."],
     starterDeck: apexDeck,
     expected: { masterLogo: true },
     points: 15
@@ -468,31 +468,31 @@ const examCards: PresentationCard[] = [
     id: "pres-exam-apex-evening",
     moduleId: "exam-build",
     moduleTitle: "Exam Presentation Build",
-    title: "Apex presentation build",
+    title: "Peak Study presentation build",
     scenario: "Complete an original presentation task using support text, layouts, theme, image, notes, and final review.",
     supportDocument: [
       ...source,
-      "Required image alt text: Apex study workspace",
-      "Required Global Design footer: Apex Study Hub",
+      "Required image alt text: Peak study workspace",
+      "Required Global Design footer: Peak Study Hub",
       "Required design object: one clear shape callout"
     ],
-    goal: "Create a complete Apex Study Skills Evening presentation.",
+    goal: "Create a complete Peak Study Skills Evening presentation.",
     steps: [
       "Create at least four slides from the support document.",
       "Use suitable layouts and add the three practice-station bullets.",
-      "Upload an image, set its alt text to Apex study workspace, and add one shape callout.",
-      "Use Global Design to add the Apex Study Hub footer, then turn on slide numbers.",
+      "Upload an image, set its alt text to Peak study workspace, and add one shape callout.",
+      "Use Global Design to add the Peak Study Hub footer, then turn on slide numbers.",
       "Add speaker notes and use Preview Slideshow for final output evidence."
     ],
     starterDeck: baseDeck,
     expected: {
       minSlides: 4,
-      slideTitle: "Apex Study Skills Evening",
+      slideTitle: "Peak Study Skills Evening",
       bulletItems: ["Spreadsheet clinic", "Document design desk", "Web authoring studio"],
-      imageAlt: "Apex study workspace",
+      imageAlt: "Peak study workspace",
       objectTypes: ["image", "shape"],
       slideNumbers: true,
-      masterFooter: "Apex Study Hub"
+      masterFooter: "Peak Study Hub"
     },
     teacherReview: ["Check slide order, consistency, no overlapping objects, spelling, notes, and output evidence."],
     points: 70

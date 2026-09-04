@@ -121,7 +121,7 @@ function validateDatabase(card: DatabaseCard, tables: DatabaseTable[], selectedT
 
   return {
     ok: messages.length === 0,
-    messages: messages.length ? messages : ["Good work. The database task matches the Apex final-result checks.", ...(card.teacherReview?.length ? ["Your teacher should now review design view, report layout, labels, and evidence screenshots."] : [])]
+    messages: messages.length ? messages : ["Good work. The database task matches the Peak final-result checks.", ...(card.teacherReview?.length ? ["Your teacher should now review design view, report layout, labels, and evidence screenshots."] : [])]
   };
 }
 
@@ -258,7 +258,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
     </style>
   </head>
   <body>
-    <div class="toolbar"><strong>Apex database evidence</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+    <div class="toolbar"><strong>Peak database evidence</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
     <main><h1>${escapeHtml(title)}</h1>${bodyHtml}</main>
   </body>
 </html>`);
@@ -437,7 +437,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         </div>
 
         <div className="min-h-0 overflow-auto p-5">
-          {panel === "import" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><FileInput size={20} /> Import source files</h2><p className="mt-2 text-slate-600">Import a real CSV file, or load an Apex practice source file.</p><label className="mt-5 block rounded-lg border border-dashed border-ocean bg-mist p-5 text-sm font-bold text-ocean"><input type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && importCsvFile(event.target.files[0])} className="sr-only" />Click to import a CSV file from your computer</label><div className="mt-5 grid gap-4 md:grid-cols-2">{sourceTables.map((table) => <button key={table.name} type="button" onClick={() => importTable(table.name)} className="rounded-lg border border-line bg-white p-5 text-left hover:border-ocean"><p className="font-bold">{table.name}.csv</p><p className="mt-2 text-sm text-slate-600">{table.fields.map((field) => field.name).join(", ")}</p></button>)}</div></section>}
+          {panel === "import" && <section><h2 className="flex items-center gap-2 text-xl font-bold"><FileInput size={20} /> Import source files</h2><p className="mt-2 text-slate-600">Import a real CSV file, or load an Peak practice source file.</p><label className="mt-5 block rounded-lg border border-dashed border-ocean bg-mist p-5 text-sm font-bold text-ocean"><input type="file" accept=".csv,text/csv" onChange={(event) => event.target.files?.[0] && importCsvFile(event.target.files[0])} className="sr-only" />Click to import a CSV file from your computer</label><div className="mt-5 grid gap-4 md:grid-cols-2">{sourceTables.map((table) => <button key={table.name} type="button" onClick={() => importTable(table.name)} className="rounded-lg border border-line bg-white p-5 text-left hover:border-ocean"><p className="font-bold">{table.name}.csv</p><p className="mt-2 text-sm text-slate-600">{table.fields.map((field) => field.name).join(", ")}</p></button>)}</div></section>}
 
           {panel === "design" && <section><div className="flex items-center justify-between gap-3"><h2 className="flex items-center gap-2 text-xl font-bold"><KeyRound size={20} /> Field design</h2><button type="button" onClick={openCurrentEvidence} className="inline-flex items-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-bold text-white"><FileDown size={16} /> Save PDF evidence</button></div>{selected ? <div className="mt-5 max-h-[calc(100vh-320px)] overflow-auto rounded-lg border border-line"><table className="w-full min-w-[680px] text-sm"><thead className="sticky top-0 bg-mist text-left"><tr><th className="p-3">Field name</th><th className="p-3">Data type</th><th className="p-3">Primary key</th></tr></thead><tbody>{fields.map((field) => <tr key={field.name} className="border-t border-line"><td className="p-3 font-bold">{field.name}</td><td className="p-3"><select value={field.type} onChange={(event) => updateField(field.name, { type: event.target.value })} className="rounded-md border border-line px-2 py-1"><option>Text</option><option>Number</option><option>Date/Time</option><option>Boolean</option><option>Currency</option></select></td><td className="p-3"><input type="radio" checked={field.primary} onChange={() => updateField(field.name, { primary: true })} /></td></tr>)}</tbody></table></div> : <p className="mt-5 text-slate-600">Import and select a table first.</p>}</section>}
 
@@ -451,7 +451,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
 
           <div className="mt-8 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-slate-700">
             <p className="flex items-center gap-2 font-bold text-ink"><Link2 size={16} /> Exam habit</p>
-            <p className="mt-1">Final Access evidence often needs import settings, Design View, query criteria, report layout, labels, print preview, and exported output. Apex checks the process knowledge, then the teacher confirms the real Microsoft Access evidence.</p>
+            <p className="mt-1">Final Access evidence often needs import settings, Design View, query criteria, report layout, labels, print preview, and exported output. Peak checks the process knowledge, then the teacher confirms the real Microsoft Access evidence.</p>
           </div>
         </div>
           </>

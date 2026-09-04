@@ -560,26 +560,26 @@ const generatedExamEditingTasks: WordProcessingInstructionCard[] = [
 ];
 
 const showcaseSupport = [
-  "Support document: Apex Practice Showcase",
-  "The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.",
+  "Support document: Peak Study Practice Showcase",
+  "The Peak practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.",
   "A photograph of a learner is available for the article.",
   "The final article should be clear enough for a community newsletter."
 ];
 
 const typedStarter = `
-  <p>Apex Practice Showcase</p>
-  <p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>
+  <p>Peak Study Practice Showcase</p>
+  <p>The Peak practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>
   <p>Visitors should check start times before arriving.</p>
 `;
 
 const extendedIntroSpecs = [
-  ["wp-intro-showcase-title", "Create a showcase article title", "Type the article title from the support document.", "Apex Practice Showcase", showcaseSupport],
+  ["wp-intro-showcase-title", "Create a showcase article title", "Type the article title from the support document.", "Peak Study Practice Showcase", showcaseSupport],
   ["wp-intro-cycle-audience", "Add the audience sentence", "Enter the sentence about the community newsletter.", "The final article should be clear enough for a community newsletter.", showcaseSupport],
   ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", showcaseSupport],
   ["wp-intro-learner-photo-note", "Add an image note", "Enter the sentence that explains the photograph.", "A photograph of a learner is available for the article.", showcaseSupport],
-  ["wp-intro-charity-sessions", "Add the charity session detail", "Type the detail about guided practice sessions.", "Guided practice sessions are included in the showcase programme.", ["Support document: Apex Practice Showcase", "Guided practice sessions are included in the showcase programme."]],
-  ["wp-intro-skills-zone", "Add the skills lab detail", "Type the sentence about the skills lab.", "The skills lab opens after the starter challenges.", ["Support document: Apex Practice Showcase", "The skills lab opens after the starter challenges."]],
-  ["wp-intro-winners", "Add the progress showcase", "Type the progress showcase sentence.", "The progress showcase starts at 16:00.", ["Support document: Apex Practice Showcase", "The progress showcase starts at 16:00."]],
+  ["wp-intro-charity-sessions", "Add the charity session detail", "Type the detail about guided practice sessions.", "Guided practice sessions are included in the showcase programme.", ["Support document: Peak Study Practice Showcase", "Guided practice sessions are included in the showcase programme."]],
+  ["wp-intro-skills-zone", "Add the skills lab detail", "Type the sentence about the skills lab.", "The skills lab opens after the starter challenges.", ["Support document: Peak Study Practice Showcase", "The skills lab opens after the starter challenges."]],
+  ["wp-intro-winners", "Add the progress showcase", "Type the progress showcase sentence.", "The progress showcase starts at 16:00.", ["Support document: Peak Study Practice Showcase", "The progress showcase starts at 16:00."]],
   ["wp-intro-safety", "Add a safety instruction", "Type the safety instruction.", "All learners must bring their login details.", ["Support document: Safety Notice", "All learners must bring their login details."]],
   ["wp-intro-meeting-point", "Add the meeting point", "Type the meeting point sentence.", "Meet at the information desk before the session.", ["Support document: Safety Notice", "Meet at the information desk before the session."]],
   ["wp-intro-results-heading", "Add a results heading", "Type the results heading.", "Practice Results Summary", ["Support document: Results", "Practice Results Summary"]],
@@ -601,7 +601,7 @@ const extendedIntroSpecs = [
 } as WordProcessingInstructionCard));
 
 const extraFormattingSpecs = [
-  ["wp-format-bold-showcase-title", "Apex Practice Showcase", "Make the article title bold.", typedStarter, "bold"],
+  ["wp-format-bold-showcase-title", "Peak Study Practice Showcase", "Make the article title bold.", typedStarter, "bold"],
   ["wp-format-italic-photo-note", "A photograph of a learner is available for the article.", "Italicise the photograph note.", `${typedStarter}<p>A photograph of a learner is available for the article.</p>`, "italic"],
   ["wp-format-underline-start-times", "Visitors should check start times before arriving.", "Underline the start time warning.", typedStarter, "underline"],
   ["wp-format-bold-winners", "progress showcase", "Make progress showcase bold.", typedStarter, "bold"],
@@ -633,15 +633,15 @@ const extraFormattingSpecs = [
 
 const extraLayoutCards: WordProcessingInstructionCard[] = [
   ...[
-    ["wp-layout-center-showcase", "Apex Practice Showcase", "Centre the article title.", "center", typedStarter],
-    ["wp-layout-justify-showcase-body", "The Apex practice showcase includes", "Justify the main article paragraph.", "justify", typedStarter],
-    ["wp-layout-right-photo-credit", "Photo: Apex Study Hub", "Right align the photo credit.", "right", `${typedStarter}<p>Photo: Apex Study Hub</p>`],
+    ["wp-layout-center-showcase", "Peak Study Practice Showcase", "Centre the article title.", "center", typedStarter],
+    ["wp-layout-justify-showcase-body", "The Peak practice showcase includes", "Justify the main article paragraph.", "justify", typedStarter],
+    ["wp-layout-right-photo-credit", "Photo: Peak Study Hub", "Right align the photo credit.", "right", `${typedStarter}<p>Photo: Peak Study Hub</p>`],
     ["wp-layout-center-results", "Practice Results Summary", "Centre the results heading.", "center", `<p>Practice Results Summary</p><p>Foundation learners start first.</p>`],
     ["wp-layout-justify-safety", "All learners must bring their login details", "Justify the safety paragraph.", "justify", `<p>Safety Notice</p><p>All learners must bring their login details. Learners should follow marshal instructions throughout the event.</p>`],
-    ["wp-layout-right-ref-showcase", "Reference: APX/26", "Right align the document reference.", "right", `<p>Reference: APX/26</p><p>Apex Practice Showcase</p>`],
+    ["wp-layout-right-ref-showcase", "Reference: PKL/26", "Right align the document reference.", "right", `<p>Reference: PKL/26</p><p>Peak Study Practice Showcase</p>`],
     ["wp-layout-center-notice", "Safety Notice", "Centre the safety heading.", "center", `<p>Safety Notice</p><p>All learners must bring their login details.</p>`],
     ["wp-layout-justify-newsletter", "The final article should be clear", "Justify the newsletter paragraph.", "justify", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`],
-    ["wp-layout-right-date-showcase", "Date: August 2026", "Right align the date.", "right", `<p>Date: August 2026</p><p>Apex Practice Showcase</p>`],
+    ["wp-layout-right-date-showcase", "Date: August 2026", "Right align the date.", "right", `<p>Date: August 2026</p><p>Peak Study Practice Showcase</p>`],
     ["wp-layout-center-awards", "Progress Showcase", "Centre the awards heading.", "center", `<p>Progress Showcase</p><p>The progress showcase starts at 16:00.</p>`]
   ].map(([id, text, goal, value, starterHtml]) => ({
     id,
@@ -681,8 +681,8 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     supportDocument: showcaseSupport,
     goal: "Insert the study image and centre it.",
     steps: ["Click below the title.", "Click the image toolbar button.", "Check the image is centred in the document."],
-    starterHtml: `<h1>Apex Practice Showcase</h1><p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>`,
-    expected: { image: { alt: "apex study workspace", alignment: "center" } },
+    starterHtml: `<h1>Peak Study Practice Showcase</h1><p>The Peak practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase.</p>`,
+    expected: { image: { alt: "peak study workspace", alignment: "center" } },
     points: 20
   },
   {
@@ -695,16 +695,16 @@ const extraLayoutCards: WordProcessingInstructionCard[] = [
     supportDocument: showcaseSupport,
     goal: "Insert the study image and apply two columns to the article.",
     steps: ["Insert the study image below the title.", "Click the two-column toolbar button.", "Check the article still reads clearly."],
-    starterHtml: `<h1>Apex Practice Showcase</h1><p>The Apex practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase. Visitors should check start times before arriving. The final article should be clear enough for a community newsletter.</p>`,
-    expected: { image: { alt: "apex study workspace", alignment: "center" }, columns: 2 },
+    starterHtml: `<h1>Peak Study Practice Showcase</h1><p>The Peak practice showcase includes starter challenges, a skills lab, guided practice sessions, and a progress showcase. Visitors should check start times before arriving. The final article should be clear enough for a community newsletter.</p>`,
+    expected: { image: { alt: "peak study workspace", alignment: "center" }, columns: 2 },
     points: 25
   }
 ];
 
 const extraListSpecs = [
-  ["wp-list-showcase-events", "Apex events", ["Starter challenges", "Skills lab", "Guided practice sessions", "Winners presentation"], "unordered"],
+  ["wp-list-showcase-events", "Peak events", ["Starter challenges", "Skills lab", "Guided practice sessions", "Winners presentation"], "unordered"],
   ["wp-list-learner-checks", "Learner checks", ["Bring login details", "Check start time", "Meet at the information desk"], "ordered"],
-  ["wp-list-source-files", "Source files", ["Apex article", "Study workspace image", "Race results"], "unordered"],
+  ["wp-list-source-files", "Source files", ["Peak article", "Study workspace image", "Race results"], "unordered"],
   ["wp-list-editing-order", "Editing order", ["Open the source document", "Format the title", "Insert the image", "Check the final document"], "ordered"],
   ["wp-list-newsletter-items", "Newsletter contents", ["Main article", "Results table", "Safety note"], "unordered"],
   ["wp-list-race-groups", "Skill groups", ["Foundation", "Intermediate", "Advanced"], "unordered"],
@@ -812,13 +812,13 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     moduleId: "exam-editing",
     moduleTitle: "Exam Editing",
     category: "exam",
-    title: "Build the Apex newsletter article",
+    title: "Build the Peak Study newsletter article",
     scenario: "This is a longer practical task modelled on a support-document workflow.",
     supportDocument: showcaseSupport,
     goal: "Create a bold centred title, insert the study image, and apply two columns.",
     steps: ["Format the title so it is bold and centred.", "Insert the study image below the title.", "Apply two columns to the article."],
     starterHtml: typedStarter,
-    expected: { boldText: ["Apex Practice Showcase"], alignments: [{ text: "Apex Practice Showcase", value: "center" }], image: { alt: "apex study workspace", alignment: "center" }, columns: 2 },
+    expected: { boldText: ["Peak Study Practice Showcase"], alignments: [{ text: "Peak Study Practice Showcase", value: "center" }], image: { alt: "peak study workspace", alignment: "center" }, columns: 2 },
     points: 30
   },
   {
@@ -865,7 +865,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     steps: ["Make the title bold.", "Italicise the photograph note.", "Underline the start time warning."],
     starterHtml: `${typedStarter}<p>A photograph of a learner is available for the article.</p>`,
     expected: {
-      boldText: ["Apex Practice Showcase"],
+      boldText: ["Peak Study Practice Showcase"],
       italicText: ["A photograph of a learner is available for the article."],
       underlineText: ["Visitors should check start times before arriving."]
     },
@@ -895,8 +895,8 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     supportDocument: ["Support document: Image", "Caption: Learner on the practice workspace"],
     goal: "Insert the study image and add the caption text.",
     steps: ["Insert the study image.", "Type the caption below the image.", "Centre the image."],
-    starterHtml: `<h1>Apex Practice Showcase</h1><p></p>`,
-    expected: { image: { alt: "apex study workspace", alignment: "center" }, textIncludes: ["Learner on the practice workspace"] },
+    starterHtml: `<h1>Peak Study Practice Showcase</h1><p></p>`,
+    expected: { image: { alt: "peak study workspace", alignment: "center" }, textIncludes: ["Learner on the practice workspace"] },
     points: 30
   },
   {
@@ -911,10 +911,10 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     steps: ["Format the title.", "Justify the article paragraph.", "Insert the study image and underline the warning sentence."],
     starterHtml: typedStarter,
     expected: {
-      boldText: ["Apex Practice Showcase"],
+      boldText: ["Peak Study Practice Showcase"],
       underlineText: ["Visitors should check start times before arriving."],
-      alignments: [{ text: "Apex Practice Showcase", value: "center" }, { text: "The Apex practice showcase includes", value: "justify" }],
-      image: { alt: "apex study workspace", alignment: "center" }
+      alignments: [{ text: "Peak Study Practice Showcase", value: "center" }, { text: "The Peak practice showcase includes", value: "justify" }],
+      image: { alt: "peak study workspace", alignment: "center" }
     },
     points: 35
   },
@@ -923,7 +923,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     ["wp-exam-numbered-process", "Create the editing process", ["Open source", "Format document", "Check output"], "ordered"],
     ["wp-exam-bullet-events", "Create the events list", ["Starter challenges", "Skills lab", "Guided practice sessions"], "unordered"],
     ["wp-exam-numbered-proofing", "Create proofing steps", ["Read instructions", "Compare document", "Save final work"], "ordered"],
-    ["wp-exam-bullet-files", "Create source file list", ["Apex document", "study image", "results data"], "unordered"],
+    ["wp-exam-bullet-files", "Create source file list", ["Peak document", "study image", "results data"], "unordered"],
     ["wp-exam-numbered-evidence", "Create evidence steps", ["Take screenshot", "Paste evidence", "Label step"], "ordered"],
     ["wp-exam-bullet-audience", "Create audience points", ["Parents", "Learners", "Visitors"], "unordered"],
     ["wp-exam-numbered-layout", "Create layout sequence", ["Place title", "Insert image", "Apply columns"], "ordered"],
@@ -945,7 +945,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
 ];
 
 const stemStyleStarter = `
-  <p>Apex Study Hub Skills Programme</p>
+  <p>Peak Study Hub Skills Programme</p>
   <p>Innovations in Science Education</p>
   <p>working in teams</p>
   <p>solving practical problems</p>
@@ -965,8 +965,8 @@ const stemStyleStarter = `
 `;
 
 const showcaseArticleStarter = `
-  <p>Apex Practice Showcase</p>
-  <p>We are delighted to announce the return of the Apex Practice Showcase this summer. The event will be held on Sunday 27 August 2023 and is open to all club members and visiting apex study workspaces.</p>
+  <p>Peak Study Practice Showcase</p>
+  <p>We are delighted to announce the return of the Peak Study Practice Showcase this summer. The event will be held on Sunday 27 August 2023 and is open to all club members and visiting peak study workspaces.</p>
   <p>Practice Sessions</p>
   <p>All practice sessions start and finish at the lake. Learners must start within twenty minutes of the listed start time for their practice session.</p>
   <p>Registration and Participation</p>
@@ -988,7 +988,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     title: "Exam source document setup",
     scenario: "A practical paper gives you a prepared source document. Your first job is to open it, recognise the structure, and add the missing source text without changing the page setup.",
     supportDocument: [
-      "Source file: Apex article",
+      "Source file: Peak article",
       "Add the subtitle Practical skills for every learner below the title.",
       "Add the sentence: Entries close on 20 August or earlier if a practice session is fully subscribed.",
       "Teacher check: file saved with the correct name and format."
@@ -1016,11 +1016,11 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     moduleTitle: "Text Formatting",
     category: "exam",
     title: "Exam style and title challenge",
-    scenario: "The exam often asks students to modify named styles and apply them to precise text. Apex checks visible formatting, while your teacher checks the named style setup.",
+    scenario: "The exam often asks students to modify named styles and apply them to precise text. Peak checks visible formatting, while your teacher checks the named style setup.",
     supportDocument: [
       "House style: title - sans-serif, 36 point, centre, bold, underlined.",
       "House style: subhead - sans-serif, 14 point, centre, all capitals, bold.",
-      "Apply title formatting to Apex Study Hub Skills Programme.",
+      "Apply title formatting to Peak Study Hub Skills Programme.",
       "Apply subheading formatting to Why is a digital skills approach to learning important?"
     ],
     goal: "Format the title and one subheading to match an exam-style house style.",
@@ -1031,10 +1031,10 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     ],
     starterHtml: stemStyleStarter,
     expected: {
-      boldText: ["Apex Study Hub Skills Programme", "Why is a digital skills approach to learning important?"],
-      underlineText: ["Apex Study Hub Skills Programme"],
+      boldText: ["Peak Study Hub Skills Programme", "Why is a digital skills approach to learning important?"],
+      underlineText: ["Peak Study Hub Skills Programme"],
       alignments: [
-        { text: "Apex Study Hub Skills Programme", value: "center" },
+        { text: "Peak Study Hub Skills Programme", value: "center" },
         { text: "Why is a digital skills approach", value: "center" }
       ]
     },
@@ -1056,7 +1056,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "Insert the study image near the paragraph beginning All practice sessions start...",
       "The image should be aligned neatly and text should sit around it in the final printout."
     ],
-    goal: "Apply two columns and insert the study image into the Apex article.",
+    goal: "Apply two columns and insert the study image into the Peak article.",
     steps: [
       "Click inside the document and apply the two-column layout.",
       "Place the cursor near the practice sessions paragraph and insert the study image.",
@@ -1065,7 +1065,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     starterHtml: showcaseArticleStarter,
     expected: {
       columns: 2,
-      image: { alt: "apex study workspace", alignment: "center" }
+      image: { alt: "peak study workspace", alignment: "center" }
     },
     teacherReview: [
       "Check that columns should begin at the requested subheading, not necessarily at the top of the document.",
@@ -1086,7 +1086,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
       "The list ends with professional shows with live editing demonstrations.",
       "Teacher check: bullet shape and left-margin alignment."
     ],
-    goal: "Turn the activity lines in the Apex article into a bullet list.",
+    goal: "Turn the activity lines in the Peak article into a bullet list.",
     steps: [
       "Select the activity lines only.",
       "Click the bullet list button.",
@@ -1163,18 +1163,18 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     goal: "Complete a full exam-style document production edit.",
     steps: [
       "Work through the support instructions as a full exam-style sequence.",
-      "Use Apex checks for visible text, formatting, list, image, columns and table changes.",
+      "Use Peak checks for visible text, formatting, list, image, columns and table changes.",
       "Use the teacher-review list for the presentation details that require human judgement."
     ],
     starterHtml: stemStyleStarter,
     expected: {
       textIncludes: ["Innovations in Science Education", "Biology", "50", "40"],
-      boldText: ["Apex Study Hub Skills Programme"],
-      underlineText: ["Apex Study Hub Skills Programme"],
-      alignments: [{ text: "Apex Study Hub Skills Programme", value: "center" }],
+      boldText: ["Peak Study Hub Skills Programme"],
+      underlineText: ["Peak Study Hub Skills Programme"],
+      alignments: [{ text: "Peak Study Hub Skills Programme", value: "center" }],
       unorderedListItems: ["working in teams", "solving practical problems", "developing own solutions"],
       columns: 2,
-      image: { alt: "apex study workspace", alignment: "center" },
+      image: { alt: "peak study workspace", alignment: "center" },
       table: {
         minRows: 5,
         minColumns: 3,

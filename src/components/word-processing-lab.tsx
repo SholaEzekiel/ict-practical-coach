@@ -201,7 +201,7 @@ function validateDocument(root: HTMLElement, card: WordProcessingInstructionCard
     ok: messages.length === 0,
     messages: messages.length === 0
       ? [
-          "Good work. The final document matches the checks available in Apex.",
+          "Good work. The final document matches the checks available in Peak Study.",
           ...(card.teacherReview?.length ? ["Your teacher should now review the listed exam presentation points."] : [])
         ]
       : messages
@@ -306,7 +306,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Apex document preview</title>
+    <title>Peak document preview</title>
     <style>
       body{margin:0;background:#eef3f7;color:#111827;font-family:Arial,Helvetica,sans-serif}
       .toolbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:#fff;border-bottom:1px solid #d9e2ea}
@@ -324,7 +324,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     </style>
   </head>
   <body>
-    <div class="toolbar"><strong>Apex document preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+    <div class="toolbar"><strong>Peak document preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
     <main class="word-document ${documentClasses}">${content}</main>
   </body>
 </html>`);
@@ -382,11 +382,11 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   function insertHeader() {
-    insertContent(`<header class="doc-header">Apex Study Hub</header><p></p>`);
+    insertContent(`<header class="doc-header">Peak Study Hub</header><p></p>`);
   }
 
   function insertFooter() {
-    insertContent(`<footer class="doc-footer">Apex Study Hub | Page <span class="page-number">1</span></footer><p></p>`);
+    insertContent(`<footer class="doc-footer">Peak Study Hub | Page <span class="page-number">1</span></footer><p></p>`);
   }
 
   function insertPageNumber() {
@@ -394,7 +394,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   function insertStudyImage() {
-    insertContent(`<p style="text-align:center"><img src="/assets/apex-study-card.svg" alt="apex study workspace" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
+    insertContent(`<p style="text-align:center"><img src="/assets/peak-study-card.svg" alt="peak study workspace" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
   }
 
   function insertTable() {

@@ -310,7 +310,7 @@ const formattingCards = [
   formatTaskCard({
     id: "sheet-format-title-bold",
     goal: "Create a bold report title.",
-    scenario: "Apex Study Hub needs a short attendance sheet with a clear title.",
+    scenario: "Peak Study Hub needs a short attendance sheet with a clear title.",
     setup: [["A1", "Club Attendance Summary"]],
     range: "A1",
     command: "Bold",
@@ -348,10 +348,10 @@ const formattingCards = [
     id: "sheet-format-title-font-family",
     goal: "Change the title font.",
     scenario: "The display title should use a standard sans-serif font.",
-    setup: [["E1", "Apex Revision Timetable"]],
+    setup: [["E1", "Peak Revision Timetable"]],
     range: "E1",
     command: "Font family",
-    checks: [{ cell: "E1", value: "Apex Revision Timetable", format: { fontFamilyIncludes: ["arial", "calibri", "aptos"] } }]
+    checks: [{ cell: "E1", value: "Peak Revision Timetable", format: { fontFamilyIncludes: ["arial", "calibri", "aptos"] } }]
   }),
   formatTaskCard({
     id: "sheet-format-title-font-size",
@@ -465,10 +465,10 @@ const formattingCards = [
     id: "sheet-format-row-height",
     goal: "Increase row height.",
     scenario: "The worksheet title row needs extra height for readability.",
-    setup: [["A33", "Apex Study Hub Open Day"]],
+    setup: [["A33", "Peak Study Hub Open Day"]],
     range: "Row 33",
     command: "Row height",
-    checks: [{ cell: "A33", value: "Apex Study Hub Open Day" }],
+    checks: [{ cell: "A33", value: "Peak Study Hub Open Day" }],
     extraChecks: { rows: [{ row: 33, minHeight: 28 }] },
     extraSteps: ["Right-click row 33 or use the row menu, then increase the row height."]
   }),

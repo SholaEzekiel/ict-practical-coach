@@ -50,7 +50,7 @@ const defaultMaster: MasterDesign = {
   enabled: false,
   footer: "",
   dateText: "",
-  logoText: "Apex",
+  logoText: "Peak Study",
   background: "#ffffff",
   fontFamily: "Arial"
 };
@@ -153,7 +153,7 @@ function validateDeck(card: PresentationCard, slides: PresentationSlide[], activ
 
   return {
     ok: messages.length === 0,
-    messages: messages.length ? messages : ["Good work. The presentation matches the Apex final-result checks.", ...(card.teacherReview?.length ? ["Your teacher should now review layout quality and output evidence."] : [])]
+    messages: messages.length ? messages : ["Good work. The presentation matches the Peak final-result checks.", ...(card.teacherReview?.length ? ["Your teacher should now review layout quality and output evidence."] : [])]
   };
 }
 
@@ -395,7 +395,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Apex presentation preview</title>
+    <title>Peak presentation preview</title>
     <style>
       body{margin:0;background:#eef3f7;color:#14212b;font-family:Arial,sans-serif}
       .toolbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;background:white;border-bottom:1px solid #d9e2ea}
@@ -415,7 +415,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
     </style>
   </head>
   <body>
-    <div class="toolbar"><strong>Apex presentation preview</strong><button onclick="window.print()">Print / Save as PDF</button></div>
+    <div class="toolbar"><strong>Peak presentation preview</strong><button onclick="window.print()">Print / Save as PDF</button></div>
     <main class="deck">${renderedSlides}</main>
   </body>
 </html>`);

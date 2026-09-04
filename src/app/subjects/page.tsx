@@ -6,7 +6,7 @@ export default function SubjectsPage() {
   return (
     <Section>
       <p className="text-sm font-semibold uppercase tracking-wide text-ocean">Subjects</p>
-      <h1 className="mt-2 text-4xl font-bold text-ink">Apex Study Hub subjects</h1>
+      <h1 className="mt-2 text-4xl font-bold text-ink">Peak Study Hub subjects</h1>
       <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
         Choose the subject you want to practise. Each subject is organised around short loops: instruction, attempt, expected result, feedback, and next step.
       </p>

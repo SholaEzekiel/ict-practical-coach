@@ -58,7 +58,7 @@ export const websiteAuthoringModules: WebsiteAuthoringModule[] = [
   {
     id: "text-media",
     title: "Text and Images",
-    description: "Add Apex source text, uploaded images, alternative text, captions, and semantic media structure."
+    description: "Add Peak source text, uploaded images, alternative text, captions, and semantic media structure."
   },
   {
     id: "links-navigation",
@@ -98,7 +98,7 @@ const baseCss = `body {
 const htmlShell = `<!doctype html>
 <html>
   <head>
-    <title>Apex Study Hub</title>
+    <title>Peak Study Hub</title>
   </head>
   <body>
 
@@ -108,7 +108,7 @@ const htmlShell = `<!doctype html>
 const mainShell = `<!doctype html>
 <html>
   <head>
-    <title>Apex Study Hub</title>
+    <title>Peak Study Hub</title>
   </head>
   <body>
     <main>
@@ -120,17 +120,17 @@ const mainShell = `<!doctype html>
 const apexStarterHtml = `<!doctype html>
 <html>
   <head>
-    <title>Apex Study Hub Open Day</title>
+    <title>Peak Study Hub Open Day</title>
   </head>
   <body>
     <header>
-      <h1>Apex Study Hub Open Day</h1>
+      <h1>Peak Study Hub Open Day</h1>
       <p>Practical digital skills for confident learners.</p>
     </header>
     <main>
       <section id="welcome">
         <h2>Welcome</h2>
-        <p>Apex Study Hub is preparing a student open day for families who want structured digital practice.</p>
+        <p>Peak Study Hub is preparing a student open day for families who want structured digital practice.</p>
       </section>
     </main>
   </body>
@@ -139,11 +139,11 @@ const apexStarterHtml = `<!doctype html>
 const apexPageHtml = `<!doctype html>
 <html>
   <head>
-    <title>Apex Study Hub Open Day</title>
+    <title>Peak Study Hub Open Day</title>
   </head>
   <body>
     <header>
-      <h1>Apex Study Hub Open Day</h1>
+      <h1>Peak Study Hub Open Day</h1>
       <p>Practical digital skills for confident learners.</p>
     </header>
     <nav>
@@ -175,11 +175,11 @@ function insertIntoSessionsSection(markup: string) {
 const tableStarterHtml = `<!doctype html>
 <html>
   <head>
-    <title>Apex Workshop Timetable</title>
+    <title>Peak Workshop Timetable</title>
   </head>
   <body>
     <main>
-      <h1>Apex Workshop Timetable</h1>
+      <h1>Peak Workshop Timetable</h1>
       <table>
         <tr>
           <th>Session</th>
@@ -230,7 +230,7 @@ function fullPagePractice(moduleId: string, moduleTitle: string, spec: PracticeS
       `Required tags: ${tags.map((tag) => (tag.startsWith("<!--") ? tag : `<${tag}>`)).join(", ")}`,
       ...(spec.extraSupport || [])
     ],
-    goal: `Build the required Apex page for ${spec.heading}.`,
+    goal: `Build the required Peak page for ${spec.heading}.`,
     steps: practiceSteps,
     starterHtml: blankHtml,
     starterCss: expected.cssIncludes ? "" : baseCss,
@@ -283,11 +283,11 @@ const introCards: WebsiteAuthoringCard[] = [
     id: "web-intro-title",
     title: "Set the browser tab title",
     scenario: "The title element names the page in the browser tab.",
-    supportDocument: ["Browser title: Apex Study Hub Open Day"],
+    supportDocument: ["Browser title: Peak Study Hub Open Day"],
     goal: "Add a title element inside head.",
-    steps: ["Find the head element.", "Inside head, type <title>Apex Study Hub Open Day</title>.", "Keep title out of body."],
+    steps: ["Find the head element.", "Inside head, type <title>Peak Study Hub Open Day</title>.", "Keep title out of body."],
     starterHtml: "<!doctype html>\n<html>\n  <head>\n\n  </head>\n  <body>\n\n  </body>\n</html>",
-    expected: { requiredTags: ["title"], htmlIncludes: ["Apex Study Hub Open Day"], title: "Apex Study Hub Open Day" },
+    expected: { requiredTags: ["title"], htmlIncludes: ["Peak Study Hub Open Day"], title: "Peak Study Hub Open Day" },
     points: 10
   }),
   moduleCard("intro", "HTML Foundations", {
@@ -305,11 +305,11 @@ const introCards: WebsiteAuthoringCard[] = [
     id: "web-intro-h1",
     title: "Add the main heading",
     scenario: "The h1 element is the main visible heading of the page.",
-    supportDocument: ["Main heading: Apex Study Hub Open Day"],
-    goal: "Add Apex Study Hub Open Day as an h1 heading inside main.",
-    steps: ["Find the main element.", "Click between <main> and </main>.", "Type <h1>Apex Study Hub Open Day</h1>."],
+    supportDocument: ["Main heading: Peak Study Hub Open Day"],
+    goal: "Add Peak Study Hub Open Day as an h1 heading inside main.",
+    steps: ["Find the main element.", "Click between <main> and </main>.", "Type <h1>Peak Study Hub Open Day</h1>."],
     starterHtml: mainShell,
-    expected: { requiredTags: ["h1"], htmlIncludes: ["Apex Study Hub Open Day"] },
+    expected: { requiredTags: ["h1"], htmlIncludes: ["Peak Study Hub Open Day"] },
     points: 10
   }),
   moduleCard("intro", "HTML Foundations", {
@@ -319,7 +319,7 @@ const introCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Subtitle: Practical digital skills for confident learners."],
     goal: "Add the subtitle as a paragraph below the h1 heading.",
     steps: ["Find the h1 heading.", "On the next line, type a p element.", "Place the subtitle between <p> and </p>."],
-    starterHtml: mainShell.replace("\n\n    </main>", "\n      <h1>Apex Study Hub Open Day</h1>\n\n    </main>"),
+    starterHtml: mainShell.replace("\n\n    </main>", "\n      <h1>Peak Study Hub Open Day</h1>\n\n    </main>"),
     expected: { requiredTags: ["p"], htmlIncludes: ["Practical digital skills for confident learners."] },
     points: 10
   }),
@@ -338,11 +338,11 @@ const introCards: WebsiteAuthoringCard[] = [
     id: "web-intro-header-footer",
     title: "Add header and footer",
     scenario: "Header and footer organise the start and end of a page.",
-    supportDocument: ["Header text: Apex Study Hub Open Day", "Footer text: Apex Study Hub practice page"],
+    supportDocument: ["Header text: Peak Study Hub Open Day", "Footer text: Peak Study Hub practice page"],
     goal: "Add header and footer elements to the page.",
     steps: ["Add a header before main.", "Place the h1 inside header.", "Add a footer before </body> with the footer text."],
     starterHtml: mainShell,
-    expected: { requiredTags: ["header", "footer", "h1"], htmlIncludes: ["Apex Study Hub Open Day", "Apex Study Hub practice page"] },
+    expected: { requiredTags: ["header", "footer", "h1"], htmlIncludes: ["Peak Study Hub Open Day", "Peak Study Hub practice page"] },
     points: 15
   }),
   moduleCard("intro", "HTML Foundations", {
@@ -400,16 +400,16 @@ const introCards: WebsiteAuthoringCard[] = [
     expected: { requiredTags: ["meta"], htmlIncludes: ["<html lang=\"en\">", "charset=\"UTF-8\"", "name=\"viewport\"", "width=device-width"] },
     points: 20
   }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-basic", title: "Practical Task 1: Build a basic page", heading: "Apex Practice Club", paragraph: "Students meet every Friday to improve practical ICT skills." }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-structured", title: "Practical Task 2: Build a structured page", heading: "Apex Study Notice", paragraph: "Bring your workbook and complete one practical task before leaving.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-headings", title: "Practical Task 3: Build a heading hierarchy", heading: "Apex Skills Morning", paragraph: "Teachers check headings, paragraphs, sections, and page structure.", tags: ["html", "head", "title", "body", "main", "section", "h1", "h2", "h3", "h4", "p"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-event", title: "Practical Task 4: Build an event page", heading: "Apex Revision Day", paragraph: "Families can visit the practical rooms and see student work.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-clinic", title: "Practical Task 5: Build a clinic page", heading: "Apex Coding Clinic", paragraph: "Students practise tags in short steps before building a full page." }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-support", title: "Practical Task 6: Build a support page", heading: "Apex Support Desk", paragraph: "Ask for help after checking the preview and source code." }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-basic", title: "Practical Task 1: Build a basic page", heading: "Peak Study Practice Club", paragraph: "Students meet every Friday to improve practical ICT skills." }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-structured", title: "Practical Task 2: Build a structured page", heading: "Peak Study Notice", paragraph: "Bring your workbook and complete one practical task before leaving.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-headings", title: "Practical Task 3: Build a heading hierarchy", heading: "Peak Skills Morning", paragraph: "Teachers check headings, paragraphs, sections, and page structure.", tags: ["html", "head", "title", "body", "main", "section", "h1", "h2", "h3", "h4", "p"] }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-event", title: "Practical Task 4: Build an event page", heading: "Peak Revision Day", paragraph: "Families can visit the practical rooms and see student work.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-clinic", title: "Practical Task 5: Build a clinic page", heading: "Peak Coding Clinic", paragraph: "Students practise tags in short steps before building a full page." }),
+  fullPagePractice("intro", "HTML Foundations", { slug: "practice-support", title: "Practical Task 6: Build a support page", heading: "Peak Support Desk", paragraph: "Ask for help after checking the preview and source code." }),
   fullPagePractice("intro", "HTML Foundations", {
     slug: "practice-final",
     title: "Practical Task 7: Final foundation build",
-    heading: "Apex Foundation Check",
+    heading: "Peak Foundation Check",
     paragraph: "A complete page uses structure, headings, text, comments, and metadata.",
     tags: ["html", "head", "meta", "title", "body", "header", "main", "section", "h1", "h2", "h4", "p", "footer"],
     expected: { htmlIncludes: ["<html lang=\"en\">", "charset=\"UTF-8\"", "name=\"viewport\"", "<!--"] },
@@ -422,10 +422,10 @@ function mediaPractice(slug: string, title: string, heading: string, alt: string
     slug,
     title,
     heading,
-    paragraph: "Apex students use media to understand practical tasks before building their own pages.",
-    extraSupport: ["Upload file: apex-study-card.svg", "Use the shown relative image path after upload.", `Alternative text: ${alt}`, `Caption: ${caption}`],
+    paragraph: "Peak students use media to understand practical tasks before building their own pages.",
+    extraSupport: ["Upload file: peak-study-card.svg", "Use the shown relative image path after upload.", `Alternative text: ${alt}`, `Caption: ${caption}`],
     tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "p", "figure", "img", "figcaption"],
-    expected: { uploadedPaths: ["images/apex-study-card.svg"], images: [{ srcIncludes: "apex-study-card.svg", alt }], htmlIncludes: [caption] },
+    expected: { uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt }], htmlIncludes: [caption] },
     points: 55
   });
 }
@@ -435,94 +435,94 @@ const textMediaCards: WebsiteAuthoringCard[] = [
     id: "web-text-media-upload",
     title: "Upload an activity image",
     scenario: "Online students must upload their own activity file before using it in HTML.",
-    supportDocument: ["Upload file: apex-study-card.svg", "The editor will show a relative path such as images/apex-study-card.svg."],
-    goal: "Upload apex-study-card.svg using Add activity file.",
-    steps: ["Click Add activity file.", "Choose apex-study-card.svg from the practice files.", "Read the relative path shown under the button."],
+    supportDocument: ["Upload file: peak-study-card.svg", "The editor will show a relative path such as images/peak-study-card.svg."],
+    goal: "Upload peak-study-card.svg using Add activity file.",
+    steps: ["Click Add activity file.", "Choose peak-study-card.svg from the practice files.", "Read the relative path shown under the button."],
     starterHtml: apexPageHtml,
-    expected: { uploadedPaths: ["images/apex-study-card.svg"] },
+    expected: { uploadedPaths: ["images/peak-study-card.svg"] },
     points: 10
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-img",
     title: "Insert an image",
     scenario: "The img element displays an uploaded image when src points to the correct relative path.",
-    supportDocument: ["Image path after upload: images/apex-study-card.svg"],
+    supportDocument: ["Image path after upload: images/peak-study-card.svg"],
     goal: "Add an img element using the uploaded image path.",
-    steps: ["Upload the image file first.", "Inside main, add <img src=\"images/apex-study-card.svg\">.", "Check that the preview shows the image."],
+    steps: ["Upload the image file first.", "Inside main, add <img src=\"images/peak-study-card.svg\">.", "Check that the preview shows the image."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["img"], images: [{ srcIncludes: "apex-study-card.svg" }], uploadedPaths: ["images/apex-study-card.svg"] },
+    expected: { requiredTags: ["img"], images: [{ srcIncludes: "peak-study-card.svg" }], uploadedPaths: ["images/peak-study-card.svg"] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-alt",
     title: "Add alternative text",
     scenario: "The alt attribute describes an image for users who cannot see it.",
-    supportDocument: ["Upload file if needed: apex-study-card.svg", "Image path: images/apex-study-card.svg", "Alternative text: Apex study practice card"],
-    goal: "Set the image alt text to Apex study practice card.",
-    steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Add alt=\"Apex study practice card\" and keep src in the same img tag."],
-    starterHtml: insertIntoSessionsSection(`        <img src="images/apex-study-card.svg">`),
-    expected: { requiredTags: ["img"], uploadedPaths: ["images/apex-study-card.svg"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex study practice card" }] },
+    supportDocument: ["Upload file if needed: peak-study-card.svg", "Image path: images/peak-study-card.svg", "Alternative text: Peak study practice card"],
+    goal: "Set the image alt text to Peak study practice card.",
+    steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Add alt=\"Peak study practice card\" and keep src in the same img tag."],
+    starterHtml: insertIntoSessionsSection(`        <img src="images/peak-study-card.svg">`),
+    expected: { requiredTags: ["img"], uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak study practice card" }] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-figure",
     title: "Group the image with figure",
     scenario: "The figure element groups media with its caption.",
-    supportDocument: ["Upload file if needed: apex-study-card.svg", "Use <figure> around the image."],
+    supportDocument: ["Upload file if needed: peak-study-card.svg", "Use <figure> around the image."],
     goal: "Wrap the image in a figure element.",
     steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Place <figure> before it and </figure> after it."],
-    starterHtml: insertIntoSessionsSection(`        <img src="images/apex-study-card.svg" alt="Apex study practice card">`),
-    expected: { requiredTags: ["figure", "img"], uploadedPaths: ["images/apex-study-card.svg"] },
+    starterHtml: insertIntoSessionsSection(`        <img src="images/peak-study-card.svg" alt="Peak study practice card">`),
+    expected: { requiredTags: ["figure", "img"], uploadedPaths: ["images/peak-study-card.svg"] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-figcaption",
     title: "Add a caption",
     scenario: "The figcaption element explains the image.",
-    supportDocument: ["Upload file if needed: apex-study-card.svg", "Caption: Guided practice workspace"],
+    supportDocument: ["Upload file if needed: peak-study-card.svg", "Caption: Guided practice workspace"],
     goal: "Add Guided practice workspace inside figcaption.",
     steps: ["Upload the image file if it is not already listed.", "Find the figure element.", "Below the img, type <figcaption>Guided practice workspace</figcaption> and keep it inside figure."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+          <img src="images/peak-study-card.svg" alt="Peak study practice card">
         </figure>`),
-    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["Guided practice workspace"] },
+    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["Guided practice workspace"] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-size",
     title: "Set image size attributes",
     scenario: "Width and height attributes reserve space for an image and help avoid layout jumps.",
-    supportDocument: ["Upload file if needed: apex-study-card.svg", "Width: 320", "Height: 180"],
+    supportDocument: ["Upload file if needed: peak-study-card.svg", "Width: 320", "Height: 180"],
     goal: "Add width and height attributes to the img element.",
     steps: ["Upload the image file if it is not already listed.", "Find the img tag.", "Add width=\"320\" and height=\"180\" while keeping the alt text."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+          <img src="images/peak-study-card.svg" alt="Peak study practice card">
           <figcaption>Guided practice workspace</figcaption>
         </figure>`),
-    expected: { requiredTags: ["img"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["width=\"320\"", "height=\"180\""] },
+    expected: { requiredTags: ["img"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["width=\"320\"", "height=\"180\""] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-section",
     title: "Create a media section",
     scenario: "Media should sit inside a clear section with a heading.",
-    supportDocument: ["Upload file if needed: apex-study-card.svg", "Section heading: Visual preview", "Caption: Guided practice workspace"],
+    supportDocument: ["Upload file if needed: peak-study-card.svg", "Section heading: Visual preview", "Caption: Guided practice workspace"],
     goal: "Create a section containing h2, figure, img, and figcaption.",
     steps: ["Upload the image file if it is not already listed.", "Inside main, add a section with <h2>Visual preview</h2>.", "Move or add the figure inside the section."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/apex-study-card.svg" alt="Apex study practice card">
+          <img src="images/peak-study-card.svg" alt="Peak study practice card">
           <figcaption>Guided practice workspace</figcaption>
         </figure>`),
-    expected: { requiredTags: ["section", "h2", "figure", "img", "figcaption"], uploadedPaths: ["images/apex-study-card.svg"], htmlIncludes: ["Visual preview", "Guided practice workspace"] },
+    expected: { requiredTags: ["section", "h2", "figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["Visual preview", "Guided practice workspace"] },
     points: 20
   }),
-  mediaPractice("practice-card", "Practical Task 1: Build an image card", "Apex Practice Feature", "Apex practice feature card", "Students practise one skill at a time."),
-  mediaPractice("practice-gallery", "Practical Task 2: Build a gallery section", "Apex Gallery", "Apex gallery practice card", "Learners review examples before attempting a task."),
-  mediaPractice("practice-news", "Practical Task 3: Build a news media page", "Apex News Update", "Apex news image", "The image supports the news paragraph."),
-  mediaPractice("practice-course", "Practical Task 4: Build a course media page", "Apex Course Preview", "Apex course preview image", "The preview helps students choose a practice room."),
-  mediaPractice("practice-revision", "Practical Task 5: Build a revision media page", "Apex Revision Image", "Apex revision image", "The image gives context for the revision task."),
-  mediaPractice("practice-accessible", "Practical Task 6: Build an accessible media page", "Apex Accessible Media", "Apex accessible practice image", "Useful captions and alt text make pages clearer."),
-  mediaPractice("practice-final", "Practical Task 7: Final text and image build", "Apex Media Evidence", "Apex media evidence card", "The evidence image supports the written page content.")
+  mediaPractice("practice-card", "Practical Task 1: Build an image card", "Peak Study Practice Feature", "Peak practice feature card", "Students practise one skill at a time."),
+  mediaPractice("practice-gallery", "Practical Task 2: Build a gallery section", "Peak Gallery", "Peak Study gallery practice card", "Learners review examples before attempting a task."),
+  mediaPractice("practice-news", "Practical Task 3: Build a news media page", "Peak News Update", "Peak Study news image", "The image supports the news paragraph."),
+  mediaPractice("practice-course", "Practical Task 4: Build a course media page", "Peak Course Preview", "Peak Study course preview image", "The preview helps students choose a practice room."),
+  mediaPractice("practice-revision", "Practical Task 5: Build a revision media page", "Peak Revision Image", "Peak Study revision image", "The image gives context for the revision task."),
+  mediaPractice("practice-accessible", "Practical Task 6: Build an accessible media page", "Peak Accessible Media", "Peak Study accessible practice image", "Useful captions and alt text make pages clearer."),
+  mediaPractice("practice-final", "Practical Task 7: Final text and image build", "Peak Media Evidence", "Peak Study media evidence card", "The evidence image supports the written page content.")
 ];
 
 function navPractice(slug: string, title: string, heading: string, links: Array<{ text: string; href: string }>): WebsiteAuthoringCard {
@@ -530,7 +530,7 @@ function navPractice(slug: string, title: string, heading: string, links: Array<
     slug,
     title,
     heading,
-    paragraph: "Apex learners use navigation links to move between practice pages.",
+    paragraph: "Peak Study learners use navigation links to move between practice pages.",
     extraSupport: links.map((link) => `Link: ${link.text} -> ${link.href}`),
     tags: ["html", "head", "title", "body", "header", "nav", "a", "main", "h1", "p"],
     expected: { links },
@@ -587,14 +587,14 @@ const linksNavigationCards: WebsiteAuthoringCard[] = [
     id: "web-links-email",
     title: "Create an email link",
     scenario: "A mailto link opens an email program for the user.",
-    supportDocument: ["Link text: Email Apex", "Href: mailto:hello@apexstudyhub.example"],
+    supportDocument: ["Link text: Email Peak Study", "Href: mailto:hello@peakstudyhub.example"],
     goal: "Add an email link to the footer.",
-    steps: ["Find the footer before </body>.", "Inside footer, type <a href=\"mailto:hello@apexstudyhub.example\">Email Apex</a>.", "Check the href starts with mailto:."],
+    steps: ["Find the footer before </body>.", "Inside footer, type <a href=\"mailto:hello@peakstudyhub.example\">Email Peak Study</a>.", "Check the href starts with mailto:."],
     starterHtml: apexPageWithFooterHtml,
     expected: {
       requiredTags: ["a", "footer"],
-      links: [{ text: "Email Apex", href: "mailto:hello@apexstudyhub.example" }],
-      containedLinks: [{ container: "footer", text: "Email Apex", href: "mailto:hello@apexstudyhub.example" }]
+      links: [{ text: "Email Peak Study", href: "mailto:hello@peakstudyhub.example" }],
+      containedLinks: [{ container: "footer", text: "Email Peak Study", href: "mailto:hello@peakstudyhub.example" }]
     },
     points: 15
   }),
@@ -602,37 +602,37 @@ const linksNavigationCards: WebsiteAuthoringCard[] = [
     id: "web-links-new-tab",
     title: "Open a link in a new tab",
     scenario: "The target attribute can open a link in a new browser tab.",
-    supportDocument: ["Link text: Apex guide", "Href: https://example.com/apex-guide", "Attribute: target=\"_blank\""],
+    supportDocument: ["Link text: Peak Study guide", "Href: https://example.com/apex-guide", "Attribute: target=\"_blank\""],
     goal: "Add a guide link that opens in a new tab.",
     steps: ["Find the nav or footer.", "Add the link with the correct href.", "Add target=\"_blank\" inside the opening a tag."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["a"], links: [{ text: "Apex guide", href: "https://example.com/apex-guide" }], htmlIncludes: ["target=\"_blank\""] },
+    expected: { requiredTags: ["a"], links: [{ text: "Peak Study guide", href: "https://example.com/apex-guide" }], htmlIncludes: ["target=\"_blank\""] },
     points: 15
   }),
   moduleCard("links-navigation", "Links and Navigation", {
     id: "web-links-image",
     title: "Use an image as a link",
     scenario: "An img element can sit inside an a element to make the image clickable.",
-    supportDocument: ["Upload file: apex-study-card.svg", "Href: index.html", "Image path: images/apex-study-card.svg", "Alt text: Apex home card"],
+    supportDocument: ["Upload file: peak-study-card.svg", "Href: index.html", "Image path: images/peak-study-card.svg", "Alt text: Peak Study home card"],
     goal: "Create a linked image that returns to index.html.",
-    steps: ["Upload apex-study-card.svg first.", "Create an a element with href=\"index.html\".", "Place <img src=\"images/apex-study-card.svg\" alt=\"Apex home card\"> inside the link."],
+    steps: ["Upload peak-study-card.svg first.", "Create an a element with href=\"index.html\".", "Place <img src=\"images/peak-study-card.svg\" alt=\"Peak Study home card\"> inside the link."],
     starterHtml: apexPageHtml,
     expected: {
       requiredTags: ["a", "img"],
-      uploadedPaths: ["images/apex-study-card.svg"],
+      uploadedPaths: ["images/peak-study-card.svg"],
       links: [{ href: "index.html" }],
-      images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex home card" }],
-      linkedImages: [{ href: "index.html", srcIncludes: "apex-study-card.svg", alt: "Apex home card" }]
+      images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak Study home card" }],
+      linkedImages: [{ href: "index.html", srcIncludes: "peak-study-card.svg", alt: "Peak Study home card" }]
     },
     points: 20
   }),
-  navPractice("practice-three-links", "Practical Task 1: Build three page links", "Apex Link Practice", [{ text: "Home", href: "index.html" }, { text: "ICT", href: "ict.html" }, { text: "Business", href: "business.html" }]),
-  navPractice("practice-bookmarks", "Practical Task 2: Build bookmark navigation", "Apex Bookmark Page", [{ text: "Top", href: "#top" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }]),
-  navPractice("practice-footer-links", "Practical Task 3: Build footer links", "Apex Footer Links", [{ text: "Contact", href: "contact.html" }, { text: "Privacy", href: "privacy.html" }, { text: "Email Apex", href: "mailto:hello@apexstudyhub.example" }]),
-  navPractice("practice-folder-links", "Practical Task 4: Build folder links", "Apex Resource Page", [{ text: "Student guide", href: "docs/student-guide.html" }, { text: "Practice file", href: "files/practice.csv" }, { text: "Main index", href: "../index.html" }]),
-  navPractice("practice-action-links", "Practical Task 5: Build action links", "Apex Action Links", [{ text: "Start practice", href: "start.html" }, { text: "View modules", href: "modules.html" }, { text: "Ask for help", href: "help.html" }]),
-  navPractice("practice-link-list", "Practical Task 6: Build a link list", "Apex Link List", [{ text: "Spreadsheets", href: "spreadsheets.html" }, { text: "Documents", href: "documents.html" }, { text: "Web authoring", href: "web-authoring.html" }]),
-  navPractice("practice-final", "Practical Task 7: Final navigation build", "Apex Navigation Evidence", [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }, { text: "Email Apex", href: "mailto:hello@apexstudyhub.example" }])
+  navPractice("practice-three-links", "Practical Task 1: Build three page links", "Peak Study Link Practice", [{ text: "Home", href: "index.html" }, { text: "ICT", href: "ict.html" }, { text: "Business", href: "business.html" }]),
+  navPractice("practice-bookmarks", "Practical Task 2: Build bookmark navigation", "Peak Study Bookmark Page", [{ text: "Top", href: "#top" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }]),
+  navPractice("practice-footer-links", "Practical Task 3: Build footer links", "Peak Study Footer Links", [{ text: "Contact", href: "contact.html" }, { text: "Privacy", href: "privacy.html" }, { text: "Email Peak Study", href: "mailto:hello@peakstudyhub.example" }]),
+  navPractice("practice-folder-links", "Practical Task 4: Build folder links", "Peak Study Resource Page", [{ text: "Student guide", href: "docs/student-guide.html" }, { text: "Practice file", href: "files/practice.csv" }, { text: "Main index", href: "../index.html" }]),
+  navPractice("practice-action-links", "Practical Task 5: Build action links", "Peak Action Links", [{ text: "Start practice", href: "start.html" }, { text: "View modules", href: "modules.html" }, { text: "Ask for help", href: "help.html" }]),
+  navPractice("practice-link-list", "Practical Task 6: Build a link list", "Peak Link List", [{ text: "Spreadsheets", href: "spreadsheets.html" }, { text: "Documents", href: "documents.html" }, { text: "Web authoring", href: "web-authoring.html" }]),
+  navPractice("practice-final", "Practical Task 7: Final navigation build", "Peak Study Navigation Evidence", [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }, { text: "Email Peak Study", href: "mailto:hello@peakstudyhub.example" }])
 ];
 
 function tablePractice(slug: string, title: string, heading: string, headers: string[]): WebsiteAuthoringCard {
@@ -641,9 +641,9 @@ function tablePractice(slug: string, title: string, heading: string, headers: st
     title,
     heading,
     paragraph: "The table should present the source data clearly.",
-    extraSupport: ["Caption: Apex comparison table", `Headers: ${headers.join(", ")}`, "Use <tr> rows, <th> headings, and <td> data cells.", "Rows: Plan/Ready/Green; Practice/In progress/Amber; Review/Needed/Red"],
+    extraSupport: ["Caption: Peak comparison table", `Headers: ${headers.join(", ")}`, "Use <tr> rows, <th> headings, and <td> data cells.", "Rows: Plan/Ready/Green; Practice/In progress/Amber; Review/Needed/Red"],
     tags: ["html", "head", "title", "body", "main", "h1", "p", "table", "caption", "tr", "th", "td"],
-    expected: { tableHeaders: headers, htmlIncludes: ["Apex comparison table", "Plan", "Practice", "Review"] },
+    expected: { tableHeaders: headers, htmlIncludes: ["Peak comparison table", "Plan", "Practice", "Review"] },
     points: 55
   });
 }
@@ -656,7 +656,7 @@ const tableCards: WebsiteAuthoringCard[] = [
     supportDocument: ["Use <table></table> inside main."],
     goal: "Add a table element below the page heading.",
     steps: ["Find the main element.", "Below the h1, type <table></table>.", "Keep the table inside main."],
-    starterHtml: mainShell.replace("\n\n    </main>", "\n      <h1>Apex Workshop Timetable</h1>\n\n    </main>"),
+    starterHtml: mainShell.replace("\n\n    </main>", "\n      <h1>Peak Workshop Timetable</h1>\n\n    </main>"),
     expected: { requiredTags: ["table"] },
     points: 10
   }),
@@ -697,11 +697,11 @@ const tableCards: WebsiteAuthoringCard[] = [
     id: "web-tables-caption",
     title: "Add a table caption",
     scenario: "A caption gives the table a clear title.",
-    supportDocument: ["Caption: Apex workshop times"],
+    supportDocument: ["Caption: Peak workshop times"],
     goal: "Add a caption directly inside the table.",
-    steps: ["Find the opening table tag.", "On the next line, type <caption>Apex workshop times</caption>.", "Keep the caption before the first tr."],
+    steps: ["Find the opening table tag.", "On the next line, type <caption>Peak workshop times</caption>.", "Keep the caption before the first tr."],
     starterHtml: tableStarterHtml,
-    expected: { requiredTags: ["caption"], htmlIncludes: ["Apex workshop times"] },
+    expected: { requiredTags: ["caption"], htmlIncludes: ["Peak workshop times"] },
     points: 15
   }),
   moduleCard("tables", "HTML Tables", {
@@ -719,20 +719,20 @@ const tableCards: WebsiteAuthoringCard[] = [
     id: "web-tables-colspan",
     title: "Use colspan",
     scenario: "The colspan attribute lets one cell stretch across more than one column.",
-    supportDocument: ["Title cell text: Apex Weekly Scores", "Attribute: colspan=\"3\""],
+    supportDocument: ["Title cell text: Peak Weekly Scores", "Attribute: colspan=\"3\""],
     goal: "Add a title row that spans three columns.",
-    steps: ["Add a new row at the top of the table.", "Inside it, add one th cell with colspan=\"3\".", "Type Apex Weekly Scores inside the spanning heading cell."],
+    steps: ["Add a new row at the top of the table.", "Inside it, add one th cell with colspan=\"3\".", "Type Peak Weekly Scores inside the spanning heading cell."],
     starterHtml: tableStarterHtml,
-    expected: { requiredTags: ["table", "tr", "th"], htmlIncludes: ["colspan=\"3\"", "Apex Weekly Scores"] },
+    expected: { requiredTags: ["table", "tr", "th"], htmlIncludes: ["colspan=\"3\"", "Peak Weekly Scores"] },
     points: 20
   }),
-  tablePractice("practice-basic", "Practical Task 1: Build a timetable", "Apex Workshop Timetable", ["Session", "Room", "Time"]),
-  tablePractice("practice-scores", "Practical Task 2: Build a scores table", "Apex Weekly Scores", ["Rank", "Learner", "Score"]),
-  tablePractice("practice-comparison", "Practical Task 3: Build a comparison table", "Apex Option Comparison", ["Feature", "Basic", "Premium"]),
-  tablePractice("practice-register", "Practical Task 4: Build a register table", "Apex Register", ["Name", "Class", "Present"]),
-  tablePractice("practice-equipment", "Practical Task 5: Build an equipment table", "Apex Equipment List", ["Item", "Quantity", "Needed"]),
-  tablePractice("practice-feedback", "Practical Task 6: Build a feedback table", "Apex Feedback Summary", ["Area", "Rating", "Action"]),
-  tablePractice("practice-final", "Practical Task 7: Final table build", "Apex Table Evidence", ["Activity", "Room", "Time"])
+  tablePractice("practice-basic", "Practical Task 1: Build a timetable", "Peak Workshop Timetable", ["Session", "Room", "Time"]),
+  tablePractice("practice-scores", "Practical Task 2: Build a scores table", "Peak Weekly Scores", ["Rank", "Learner", "Score"]),
+  tablePractice("practice-comparison", "Practical Task 3: Build a comparison table", "Peak Option Comparison", ["Feature", "Basic", "Premium"]),
+  tablePractice("practice-register", "Practical Task 4: Build a register table", "Peak Register", ["Name", "Class", "Present"]),
+  tablePractice("practice-equipment", "Practical Task 5: Build an equipment table", "Peak Equipment List", ["Item", "Quantity", "Needed"]),
+  tablePractice("practice-feedback", "Practical Task 6: Build a feedback table", "Peak Feedback Summary", ["Area", "Rating", "Action"]),
+  tablePractice("practice-final", "Practical Task 7: Final table build", "Peak Table Evidence", ["Activity", "Room", "Time"])
 ];
 
 function cssPractice(slug: string, title: string, heading: string, cssParts: string[]): WebsiteAuthoringCard {
@@ -740,7 +740,7 @@ function cssPractice(slug: string, title: string, heading: string, cssParts: str
     slug,
     title,
     heading,
-    paragraph: "Apex students practise the page, then check the browser preview.",
+    paragraph: "Peak students practise the page, then check the browser preview.",
     extraSupport: ["Link: Start practice -> practice.html", `CSS requirements: ${cssParts.join(", ")}`],
     tags: ["html", "head", "title", "body", "header", "nav", "a", "main", "section", "h1", "p"],
     expected: { links: [{ text: "Start practice", href: "practice.html" }], cssIncludes: cssParts },
@@ -777,7 +777,7 @@ const cssCards: WebsiteAuthoringCard[] = [
     title: "Change heading colour",
     scenario: "The color property changes text colour.",
     supportDocument: ["Selector: h1", "Property: color", "Colour: #0f6f8c"],
-    goal: "Style h1 text with the Apex blue colour.",
+    goal: "Style h1 text with the Peak blue colour.",
     steps: ["Open the CSS tab.", "Create an h1 rule.", "Add color: #0f6f8c; inside the rule."],
     starterHtml: apexPageHtml,
     starterCss: "",
@@ -832,13 +832,13 @@ const cssCards: WebsiteAuthoringCard[] = [
     expected: { cssIncludes: ["nav", "display", "flex", "gap"] },
     points: 20
   }),
-  cssPractice("practice-colour", "Practical Task 1: Style colours", "Apex Colour Practice", ["body", "font-family", "h1", "color", "section", "background"]),
-  cssPractice("practice-spacing", "Practical Task 2: Style spacing", "Apex Spacing Practice", ["main", "max-width", "section", "padding", "margin"]),
-  cssPractice("practice-nav", "Practical Task 3: Style navigation", "Apex Navigation Style", ["nav", "display", "flex", "gap", "a", "text-decoration"]),
-  cssPractice("practice-card", "Practical Task 4: Style a content card", "Apex Card Style", [".notice-card", "border", "padding", "border-radius", "box-shadow"]),
-  cssPractice("practice-image", "Practical Task 5: Style responsive images", "Apex Image Style", ["img", "max-width", "height", "border-radius"]),
-  cssPractice("practice-table", "Practical Task 6: Style a table", "Apex Table Style", ["table", "border-collapse", "th", "td", "border", "padding"]),
-  cssPractice("practice-final", "Practical Task 7: Final CSS layout build", "Apex CSS Evidence", ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "h1", "color", "a:hover"])
+  cssPractice("practice-colour", "Practical Task 1: Style colours", "Peak Colour Practice", ["body", "font-family", "h1", "color", "section", "background"]),
+  cssPractice("practice-spacing", "Practical Task 2: Style spacing", "Peak Spacing Practice", ["main", "max-width", "section", "padding", "margin"]),
+  cssPractice("practice-nav", "Practical Task 3: Style navigation", "Peak Navigation Style", ["nav", "display", "flex", "gap", "a", "text-decoration"]),
+  cssPractice("practice-card", "Practical Task 4: Style a content card", "Peak Card Style", [".notice-card", "border", "padding", "border-radius", "box-shadow"]),
+  cssPractice("practice-image", "Practical Task 5: Style responsive images", "Peak Image Style", ["img", "max-width", "height", "border-radius"]),
+  cssPractice("practice-table", "Practical Task 6: Style a table", "Peak Table Style", ["table", "border-collapse", "th", "td", "border", "padding"]),
+  cssPractice("practice-final", "Practical Task 7: Final CSS layout build", "Peak CSS Evidence", ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "h1", "color", "a:hover"])
 ];
 
 function examPractice(slug: string, title: string, heading: string): WebsiteAuthoringCard {
@@ -849,10 +849,10 @@ function examPractice(slug: string, title: string, heading: string): WebsiteAuth
     paragraph: "Practical digital skills for confident learners.",
     extraSupport: [
       "Navigation: Home/index.html, Sessions/#sessions, Register/#register, Contact/contact.html",
-      "Image file to upload: apex-study-card.svg",
-      "Image path after upload: images/apex-study-card.svg",
+      "Image file to upload: peak-study-card.svg",
+      "Image path after upload: images/peak-study-card.svg",
       `Image alt text: ${heading} practice image`,
-      "Table caption: Apex session timetable",
+      "Table caption: Peak session timetable",
       "Table headings: Activity, Room, Time",
       "Rows: Spreadsheet/Lab 1/09:00; Documents/Lab 2/10:00; Websites/Lab 3/11:00",
       "CSS: body font-family, main max-width, nav display flex, section padding, img max-width, table border"
@@ -860,10 +860,10 @@ function examPractice(slug: string, title: string, heading: string): WebsiteAuth
     tags: ["html", "head", "meta", "title", "body", "header", "nav", "a", "main", "section", "h1", "h2", "p", "figure", "img", "figcaption", "table", "caption", "tr", "th", "td", "footer"],
     expected: {
       links: [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }, { text: "Contact", href: "contact.html" }],
-      uploadedPaths: ["images/apex-study-card.svg"],
-      images: [{ srcIncludes: "apex-study-card.svg", alt: `${heading} practice image` }],
+      uploadedPaths: ["images/peak-study-card.svg"],
+      images: [{ srcIncludes: "peak-study-card.svg", alt: `${heading} practice image` }],
       tableHeaders: ["Activity", "Room", "Time"],
-      htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\"", "Apex session timetable", "Spreadsheet", "Documents", "Websites"],
+      htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\"", "Peak session timetable", "Spreadsheet", "Documents", "Websites"],
       cssIncludes: ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "img", "max-width", "table", "border"]
     },
     points: 90
@@ -875,7 +875,7 @@ const examBuildCards: WebsiteAuthoringCard[] = [
     id: "web-exam-read-brief",
     title: "Identify the page requirements",
     scenario: "Before building, identify title, headings, links, media, table data, and styles from the support document.",
-    supportDocument: ["Project: Apex Study Hub Open Day", "Required parts: title, heading, subtitle, nav links, image, table, footer, CSS."],
+    supportDocument: ["Project: Peak Study Hub Open Day", "Required parts: title, heading, subtitle, nav links, image, table, footer, CSS."],
     goal: "Add an HTML comment listing the required page parts.",
     steps: ["Read the support document.", "At the top of body, add a short HTML comment.", "Include title, links, image, table, and CSS in the comment."],
     starterHtml: htmlShell,
@@ -886,11 +886,11 @@ const examBuildCards: WebsiteAuthoringCard[] = [
     id: "web-exam-metadata",
     title: "Prepare the document metadata",
     scenario: "The final build starts with reliable document setup before visible content.",
-    supportDocument: ["Use charset UTF-8, viewport, and title: Apex Study Hub Open Day"],
+    supportDocument: ["Use charset UTF-8, viewport, and title: Peak Study Hub Open Day"],
     goal: "Set up head with charset, viewport, and title.",
-    steps: ["Find the head element.", "Add charset and viewport meta tags.", "Set the title to Apex Study Hub Open Day."],
+    steps: ["Find the head element.", "Add charset and viewport meta tags.", "Set the title to Peak Study Hub Open Day."],
     starterHtml: htmlShell,
-    expected: { requiredTags: ["meta", "title"], htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\""], title: "Apex Study Hub Open Day" },
+    expected: { requiredTags: ["meta", "title"], htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\""], title: "Peak Study Hub Open Day" },
     points: 20
   }),
   moduleCard("exam-build", "Exam Website Build", {
@@ -919,22 +919,22 @@ const examBuildCards: WebsiteAuthoringCard[] = [
     id: "web-exam-media",
     title: "Add accessible media",
     scenario: "Images need upload, src, alt text, and caption so they work online and remain accessible.",
-    supportDocument: ["Upload file: apex-study-card.svg", "Image path after upload: images/apex-study-card.svg", "Alt text: Apex open day practice image", "Caption: Students practise before the final check."],
+    supportDocument: ["Upload file: peak-study-card.svg", "Image path after upload: images/peak-study-card.svg", "Alt text: Peak Study open day practice image", "Caption: Students practise before the final check."],
     goal: "Add a figure with image and caption.",
     steps: ["Upload the image.", "Add figure, img, and figcaption inside main.", "Use the uploaded path and exact alt text."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/apex-study-card.svg"], images: [{ srcIncludes: "apex-study-card.svg", alt: "Apex open day practice image" }], htmlIncludes: ["Students practise before the final check."] },
+    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak Study open day practice image" }], htmlIncludes: ["Students practise before the final check."] },
     points: 30
   }),
   moduleCard("exam-build", "Exam Website Build", {
     id: "web-exam-table",
     title: "Add source data as a table",
     scenario: "Tabular source data must be converted into table, caption, rows, headings, and data cells.",
-    supportDocument: ["Caption: Apex session timetable", "Headings: Activity, Room, Time", "Use <tr> rows, <th> headings, and <td> data cells.", "Rows: Spreadsheet/Lab 1/09:00; Documents/Lab 2/10:00; Websites/Lab 3/11:00"],
+    supportDocument: ["Caption: Peak session timetable", "Headings: Activity, Room, Time", "Use <tr> rows, <th> headings, and <td> data cells.", "Rows: Spreadsheet/Lab 1/09:00; Documents/Lab 2/10:00; Websites/Lab 3/11:00"],
     goal: "Add the timetable table to the sessions section.",
     steps: ["Find the sessions section.", "Add table and caption.", "Add heading row and three data rows using th and td."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["table", "caption", "tr", "th", "td"], tableHeaders: ["Activity", "Room", "Time"], htmlIncludes: ["Apex session timetable", "Spreadsheet", "Documents", "Websites"] },
+    expected: { requiredTags: ["table", "caption", "tr", "th", "td"], tableHeaders: ["Activity", "Room", "Time"], htmlIncludes: ["Peak session timetable", "Spreadsheet", "Documents", "Websites"] },
     points: 30
   }),
   moduleCard("exam-build", "Exam Website Build", {
@@ -949,13 +949,13 @@ const examBuildCards: WebsiteAuthoringCard[] = [
     expected: { cssIncludes: ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "img", "max-width", "table", "border"] },
     points: 30
   }),
-  examPractice("practice-open-day", "Practical Task 1: Build an open day page", "Apex Open Day"),
-  examPractice("practice-clinic", "Practical Task 2: Build a clinic page", "Apex ICT Clinic"),
-  examPractice("practice-showcase", "Practical Task 3: Build a showcase page", "Apex Skills Showcase"),
-  examPractice("practice-register", "Practical Task 4: Build a register page", "Apex Registration Day"),
-  examPractice("practice-timetable", "Practical Task 5: Build a timetable page", "Apex Practical Timetable"),
-  examPractice("practice-evidence", "Practical Task 6: Build an evidence page", "Apex Evidence Page"),
-  examPractice("practice-final", "Practical Task 7: Final exam-style website", "Apex Final Website")
+  examPractice("practice-open-day", "Practical Task 1: Build an open day page", "Peak Open Day"),
+  examPractice("practice-clinic", "Practical Task 2: Build a clinic page", "Peak ICT Clinic"),
+  examPractice("practice-showcase", "Practical Task 3: Build a showcase page", "Peak Skills Showcase"),
+  examPractice("practice-register", "Practical Task 4: Build a register page", "Peak Registration Day"),
+  examPractice("practice-timetable", "Practical Task 5: Build a timetable page", "Peak Practical Timetable"),
+  examPractice("practice-evidence", "Practical Task 6: Build an evidence page", "Peak Evidence Page"),
+  examPractice("practice-final", "Practical Task 7: Final exam-style website", "Peak Final Website")
 ];
 
 const allCards = [

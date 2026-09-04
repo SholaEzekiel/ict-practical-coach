@@ -1,6 +1,17 @@
 import Link from "next/link";
-import { ChevronDown, GraduationCap } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { PRODUCT_NAME } from "@/lib/constants";
+
+function PeakMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-7 w-7" role="img" aria-label="Peak Study Hub mark">
+      <circle cx="30" cy="14" r="8" fill="#f59e0b" />
+      <path d="M5 36 20 14l8 11 5-7 10 18H5Z" fill="#f8fafc" />
+      <path d="M20 14 5 36h16l7-11-8-11Zm8 11-7 11h22L33 18l-5 7Z" fill="#0f2a4d" opacity="0.9" />
+      <path d="M15 36c5-8 10-9 15-13" fill="none" stroke="#f8fafc" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function SiteHeader() {
   return (
@@ -8,7 +19,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 font-semibold text-ink" aria-label={`${PRODUCT_NAME} home`}>
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-ink text-white">
-            <GraduationCap size={20} aria-hidden="true" />
+            <PeakMark />
           </span>
           <span>{PRODUCT_NAME}</span>
         </Link>

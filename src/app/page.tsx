@@ -39,7 +39,7 @@ export default function HomePage() {
               Practice rooms for confident exam preparation.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-650">
-              Apex Study Hub helps students turn instructions into action through structured modules, familiar interfaces, clear goals, and result-focused checks.
+              Peak Study Hub helps students turn instructions into action through structured modules, familiar interfaces, clear goals, and result-focused checks.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/subjects/ict/spreadsheets" className="inline-flex items-center gap-2 rounded-lg bg-ocean px-5 py-3 font-semibold text-white shadow-sm hover:bg-ocean/90">
@@ -53,7 +53,7 @@ export default function HomePage() {
 
           <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
             <div className="rounded-lg bg-ink p-5 text-white">
-              <p className="text-sm font-semibold text-white/70">Apex learning activity</p>
+              <p className="text-sm font-semibold text-white/70">Peak study activity</p>
               <h2 className="mt-2 text-2xl font-bold">Practice that grows with each learner</h2>
               <p className="mt-3 text-sm leading-6 text-white/75">Focused practical rooms, concise notes, and result checks for students preparing across subjects.</p>
             </div>
