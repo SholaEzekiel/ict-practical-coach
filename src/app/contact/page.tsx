@@ -2,7 +2,7 @@ import { Mail, MessageSquare, Send } from "lucide-react";
 import { Card, Section } from "@/components/ui";
 
 const contactOptions = [
-  ["Email", "hello@example.com", Mail],
+  ["Email", "info@peakstudyhub.com", Mail],
   ["Platform enquiries", "Subjects, practice modules, and school support.", MessageSquare],
   ["Content requests", "Suggest a topic, module, or exam-skill practice area.", Send]
 ];

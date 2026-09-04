@@ -8,7 +8,7 @@ export function SiteFooter({ disclaimer }: { disclaimer: string }) {
         <div>
           <p className="font-semibold text-ink">{PRODUCT_NAME}</p>
           <p className="mt-2 max-w-3xl leading-6">{disclaimer}</p>
-          <p className="mt-3">Contact: hello@example.com</p>
+          <p className="mt-3">Contact: info@peakstudyhub.com</p>
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end">
           <Link href="/" className="hover:text-ocean">Home</Link>

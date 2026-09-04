@@ -49,7 +49,7 @@ export default function AcademyPage({ params }: { params: { academy: string } })
               </Link>
             ) : (
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
-                <Lock size={16} aria-hidden="true" /> Structured placeholder
+                <Lock size={16} aria-hidden="true" /> Coming soon
               </span>
             )}
           </Card>

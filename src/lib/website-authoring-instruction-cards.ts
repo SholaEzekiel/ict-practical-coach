@@ -602,11 +602,11 @@ const linksNavigationCards: WebsiteAuthoringCard[] = [
     id: "web-links-new-tab",
     title: "Open a link in a new tab",
     scenario: "The target attribute can open a link in a new browser tab.",
-    supportDocument: ["Link text: Peak Study guide", "Href: https://example.com/apex-guide", "Attribute: target=\"_blank\""],
+    supportDocument: ["Link text: Peak Study guide", "Href: https://www.peakstudyhub.com/subjects/ict/website-authoring", "Attribute: target=\"_blank\""],
     goal: "Add a guide link that opens in a new tab.",
     steps: ["Find the nav or footer.", "Add the link with the correct href.", "Add target=\"_blank\" inside the opening a tag."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["a"], links: [{ text: "Peak Study guide", href: "https://example.com/apex-guide" }], htmlIncludes: ["target=\"_blank\""] },
+    expected: { requiredTags: ["a"], links: [{ text: "Peak Study guide", href: "https://www.peakstudyhub.com/subjects/ict/website-authoring" }], htmlIncludes: ["target=\"_blank\""] },
     points: 15
   }),
   moduleCard("links-navigation", "Links and Navigation", {
