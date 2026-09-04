@@ -21,6 +21,15 @@ export const metadata: Metadata = {
       follow: true
     }
   },
+  icons: {
+    icon: [
+      {
+        url: "/favicon.png",
+        type: "image/png",
+        sizes: "64x64"
+      }
+    ]
+  },
   keywords: [
     "ICT skills practice",
     "international exam ICT practical practice",
