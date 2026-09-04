@@ -6,9 +6,21 @@ import { SiteHeader } from "@/components/site-header";
 import { PRODUCT_NAME, SHORT_DISCLAIMER } from "@/lib/constants";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.peakstudyhub.com"),
   title: `${PRODUCT_NAME} | Independent ICT Skills Practice`,
   description:
     "Independent exam-style study practice for ICT practical skills, theory revision, and future Business practice.",
+  alternates: {
+    canonical: "/"
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true
+    }
+  },
   keywords: [
     "ICT skills practice",
     "international exam ICT practical practice",
