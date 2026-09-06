@@ -37,7 +37,7 @@ export type IctTheoryModule = {
   glossary: Array<{ term: string; definition: string }>;
 };
 
-export const ictTheoryModules: IctTheoryModule[] = [
+const baseIctTheoryModules: IctTheoryModule[] = [
   {
     id: "computer-systems",
     moduleId: 1,
@@ -1242,3 +1242,237 @@ export const ictTheoryModules: IctTheoryModule[] = [
     ]
   }
 ];
+
+const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
+  "computer-systems": [
+    {
+      id: "ict-1-q4",
+      topic: "Hardware and software",
+      question: "Which pair correctly classifies one hardware item and one software item?",
+      options: ["RAM and operating system", "Spreadsheet and browser", "Keyboard and monitor", "Antivirus and presentation file"],
+      correctIndex: 0,
+      feedback: "Correct. RAM is physical hardware, while an operating system is software."
+    },
+    {
+      id: "ict-1-q5",
+      topic: "Operating systems",
+      question: "Which task is normally handled by an operating system?",
+      options: ["Managing files and memory", "Printing only photographs", "Replacing the CPU", "Creating a barcode label automatically"],
+      correctIndex: 0,
+      feedback: "Correct. Operating systems manage resources such as files, memory, devices, users, and running programs."
+    }
+  ],
+  "input-output": [
+    {
+      id: "ict-2-q3",
+      topic: "Manual input",
+      question: "Why can manual data entry be less suitable for very large volumes of records?",
+      options: ["It can be slow and prone to typing errors", "It cannot enter text", "It always requires RFID tags", "It only works with printers"],
+      correctIndex: 0,
+      feedback: "Correct. Manual entry depends on the user, so large volumes can be slow and error-prone."
+    },
+    {
+      id: "ict-2-q4",
+      topic: "Printer choice",
+      question: "Which factor is most important when choosing a printer for colour photographs?",
+      options: ["Colour quality and running cost", "Number of keyboard shortcuts", "Amount of RAM in a router", "Whether the device uses MICR"],
+      correctIndex: 0,
+      feedback: "Correct. Photo output depends on colour quality, paper/media support, and cost per print."
+    },
+    {
+      id: "ict-2-q5",
+      topic: "Direct data entry",
+      question: "Why is barcode scanning useful in a library or shop?",
+      options: ["It reduces manual typing and speeds up item identification", "It makes every item wireless", "It stores data only on paper", "It prints reports without software"],
+      correctIndex: 0,
+      feedback: "Correct. Barcode scanning captures item codes quickly with fewer transcription errors."
+    }
+  ],
+  "storage": [
+    {
+      id: "ict-3-q3",
+      topic: "Storage comparison",
+      question: "Which storage device is usually fastest for opening programs and files?",
+      options: ["SSD", "Optical disc", "Magnetic tape", "Printed report"],
+      correctIndex: 0,
+      feedback: "Correct. Solid-state drives have fast access because they use flash memory and no moving read/write heads."
+    },
+    {
+      id: "ict-3-q4",
+      topic: "Cloud storage",
+      question: "What is a main limitation of cloud storage?",
+      options: ["It depends on internet access and account security", "It can never be shared", "It only stores one file", "It is a manual input device"],
+      correctIndex: 0,
+      feedback: "Correct. Cloud storage is useful for access and sharing, but depends on network availability and secure accounts."
+    },
+    {
+      id: "ict-3-q5",
+      topic: "Optical media",
+      question: "Which situation is a suitable use of optical media?",
+      options: ["Distributing or archiving files where low-cost physical media is acceptable", "Running the main memory of a phone", "Replacing a CPU cache", "Reading RFID tags"],
+      correctIndex: 0,
+      feedback: "Correct. Optical discs can be useful for distribution or archiving, although they are slower and lower capacity than many modern options."
+    }
+  ],
+  "networks": [
+    {
+      id: "ict-4-q3",
+      topic: "LAN and WAN",
+      question: "Which statement best describes a WAN?",
+      options: ["It connects networks over a large geographical area", "It is always one computer only", "It is a type of optical disc", "It is the same as RAM"],
+      correctIndex: 0,
+      feedback: "Correct. A WAN covers a wider area and can connect sites in different towns, cities, or countries."
+    },
+    {
+      id: "ict-4-q4",
+      topic: "Network hardware",
+      question: "What is the main role of a router?",
+      options: ["Forwarding data between networks", "Printing colour photographs", "Performing arithmetic in the CPU", "Entering text manually"],
+      correctIndex: 0,
+      feedback: "Correct. Routers direct packets between networks, including between a local network and the internet."
+    },
+    {
+      id: "ict-4-q5",
+      topic: "Wireless networking",
+      question: "Which issue is more likely with wireless networking than wired Ethernet?",
+      options: ["Signal interference and variable connection quality", "No need for security", "No ability to connect phones", "Only one device can use it"],
+      correctIndex: 0,
+      feedback: "Correct. Wireless networks are flexible but can suffer from range, interference, and security issues."
+    }
+  ],
+  "social-effects": [
+    {
+      id: "ict-5-q3",
+      topic: "Employment",
+      question: "How can automation affect employment?",
+      options: ["It can replace some routine jobs while creating demand for new technical skills", "It removes the need for all workers", "It only affects printers", "It makes passwords unnecessary"],
+      correctIndex: 0,
+      feedback: "Correct. Automation can reduce some repetitive roles while increasing demand for digital and technical skills."
+    },
+    {
+      id: "ict-5-q4",
+      topic: "Teleworking",
+      question: "Which is a benefit of teleworking?",
+      options: ["Reduced travel time and flexible working location", "Guaranteed faster internet for everyone", "No need for communication tools", "Automatic removal of distractions"],
+      correctIndex: 0,
+      feedback: "Correct. Teleworking can reduce travel and support flexibility, although it also needs good communication and self-management."
+    },
+    {
+      id: "ict-5-q5",
+      topic: "Health and safety",
+      question: "Which action helps reduce strain when using computers for long periods?",
+      options: ["Taking breaks and using an ergonomic workstation", "Turning off all backups", "Using all-caps messages", "Printing every email"],
+      correctIndex: 0,
+      feedback: "Correct. Good posture, suitable equipment, lighting, and regular breaks reduce health risks."
+    }
+  ],
+  "applications": [
+    {
+      id: "ict-6-q3",
+      topic: "Expert systems",
+      question: "What does the knowledge base contain in an expert system?",
+      options: ["Facts and rules used to support decisions", "Only printed labels", "Mouse movements", "The user's monitor brightness"],
+      correctIndex: 0,
+      feedback: "Correct. The knowledge base stores expert facts and rules used by the inference engine."
+    },
+    {
+      id: "ict-6-q4",
+      topic: "Transaction processing",
+      question: "Why must online booking systems update records quickly?",
+      options: ["To prevent the same seat or resource being sold twice", "To make the screen larger", "To remove the need for passwords", "To convert output into sound"],
+      correctIndex: 0,
+      feedback: "Correct. Fast record updates help prevent double booking and keep availability accurate."
+    },
+    {
+      id: "ict-6-q5",
+      topic: "Control systems",
+      question: "What does an actuator do in a control system?",
+      options: ["Converts a control signal into physical action", "Stores optical discs", "Writes a questionnaire", "Counts spreadsheet cells only"],
+      correctIndex: 0,
+      feedback: "Correct. Actuators carry out physical actions such as opening a valve, moving a motor, or sounding an alarm."
+    }
+  ],
+  "systems-life-cycle": [
+    {
+      id: "ict-7-q3",
+      topic: "Analysis",
+      question: "Why are interviews useful during systems analysis?",
+      options: ["They allow detailed answers and follow-up questions", "They automatically write all software", "They replace testing", "They remove the need for users"],
+      correctIndex: 0,
+      feedback: "Correct. Interviews can reveal detailed requirements, problems, and exceptions."
+    },
+    {
+      id: "ict-7-q4",
+      topic: "Testing",
+      question: "Why should a test plan include normal, abnormal, and extreme data?",
+      options: ["To check that the system works across expected and problem cases", "To make all data invalid", "To avoid documenting results", "To turn the system into hardware"],
+      correctIndex: 0,
+      feedback: "Correct. Different test data checks correct behaviour, error handling, and boundary cases."
+    },
+    {
+      id: "ict-7-q5",
+      topic: "Implementation",
+      question: "What is a benefit of parallel running?",
+      options: ["The old and new systems can be compared before fully switching over", "It is always the cheapest method", "It requires no staff training", "It deletes the old data immediately"],
+      correctIndex: 0,
+      feedback: "Correct. Parallel running reduces risk because outputs from both systems can be compared."
+    }
+  ],
+  "security": [
+    {
+      id: "ict-8-q3",
+      topic: "Malware",
+      question: "Which practice helps reduce malware risk?",
+      options: ["Keeping security software and operating systems updated", "Opening all unknown attachments", "Sharing passwords freely", "Turning off backups permanently"],
+      correctIndex: 0,
+      feedback: "Correct. Updates and security tools help protect against known threats."
+    },
+    {
+      id: "ict-8-q4",
+      topic: "Authentication",
+      question: "Why is two-factor authentication stronger than a password alone?",
+      options: ["It requires an extra proof such as a code or device", "It removes the need for usernames", "It publishes the password", "It makes phishing impossible"],
+      correctIndex: 0,
+      feedback: "Correct. Two-factor authentication adds another check, so a stolen password alone is less useful."
+    },
+    {
+      id: "ict-8-q5",
+      topic: "Encryption",
+      question: "What is the purpose of encryption?",
+      options: ["To make data unreadable without the correct key", "To delete all files", "To improve typing speed", "To print documents faster"],
+      correctIndex: 0,
+      feedback: "Correct. Encryption protects confidentiality by converting readable data into ciphertext."
+    }
+  ],
+  "audience-communication": [
+    {
+      id: "ict-9-q3",
+      topic: "Audience",
+      question: "Which design choice best supports a younger audience?",
+      options: ["Clear language, readable text, and suitable visuals", "Dense technical jargon only", "Tiny text with no headings", "No navigation"],
+      correctIndex: 0,
+      feedback: "Correct. Audience needs should guide language, layout, visuals, and level of detail."
+    },
+    {
+      id: "ict-9-q4",
+      topic: "Purpose",
+      question: "Why should the purpose of a communication be clear before creating it?",
+      options: ["It guides the content, tone, layout, and evidence used", "It chooses the CPU automatically", "It encrypts every file", "It removes copyright rules"],
+      correctIndex: 0,
+      feedback: "Correct. Purpose shapes what is included and how it is presented."
+    },
+    {
+      id: "ict-9-q5",
+      topic: "Digital responsibility",
+      question: "What should a student do before using an image found online in coursework?",
+      options: ["Check permission, copyright, and whether a citation is needed", "Assume every image is free", "Remove the author's name", "Upload private data with it"],
+      correctIndex: 0,
+      feedback: "Correct. Responsible use means checking rights, permission, and citation requirements."
+    }
+  ]
+};
+
+export const ictTheoryModules: IctTheoryModule[] = baseIctTheoryModules.map((module) => ({
+  ...module,
+  quiz: [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])]
+}));

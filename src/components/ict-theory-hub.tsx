@@ -313,7 +313,7 @@ export function IctTheoryHub() {
   const isCorrect = selectedAnswer === quiz?.correctIndex;
   const shuffledOptions = useMemo(() => {
     if (!quiz) return [];
-    return quiz.options.map((option, index) => ({ option, index }));
+    return shuffle(quiz.options.map((option, index) => ({ option, index })));
   }, [quiz]);
 
   useEffect(() => {

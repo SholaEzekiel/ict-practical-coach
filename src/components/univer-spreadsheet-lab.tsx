@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, Lock, PanelLeftClose, PanelLeftOpen, Sparkles } from "lucide-react";
+import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
 import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { getSpreadsheetCardsForModule, getSpreadsheetModule } from "@/lib/spreadsheet-instruction-cards";
 import { Card, Pill, ProgressBar } from "./ui";
@@ -36,6 +36,17 @@ type ChartSettings = {
   categoryLabel: string;
   valueLabel: string;
   legend: boolean;
+};
+type PrintSettings = {
+  orientation: "Portrait" | "Landscape";
+  printArea: string;
+  scaleWidth: "Auto" | "1 page";
+  gridlines: boolean;
+  headings: boolean;
+  showFormulas: boolean;
+  repeatRows: string;
+  headerText: string;
+  footerText: string;
 };
 
 function colToIndex(column: string) {
@@ -76,6 +87,17 @@ function makeWorkbook(name: string, cellEntries: Array<[string, CellValue]> = []
 
 function getStarterWorkbook(moduleId?: string) {
   if (moduleId === "formatting") return makeWorkbook("Formatting");
+  if (moduleId === "layout") {
+    return makeWorkbook("Print Layout", [
+      ["A1", "Club"], ["B1", "Attendance"], ["C1", "Sessions"], ["D1", "Average"], ["E1", "Coach"], ["F1", "Room"],
+      ["A2", "Drama"], ["B2", 18], ["C2", 6], ["D2", 3], ["E2", "Mr Lee"], ["F2", "Hall"],
+      ["A3", "Robotics"], ["B3", 22], ["C3", 6], ["D3", 3.67], ["E3", "Ms Patel"], ["F3", "Lab 1"],
+      ["A4", "Coding"], ["B4", 16], ["C4", 5], ["D4", 3.2], ["E4", "Mr Obi"], ["F4", "Lab 2"],
+      ["A5", "Art"], ["B5", 20], ["C5", 5], ["D5", 4], ["E5", "Mrs Green"], ["F5", "Room 3"],
+      ["A7", "Total"], ["B7", 76], ["C7", 22], ["D7", 3.45],
+      ["A10", "Print notes"], ["A11", "Use print settings to control output evidence."], ["A12", "Check preview before saving PDF."]
+    ]);
+  }
   if (moduleId === "free-practice") return makeWorkbook("Free Practice", [["A1", "Paste or import data to begin"]]);
   return makeWorkbook(getSpreadsheetModule(moduleId)?.title || "Spreadsheet Practice");
 }
@@ -259,12 +281,24 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     valueLabel: "",
     legend: false
   });
+  const [printSettings, setPrintSettings] = useState<PrintSettings>({
+    orientation: "Portrait",
+    printArea: "",
+    scaleWidth: "Auto",
+    gridlines: false,
+    headings: false,
+    showFormulas: false,
+    repeatRows: "",
+    headerText: "",
+    footerText: ""
+  });
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
 
   const moduleCardsForRoute = useMemo(() => getSpreadsheetCardsForModule(moduleId), [moduleId]);
   const currentModule = getSpreadsheetModule(moduleId);
   const isFreePractice = moduleId === "free-practice";
   const isChartModule = moduleId === "chart";
+  const isLayoutModule = moduleId === "layout";
   const card = moduleCardsForRoute[activeIndex];
   const currentCardComplete = card ? completed.includes(card.id) : false;
   const completedModuleCards = moduleCardsForRoute.filter((task) => completed.includes(task.id)).length;
@@ -284,6 +318,17 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       categoryLabel: "",
       valueLabel: "",
       legend: false
+    });
+    setPrintSettings({
+      orientation: "Portrait",
+      printArea: "",
+      scaleWidth: "Auto",
+      gridlines: false,
+      headings: false,
+      showFormulas: false,
+      repeatRows: "",
+      headerText: "",
+      footerText: ""
     });
   }, [moduleId]);
 
@@ -371,6 +416,19 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     const currentSnapshot = snapshot();
     const result = validateSpreadsheetResult(card, currentSnapshot);
 
+    if (result.isCorrect && card.printCheck) {
+      const printError = validatePrintSettings(card.printCheck, printSettings);
+      if (printError) {
+        setFeedback({
+          isCorrect: false,
+          canAutoCheck: true,
+          message: printError,
+          nextStep: card.feedback.wrongResult
+        });
+        return;
+      }
+    }
+
     if (result.isCorrect && card.chartCheck) {
       const chartError = validateChartSettings(card.chartCheck, chartSettings, currentSnapshot);
       if (chartError) {
@@ -432,15 +490,34 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "apex-free-practice.csv";
+    link.download = "peak-free-practice.csv";
     link.click();
     URL.revokeObjectURL(url);
   }
 
   const chartData = isChartModule ? chartDataFromSnapshot(snapshot(), chartSettings.sourceRange) : [];
   const gridClass = isChartModule
-    ? `grid h-[calc(100vh-120px)] min-h-[720px] gap-4 ${instructionsOpen ? "xl:grid-cols-[360px_minmax(0,1fr)_360px]" : "xl:grid-cols-[72px_minmax(0,1fr)_360px]"}`
-    : `grid h-[calc(100vh-120px)] min-h-[720px] gap-4 ${instructionsOpen ? "xl:grid-cols-[380px_minmax(0,1fr)]" : "xl:grid-cols-[72px_minmax(0,1fr)]"}`;
+    ? `grid gap-4 lg:h-[calc(100svh-120px)] lg:min-h-[640px] ${instructionsOpen ? "lg:grid-cols-[340px_minmax(0,1fr)_320px]" : "lg:grid-cols-[72px_minmax(0,1fr)_320px]"}`
+    : isLayoutModule
+      ? `grid gap-4 lg:h-[calc(100svh-120px)] lg:min-h-[640px] ${instructionsOpen ? "lg:grid-cols-[340px_minmax(0,1fr)_300px]" : "lg:grid-cols-[72px_minmax(0,1fr)_300px]"}`
+      : `grid gap-4 lg:h-[calc(100svh-120px)] lg:min-h-[640px] ${instructionsOpen ? "lg:grid-cols-[360px_minmax(0,1fr)]" : "lg:grid-cols-[72px_minmax(0,1fr)]"}`;
+
+  function validatePrintSettings(expected: NonNullable<typeof card>["printCheck"], settings: PrintSettings) {
+    if (!expected) return "";
+    const same = (actual: string, target: string) => normalise(actual) === normalise(target);
+
+    if (expected.orientation && settings.orientation !== expected.orientation) return `Orientation should be ${expected.orientation}.`;
+    if (expected.printArea && !same(settings.printArea, expected.printArea)) return `Print area should be ${expected.printArea}.`;
+    if (expected.scaleWidth && settings.scaleWidth !== expected.scaleWidth) return `Width should be set to ${expected.scaleWidth}.`;
+    if (expected.gridlines !== undefined && settings.gridlines !== expected.gridlines) return expected.gridlines ? "Printed gridlines should be turned on." : "Printed gridlines should be turned off.";
+    if (expected.headings !== undefined && settings.headings !== expected.headings) return expected.headings ? "Row and column headings should be turned on." : "Row and column headings should be turned off.";
+    if (expected.showFormulas !== undefined && settings.showFormulas !== expected.showFormulas) return expected.showFormulas ? "Show formulas should be turned on." : "Show formulas should be turned off.";
+    if (expected.repeatRows && !same(settings.repeatRows, expected.repeatRows)) return `Rows to repeat at top should be ${expected.repeatRows}.`;
+    if (expected.headerText && !normalise(settings.headerText).includes(normalise(expected.headerText))) return `Header text should include ${expected.headerText}.`;
+    if (expected.footerText && !normalise(settings.footerText).includes(normalise(expected.footerText))) return `Footer text should include ${expected.footerText}.`;
+
+    return "";
+  }
 
   function validateChartSettings(expected: NonNullable<typeof card>["chartCheck"], settings: ChartSettings, currentSnapshot: unknown) {
     if (!expected) return "";
@@ -458,8 +535,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
   if (isFreePractice) {
     return (
-      <div className="grid h-[calc(100vh-120px)] min-h-[720px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <Card className="flex min-h-0 flex-col overflow-hidden p-0">
+      <div className="grid gap-4 lg:h-[calc(100svh-120px)] lg:min-h-[640px] lg:grid-cols-[360px_minmax(0,1fr)]">
+        <Card className="flex min-h-[560px] flex-col overflow-hidden p-0 lg:min-h-0">
           <div className="border-b border-line p-4">
             <Pill>Free Practice</Pill>
             <h1 className="mt-3 text-xl font-bold">Spreadsheet free practice</h1>
@@ -494,7 +571,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
           </div>
         </Card>
 
-        <Card className="flex min-h-0 flex-col overflow-hidden p-0">
+        <Card className="flex min-h-[560px] flex-col overflow-hidden p-0 lg:min-h-0">
           <div className="flex items-center justify-between gap-3 border-b border-line bg-white px-4 py-3">
             <div>
               <h2 className="font-semibold">Spreadsheet workspace</h2>
@@ -502,7 +579,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             </div>
             <Link href="/subjects/ict/spreadsheets" className="text-sm font-semibold text-ocean hover:underline">Modules</Link>
           </div>
-          <div id={containerId} className="min-h-0 flex-1 bg-white" />
+          <div id={containerId} className="min-h-0 flex-1 overflow-auto bg-white" />
         </Card>
       </div>
     );
@@ -519,7 +596,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
   return (
     <div className={gridClass}>
-      <Card className="flex min-h-0 flex-col overflow-hidden p-0">
+      <Card className="flex min-h-[560px] flex-col overflow-hidden p-0 lg:min-h-0">
         <button
           type="button"
           onClick={() => setInstructionsOpen((value) => !value)}
@@ -638,7 +715,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
         )}
       </Card>
 
-      <Card className="flex min-h-0 flex-col overflow-hidden p-0">
+      <Card className="flex min-h-[560px] flex-col overflow-hidden p-0 lg:min-h-0">
         <div className="flex items-center justify-between gap-3 border-b border-line bg-white px-4 py-3">
           <div>
             <h2 className="font-semibold">Spreadsheet workspace</h2>
@@ -646,7 +723,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
           </div>
           <Link href="/subjects/ict/spreadsheets" className="text-sm font-semibold text-ocean hover:underline">Modules</Link>
         </div>
-        <div id={containerId} className="min-h-0 flex-1 bg-white" />
+        <div id={containerId} className="min-h-0 flex-1 overflow-auto bg-white" />
       </Card>
 
       {isChartModule && (
@@ -737,6 +814,86 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                   {chartSettings.categoryLabel || "Category"} compared with {chartSettings.valueLabel || "Value"}
                 </p>
               )}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {isLayoutModule && (
+        <Card className="flex min-h-0 flex-col overflow-hidden p-0">
+          <div className="border-b border-line bg-white px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Printer size={18} className="text-ocean" aria-hidden="true" />
+              <h2 className="font-semibold">Print setup</h2>
+            </div>
+            <p className="mt-1 text-sm text-slate-600">Prepare the worksheet for print or PDF evidence.</p>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="grid gap-3">
+              <label className="text-sm font-bold">
+                Orientation
+                <select
+                  value={printSettings.orientation}
+                  onChange={(event) => setPrintSettings((current) => ({ ...current, orientation: event.target.value as PrintSettings["orientation"] }))}
+                  className="mt-2 block w-full rounded-lg border border-line bg-white p-3"
+                >
+                  <option>Portrait</option>
+                  <option>Landscape</option>
+                </select>
+              </label>
+              <label className="text-sm font-bold">
+                Print area
+                <input value={printSettings.printArea} onChange={(event) => setPrintSettings((current) => ({ ...current, printArea: event.target.value.toUpperCase() }))} className="mt-2 block w-full rounded-lg border border-line p-3" placeholder="A1:F12" />
+              </label>
+              <label className="text-sm font-bold">
+                Width
+                <select
+                  value={printSettings.scaleWidth}
+                  onChange={(event) => setPrintSettings((current) => ({ ...current, scaleWidth: event.target.value as PrintSettings["scaleWidth"] }))}
+                  className="mt-2 block w-full rounded-lg border border-line bg-white p-3"
+                >
+                  <option>Auto</option>
+                  <option>1 page</option>
+                </select>
+              </label>
+              <div className="grid gap-2 rounded-lg border border-line bg-white p-3">
+                <label className="inline-flex items-center gap-2 text-sm font-bold">
+                  <input type="checkbox" checked={printSettings.gridlines} onChange={(event) => setPrintSettings((current) => ({ ...current, gridlines: event.target.checked }))} className="h-4 w-4" />
+                  Print gridlines
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm font-bold">
+                  <input type="checkbox" checked={printSettings.headings} onChange={(event) => setPrintSettings((current) => ({ ...current, headings: event.target.checked }))} className="h-4 w-4" />
+                  Print headings
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm font-bold">
+                  <input type="checkbox" checked={printSettings.showFormulas} onChange={(event) => setPrintSettings((current) => ({ ...current, showFormulas: event.target.checked }))} className="h-4 w-4" />
+                  Show formulas
+                </label>
+              </div>
+              <label className="text-sm font-bold">
+                Rows to repeat at top
+                <input value={printSettings.repeatRows} onChange={(event) => setPrintSettings((current) => ({ ...current, repeatRows: event.target.value }))} className="mt-2 block w-full rounded-lg border border-line p-3" placeholder="$1:$1" />
+              </label>
+              <label className="text-sm font-bold">
+                Header
+                <input value={printSettings.headerText} onChange={(event) => setPrintSettings((current) => ({ ...current, headerText: event.target.value }))} className="mt-2 block w-full rounded-lg border border-line p-3" placeholder="Peak Study Hub" />
+              </label>
+              <label className="text-sm font-bold">
+                Footer
+                <input value={printSettings.footerText} onChange={(event) => setPrintSettings((current) => ({ ...current, footerText: event.target.value }))} className="mt-2 block w-full rounded-lg border border-line p-3" placeholder="Page 1" />
+              </label>
+            </div>
+
+            <div className="mt-5 rounded-lg border border-line bg-mist p-4">
+              <p className="text-sm font-bold text-ink">Preview settings</p>
+              <dl className="mt-3 grid gap-2 text-xs text-slate-700">
+                <div className="flex justify-between gap-3"><dt>Orientation</dt><dd className="font-bold">{printSettings.orientation}</dd></div>
+                <div className="flex justify-between gap-3"><dt>Area</dt><dd className="font-bold">{printSettings.printArea || "Not set"}</dd></div>
+                <div className="flex justify-between gap-3"><dt>Width</dt><dd className="font-bold">{printSettings.scaleWidth}</dd></div>
+                <div className="flex justify-between gap-3"><dt>Gridlines</dt><dd className="font-bold">{printSettings.gridlines ? "On" : "Off"}</dd></div>
+                <div className="flex justify-between gap-3"><dt>Headings</dt><dd className="font-bold">{printSettings.headings ? "On" : "Off"}</dd></div>
+                <div className="flex justify-between gap-3"><dt>Formulas</dt><dd className="font-bold">{printSettings.showFormulas ? "Shown" : "Hidden"}</dd></div>
+              </dl>
             </div>
           </div>
         </Card>

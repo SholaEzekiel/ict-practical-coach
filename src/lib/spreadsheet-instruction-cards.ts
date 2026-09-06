@@ -52,6 +52,17 @@ export type SpreadsheetInstructionCard = {
     valueLabel?: string;
     legend?: boolean;
   };
+  printCheck?: {
+    orientation?: "Portrait" | "Landscape";
+    printArea?: string;
+    scaleWidth?: "Auto" | "1 page";
+    gridlines?: boolean;
+    headings?: boolean;
+    showFormulas?: boolean;
+    repeatRows?: string;
+    headerText?: string;
+    footerText?: string;
+  };
   quiz?: {
     question: string;
     options: string[];
@@ -833,7 +844,74 @@ function printStudyCard(
   });
 }
 
+function printPracticalCard(
+  id: string,
+  goal: string,
+  scenario: string,
+  steps: string[],
+  printCheck: NonNullable<SpreadsheetInstructionCard["printCheck"]>,
+  expectedResult: string
+) {
+  return baseCard({
+    id,
+    moduleId: "layout",
+    moduleTitle: "Print and Layout",
+    category: "layout",
+    skill: "Print setup simulation",
+    studentGoal: goal,
+    scenario,
+    studentSteps: [...steps, "Use the Print setup panel beside the worksheet.", "Click Check my result."],
+    instruction: goal,
+    meaning: "The simulator checks the print preparation settings that control final spreadsheet evidence.",
+    clickPath: ["Print setup panel", "Print preview simulation", "Check my result"],
+    expectedAction: "print-setup",
+    expectedResult,
+    autoCheck: { cells: [] },
+    printCheck,
+    commonMistakes: ["Changing worksheet data instead of print settings", "Forgetting to check print preview", "Leaving the print area too wide or too narrow"],
+    feedback: {
+      wrongTool: "Use the Print setup panel for this task.",
+      wrongResult: "Compare the print settings with the requirement, then update the Print setup panel."
+    },
+    hints: ["The data is already provided for this module.", "Match every print setting named in the task."],
+    difficulty: "developing",
+    marks: 3
+  });
+}
+
 const layoutCards = [
+  printPracticalCard(
+    "sheet-layout-practical-landscape",
+    "Prepare a wide worksheet for landscape output.",
+    "A teacher needs the club attendance table to fit clearly across the page.",
+    ["Keep the provided worksheet data unchanged.", "Set the output orientation to Landscape.", "Set the print area to A1:F12."],
+    { orientation: "Landscape", printArea: "A1:F12" },
+    "Landscape output is prepared for A1:F12."
+  ),
+  printPracticalCard(
+    "sheet-layout-practical-fit-grid",
+    "Fit the table across one page and show gridlines.",
+    "Printed evidence should show the table structure clearly and avoid splitting columns across pages.",
+    ["Set Width to 1 page.", "Turn on printed gridlines.", "Turn on row and column headings."],
+    { scaleWidth: "1 page", gridlines: true, headings: true },
+    "The worksheet will fit one page wide with gridlines and headings visible."
+  ),
+  printPracticalCard(
+    "sheet-layout-practical-formulas",
+    "Prepare formula evidence for checking.",
+    "A teacher needs to see the formula method, not only the calculated answers.",
+    ["Turn on Show formulas.", "Use Landscape orientation.", "Set the print area to A1:F12."],
+    { showFormulas: true, orientation: "Landscape", printArea: "A1:F12" },
+    "Formula evidence is ready in landscape for A1:F12."
+  ),
+  printPracticalCard(
+    "sheet-layout-practical-footer-repeat",
+    "Add print identity details and repeated headings.",
+    "Longer evidence should identify the student work and keep headings visible on each page.",
+    ["Set Rows to repeat at top to $1:$1.", "Add Peak Study Hub to the header.", "Add Page 1 to the footer."],
+    { repeatRows: "$1:$1", headerText: "Peak Study Hub", footerText: "Page 1" },
+    "The output has repeated headings plus header and footer identity text."
+  ),
   printStudyCard(
     "sheet-layout-exam-instruction",
     "Read a spreadsheet print instruction.",
