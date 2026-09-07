@@ -1340,7 +1340,7 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
       feedback: "Correct. Wireless networks are flexible but can suffer from range, interference, and security issues."
     }
   ],
-  "social-effects": [
+  "social-economic": [
     {
       id: "ict-5-q3",
       topic: "Employment",
@@ -1418,7 +1418,7 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
       feedback: "Correct. Parallel running reduces risk because outputs from both systems can be compared."
     }
   ],
-  "security": [
+  "safety-security": [
     {
       id: "ict-8-q3",
       topic: "Malware",
@@ -1444,7 +1444,7 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
       feedback: "Correct. Encryption protects confidentiality by converting readable data into ciphertext."
     }
   ],
-  "audience-communication": [
+  "communication": [
     {
       id: "ict-9-q3",
       topic: "Audience",
@@ -1471,6 +1471,51 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
     }
   ]
 };
+
+const minimumQuizCount = 25;
+
+function optionWindow(items: string[], correct: string, start: number) {
+  const pool = items.filter((item) => item !== correct);
+  const distractors = Array.from({ length: 3 }, (_, index) => pool[(start + index) % Math.max(1, pool.length)]).filter(Boolean);
+  return [correct, ...distractors];
+}
+
+function generatedQuizForModule(module: IctTheoryModule, existingCount: number): IctTheoryQuiz[] {
+  const generated: IctTheoryQuiz[] = [];
+  const glossaryTerms = module.glossary.map((term) => term.term);
+  const lessonStatements = module.lessons.flatMap((lesson) => [
+    lesson.summary,
+    ...lesson.keyPoints,
+    ...(lesson.studyBlocks || []).flatMap((block) => block.points)
+  ]).filter(Boolean);
+
+  module.glossary.forEach((term, index) => {
+    if (existingCount + generated.length >= minimumQuizCount) return;
+    generated.push({
+      id: `${module.id}-auto-term-${index + 1}`,
+      topic: term.term,
+      question: `Which term best matches this description: ${term.definition}`,
+      options: optionWindow(glossaryTerms, term.term, index + 1),
+      correctIndex: 0,
+      feedback: `Correct. ${term.term}: ${term.definition}`
+    });
+  });
+
+  lessonStatements.forEach((statement, index) => {
+    if (existingCount + generated.length >= minimumQuizCount) return;
+    const lesson = module.lessons[index % module.lessons.length];
+    generated.push({
+      id: `${module.id}-auto-skill-${index + 1}`,
+      topic: lesson?.title || module.moduleTitle,
+      question: `Which statement is true about ${lesson?.title || module.moduleTitle}?`,
+      options: optionWindow(lessonStatements, statement, index + 1),
+      correctIndex: 0,
+      feedback: `Correct. ${statement}`
+    });
+  });
+
+  return generated;
+}
 
 const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["studyBlocks"]>> = {
   "ict-1-hardware-software": [
@@ -1741,5 +1786,8 @@ export const ictTheoryModules: IctTheoryModule[] = baseIctTheoryModules.map((mod
     ...lesson,
     studyBlocks: [...(lesson.studyBlocks || []), ...(ictTheoryStudyAdditions[lesson.id] || [])]
   })),
-  quiz: [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])]
+  quiz: (() => {
+    const manualQuiz = [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])];
+    return [...manualQuiz, ...generatedQuizForModule(module, manualQuiz.length)];
+  })()
 }));

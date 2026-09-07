@@ -547,6 +547,30 @@ export const flowchartModules: FlowchartModule[] = [
       { id: "stop", type: "stop", label: "STOP", x: 250, y: 300 }
     ],
     solutionEdges: []
+  },
+  {
+    id: "free-practice-test",
+    title: "Free Practice Test",
+    description: "Open sandbox for drawing and testing your own flowchart idea without a fixed task.",
+    allowedBlocks: ["start", "input", "process", "decision", "output", "stop"],
+    scenario: "Build and test your own flowchart.",
+    inputs: ["Student"],
+    expectedOutputs: ["Your output appears in the test plate"],
+    steps: [],
+    support: [],
+    starterNodes: [
+      { id: "start", type: "start", label: "START", x: 250, y: 35 },
+      { id: "input-name", type: "input", label: "INPUT Name", x: 210, y: 130 },
+      { id: "output-welcome", type: "output", label: "OUTPUT Welcome Name", x: 210, y: 225 },
+      { id: "stop", type: "stop", label: "STOP", x: 250, y: 320 }
+    ],
+    starterEdges: [
+      { id: "s1", from: "start", to: "input-name" },
+      { id: "s2", from: "input-name", to: "output-welcome" },
+      { id: "s3", from: "output-welcome", to: "stop" }
+    ],
+    solutionNodes: [],
+    solutionEdges: []
   }
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
@@ -12,6 +12,12 @@ type Feedback = {
   ok: boolean;
   messages: string[];
 };
+type QuizScore = {
+  correct: number;
+  attempted: number;
+};
+
+const databaseQuizScoreStorageKey = "peak-database-quiz-scoreboard";
 
 function cloneTable(table: DatabaseTable) {
   return {
@@ -164,6 +170,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const [query, setQuery] = useState<QueryState>(defaultQuery);
   const [report, setReport] = useState<ReportState>(defaultReport);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizAttempts, setQuizAttempts] = useState<Record<string, QuizScore>>({});
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [mode, setMode] = useState<"study" | "practice">("study");
   const [instructionsOpen, setInstructionsOpen] = useState(true);
@@ -174,6 +181,9 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const fields = selected?.fields || [];
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
+  const quizScoreKey = moduleId || module?.id || "databases";
+  const quizScore = quizAttempts[quizScoreKey] || { correct: 0, attempted: 0 };
+  const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
   const queryRows = useMemo(() => {
     const rows = selected?.rows || [];
     const filtered = query.field ? rows.filter((row) => compareValue(row[query.field], query.operator, query.value)) : rows;
@@ -194,6 +204,19 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const sqlPreview = selected
     ? `SELECT ${report.fields.length ? report.fields.join(", ") : "*"} FROM ${selected.name}${query.field ? ` WHERE ${query.field} ${query.operator} "${query.value}"` : ""}${query.sortField ? ` ORDER BY ${query.sortField} ${query.sortDirection === "Descending" ? "DESC" : "ASC"}` : ""};`
     : "Import or select a table to generate a query.";
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(databaseQuizScoreStorageKey);
+      if (saved) setQuizAttempts(JSON.parse(saved) as Record<string, QuizScore>);
+    } catch {
+      window.localStorage.removeItem(databaseQuizScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(databaseQuizScoreStorageKey, JSON.stringify(quizAttempts));
+  }, [quizAttempts]);
 
   function importTable(name: string) {
     const source = sourceTables.find((table) => table.name === name);
@@ -302,6 +325,21 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
     if (result.ok) setCompleted((items) => items.includes(card.id) ? items : [...items, card.id]);
   }
 
+  function chooseQuizAnswer(answerIndex: number) {
+    if (!card?.quiz || quizAnswers[card.id] !== undefined) return;
+    setQuizAnswers((answers) => ({ ...answers, [card.id]: answerIndex }));
+    setQuizAttempts((scores) => {
+      const current = scores[quizScoreKey] || { correct: 0, attempted: 0 };
+      return {
+        ...scores,
+        [quizScoreKey]: {
+          correct: current.correct + (answerIndex === card.quiz!.correctIndex ? 1 : 0),
+          attempted: current.attempted + 1
+        }
+      };
+    });
+  }
+
   function nextCard() {
     if (!currentComplete || activeIndex === cards.length - 1) return;
     setActiveIndex((index) => index + 1);
@@ -358,12 +396,38 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
                   <section className="rounded-lg border border-line bg-white p-3"><h3 className="font-bold">Steps</h3><ol className="mt-2 space-y-2">{card.steps.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span><span>{step}</span></li>)}</ol></section>
                   {card.quiz && (
                     <section className="rounded-lg border border-line bg-white p-3">
+                      <div className="mb-3 rounded-lg border border-line bg-slate-50 p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-bold text-ink">Scoreboard</p>
+                          <button
+                            type="button"
+                            onClick={() => setQuizAttempts((scores) => ({ ...scores, [quizScoreKey]: { correct: 0, attempted: 0 } }))}
+                            className="text-xs font-bold text-ocean hover:text-ocean/80"
+                          >
+                            Reset module score
+                          </button>
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                          <div className="rounded-md bg-white p-2">
+                            <p className="text-lg font-black text-ocean">{quizScore.correct}</p>
+                            <p className="text-[11px] font-semibold text-slate-600">Correct</p>
+                          </div>
+                          <div className="rounded-md bg-white p-2">
+                            <p className="text-lg font-black text-ink">{quizScore.attempted}</p>
+                            <p className="text-[11px] font-semibold text-slate-600">Answered</p>
+                          </div>
+                          <div className="rounded-md bg-white p-2">
+                            <p className="text-lg font-black text-leaf">{quizAccuracy}%</p>
+                            <p className="text-[11px] font-semibold text-slate-600">Accuracy</p>
+                          </div>
+                        </div>
+                      </div>
                       <h3 className="font-bold">Knowledge check</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
                       <div className="mt-2 space-y-2">
                         {card.quiz.options.map((option, index) => (
                           <label key={option} className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm font-semibold ${quizAnswers[card.id] === index ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700"}`}>
-                            <input type="radio" name={`quiz-${card.id}`} checked={quizAnswers[card.id] === index} onChange={() => setQuizAnswers((answers) => ({ ...answers, [card.id]: index }))} />
+                            <input type="radio" name={`quiz-${card.id}`} checked={quizAnswers[card.id] === index} onChange={() => chooseQuizAnswer(index)} disabled={quizAnswers[card.id] !== undefined} />
                             <span>{option}</span>
                           </label>
                         ))}

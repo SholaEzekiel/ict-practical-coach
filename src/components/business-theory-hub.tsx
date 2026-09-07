@@ -11,6 +11,7 @@ import { Card, Pill, ProgressBar } from "@/components/ui";
 type ContentTarget = string | "module-glossary" | "module-quiz";
 
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
+const businessQuizScoreStorageKey = "peak-business-quiz-scoreboard";
 
 const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: number }> = {
   "Primary Secondary Tertiary": {
@@ -182,6 +183,7 @@ export function BusinessTheoryHub() {
   const [quizOrder, setQuizOrder] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [quizAttempts, setQuizAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
 
   const activeModule = businessNoteModules.find((module) => module.id === activeModuleId) || businessNoteModules[0];
   const moduleGlossary = useMemo(
@@ -195,6 +197,21 @@ export function BusinessTheoryHub() {
     setQuizIndex(0);
     setSelectedAnswer(null);
   }, [moduleGlossary]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(businessQuizScoreStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as Record<string, { correct: number; attempted: number }>;
+      if (parsed && typeof parsed === "object") setQuizAttempts(parsed);
+    } catch {
+      window.localStorage.removeItem(businessQuizScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(businessQuizScoreStorageKey, JSON.stringify(quizAttempts));
+  }, [quizAttempts]);
 
   const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
   const quizTerm = moduleGlossary[orderedIndex] || moduleGlossary[0] || businessGlossaryTerms[0];
@@ -219,6 +236,21 @@ export function BusinessTheoryHub() {
   function nextQuestion() {
     setQuizIndex((index) => index + 1);
     setSelectedAnswer(null);
+  }
+
+  function chooseAnswer(answer: string) {
+    if (selectedAnswer !== null) return;
+    setSelectedAnswer(answer);
+    setQuizAttempts((current) => {
+      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
+      return {
+        ...current,
+        [activeModule.id]: {
+          attempted: moduleScore.attempted + 1,
+          correct: moduleScore.correct + (answer === quizTerm?.title ? 1 : 0)
+        }
+      };
+    });
   }
 
   return (
@@ -333,6 +365,32 @@ export function BusinessTheoryHub() {
                   <h2 className="text-2xl font-bold">Multiple choice questions</h2>
                 </div>
                 <p className="mt-3 leading-7 text-slate-600">Read the definition, then choose the correct business term. Question order is shuffled for this attempt.</p>
+                <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                  <p className="text-sm font-bold text-ink">Scoreboard</p>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ocean">{quizAttempts[activeModule.id]?.correct || 0}</p>
+                      <p className="text-xs text-slate-600">Correct</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">{quizAttempts[activeModule.id]?.attempted || 0}</p>
+                      <p className="text-xs text-slate-600">Answered</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">
+                        {quizAttempts[activeModule.id]?.attempted ? Math.round(((quizAttempts[activeModule.id]?.correct || 0) / quizAttempts[activeModule.id].attempted) * 100) : 0}%
+                      </p>
+                      <p className="text-xs text-slate-600">Accuracy</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setQuizAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }))}
+                    className="mt-3 text-xs font-bold text-ocean hover:underline"
+                  >
+                    Reset module score
+                  </button>
+                </div>
                 <div className="mt-5">
                   <div className="mb-2 flex justify-between text-sm font-medium">
                     <span>{activeModule?.moduleTitle}</span>
@@ -353,7 +411,7 @@ export function BusinessTheoryHub() {
                       <button
                         key={option.id}
                         type="button"
-                        onClick={() => setSelectedAnswer(option.title)}
+                        onClick={() => chooseAnswer(option.title)}
                         className={`flex items-center justify-between rounded-lg border bg-white px-4 py-3 text-left font-bold transition ${
                           chosen ? (correct ? "border-emerald-300 text-emerald-700" : "border-amber-300 text-amber-700") : "border-line text-ink hover:border-ocean"
                         }`}

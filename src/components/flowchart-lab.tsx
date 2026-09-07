@@ -101,6 +101,21 @@ function validateFreePracticeFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) 
   return feedback;
 }
 
+function validateFreeSandboxFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) {
+  const feedback: string[] = [];
+  const startCount = nodes.filter((node) => node.type === "start").length;
+  const stopCount = nodes.filter((node) => node.type === "stop").length;
+  const connectedIds = new Set(edges.flatMap((edge) => [edge.from, edge.to]));
+
+  if (startCount !== 1) feedback.push("Use exactly one START block.");
+  if (stopCount !== 1) feedback.push("Use exactly one STOP block.");
+  if (edges.length < 1) feedback.push("Connect the blocks before running the test.");
+  if (!nodes.some((node) => node.type === "output")) feedback.push("Add an OUTPUT block so the test plate has something to display.");
+  if (nodes.some((node) => !connectedIds.has(node.id))) feedback.push("Every block should be connected to the flow.");
+
+  return feedback;
+}
+
 type FlowSnapshot = {
   nodes: FlowNodeSeed[];
   edges: FlowEdgeSeed[];
@@ -146,6 +161,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const previousModule = flowchartModules[moduleIndex - 1];
   const nextModule = flowchartModules[moduleIndex + 1];
   const isFreePractice = module.id === "free-practice";
+  const isFreeSandbox = module.id === "free-practice-test";
   const [nodes, setNodes] = useState(() => cloneNodes(module.starterNodes));
   const [edges, setEdges] = useState(() => cloneEdges(module.starterEdges));
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(nodes[0]?.id || null);
@@ -158,10 +174,12 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const [historyFuture, setHistoryFuture] = useState<FlowSnapshot[]>([]);
   const [showModelChecklist, setShowModelChecklist] = useState(false);
   const [testRuns, setTestRuns] = useState<string[]>([]);
+  const [sandboxInput, setSandboxInput] = useState("Student");
+  const [sandboxOutput, setSandboxOutput] = useState("");
   const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
-  const progress = isFreePractice ? (complete ? 100 : 0) : complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
+  const progress = isFreePractice || isFreeSandbox ? (complete ? 100 : 0) : complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
 
   const simulationText = useMemo(() => {
     return module.inputs.map((input, index) => `Run ${index + 1}: ${JSON.stringify(input)} → ${JSON.stringify(module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)])}`).join("\n");
@@ -180,6 +198,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setHistoryFuture([]);
     setShowModelChecklist(false);
     setTestRuns([]);
+    setSandboxInput("Student");
+    setSandboxOutput("");
   }, [module.id, module.starterEdges, module.starterNodes]);
 
   function rememberChange() {
@@ -188,6 +208,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setFeedback([]);
     setComplete(false);
     setTestRuns([]);
+    setSandboxOutput("");
   }
 
   function resetModule() {
@@ -260,6 +281,13 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   }
 
   function runValidation() {
+    if (isFreeSandbox) {
+      const result = validateFreeSandboxFlow(nodes, edges);
+      setFeedback(result.length ? result : ["Free Practice Test is ready. Run test data to display the output from your flowchart."]);
+      setComplete(result.length === 0);
+      return;
+    }
+
     if (isFreePractice) {
       const result = validateFreePracticeFlow(nodes, edges);
       setFeedback(result.length ? result : ["Free practice structure looks clear. Use your own test data to review whether the logic gives the output you expect."]);
@@ -273,6 +301,27 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   }
 
   function runTestData() {
+    if (isFreeSandbox) {
+      const result = validateFreeSandboxFlow(nodes, edges);
+      if (result.length) {
+        setFeedback(result);
+        setComplete(false);
+        setSandboxOutput("");
+        setTestRuns(["Fix the structure first, then run the test again."]);
+        return;
+      }
+
+      const outputLabels = nodes
+        .filter((node) => node.type === "output")
+        .map((node) => renderSandboxOutput(node.label, sandboxInput));
+
+      setComplete(true);
+      setFeedback(["Free Practice Test ran. Compare the output plate with what you expected."]);
+      setSandboxOutput(outputLabels.join("\n"));
+      setTestRuns(outputLabels.map((output, index) => `OUTPUT ${index + 1}: ${output}`));
+      return;
+    }
+
     if (isFreePractice) {
       const result = validateFreePracticeFlow(nodes, edges);
       if (result.length) {
@@ -319,6 +368,19 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setTestRuns([]);
   }
 
+  function renderSandboxOutput(label: string, inputValue: string) {
+    const cleanInput = inputValue.trim() || "Student";
+    let output = label
+      .replace(/^(output|display)\s*/i, "")
+      .replace(/\{name\}/gi, cleanInput)
+      .replace(/\bname\b/gi, cleanInput)
+      .trim();
+
+    if (!output) output = cleanInput;
+    if (/^welcome$/i.test(output)) return `Welcome ${cleanInput}`;
+    return output;
+  }
+
   function redo() {
     const next = historyFuture[0];
     if (!next) return;
@@ -353,37 +415,47 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            {isFreePractice && (
+            {(isFreePractice || isFreeSandbox) && (
               <div className="mb-4">
                 <PracticeTimer compact />
               </div>
             )}
-            <section className="rounded-lg border border-line bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
-              <h2 className="mt-3 text-xl font-bold leading-8 text-ink">{module.scenario}</h2>
-            </section>
-            <section className="mt-4 rounded-lg border border-line p-4">
-              <h3 className="font-bold text-ink">Steps</h3>
-              <ol className="mt-3 space-y-3">
-                {module.steps.map((step, index) => (
-                  <li key={step} className="flex gap-3 leading-7 text-slate-700">
-                    <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ocean text-sm font-bold text-white">{index + 1}</span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-            <section className="mt-4 rounded-lg border border-line p-4">
-              <h3 className="font-bold text-ink">Support</h3>
-              <ul className="mt-3 space-y-2">
-                {module.support.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
-                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-gold" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {isFreeSandbox ? (
+              <section className="rounded-lg border border-line bg-slate-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Open sandbox</p>
+                <h2 className="mt-3 text-xl font-bold leading-8 text-ink">Create any flowchart idea and test its output.</h2>
+                <p className="mt-3 text-sm leading-6 text-slate-600">Use the block tools, connector labels, and test plate. There is no fixed task in this mode.</p>
+              </section>
+            ) : (
+              <>
+                <section className="rounded-lg border border-line bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
+                  <h2 className="mt-3 text-xl font-bold leading-8 text-ink">{module.scenario}</h2>
+                </section>
+                <section className="mt-4 rounded-lg border border-line p-4">
+                  <h3 className="font-bold text-ink">Steps</h3>
+                  <ol className="mt-3 space-y-3">
+                    {module.steps.map((step, index) => (
+                      <li key={step} className="flex gap-3 leading-7 text-slate-700">
+                        <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ocean text-sm font-bold text-white">{index + 1}</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+                <section className="mt-4 rounded-lg border border-line p-4">
+                  <h3 className="font-bold text-ink">Support</h3>
+                  <ul className="mt-3 space-y-2">
+                    {module.support.map((item) => (
+                      <li key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
+                        <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-gold" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </>
+            )}
           </div>
 
           <div className="border-t border-line p-4">
@@ -526,7 +598,24 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
             <section className="mt-5 rounded-lg border border-line p-4">
               <h3 className="flex items-center gap-2 font-bold text-ink"><Play size={17} aria-hidden="true" /> Simulation preview</h3>
-              <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-ink p-3 text-xs leading-5 text-white">{simulationText}</pre>
+              {isFreeSandbox ? (
+                <div className="mt-3 space-y-3">
+                  <label className="block text-sm font-bold text-slate-600" htmlFor="sandbox-input">Test input</label>
+                  <input
+                    id="sandbox-input"
+                    value={sandboxInput}
+                    onChange={(event) => setSandboxInput(event.target.value)}
+                    placeholder="Type a name or value"
+                    className="w-full rounded-lg border border-line p-2 text-sm"
+                  />
+                  <div className="rounded-lg border border-line bg-slate-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-ocean">Output plate</p>
+                    <pre className="mt-2 min-h-20 whitespace-pre-wrap rounded-lg bg-ink p-3 text-sm leading-6 text-white">{sandboxOutput || "Run test data to display your flowchart output."}</pre>
+                  </div>
+                </div>
+              ) : (
+                <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-ink p-3 text-xs leading-5 text-white">{simulationText}</pre>
+              )}
               <button onClick={runTestData} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
                 <Play size={17} aria-hidden="true" /> Run test data
               </button>

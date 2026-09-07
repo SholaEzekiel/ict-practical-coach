@@ -30,7 +30,9 @@ export default function FlowchartsPage() {
                 <span className="grid h-11 w-11 place-items-center rounded-lg bg-mist text-ocean">
                   <Icon size={22} aria-hidden="true" />
                 </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Task {index + 1}</span>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+                  {module.id.includes("free-practice") ? "Free practice" : `Task ${index + 1}`}
+                </span>
               </div>
               <h2 className="mt-5 text-xl font-bold text-ink">{module.title}</h2>
               <p className="mt-2 min-h-16 text-sm leading-6 text-slate-600">{module.description}</p>

@@ -49,6 +49,12 @@ type PrintSettings = {
   headerText: string;
   footerText: string;
 };
+type QuizScore = {
+  correct: number;
+  attempted: number;
+};
+
+const spreadsheetQuizScoreStorageKey = "peak-spreadsheet-quiz-scoreboard";
 
 function colToIndex(column: string) {
   return column
@@ -312,6 +318,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     footerText: ""
   });
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
+  const [quizAttempts, setQuizAttempts] = useState<Record<string, QuizScore>>({});
 
   const moduleCardsForRoute = useMemo(() => getSpreadsheetCardsForModule(moduleId), [moduleId]);
   const currentModule = getSpreadsheetModule(moduleId);
@@ -322,6 +329,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const currentCardComplete = card ? completed.includes(card.id) : false;
   const completedModuleCards = moduleCardsForRoute.filter((task) => completed.includes(task.id)).length;
   const progressValue = moduleCardsForRoute.length ? (completedModuleCards / moduleCardsForRoute.length) * 100 : 0;
+  const quizScore = quizAttempts[moduleId || "spreadsheets"] || { correct: 0, attempted: 0 };
+  const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
 
   useEffect(() => {
     setActiveIndex(0);
@@ -350,6 +359,19 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       footerText: ""
     });
   }, [moduleId]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(spreadsheetQuizScoreStorageKey);
+      if (saved) setQuizAttempts(JSON.parse(saved) as Record<string, QuizScore>);
+    } catch {
+      window.localStorage.removeItem(spreadsheetQuizScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(spreadsheetQuizScoreStorageKey, JSON.stringify(quizAttempts));
+  }, [quizAttempts]);
 
   useEffect(() => {
     if (!card?.chartCheck) return;
@@ -469,6 +491,22 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       setCelebrating(true);
       window.setTimeout(() => setCelebrating(false), 900);
     }
+  }
+
+  function chooseQuizAnswer(answerIndex: number) {
+    if (!card?.quiz || quizAnswers[card.id] !== undefined) return;
+    const scoreKey = moduleId || "spreadsheets";
+    setQuizAnswers((answers) => ({ ...answers, [card.id]: answerIndex }));
+    setQuizAttempts((scores) => {
+      const current = scores[scoreKey] || { correct: 0, attempted: 0 };
+      return {
+        ...scores,
+        [scoreKey]: {
+          correct: current.correct + (answerIndex === card.quiz!.correctIndex ? 1 : 0),
+          attempted: current.attempted + 1
+        }
+      };
+    });
   }
 
   function previousCard() {
@@ -740,6 +778,32 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
               {card.quiz && (
                 <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                  <div className="mb-4 rounded-lg border border-line bg-slate-50 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-bold text-ink">Scoreboard</p>
+                      <button
+                        type="button"
+                        onClick={() => setQuizAttempts((scores) => ({ ...scores, [moduleId || "spreadsheets"]: { correct: 0, attempted: 0 } }))}
+                        className="text-xs font-bold text-ocean hover:text-ocean/80"
+                      >
+                        Reset module score
+                      </button>
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-md bg-white p-2">
+                        <p className="text-lg font-black text-ocean">{quizScore.correct}</p>
+                        <p className="text-[11px] font-semibold text-slate-600">Correct</p>
+                      </div>
+                      <div className="rounded-md bg-white p-2">
+                        <p className="text-lg font-black text-ink">{quizScore.attempted}</p>
+                        <p className="text-[11px] font-semibold text-slate-600">Answered</p>
+                      </div>
+                      <div className="rounded-md bg-white p-2">
+                        <p className="text-lg font-black text-leaf">{quizAccuracy}%</p>
+                        <p className="text-[11px] font-semibold text-slate-600">Accuracy</p>
+                      </div>
+                    </div>
+                  </div>
                   <p className="text-sm font-semibold text-ink">Knowledge check</p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
                   <div className="mt-3 grid gap-2">
@@ -752,7 +816,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                           type="radio"
                           name={`quiz-${card.id}`}
                           checked={quizAnswers[card.id] === index}
-                          onChange={() => setQuizAnswers((answers) => ({ ...answers, [card.id]: index }))}
+                          onChange={() => chooseQuizAnswer(index)}
+                          disabled={quizAnswers[card.id] !== undefined}
                         />
                         <span>{option}</span>
                       </label>
