@@ -71,14 +71,8 @@ export default function SubjectPage({ params }: { params: { subject: string } })
         ))}
       </div>
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-[0.7fr_1fr]">
-        <Card>
-          <h2 className="text-xl font-semibold">How practice works</h2>
-          <ol className="mt-3 space-y-2 leading-7 text-slate-600">
-            {subject.learningModel.map((step, index) => <li key={step}>{index + 1}. {step}</li>)}
-          </ol>
-        </Card>
-        {isIct ? <IctImageTrainer /> : <BusinessTheoryHub />}
+      <div className="mt-10">
+        <IctImageTrainer />
       </div>
     </Section>
   );

@@ -18,6 +18,7 @@ export function InstallAppButton() {
 
   useEffect(() => {
     if (isStandalone()) return;
+    setVisible(true);
 
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
@@ -40,7 +41,10 @@ export function InstallAppButton() {
   }, []);
 
   async function installApp() {
-    if (!installPrompt) return;
+    if (!installPrompt) {
+      window.alert("To install Peak Study Hub, open this site in Chrome or Edge, then use the browser menu and choose Install app or Add to home screen.");
+      return;
+    }
     await installPrompt.prompt();
     const choice = await installPrompt.userChoice;
     if (!choice || choice.outcome !== "dismissed") {
