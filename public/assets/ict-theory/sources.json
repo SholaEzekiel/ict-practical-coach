@@ -49,10 +49,11 @@
     "title": "Processor",
     "query": "computer processor chip close up",
     "file": "public/assets/ict-theory/ict-1-cpu-memory/01-concept.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/44124348109@N01/31409423572",
-    "bytes": 23156,
-    "width": 1024,
-    "height": 640
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Intel_CPU_Core_i7_2600K_Sandy_Bridge_top.jpg",
+    "bytes": 199559,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-1-cpu-memory",
@@ -71,10 +72,11 @@
     "title": "Storage device",
     "query": "solid state drive computer storage",
     "file": "public/assets/ict-theory/ict-1-cpu-memory/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/15932083@N05/4247405008",
-    "bytes": 38442,
-    "width": 451,
-    "height": 452
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Samsung_NVMe_M.2_970_EVO_Plus_18540.jpg",
+    "bytes": 123332,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-1-cpu-memory",
@@ -183,10 +185,11 @@
     "title": "Barcode",
     "query": "barcode scanner retail",
     "file": "public/assets/ict-theory/ict-2-direct-entry/01-concept.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/86792135@N04/15428091557",
-    "bytes": 89944,
-    "width": 727,
-    "height": 1024
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barcode-scanner.jpg",
+    "bytes": 21718,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-direct-entry",
@@ -194,10 +197,11 @@
     "title": "QR code",
     "query": "qr code scanning phone",
     "file": "public/assets/ict-theory/ict-2-direct-entry/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/10559879@N00/2656508531",
-    "bytes": 47352,
-    "width": 768,
-    "height": 1024
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scanning_QR_codes_at_Ding_Darling_Refuge.jpg",
+    "bytes": 125405,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-direct-entry",
