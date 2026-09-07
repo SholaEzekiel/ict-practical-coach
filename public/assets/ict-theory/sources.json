@@ -254,10 +254,11 @@
     "title": "Speaker",
     "query": "computer speaker audio",
     "file": "public/assets/ict-theory/ict-2-output/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/12289718@N00/7586864728",
-    "bytes": 98354,
-    "width": 1024,
-    "height": 683
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bose_Computer_MusicMonitor.jpg",
+    "bytes": 78724,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-2-output",
@@ -343,10 +344,11 @@
     "title": "Memory card",
     "query": "sd memory card camera",
     "file": "public/assets/ict-theory/ict-3-solid-state/03-real-world.jpg",
-    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=38389242",
-    "bytes": 3425875,
-    "width": 5053,
-    "height": 2592
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:SAMSUNG_SD_CARD_PRO_PLUS.jpg",
+    "bytes": 64409,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-3-solid-state",
@@ -354,10 +356,11 @@
     "title": "Portable storage",
     "query": "portable ssd laptop",
     "file": "public/assets/ict-theory/ict-3-solid-state/04-context.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/93841400@N00/4542086949",
-    "bytes": 33585,
-    "width": 1024,
-    "height": 685
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:SanDisk_Extreme_Portable_SSD_-_1TB,_USB-C_(41036158305).jpg",
+    "bytes": 189361,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-3-optical-cloud",
@@ -377,10 +380,11 @@
     "title": "Disc drive",
     "query": "optical disc drive computer",
     "file": "public/assets/ict-theory/ict-3-optical-cloud/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/25030443@N03/2989971719",
-    "bytes": 26732,
-    "width": 1024,
-    "height": 768
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:DVD_Multi_Recorder_close-up.jpg",
+    "bytes": 70727,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-3-optical-cloud",
@@ -459,10 +463,11 @@
     "title": "Router",
     "query": "wireless router close up",
     "file": "public/assets/ict-theory/ict-4-hardware/01-concept.jpg",
-    "sourceUrl": "https://commons.wikimedia.org/w/index.php?curid=69498767",
-    "bytes": 203442,
-    "width": 1126,
-    "height": 1321
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:TP-Link_TL-WR740N_router_HS1.jpg",
+    "bytes": 25527,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-hardware",
@@ -470,10 +475,11 @@
     "title": "Switch",
     "query": "network switch ethernet cables",
     "file": "public/assets/ict-theory/ict-4-hardware/02-detail.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/44038067@N00/450303689",
-    "bytes": 75862,
-    "width": 1024,
-    "height": 678
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg",
+    "bytes": 127610,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-hardware",
@@ -481,10 +487,11 @@
     "title": "Network cables",
     "query": "ethernet cables network rack",
     "file": "public/assets/ict-theory/ict-4-hardware/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/94953676@N00/88652740",
-    "bytes": 54953,
-    "width": 1024,
-    "height": 1024
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Computer_rack_with_switches_and_cables.jpg",
+    "bytes": 96069,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-hardware",
@@ -492,10 +499,11 @@
     "title": "Adapter",
     "query": "network adapter computer hardware",
     "file": "public/assets/ict-theory/ict-4-hardware/04-context.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/42956186@N04/16251014260",
-    "bytes": 27053,
-    "width": 1024,
-    "height": 683
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:USB_Dongle_WiFi_stick_on_computer.jpg",
+    "bytes": 89800,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-wired-wireless",
@@ -525,10 +533,11 @@
     "title": "Mobile network",
     "query": "mobile phone network signal",
     "file": "public/assets/ict-theory/ict-4-wired-wireless/03-real-world.jpg",
-    "sourceUrl": "https://www.flickr.com/photos/44124348109@N01/3447358053",
-    "bytes": 62712,
-    "width": 1001,
-    "height": 826
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cell_phone_antenna_tower,_Provo,_Utah,_Feb_17.jpg",
+    "bytes": 92989,
+    "width": 960,
+    "height": 540,
+    "reviewStatus": "curated-replacement"
   },
   {
     "lessonId": "ict-4-wired-wireless",
