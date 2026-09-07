@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, Li
 import { clsx } from "clsx";
 import { getFlowchartModule, flowchartModules } from "@/lib/flowchart-instruction-cards";
 import type { FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
+import { PracticeTimer } from "@/components/practice-timer";
 import { Pill, ProgressBar } from "@/components/ui";
 
 const nodeStyles: Record<FlowNodeType, string> = {
@@ -83,6 +84,23 @@ function validateFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[], solutionNode
   return feedback;
 }
 
+function validateFreePracticeFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) {
+  const feedback: string[] = [];
+  const startCount = nodes.filter((node) => node.type === "start").length;
+  const stopCount = nodes.filter((node) => node.type === "stop").length;
+  const connectedIds = new Set(edges.flatMap((edge) => [edge.from, edge.to]));
+  const labelledNodes = nodes.filter((node) => normalise(node.label) && !normalise(node.label).endsWith("block"));
+
+  if (startCount !== 1) feedback.push("Use exactly one START block.");
+  if (stopCount !== 1) feedback.push("Use exactly one STOP block.");
+  if (nodes.length < 4) feedback.push("Add at least two useful algorithm blocks between START and STOP.");
+  if (edges.length < Math.max(1, nodes.length - 1)) feedback.push("Connect the blocks so the flow can be followed from start to finish.");
+  if (labelledNodes.length < nodes.length) feedback.push("Give each block a meaningful label for your chosen problem.");
+  if (nodes.some((node) => !connectedIds.has(node.id))) feedback.push("Avoid isolated blocks; every block should be part of the flow.");
+
+  return feedback;
+}
+
 type FlowSnapshot = {
   nodes: FlowNodeSeed[];
   edges: FlowEdgeSeed[];
@@ -127,6 +145,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const moduleIndex = flowchartModules.findIndex((item) => item.id === module.id);
   const previousModule = flowchartModules[moduleIndex - 1];
   const nextModule = flowchartModules[moduleIndex + 1];
+  const isFreePractice = module.id === "free-practice";
   const [nodes, setNodes] = useState(() => cloneNodes(module.starterNodes));
   const [edges, setEdges] = useState(() => cloneEdges(module.starterEdges));
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(nodes[0]?.id || null);
@@ -142,7 +161,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
-  const progress = complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
+  const progress = isFreePractice ? (complete ? 100 : 0) : complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
 
   const simulationText = useMemo(() => {
     return module.inputs.map((input, index) => `Run ${index + 1}: ${JSON.stringify(input)} → ${JSON.stringify(module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)])}`).join("\n");
@@ -241,12 +260,37 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   }
 
   function runValidation() {
+    if (isFreePractice) {
+      const result = validateFreePracticeFlow(nodes, edges);
+      setFeedback(result.length ? result : ["Free practice structure looks clear. Use your own test data to review whether the logic gives the output you expect."]);
+      setComplete(result.length === 0);
+      return;
+    }
+
     const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
     setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Use Run test data to compare the test inputs with the expected outputs."]);
     setComplete(result.length === 0);
   }
 
   function runTestData() {
+    if (isFreePractice) {
+      const result = validateFreePracticeFlow(nodes, edges);
+      if (result.length) {
+        setFeedback(result);
+        setComplete(false);
+        setTestRuns(["Fix the structure first, then test your own input and expected output manually."]);
+        return;
+      }
+      setComplete(true);
+      setFeedback(["Free practice structure is ready for self-testing."]);
+      setTestRuns([
+        "Choose an input value for your own problem.",
+        "Trace the flowchart path by path.",
+        "Compare the result with the output you expected before running the trace."
+      ]);
+      return;
+    }
+
     const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
     if (result.length) {
       setFeedback(result);
@@ -309,6 +353,11 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
+            {isFreePractice && (
+              <div className="mb-4">
+                <PracticeTimer compact />
+              </div>
+            )}
             <section className="rounded-lg border border-line bg-slate-50 p-4">
               <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
               <h2 className="mt-3 text-xl font-bold leading-8 text-ink">{module.scenario}</h2>

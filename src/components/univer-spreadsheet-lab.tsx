@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
 import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { getSpreadsheetCardsForModule, getSpreadsheetModule } from "@/lib/spreadsheet-instruction-cards";
+import { PracticeTimer } from "@/components/practice-timer";
 import { Card, Pill, ProgressBar } from "./ui";
 
 type CellValue = string | number;
@@ -142,6 +143,14 @@ function readSnapshotCell(snapshot: unknown, cell: string) {
   return sheet.cellData[String(Number(match[2]) - 1)]?.[String(colToIndex(match[1]))]?.v;
 }
 
+function readSnapshotCellDisplay(snapshot: unknown, rowIndex: number, columnIndex: number, showFormulas = false) {
+  if (!snapshot || typeof snapshot !== "object") return "";
+  const workbook = snapshot as { sheetOrder?: string[]; sheets?: Record<string, { cellData?: Record<string, Record<string, { v?: unknown; f?: unknown }>> }> };
+  const sheetId = workbook.sheetOrder?.[0] || Object.keys(workbook.sheets || {})[0];
+  const cell = sheetId ? workbook.sheets?.[sheetId]?.cellData?.[String(rowIndex)]?.[String(columnIndex)] : undefined;
+  return String((showFormulas && cell?.f ? `=${cell.f}` : cell?.v) ?? "");
+}
+
 function chartDataFromSnapshot(snapshot: unknown, sourceRange: string) {
   const range = parseRange(sourceRange);
   if (!range) return [];
@@ -258,6 +267,16 @@ function snapshotToCsv(snapshot: unknown) {
   }
   while (rows.length && rows[rows.length - 1].every((value) => !value)) rows.pop();
   return rows.map((row) => row.map((value) => (value.includes(",") ? `"${value.replace(/"/g, '""')}"` : value)).join(",")).join("\n");
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[character] || character));
 }
 
 export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
@@ -495,6 +514,79 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     URL.revokeObjectURL(url);
   }
 
+  function openPrintPreview() {
+    const currentSnapshot = snapshot();
+    const selectedRange = parseRange(printSettings.printArea || "A1:F12") || { startRow: 0, endRow: 11, startColumn: 0, endColumn: 5 };
+    const rows = [];
+
+    for (let row = selectedRange.startRow; row <= selectedRange.endRow; row += 1) {
+      const cells = [];
+      for (let column = selectedRange.startColumn; column <= selectedRange.endColumn; column += 1) {
+        cells.push(readSnapshotCellDisplay(currentSnapshot, row, column, printSettings.showFormulas));
+      }
+      rows.push(cells);
+    }
+
+    const columnCount = Math.max(...rows.map((row) => row.length), 1);
+    const headingRow = printSettings.headings
+      ? `<tr><th></th>${Array.from({ length: columnCount }, (_, index) => `<th>${escapeHtml(cellAddress(0, selectedRange.startColumn + index).replace(/\d+$/, ""))}</th>`).join("")}</tr>`
+      : "";
+    const bodyRows = rows.map((row, rowIndex) => (
+      `<tr>${printSettings.headings ? `<th>${selectedRange.startRow + rowIndex + 1}</th>` : ""}${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
+    )).join("");
+    const preview = window.open("", "peak-study-spreadsheet-print", "width=1100,height=800");
+
+    if (!preview) {
+      setFeedback({
+        isCorrect: false,
+        canAutoCheck: true,
+        message: "The print preview was blocked by the browser.",
+        nextStep: "Allow pop-ups for this site, then open the print preview again."
+      });
+      return;
+    }
+
+    preview.document.write(`<!doctype html>
+      <html>
+        <head>
+          <title>Spreadsheet print preview</title>
+          <style>
+            @page { size: A4 ${printSettings.orientation.toLowerCase()}; margin: 14mm; }
+            * { box-sizing: border-box; }
+            body { margin: 0; background: #eef2f7; color: #111827; font-family: Arial, sans-serif; }
+            .toolbar { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: #0f172a; color: #fff; }
+            .toolbar button { border: 0; border-radius: 8px; background: #0f7490; color: #fff; cursor: pointer; font-weight: 700; padding: 10px 14px; }
+            .sheet { width: ${printSettings.orientation === "Landscape" ? "297mm" : "210mm"}; min-height: ${printSettings.orientation === "Landscape" ? "210mm" : "297mm"}; margin: 18px auto; background: #fff; padding: 18mm; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15); }
+            .sheet-header, .sheet-footer { min-height: 24px; color: #334155; font-size: 12px; }
+            .sheet-footer { margin-top: 16px; text-align: right; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; ${printSettings.scaleWidth === "1 page" ? "table-layout: fixed;" : ""} }
+            th, td { border: ${printSettings.gridlines || printSettings.headings ? "1px solid #94a3b8" : "1px solid transparent"}; min-width: 42px; padding: 6px 8px; text-align: left; vertical-align: top; word-break: break-word; }
+            th { background: #f1f5f9; font-weight: 700; }
+            @media print {
+              body { background: #fff; }
+              .toolbar { display: none; }
+              .sheet { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="toolbar">
+            <strong>Spreadsheet print preview</strong>
+            <button type="button" onclick="window.print()">Print / Save as PDF</button>
+          </div>
+          <main class="sheet">
+            <div class="sheet-header">${escapeHtml(printSettings.headerText || "Peak Study Hub")}</div>
+            <table aria-label="Spreadsheet print area">
+              <thead>${headingRow}</thead>
+              <tbody>${bodyRows}</tbody>
+            </table>
+            <div class="sheet-footer">${escapeHtml(printSettings.footerText || "Page 1")}</div>
+          </main>
+        </body>
+      </html>`);
+    preview.document.close();
+  }
+
   const chartData = isChartModule ? chartDataFromSnapshot(snapshot(), chartSettings.sourceRange) : [];
   const gridClass = isChartModule
     ? `grid gap-4 lg:h-[calc(100svh-120px)] lg:min-h-[640px] ${instructionsOpen ? "lg:grid-cols-[340px_minmax(0,1fr)_320px]" : "lg:grid-cols-[72px_minmax(0,1fr)_320px]"}`
@@ -543,6 +635,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             <p className="mt-2 text-sm leading-6 text-slate-600">Import or paste data, practise freely, then download your work. This module does not affect lesson progress.</p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <PracticeTimer compact />
+            <div className="mt-4">
             <label className="text-sm font-bold text-ink" htmlFor="csv-input">Paste CSV data</label>
             <textarea
               id="csv-input"
@@ -551,6 +645,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
               placeholder={"Name,Score\nAmina,18\nDaniel,22"}
               className="mt-2 min-h-40 w-full rounded-lg border border-line p-3 text-sm outline-none focus:border-ocean"
             />
+            </div>
             {feedback && (
               <div className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
                 <p className="font-semibold">{feedback.message}</p>
@@ -827,6 +922,14 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
               <h2 className="font-semibold">Print setup</h2>
             </div>
             <p className="mt-1 text-sm text-slate-600">Prepare the worksheet for print or PDF evidence.</p>
+            <button
+              type="button"
+              onClick={openPrintPreview}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ocean px-3 py-2.5 text-sm font-semibold text-white hover:bg-ocean/90"
+            >
+              <Printer size={16} aria-hidden="true" />
+              Open print preview
+            </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <div className="grid gap-3">

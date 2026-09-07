@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
+import { PracticeTimer } from "@/components/practice-timer";
 import { getDatabaseCardsForModule, getDatabaseModule, sourceTables } from "@/lib/database-instruction-cards";
 import type { DatabaseCard, DatabaseExpectedResult, DatabaseTable } from "@/lib/database-instruction-cards";
 
@@ -168,6 +169,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [toolsOpen, setToolsOpen] = useState(false);
   const card = cards[activeIndex];
+  const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const selected = tables.find((table) => table.name === selectedTable) || tables[0];
   const fields = selected?.fields || [];
   const currentComplete = card ? completed.includes(card.id) : false;
@@ -347,6 +349,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
               <div className="mt-3"><div className="mb-1 flex justify-between text-sm font-medium"><span>Progress</span><span>{completed.length}/{cards.length}</span></div><ProgressBar value={progress} /></div>
             </div>
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+              {isFreePractice && <PracticeTimer compact />}
               {mode === "study" ? (
                 <>
                   <section className="rounded-lg border border-line bg-mist p-3"><p className="text-xs font-bold uppercase tracking-wide text-ocean">Study focus</p><h2 className="mt-1 text-lg font-bold leading-7">{card.goal}</h2></section>

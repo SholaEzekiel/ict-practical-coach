@@ -514,6 +514,39 @@ export const flowchartModules: FlowchartModule[] = [
       { id: "e9", from: "output", to: "repeat" },
       { id: "e10", from: "repeat", to: "continue" }
     ]
+  },
+  {
+    id: "free-practice",
+    title: "Free practice",
+    description: "Build your own algorithm flowchart, test your timing, and practise without locked progression.",
+    allowedBlocks: ["start", "input", "process", "decision", "output", "stop"],
+    scenario: "Create a clear flowchart for any classroom, business, or exam-style problem you want to practise.",
+    inputs: ["Choose your own test input values"],
+    expectedOutputs: ["Write the output you expect, then compare it with your flowchart"],
+    steps: [
+      "Choose a simple problem, such as checking a password, calculating a total, or deciding whether a learner passes.",
+      "Add one START block and one STOP block.",
+      "Add input blocks for the values the algorithm needs.",
+      "Add process blocks for calculations or assignments.",
+      "Add decision blocks only where the algorithm must choose between paths.",
+      "Connect every block in a sensible order, using YES and NO labels on decision paths.",
+      "Run validation to check the basic structure, then use your own test data to review the logic."
+    ],
+    support: [
+      "Free practice is for experimenting, so it checks structure rather than one model answer.",
+      "A readable flowchart should have a single start, a clear end, connected paths, and meaningful labels.",
+      "Use the timer to practise completing a flowchart within a classroom or exam-style time limit."
+    ],
+    starterNodes: [
+      { id: "start", type: "start", label: "START", x: 250, y: 35 },
+      { id: "stop", type: "stop", label: "STOP", x: 250, y: 300 }
+    ],
+    starterEdges: [],
+    solutionNodes: [
+      { id: "start", type: "start", label: "START", x: 250, y: 35 },
+      { id: "stop", type: "stop", label: "STOP", x: 250, y: 300 }
+    ],
+    solutionEdges: []
   }
 ];
 

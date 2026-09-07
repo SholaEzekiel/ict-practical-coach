@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { ictTheoryModules } from "@/lib/ict-theory-data";
 import type { IctTheoryLesson } from "@/lib/ict-theory-data";
@@ -56,6 +56,7 @@ type VisualSearch = {
 };
 
 const visualFileNames = ["01-concept.jpg", "02-detail.jpg", "03-real-world.jpg", "04-context.jpg"];
+const quizScoreStorageKey = "peak-ict-theory-quiz-scoreboard";
 
 const visualSearchesByLesson: Record<string, VisualSearch[]> = {
   "ict-1-hardware-software": [
@@ -304,6 +305,8 @@ export function IctTheoryHub() {
   const [quizOrder, setQuizOrder] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [quizAttempts, setQuizAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const activeModule = ictTheoryModules.find((module) => module.id === activeModuleId) || ictTheoryModules[0];
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
@@ -322,22 +325,61 @@ export function IctTheoryHub() {
     setSelectedAnswer(null);
   }, [activeModule?.id, activeModule?.quiz]);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(quizScoreStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as Record<string, { correct: number; attempted: number }>;
+      if (parsed && typeof parsed === "object") setQuizAttempts(parsed);
+    } catch {
+      window.localStorage.removeItem(quizScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(quizScoreStorageKey, JSON.stringify(quizAttempts));
+  }, [quizAttempts]);
+
   function chooseModule(moduleId: string) {
     const nextModule = ictTheoryModules.find((module) => module.id === moduleId);
     setActiveModuleId(moduleId);
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
     setSelectedAnswer(null);
+    scrollToContentOnMobile();
   }
 
   function chooseContent(moduleId: string, target: ContentTarget) {
     if (moduleId !== activeModuleId) setActiveModuleId(moduleId);
     setActiveLessonId(target);
     setSelectedAnswer(null);
+    scrollToContentOnMobile();
+  }
+
+  function scrollToContentOnMobile() {
+    if (typeof window === "undefined" || window.innerWidth >= 1280) return;
+    window.requestAnimationFrame(() => {
+      contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function nextQuestion() {
     setQuizIndex((index) => index + 1);
     setSelectedAnswer(null);
+  }
+
+  function chooseAnswer(index: number) {
+    if (!quiz || selectedAnswer !== null) return;
+    setSelectedAnswer(index);
+    setQuizAttempts((current) => {
+      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
+      return {
+        ...current,
+        [activeModule.id]: {
+          attempted: moduleScore.attempted + 1,
+          correct: moduleScore.correct + (index === quiz.correctIndex ? 1 : 0)
+        }
+      };
+    });
   }
 
   return (
@@ -404,7 +446,7 @@ export function IctTheoryHub() {
         })}
       </section>
 
-      <div className="min-w-0 space-y-5">
+      <div ref={contentRef} className="min-w-0 scroll-mt-24 space-y-5">
         <Card>
           <Pill>Unit {activeModule?.moduleId}</Pill>
           <h2 className="mt-4 text-3xl font-bold">{activeModule?.moduleTitle}</h2>
@@ -452,6 +494,32 @@ export function IctTheoryHub() {
                   <h2 className="text-2xl font-bold">Multiple choice questions</h2>
                 </div>
                 <p className="mt-3 leading-7 text-slate-600">Read the scenario, then choose the best ICT theory answer for this module.</p>
+                <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                  <p className="text-sm font-bold text-ink">Scoreboard</p>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ocean">{quizAttempts[activeModule.id]?.correct || 0}</p>
+                      <p className="text-xs text-slate-600">Correct</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">{quizAttempts[activeModule.id]?.attempted || 0}</p>
+                      <p className="text-xs text-slate-600">Answered</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">
+                        {quizAttempts[activeModule.id]?.attempted ? Math.round(((quizAttempts[activeModule.id]?.correct || 0) / quizAttempts[activeModule.id].attempted) * 100) : 0}%
+                      </p>
+                      <p className="text-xs text-slate-600">Accuracy</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setQuizAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }))}
+                    className="mt-3 text-xs font-bold text-ocean hover:underline"
+                  >
+                    Reset module score
+                  </button>
+                </div>
                 <div className="mt-5">
                   <div className="mb-2 flex justify-between text-sm font-medium">
                     <span>{activeModule?.moduleTitle}</span>
@@ -472,7 +540,7 @@ export function IctTheoryHub() {
                       <button
                         key={option}
                         type="button"
-                        onClick={() => setSelectedAnswer(index)}
+                        onClick={() => chooseAnswer(index)}
                         className={`flex items-center justify-between rounded-lg border bg-white px-4 py-3 text-left font-bold transition ${
                           chosen ? (correct ? "border-emerald-300 text-emerald-700" : "border-amber-300 text-amber-700") : "border-line text-ink hover:border-ocean"
                         }`}

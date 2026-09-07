@@ -28,6 +28,7 @@ import {
   Underline
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
+import { PracticeTimer } from "@/components/practice-timer";
 import { getWordProcessingCardsForModule, getWordProcessingModule } from "@/lib/word-processing-instruction-cards";
 import type { WordProcessingExpectedResult, WordProcessingInstructionCard } from "@/lib/word-processing-instruction-cards";
 
@@ -257,6 +258,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const [documentClasses, setDocumentClasses] = useState("");
 
   const card = cards[activeIndex];
+  const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const currentComplete = completed.includes(card.id);
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
@@ -437,6 +439,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+          {isFreePractice && <PracticeTimer compact />}
           <section className="rounded-lg border border-line bg-mist p-4">
             <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
             <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>

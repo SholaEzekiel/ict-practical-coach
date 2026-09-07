@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "@univerjs/preset-sheets-core/lib/index.css";
 import "./globals.css";
+import { PwaRegistrar } from "@/components/pwa-registrar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { PRODUCT_NAME, SHORT_DISCLAIMER } from "@/lib/constants";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/"
   },
+  manifest: "/manifest.webmanifest",
   robots: {
     index: true,
     follow: true,
@@ -43,6 +45,10 @@ export const metadata: Metadata = {
   ]
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0f7490"
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -52,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <SiteFooter disclaimer={SHORT_DISCLAIMER} />
         </div>
+        <PwaRegistrar />
       </body>
     </html>
   );

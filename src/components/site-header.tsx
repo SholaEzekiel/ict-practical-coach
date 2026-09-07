@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import { InstallAppButton } from "@/components/install-app-button";
 import { PRODUCT_NAME } from "@/lib/constants";
 
 function PeakMark() {
@@ -65,12 +66,15 @@ export function SiteHeader() {
             Contact
           </Link>
         </nav>
-        <Link
-          href="/subjects"
-          className="rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90"
-        >
-          Start Practice
-        </Link>
+        <div className="flex items-center gap-2">
+          <InstallAppButton />
+          <Link
+            href="/subjects"
+            className="rounded-lg bg-ocean px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ocean/90"
+          >
+            Start Practice
+          </Link>
+        </div>
       </div>
     </header>
   );

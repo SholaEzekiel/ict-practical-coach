@@ -27,6 +27,7 @@ import {
   Type
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
+import { PracticeTimer } from "@/components/practice-timer";
 import { getPresentationCardsForModule, getPresentationModule } from "@/lib/presentation-instruction-cards";
 import type { PresentationCard, PresentationObject, PresentationSlide } from "@/lib/presentation-instruction-cards";
 
@@ -251,6 +252,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const card = cards[activeIndex];
+  const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
   const selected = slides[activeSlide] || slides[0] || normaliseSlide(emptySlide);
@@ -454,6 +456,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
               </div>
             </div>
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+              {isFreePractice && <PracticeTimer compact />}
               <section className="rounded-lg border border-line bg-mist p-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
                 <h2 className="mt-2 text-lg font-bold leading-7">{card.goal}</h2>

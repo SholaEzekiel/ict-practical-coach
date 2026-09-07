@@ -7,6 +7,7 @@ import grapesjs from "grapesjs";
 import type { Editor as GrapesEditor } from "grapesjs";
 import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen, Upload } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
+import { PracticeTimer } from "@/components/practice-timer";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
 
@@ -219,6 +220,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const [mode, setMode] = useState<"html" | "css">("html");
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const card = cards[activeIndex];
+  const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const [html, setHtml] = useState(card?.starterHtml || "");
   const [css, setCss] = useState(card?.starterCss || "");
   const [activityFiles, setActivityFiles] = useState<ActivityFile[]>([]);
@@ -407,6 +409,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               onCut={(event) => event.preventDefault()}
               onContextMenu={(event) => event.preventDefault()}
             >
+              {isFreePractice && <PracticeTimer compact />}
               <section className="rounded-lg border border-line bg-gradient-to-br from-mist to-white p-4">
                 <p className="text-sm font-semibold text-ocean">Goal</p>
                 <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>

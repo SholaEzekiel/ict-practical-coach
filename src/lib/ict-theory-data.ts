@@ -1472,7 +1472,274 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
   ]
 };
 
+const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["studyBlocks"]>> = {
+  "ict-1-hardware-software": [
+    {
+      heading: "Useful Vocabulary",
+      points: [
+        "Internal hardware includes the processor, motherboard, RAM, ROM, video card, sound card, and internal storage.",
+        "External hardware includes input and output devices such as keyboards, mice, monitors, printers, speakers, and microphones.",
+        "Application software is written for user tasks; system software manages the computer and supports hardware devices."
+      ]
+    }
+  ],
+  "ict-1-cpu-memory": [
+    {
+      heading: "Processing Sequence",
+      points: [
+        "The CPU fetches instructions and data from memory, decodes what must happen, then executes the instruction.",
+        "Cache improves speed by keeping frequently used instructions close to the processor.",
+        "RAM is temporary working space; ROM keeps start-up instructions; secondary storage keeps files for later use."
+      ]
+    }
+  ],
+  "ict-1-interfaces": [
+    {
+      heading: "Interface Detail",
+      points: [
+        "A GUI is built around windows, icons, menus, and pointers so users can select commands visually.",
+        "A CLI requires typed commands, so it suits trained users who need precision, scripting, or remote administration.",
+        "Operating systems also handle device drivers, file management, user accounts, memory, and security."
+      ]
+    }
+  ],
+  "ict-2-manual-input": [
+    {
+      heading: "Device Selection",
+      points: [
+        "Choose a keyboard or numeric keypad for accurate text, numbers, codes, and command entry.",
+        "Choose a mouse, touchpad, trackerball, joystick, or touchscreen when pointing, dragging, or selection is more important.",
+        "Manual input is flexible, but the user can introduce mistakes and may become slower or uncomfortable during long sessions."
+      ]
+    }
+  ],
+  "ict-2-direct-entry": [
+    {
+      heading: "Recognition Methods",
+      points: [
+        "Magnetic stripe, chip and PIN, contactless card, RFID, MICR, OMR, and OCR reduce the amount of typing required.",
+        "MICR is suited to banking documents because magnetic characters can be read accurately and are harder to alter.",
+        "OMR reads marks on forms; OCR converts printed text into editable text; RFID reads tagged items using radio waves."
+      ]
+    }
+  ],
+  "ict-2-output": [
+    {
+      heading: "Choosing Output",
+      points: [
+        "A monitor, projector, speaker, printer, plotter, actuator, or 3D printer should be chosen for the required output type.",
+        "Laser printers suit high-volume text, inkjet printers suit colour images at low volume, and dot-matrix printers suit multipart forms.",
+        "Actuators are output devices in control systems because they cause real-world movement or action."
+      ]
+    }
+  ],
+  "ict-3-magnetic": [
+    {
+      heading: "Access and Backup",
+      points: [
+        "Hard disks usually provide direct access, so required files can be found without reading every item in order.",
+        "Magnetic tape is often used for large backup archives because it has high capacity but serial access.",
+        "Magnetic storage can be useful for bulk storage, but moving parts make it more vulnerable to shock."
+      ]
+    }
+  ],
+  "ict-3-solid-state": [
+    {
+      heading: "Flash Memory",
+      points: [
+        "Solid-state media store data electronically in flash memory rather than on spinning surfaces.",
+        "USB drives, memory cards, and SSDs are portable, quiet, compact, and resistant to movement.",
+        "They are excellent for mobile devices, but cost per gigabyte and limited write cycles can matter."
+      ]
+    }
+  ],
+  "ict-3-optical-cloud": [
+    {
+      heading: "Optical and Online Storage",
+      points: [
+        "CD, DVD, and Blu-ray discs are read by lasers; Blu-ray uses a shorter wavelength that supports higher capacity.",
+        "Write-once discs are useful where files should not be changed after recording; rewritable discs can be reused.",
+        "Cloud storage is convenient for synchronising, sharing, and remote access, but depends on internet service and account security."
+      ]
+    }
+  ],
+  "ict-4-network-types": [
+    {
+      heading: "Network Scope",
+      points: [
+        "A LAN is usually within one site such as a home, school, or office and is often controlled by one organisation.",
+        "A WAN connects larger geographical areas and may use telecoms links, leased lines, or the internet.",
+        "Networks make sharing easier, but failure, malware, or poor security can affect many users at once."
+      ]
+    }
+  ],
+  "ict-4-hardware": [
+    {
+      heading: "Network Devices",
+      points: [
+        "A router sends packets between networks, commonly between a local network and the internet.",
+        "A switch connects devices inside a LAN and forwards data to the correct port using device addresses.",
+        "Modems, bridges, wireless access points, and network interface cards each support connection or data transfer."
+      ]
+    }
+  ],
+  "ict-4-wired-wireless": [
+    {
+      heading: "Transmission Choice",
+      points: [
+        "Ethernet and fibre connections are usually more stable and less affected by interference than wireless links.",
+        "Wi-Fi and mobile networks support mobility but can be affected by walls, distance, congestion, and interception risk.",
+        "Bluetooth is best for short-range device links such as headphones, keyboards, controllers, and sensors."
+      ]
+    }
+  ],
+  "ict-5-employment": [
+    {
+      heading: "Economic Impact",
+      points: [
+        "ICT can increase employment in areas such as programming, web design, delivery logistics, cybersecurity, and technical support.",
+        "It can reduce employment where repetitive office, retail, or factory tasks are automated.",
+        "Strong answers normally consider both the business benefit and the effect on workers who may need retraining."
+      ]
+    }
+  ],
+  "ict-5-teleworking": [
+    {
+      heading: "Working Patterns",
+      points: [
+        "Remote work can use email, video conferencing, shared documents, cloud storage, and secure remote access.",
+        "Workers may save travel time and gain flexibility, while employers may reduce office space and operating costs.",
+        "Problems include isolation, distractions, monitoring difficulty, data security, and dependence on reliable internet."
+      ]
+    }
+  ],
+  "ict-5-health": [
+    {
+      heading: "Safe Use",
+      points: [
+        "Repetitive strain injury may be reduced by correct posture, wrist support, breaks, and suitable input devices.",
+        "Eye strain may be reduced by screen positioning, lighting control, breaks, and suitable brightness.",
+        "Safe working also includes cable management, enough desk space, stable equipment, and accessible design."
+      ]
+    }
+  ],
+  "ict-6-expert-systems": [
+    {
+      heading: "Expert System Flow",
+      points: [
+        "Experts provide facts and rules that are stored in the knowledge base.",
+        "The user answers questions through an interface, then the inference engine applies rules to reach a conclusion.",
+        "An explanation facility should show why the system gave its advice, which helps users judge whether to trust it."
+      ]
+    }
+  ],
+  "ict-6-transaction-systems": [
+    {
+      heading: "Data Handling Applications",
+      points: [
+        "Booking, banking, library, retail, and stock systems all validate input, search records, update data, and produce output.",
+        "A card transaction may check card details, available funds, merchant details, authorisation, and account balances.",
+        "Retail stock control can reduce stock automatically after a sale and reorder when stock falls below a set level."
+      ]
+    }
+  ],
+  "ict-6-control-systems": [
+    {
+      heading: "Monitoring and Control",
+      points: [
+        "Monitoring systems collect sensor readings and may display or record them for humans.",
+        "Control systems compare sensor readings with preset values and send signals to actuators when action is needed.",
+        "Examples include greenhouses, ovens, burglar alarms, washing machines, manufacturing robots, and patient monitoring."
+      ]
+    }
+  ],
+  "ict-7-analysis": [
+    {
+      heading: "Analysis Evidence",
+      points: [
+        "Analysis identifies inputs, outputs, processing, files, current problems, user needs, and constraints.",
+        "Observation gives realistic workflow evidence; interviews give detail; questionnaires gather wider opinions; documents show current data.",
+        "Good analysis prevents a new system from solving the wrong problem."
+      ]
+    }
+  ],
+  "ict-7-design-testing": [
+    {
+      heading: "Design and Test Planning",
+      points: [
+        "Design decisions include file structures, fields, data types, validation rules, screen layouts, reports, and algorithms.",
+        "Normal data should be accepted, abnormal data should be rejected, and extreme data should test boundary values.",
+        "A test plan records the test data, expected outcome, actual outcome, and whether the system passed."
+      ]
+    }
+  ],
+  "ict-7-implementation": [
+    {
+      heading: "Changeover Methods",
+      points: [
+        "Direct changeover is fast but risky because the old system stops immediately.",
+        "Parallel running is safer because both systems run together, but it needs more time, staff effort, and cost.",
+        "Pilot and phased implementation reduce risk by introducing the system to a small area or one part at a time."
+      ]
+    }
+  ],
+  "ict-8-threats": [
+    {
+      heading: "Threat Recognition",
+      points: [
+        "Viruses, worms, trojans, spyware, ransomware, phishing, pharming, smishing, spam, and key logging attack users in different ways.",
+        "Phishing depends on persuading a user to click or disclose information; pharming redirects the user to a fake site.",
+        "A strong answer names the threat, explains the harm, and matches it to a suitable protection."
+      ]
+    }
+  ],
+  "ict-8-protection": [
+    {
+      heading: "Layered Protection",
+      points: [
+        "Strong passwords should combine length, letters, numbers, and symbols and should not use obvious personal words.",
+        "Firewalls monitor and control traffic between a device or network and external networks.",
+        "Security also includes antivirus, updates, access rights, backups, biometric checks, and two-factor authentication."
+      ]
+    }
+  ],
+  "ict-8-encryption": [
+    {
+      heading: "Keys and Privacy",
+      points: [
+        "Encryption turns readable information into ciphertext so intercepted data cannot be understood without the correct key.",
+        "Encryption protects confidentiality, but it does not stop files being deleted, lost, or sent to the wrong person.",
+        "It is used in secure websites, messaging, stored files, wireless networks, and payment systems."
+      ]
+    }
+  ],
+  "ict-9-audience": [
+    {
+      heading: "Audience Appreciation",
+      points: [
+        "Audience, purpose, language, reading level, accessibility, images, colour, and layout all affect communication quality.",
+        "Content for children, adults, experts, customers, or school users should not use the same vocabulary or density.",
+        "Legal, moral, ethical, and cultural issues should be considered when producing public digital material."
+      ]
+    }
+  ],
+  "ict-9-netiquette": [
+    {
+      heading: "Responsible Communication",
+      points: [
+        "Formal email should use an appropriate subject, greeting, tone, spelling, attachments, and recipient list.",
+        "Confidential messages should not be forwarded without permission, and private data should not be posted publicly.",
+        "Online content should respect copyright, avoid offensive language, and avoid spreading spam, rumours, or harmful links."
+      ]
+    }
+  ]
+};
+
 export const ictTheoryModules: IctTheoryModule[] = baseIctTheoryModules.map((module) => ({
   ...module,
+  lessons: module.lessons.map((lesson) => ({
+    ...lesson,
+    studyBlocks: [...(lesson.studyBlocks || []), ...(ictTheoryStudyAdditions[lesson.id] || [])]
+  })),
   quiz: [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])]
 }));
