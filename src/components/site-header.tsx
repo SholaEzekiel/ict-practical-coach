@@ -57,6 +57,12 @@ export function SiteHeader() {
               <Link href="/subjects/business" className="block rounded-md px-3 py-2 hover:bg-mist">
                 Business
               </Link>
+              <Link href="/subjects/business/notes" className="block rounded-md px-3 py-2 hover:bg-mist">
+                Business Notes
+              </Link>
+              <Link href="/subjects/business/case-study" className="block rounded-md px-3 py-2 hover:bg-mist">
+                Business Case Study
+              </Link>
             </div>
           </div>
           <Link href="/about" className="rounded-lg px-2 py-2 font-medium hover:text-ocean">

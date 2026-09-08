@@ -4,8 +4,8 @@ import { ArrowRight, BookOpenCheck, BriefcaseBusiness, CheckCircle2, Laptop, Mai
 const subjectLinks = [
   {
     title: "ICT Practical",
-    description: "Spreadsheet modules are live, with word processing, database, presentation, and web-authoring practice next.",
-    href: "/subjects/ict/spreadsheets",
+    description: "Choose from spreadsheet, word processing, database, presentation, flowchart, and web-authoring practice.",
+    href: "/subjects/ict",
     icon: Laptop
   },
   {
@@ -42,7 +42,7 @@ export default function HomePage() {
               Peak Study Hub helps students turn instructions into action through structured modules, familiar interfaces, clear goals, and result-focused checks.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/subjects/ict/spreadsheets" className="inline-flex items-center gap-2 rounded-lg bg-ocean px-5 py-3 font-semibold text-white shadow-sm hover:bg-ocean/90">
+              <Link href="/subjects" className="inline-flex items-center gap-2 rounded-lg bg-ocean px-5 py-3 font-semibold text-white shadow-sm hover:bg-ocean/90">
                 Start Practice <ArrowRight size={18} aria-hidden="true" />
               </Link>
               <Link href="/subjects" className="inline-flex items-center rounded-lg border border-line bg-white px-5 py-3 font-semibold text-ink hover:border-ocean">

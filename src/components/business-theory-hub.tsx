@@ -2,14 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
-import { businessCaseStudyModules } from "@/lib/business-case-study-data";
 import { businessNoteModules } from "@/lib/business-note-data";
 import type { BusinessNoteLesson } from "@/lib/business-note-data";
 import { businessGlossaryTerms } from "@/lib/business-theory-data";
 import type { BusinessTheoryLesson } from "@/lib/business-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 
-type ContentTarget = string | "module-glossary" | "module-quiz" | "case-study-practice";
+type ContentTarget = string | "module-glossary" | "module-quiz";
 type BusinessKnowledgeQuestion = {
   id: string;
   prompt: string;
@@ -19,7 +18,6 @@ type BusinessKnowledgeQuestion = {
 
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
 const businessQuizScoreStorageKey = "peak-business-quiz-scoreboard";
-const businessCaseScoreStorageKey = "peak-business-case-scoreboard";
 const businessMinimumQuizCount = 60;
 
 const businessExamNoteAdditions: Record<string, string> = {
@@ -254,10 +252,6 @@ export function BusinessTheoryHub() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [quizAttempts, setQuizAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
-  const [caseIndex, setCaseIndex] = useState(0);
-  const [caseQuestionIndex, setCaseQuestionIndex] = useState(0);
-  const [selectedCaseAnswer, setSelectedCaseAnswer] = useState<number | null>(null);
-  const [caseAttempts, setCaseAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
 
   const activeModule = businessNoteModules.find((module) => module.id === activeModuleId) || businessNoteModules[0];
   const moduleGlossary = useMemo(
@@ -265,12 +259,6 @@ export function BusinessTheoryHub() {
     [activeModule?.moduleId],
   );
   const knowledgeQuestions = useMemo(() => buildKnowledgeQuestions(moduleGlossary), [moduleGlossary]);
-  const moduleCaseData = businessCaseStudyModules.find((module) => module.unitId === activeModule?.moduleId);
-  const activeCase = moduleCaseData?.cases[caseIndex % Math.max(1, moduleCaseData.cases.length)];
-  const activeCaseQuestion = activeCase?.questions[caseQuestionIndex % Math.max(1, activeCase.questions.length)];
-  const activeCaseOptions = useMemo(() => (
-    activeCaseQuestion ? shuffle(activeCaseQuestion.options.map((option, index) => ({ option, index }))) : []
-  ), [activeCaseQuestion]);
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
 
   useEffect(() => {
@@ -278,12 +266,6 @@ export function BusinessTheoryHub() {
     setQuizIndex(0);
     setSelectedAnswer(null);
   }, [knowledgeQuestions]);
-
-  useEffect(() => {
-    setCaseIndex(0);
-    setCaseQuestionIndex(0);
-    setSelectedCaseAnswer(null);
-  }, [activeModule?.id]);
 
   useEffect(() => {
     try {
@@ -300,31 +282,12 @@ export function BusinessTheoryHub() {
     window.localStorage.setItem(businessQuizScoreStorageKey, JSON.stringify(quizAttempts));
   }, [quizAttempts]);
 
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(businessCaseScoreStorageKey);
-      if (!saved) return;
-      const parsed = JSON.parse(saved) as Record<string, { correct: number; attempted: number }>;
-      if (parsed && typeof parsed === "object") setCaseAttempts(parsed);
-    } catch {
-      window.localStorage.removeItem(businessCaseScoreStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(businessCaseScoreStorageKey, JSON.stringify(caseAttempts));
-  }, [caseAttempts]);
-
   const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
   const quizQuestion = knowledgeQuestions[orderedIndex] || knowledgeQuestions[0];
   const quizTerm = quizQuestion?.correct;
   const options = quizQuestion?.options || [];
   const isCorrect = selectedAnswer === quizTerm?.title;
   const quizProgress = knowledgeQuestions.length ? ((quizIndex % knowledgeQuestions.length) / knowledgeQuestions.length) * 100 : 0;
-  const caseTotalQuestions = moduleCaseData?.cases.reduce((total, caseStudy) => total + caseStudy.questions.length, 0) || 0;
-  const caseCurrentPosition = activeCase && activeCaseQuestion ? caseIndex * activeCase.questions.length + caseQuestionIndex + 1 : 0;
-  const caseProgress = caseTotalQuestions ? ((caseCurrentPosition - 1) / caseTotalQuestions) * 100 : 0;
-  const isCaseCorrect = selectedCaseAnswer === activeCaseQuestion?.correctIndex;
 
   function chooseModule(moduleId: string) {
     const nextModule = businessNoteModules.find((module) => module.id === moduleId);
@@ -339,7 +302,6 @@ export function BusinessTheoryHub() {
     }
     setActiveLessonId(target);
     setSelectedAnswer(null);
-    setSelectedCaseAnswer(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -361,46 +323,6 @@ export function BusinessTheoryHub() {
         }
       };
     });
-  }
-
-  function chooseCaseAnswer(answerIndex: number) {
-    if (!activeCaseQuestion || selectedCaseAnswer !== null) return;
-    setSelectedCaseAnswer(answerIndex);
-    setCaseAttempts((current) => {
-      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
-      return {
-        ...current,
-        [activeModule.id]: {
-          attempted: moduleScore.attempted + 1,
-          correct: moduleScore.correct + (answerIndex === activeCaseQuestion.correctIndex ? 1 : 0)
-        }
-      };
-    });
-  }
-
-  function nextCaseQuestion() {
-    if (!activeCase || !moduleCaseData) return;
-    const nextQuestionIndex = caseQuestionIndex + 1;
-    if (nextQuestionIndex < activeCase.questions.length) {
-      setCaseQuestionIndex(nextQuestionIndex);
-    } else {
-      setCaseQuestionIndex(0);
-      setCaseIndex((index) => (index + 1) % moduleCaseData.cases.length);
-    }
-    setSelectedCaseAnswer(null);
-  }
-
-  function previousCaseQuestion() {
-    if (!activeCase || !moduleCaseData) return;
-    if (caseQuestionIndex > 0) {
-      setCaseQuestionIndex((index) => index - 1);
-    } else {
-      const previousCaseIndex = caseIndex === 0 ? moduleCaseData.cases.length - 1 : caseIndex - 1;
-      const previousCase = moduleCaseData.cases[previousCaseIndex];
-      setCaseIndex(previousCaseIndex);
-      setCaseQuestionIndex(previousCase.questions.length - 1);
-    }
-    setSelectedCaseAnswer(null);
   }
 
   return (
@@ -457,16 +379,6 @@ export function BusinessTheoryHub() {
                       }`}
                     >
                       <span className="min-w-0 break-words font-bold">Multiple choice questions</span>
-                      <ChevronRight size={17} className="flex-none" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => chooseContent(module.id, "case-study-practice")}
-                      className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left transition ${
-                        activeLessonId === "case-study-practice" ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
-                      }`}
-                    >
-                      <span className="min-w-0 break-words font-bold">Case study practice</span>
                       <ChevronRight size={17} className="flex-none" aria-hidden="true" />
                     </button>
                   </div>
@@ -596,103 +508,6 @@ export function BusinessTheoryHub() {
           </Card>
         )}
 
-        {activeLessonId === "case-study-practice" && activeCase && activeCaseQuestion && (
-          <Card>
-            <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
-              <div>
-                <div className="flex items-center gap-2">
-                  <ListChecks size={20} className="text-ocean" aria-hidden="true" />
-                  <h2 className="text-2xl font-bold">Case study practice</h2>
-                </div>
-                <p className="mt-3 leading-7 text-slate-600">Practise spotting Knowledge, Application, Analysis, and Evaluation in exam-style responses.</p>
-                <div className="mt-4 rounded-lg border border-line bg-white p-4">
-                  <p className="text-sm font-bold text-ink">Scoreboard</p>
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
-                    <div className="rounded-lg bg-mist p-3">
-                      <p className="font-bold text-ocean">{caseAttempts[activeModule.id]?.correct || 0}</p>
-                      <p className="text-xs text-slate-600">Correct</p>
-                    </div>
-                    <div className="rounded-lg bg-mist p-3">
-                      <p className="font-bold text-ink">{caseAttempts[activeModule.id]?.attempted || 0}</p>
-                      <p className="text-xs text-slate-600">Answered</p>
-                    </div>
-                    <div className="rounded-lg bg-mist p-3">
-                      <p className="font-bold text-ink">
-                        {caseAttempts[activeModule.id]?.attempted ? Math.round(((caseAttempts[activeModule.id]?.correct || 0) / caseAttempts[activeModule.id].attempted) * 100) : 0}%
-                      </p>
-                      <p className="text-xs text-slate-600">Accuracy</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCaseAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }))}
-                    className="mt-3 text-xs font-bold text-ocean hover:underline"
-                  >
-                    Reset module score
-                  </button>
-                </div>
-                <div className="mt-5">
-                  <div className="mb-2 flex justify-between text-sm font-medium">
-                    <span>Case {caseIndex + 1}/{moduleCaseData?.cases.length || 1}</span>
-                    <span>{caseCurrentPosition}/{caseTotalQuestions}</span>
-                  </div>
-                  <ProgressBar value={caseProgress} />
-                </div>
-                <div className="mt-5 rounded-lg border border-line bg-mist p-5">
-                  <Pill>Unit {activeModule.moduleId}</Pill>
-                  <h3 className="mt-3 text-xl font-bold text-ink">{activeCase.title}</h3>
-                  <p className="mt-3 leading-7 text-slate-700">{activeCase.scenario}</p>
-                  <div className="mt-4 grid gap-2">
-                    {activeCase.details.map((detail) => (
-                      <p key={detail} className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-700">{detail}</p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-line bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-wide text-ocean">{activeCaseQuestion.skill} skill focus</p>
-                <p className="mt-3 text-lg font-semibold leading-8 text-ink">{activeCaseQuestion.question}</p>
-                <div className="mt-5 grid gap-3">
-                  {activeCaseOptions.map(({ option, index }) => {
-                    const chosen = selectedCaseAnswer === index;
-                    const correct = activeCaseQuestion.correctIndex === index;
-                    return (
-                      <button
-                        key={`${activeCaseQuestion.id}-${option}`}
-                        type="button"
-                        onClick={() => chooseCaseAnswer(index)}
-                        className={`rounded-lg border px-4 py-3 text-left font-semibold leading-7 transition ${
-                          chosen ? (correct ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-amber-300 bg-amber-50 text-amber-800") : "border-line bg-white text-ink hover:border-ocean"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedCaseAnswer !== null && (
-                  <div className={`mt-4 rounded-lg border p-4 ${isCaseCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-                    <p className="font-bold">{isCaseCorrect ? "Correct" : `Correct answer: ${activeCaseQuestion.options[activeCaseQuestion.correctIndex]}`}</p>
-                    <div className="mt-2 space-y-2">
-                      {activeCaseQuestion.feedback.map((line) => (
-                        <p key={line} className="text-sm leading-6 text-slate-700">{line}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <button type="button" onClick={previousCaseQuestion} className="rounded-lg border border-line bg-white px-4 py-2 text-sm font-bold text-ink hover:border-ocean">
-                    Previous
-                  </button>
-                  <button type="button" onClick={nextCaseQuestion} className="rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white">
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        )}
       </div>
     </div>
   );

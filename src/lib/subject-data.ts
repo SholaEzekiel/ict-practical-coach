@@ -86,24 +86,16 @@ export const ictPracticeAreas = [
 
 export const businessPracticeAreas = [
   {
-    title: "Terminology",
-    summary: "Short drills for key business words, definitions, examples, and common confusions.",
-    actions: ["define", "identify", "match", "recall"]
+    title: "Business Notes",
+    href: "/subjects/business/notes",
+    summary: "Concise revision notes, glossary and knowledge-focused MCQ practice.",
+    actions: ["revise notes", "use glossary", "answer MCQs", "build knowledge"]
   },
   {
-    title: "Application",
-    summary: "Scenario-based practice that trains students to apply ideas to the business in the question.",
-    actions: ["select context", "connect concept", "write applied points"]
-  },
-  {
-    title: "Analysis",
-    summary: "Cause-and-effect chains that move answers beyond simple statements.",
-    actions: ["explain impact", "link consequences", "develop chains"]
-  },
-  {
-    title: "Evaluation",
-    summary: "Judgement practice for weighing options, using evidence, and writing balanced conclusions.",
-    actions: ["compare options", "justify", "evaluate", "conclude"]
+    title: "Business Case Study Practice",
+    href: "/subjects/business/case-study",
+    summary: "Applied business scenarios for developing Application, Analysis and Evaluation skills.",
+    actions: ["read cases", "apply evidence", "analyse impact", "evaluate choices"]
   }
 ];
 
@@ -138,10 +130,8 @@ export const subjects: SubjectArea[] = [
     summary:
       "Practice business terms, application, analysis, and evaluation through guided scenarios and response building.",
     focus: [
-      "Terminology",
-      "Application",
-      "Analysis",
-      "Evaluation"
+      "Business Notes",
+      "Case Study Practice"
     ],
     routes: [
       { label: "Open Business", href: "/subjects/business" }
