@@ -248,8 +248,8 @@ function VisualTile({ visual, index }: { visual: VisualCard; index: number }) {
 }
 
 function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
-  if (!visualSearchesByLesson[lesson.id] && lesson.example) {
-    return <LessonExamplePanel lesson={lesson} />;
+  if (!visualSearchesByLesson[lesson.id]) {
+    return lesson.example ? <LessonExamplePanel lesson={lesson} /> : <LessonFocusPanel lesson={lesson} />;
   }
 
   const visuals = lessonVisuals(lesson).slice(0, 4);
@@ -261,6 +261,28 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
         <VisualTile key={`${lesson.id}-${visual.title}`} visual={visual} index={index} />
       ))}
       </div>
+    </aside>
+  );
+}
+
+function LessonFocusPanel({ lesson }: { lesson: IctTheoryLesson }) {
+  const focusItems = [
+    ...(lesson.studyBlocks?.[0]?.points || []),
+    ...(lesson.compare?.rows.map((row) => `${row[0]}: ${row.slice(1).join(" - ")}`) || [])
+  ].slice(0, 5);
+
+  return (
+    <aside className="rounded-lg border border-line bg-slate-50 p-4">
+      <h4 className="text-sm font-bold uppercase tracking-wide text-ocean">Revision Focus</h4>
+      <p className="mt-3 text-sm leading-6 text-slate-700">{lesson.summary}</p>
+      <ul className="mt-4 space-y-2">
+        {focusItems.map((item) => (
+          <li key={item} className="flex gap-2 text-sm leading-6 text-slate-700">
+            <span className="mt-2.5 h-1.5 w-1.5 flex-none bg-gold" aria-hidden="true" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </aside>
   );
 }
