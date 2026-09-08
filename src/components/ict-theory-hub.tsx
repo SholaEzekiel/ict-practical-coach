@@ -418,18 +418,18 @@ export function IctTheoryHub() {
     setActiveModuleId(moduleId);
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
     setSelectedAnswer(null);
-    scrollToContentOnMobile();
+    scrollToContent();
   }
 
   function chooseContent(moduleId: string, target: ContentTarget) {
     if (moduleId !== activeModuleId) setActiveModuleId(moduleId);
     setActiveLessonId(target);
     setSelectedAnswer(null);
-    scrollToContentOnMobile();
+    scrollToContent();
   }
 
-  function scrollToContentOnMobile() {
-    if (typeof window === "undefined" || window.innerWidth >= 1280) return;
+  function scrollToContent() {
+    if (typeof window === "undefined") return;
     window.requestAnimationFrame(() => {
       contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });

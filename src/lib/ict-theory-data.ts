@@ -1273,7 +1273,16 @@ const applicationTheoryModules: IctTheoryModule[] = [
             points: [
               "A page break starts content on a new page; a column break moves content to the next column.",
               "Landscape orientation is wider than portrait and can help wide tables fit.",
-              "A gutter margin gives extra space for binding, so text is not hidden near the spine."
+              "A gutter margin gives extra space for binding, so text is not hidden near the spine.",
+              "Section breaks allow different parts of a document to use different layout settings."
+            ]
+          },
+          {
+            heading: "Output and File Size",
+            points: [
+              "Large documents with many images can be compressed before storage or upload.",
+              "Images should be resized or compressed carefully so quality remains suitable for the audience.",
+              "Headers, footers, page numbers, and file names can provide evidence that the correct document was produced."
             ]
           }
         ],
@@ -1304,7 +1313,16 @@ const applicationTheoryModules: IctTheoryModule[] = [
             points: [
               "Editing changes the content; formatting changes the appearance.",
               "Alignment controls where text sits horizontally, while indentation controls where a paragraph begins.",
-              "A hyperlink can open a web page, email address, bookmark, or file, depending on its target."
+              "A hyperlink can open a web page, email address, bookmark, or file, depending on its target.",
+              "A corporate house style keeps documents consistent by using approved fonts, colours, logos, headers, and spacing."
+            ]
+          },
+          {
+            heading: "Mail Merge",
+            points: [
+              "Mail merge combines a main document with a data source to create personalised letters, labels, or emails.",
+              "Merge fields such as FirstName or Address are replaced by matching data from each record.",
+              "It saves time and reduces repeated typing when many similar documents are needed."
             ]
           }
         ],
@@ -1370,7 +1388,8 @@ const applicationTheoryModules: IctTheoryModule[] = [
             points: [
               "A slide title identifies the topic; body text gives the key supporting points.",
               "Too much text, low contrast, or small fonts can reduce audience understanding.",
-              "Handouts, full-page slides, and presenter notes are different output formats."
+              "Handouts, full-page slides, and presenter notes are different output formats.",
+              "Different audiences may need different wording, detail, examples, images, and tone even when the topic is the same."
             ]
           }
         ],
@@ -1400,7 +1419,8 @@ const applicationTheoryModules: IctTheoryModule[] = [
             points: [
               "Use animations only when they support understanding.",
               "Use alt text and screen tips where accessibility or clarity is needed.",
-              "Keep fonts, colours, spacing, and object alignment consistent."
+              "Keep fonts, colours, spacing, and object alignment consistent.",
+              "Audio, video, charts, tables, and images should be relevant and should not distract from the message."
             ]
           }
         ],
@@ -1457,7 +1477,16 @@ const applicationTheoryModules: IctTheoryModule[] = [
             points: [
               "Formulae usually begin with an equals sign.",
               "Brackets control the order of operations.",
-              "Functions can be nested, for example using IF with another function inside it."
+              "Functions can be nested, for example using IF with another function inside it.",
+              "A formula may combine cell references, constants, arithmetic operators, comparison operators, and functions."
+            ]
+          },
+          {
+            heading: "Testing Formulae",
+            points: [
+              "Normal data checks that expected values produce the expected result.",
+              "Extreme data checks boundary values such as the exact pass mark or maximum allowed value.",
+              "Abnormal data checks that unsuitable values are handled or rejected."
             ]
           }
         ],
@@ -1481,6 +1510,16 @@ const applicationTheoryModules: IctTheoryModule[] = [
           "Sorting changes record order; selecting or filtering shows only records that match criteria.",
           "Charts should use a suitable chart type, labels, titles, legend, and a correct data range.",
           "Print settings include orientation, margins, print area, row/column headings, gridlines, scaling, headers, and footers."
+        ],
+        studyBlocks: [
+          {
+            heading: "When Spreadsheets Are Useful",
+            points: [
+              "Spreadsheets are suitable for modelling because values can be changed and results recalculated automatically.",
+              "They can help compare what-if situations such as budgets, marks, stock totals, and forecasts.",
+              "Errors in formulae, wrong cell references, or accidental data changes can produce misleading results."
+            ]
+          }
         ],
         compare: {
           headers: ["Task", "Why it matters"],
@@ -1510,6 +1549,10 @@ const applicationTheoryModules: IctTheoryModule[] = [
       { term: "Relative reference", definition: "A cell reference that changes when copied." },
       { term: "Absolute reference", definition: "A cell reference fixed with dollar signs." },
       { term: "Lookup", definition: "A function used to find matching data in a table." },
+      { term: "Model", definition: "A spreadsheet used to explore how changing data affects results." },
+      { term: "Sort", definition: "To arrange data into a chosen order." },
+      { term: "Filter", definition: "To show only data that meets selected criteria." },
+      { term: "Chart", definition: "A graphical representation of spreadsheet data." },
       { term: "Print area", definition: "The selected range that will be printed or exported." }
     ]
   },
@@ -1529,6 +1572,24 @@ const applicationTheoryModules: IctTheoryModule[] = [
           "Field data types include text, numeric, date/time, currency, and Boolean/logical.",
           "A primary key uniquely identifies a record; a foreign key links a record to a related table."
         ],
+        studyBlocks: [
+          {
+            heading: "Choosing Field Names",
+            points: [
+              "Field names should be short, meaningful, and usually avoid spaces, such as PatientID, DateOfBirth, or StockLevel.",
+              "A field name should describe the data stored, not the question being asked on a form.",
+              "Do not use a person's name, address, or changing value as a primary key because it may not stay unique."
+            ]
+          },
+          {
+            heading: "Choosing Data Types",
+            points: [
+              "Use text for codes that contain leading zeros or characters, such as ISBN, product code, phone number, or patient ID.",
+              "Use numeric types for values that will be calculated, sorted numerically, or compared with ranges.",
+              "Use date/time for dates that may be used for age, duration, sorting, or date-based searches."
+            ]
+          }
+        ],
         example: {
           title: "Records and Fields",
           rows: [
@@ -1540,8 +1601,47 @@ const applicationTheoryModules: IctTheoryModule[] = [
         }
       },
       {
-        id: "ict-13-queries-reports",
+        id: "ict-13-validation",
         number: "13.2",
+        title: "Validation, Verification, and Testing",
+        summary: "Databases need checks so data is reasonable, accurately copied, and safe to use before reports or decisions are made.",
+        keyPoints: [
+          "Validation checks whether data is sensible or follows rules; it does not prove the data is true.",
+          "Verification checks that data has been copied accurately, often by comparing the entered data with the original source.",
+          "Testing uses normal, abnormal, and extreme data to check that tables, forms, queries, validation rules, and reports work as expected."
+        ],
+        studyBlocks: [
+          {
+            heading: "Common Validation Checks",
+            points: [
+              "Presence check: makes sure required data has been entered.",
+              "Format check: makes sure data follows a pattern, such as DD/MM/YYYY or a fixed code structure.",
+              "Range or limit check: makes sure a value is within acceptable boundaries.",
+              "Length check: makes sure a value has the required number of characters."
+            ]
+          },
+          {
+            heading: "Exam Traps",
+            points: [
+              "Age is often better calculated from date of birth because age changes over time.",
+              "A barcode or ID may be stored as text if leading zeros must be kept.",
+              "Validation can reject badly formatted data, but a correctly formatted wrong value can still pass."
+            ]
+          }
+        ],
+        compare: {
+          headers: ["Check", "Example"],
+          rows: [
+            ["Presence", "Patient number cannot be blank"],
+            ["Format", "Date must be DD/MM/YYYY"],
+            ["Length", "Patient number must contain 6 digits"],
+            ["Range", "Quantity must be between 1 and 500"]
+          ]
+        }
+      },
+      {
+        id: "ict-13-queries-reports",
+        number: "13.3",
         title: "Queries, Forms, and Reports",
         summary: "Database tools let users input data safely, find matching records, and output selected information.",
         keyPoints: [
@@ -1557,12 +1657,40 @@ const applicationTheoryModules: IctTheoryModule[] = [
               "Score >= 80 AND Paid = Yes finds high-scoring students who have paid.",
               "Surname LIKE 'A*' finds surnames that begin with A."
             ]
+          },
+          {
+            heading: "Why Databases Are Used",
+            points: [
+              "A database is better than a spreadsheet when many related records need to be searched, validated, updated, and reported.",
+              "A relational database reduces repeated data by splitting data into linked tables.",
+              "Reports can select only required fields, sort records, group data, and add headings or totals for output."
+            ]
           }
         ],
         example: {
           title: "Query and Result",
           code: "SELECT Surname, Year\nFROM Students\nWHERE Year = 11 AND Paid = 'No';",
           result: "Shows only Year 11 students whose Paid field is No."
+        }
+      },
+      {
+        id: "ict-13-flat-relational",
+        number: "13.4",
+        title: "Flat File and Relational Databases",
+        summary: "Paper 1 often asks students to compare simple flat-file databases with relational databases that use linked tables.",
+        keyPoints: [
+          "A flat-file database stores data in one table, so it is simpler but can repeat the same data many times.",
+          "A relational database stores data in linked tables and uses keys to connect related records.",
+          "Relational databases can reduce duplication and improve consistency, but they are more complex to design."
+        ],
+        compare: {
+          headers: ["Flat file", "Relational"],
+          rows: [
+            ["One table", "Two or more linked tables"],
+            ["Simple to create for small data sets", "Better for large related data sets"],
+            ["Can repeat data", "Reduces duplication using relationships"],
+            ["No foreign keys needed", "Uses primary and foreign keys"]
+          ]
         }
       }
     ],
@@ -1583,6 +1711,11 @@ const applicationTheoryModules: IctTheoryModule[] = [
       { term: "Data type", definition: "The kind of data a field stores." },
       { term: "Primary key", definition: "A field that uniquely identifies each record." },
       { term: "Foreign key", definition: "A field that links to a primary key in another table." },
+      { term: "Validation", definition: "Checking that data is sensible or follows rules." },
+      { term: "Verification", definition: "Checking that entered data matches the original source." },
+      { term: "Criteria", definition: "Conditions used to select records in a query." },
+      { term: "Flat-file database", definition: "A database that stores data in one table." },
+      { term: "Relational database", definition: "A database that stores data in linked tables." },
       { term: "Query", definition: "A search or selection instruction using criteria." },
       { term: "Report", definition: "A formatted database output." }
     ]
@@ -1603,6 +1736,24 @@ const applicationTheoryModules: IctTheoryModule[] = [
           "Common body elements include headings, paragraphs, lists, tables, images, video, audio, divs, and hyperlinks.",
           "Attributes add extra information, such as href for a link, src for an image, alt for image description, and id for a bookmark target."
         ],
+        studyBlocks: [
+          {
+            heading: "Exam Knowledge",
+            points: [
+              "HTML belongs to the content layer because it describes the structure and meaning of the page content.",
+              "The head section can contain title, metadata, and links to external stylesheets.",
+              "The body section contains content that the user can see, such as headings, paragraphs, lists, tables, and media."
+            ]
+          },
+          {
+            heading: "Tables on Web Pages",
+            points: [
+              "Tables organise related data into rows and columns so comparisons are easier to read.",
+              "Table headings identify what each column or row represents.",
+              "Tables should be used for structured data, not simply to force page layout."
+            ]
+          }
+        ],
         example: {
           title: "HTML and Output",
           code: "<h1>Peak Study Hub</h1>\n<p>Learn, practise, achieve.</p>",
@@ -1621,11 +1772,27 @@ const applicationTheoryModules: IctTheoryModule[] = [
         ],
         studyBlocks: [
           {
+            heading: "Stylesheet Choices",
+            points: [
+              "An attached stylesheet is stored separately and can format many pages consistently.",
+              "An inline style attribute affects one element and can override an attached stylesheet for that element.",
+              "External stylesheets make large websites easier to update because one CSS file can change many pages."
+            ]
+          },
+          {
             heading: "Metadata",
             points: [
               "The title appears in the browser tab.",
               "Charset helps the browser interpret text characters correctly.",
-              "Description and viewport metadata support search previews and responsive display."
+              "Description, keywords, author, and viewport metadata can be placed in the head section."
+            ]
+          },
+          {
+            heading: "Paths and Links",
+            points: [
+              "A relative path is usually safer for local site files because the site can move folder without breaking internal links.",
+              "An absolute URL is useful for linking to a different website because it includes the full address.",
+              "A hyperlink is clicked to move to another page, file, email address, or bookmark position."
             ]
           }
         ],
@@ -1640,6 +1807,49 @@ const applicationTheoryModules: IctTheoryModule[] = [
             ["Content", "HTML text and image elements"],
             ["Presentation", "CSS colour, size, spacing, borders"],
             ["Behaviour", "Scripted interaction such as validation"]
+          ]
+        }
+      },
+      {
+        id: "ict-14-links-testing",
+        number: "14.3",
+        title: "Hyperlinks, Anchors, Bookmarks, and Testing",
+        summary: "Web pages should be tested before publishing so navigation, media, layout, security, and accessibility work as expected.",
+        keyPoints: [
+          "An anchor marks a position on a page, while a hyperlink is the clickable item that takes the user to a target.",
+          "A bookmark stores the address of a useful web page in the browser so the user can return to it quickly.",
+          "Website testing should check links, anchors, images, tables, forms, spelling, layout, accessibility, and display in different browsers or screen sizes."
+        ],
+        studyBlocks: [
+          {
+            heading: "Publishing and Security",
+            points: [
+              "FTP can be used to upload website files from a local computer to a web server.",
+              "A secure website may use HTTPS/SSL so transmitted data is encrypted.",
+              "Users can often recognise SSL/HTTPS by a padlock symbol and an address beginning with https."
+            ]
+          },
+          {
+            heading: "Audience and Reliability",
+            points: [
+              "Web content should suit the age, ability, language, and needs of the intended audience.",
+              "Information found online should be checked for author, date, bias, supporting evidence, and whether other reliable sources agree.",
+              "Accessibility can be improved with clear text, good contrast, alt text, readable navigation, and responsive layout."
+            ]
+          }
+        ],
+        example: {
+          title: "Anchor and Hyperlink",
+          code: "<h2 id=\"top\">Revision</h2>\n<a href=\"#top\">Back to top</a>",
+          result: "The anchor is the target position. The hyperlink is the clickable text."
+        },
+        compare: {
+          headers: ["Feature", "Purpose"],
+          rows: [
+            ["Anchor", "Marks a location on a page"],
+            ["Hyperlink", "Moves the user to a target"],
+            ["Bookmark", "Saves a page address in the browser"],
+            ["HTTPS", "Helps protect transmitted data"]
           ]
         }
       }
@@ -1662,7 +1872,12 @@ const applicationTheoryModules: IctTheoryModule[] = [
       { term: "Metadata", definition: "Information about a page stored in the head section." },
       { term: "Relative path", definition: "A file path written from the current page location." },
       { term: "Absolute URL", definition: "A full web address including the protocol and domain." },
-      { term: "Cascade", definition: "The rule system that decides which CSS style applies." }
+      { term: "Anchor", definition: "A marked position on a web page that can be linked to." },
+      { term: "Hyperlink", definition: "A clickable item that opens a target such as a page, file, email address, or anchor." },
+      { term: "Bookmark", definition: "A saved web page address in a browser." },
+      { term: "Cascade", definition: "The rule system that decides which CSS style applies." },
+      { term: "FTP", definition: "A file transfer method that can upload website files to a server." },
+      { term: "HTTPS", definition: "A secure web protocol that encrypts data transmitted between browser and server." }
     ]
   }
 ];
@@ -1896,11 +2111,17 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
   ]
 };
 
-const minimumQuizCount = 25;
+const minimumQuizCount = 52;
 
 function optionWindow(items: string[], correct: string, start: number) {
-  const pool = items.filter((item) => item !== correct);
-  const distractors = Array.from({ length: 3 }, (_, index) => pool[(start + index) % Math.max(1, pool.length)]).filter(Boolean);
+  const fallbackDistractors = [
+    "This is not the most accurate ICT answer.",
+    "This describes a different ICT concept.",
+    "This would not answer the question in this scenario.",
+    "This is too vague for a theory answer."
+  ];
+  const pool = [...items.filter((item) => item !== correct), ...fallbackDistractors.filter((item) => item !== correct)];
+  const distractors = Array.from({ length: 3 }, (_, index) => pool[(start + index) % pool.length]).filter(Boolean);
   return [correct, ...distractors];
 }
 
@@ -1910,7 +2131,10 @@ function generatedQuizForModule(module: IctTheoryModule, existingCount: number):
   const lessonStatements = module.lessons.flatMap((lesson) => [
     lesson.summary,
     ...lesson.keyPoints,
-    ...(lesson.studyBlocks || []).flatMap((block) => block.points)
+    ...(lesson.studyBlocks || []).flatMap((block) => block.points),
+    ...(lesson.compare?.rows || []).map((row) => `${row[0]} is linked with ${row.slice(1).join(" and ")}.`),
+    ...(lesson.example?.notes || []),
+    ...(lesson.example?.result ? [lesson.example.result] : [])
   ]).filter(Boolean);
 
   module.glossary.forEach((term, index) => {
@@ -1925,18 +2149,23 @@ function generatedQuizForModule(module: IctTheoryModule, existingCount: number):
     });
   });
 
-  lessonStatements.forEach((statement, index) => {
-    if (existingCount + generated.length >= minimumQuizCount) return;
+  let index = 0;
+  while (existingCount + generated.length < minimumQuizCount && lessonStatements.length) {
+    const statement = lessonStatements[index % lessonStatements.length];
     const lesson = module.lessons[index % module.lessons.length];
+    const questionStem = index % 2 === 0
+      ? `Which statement is true about ${lesson?.title || module.moduleTitle}?`
+      : `Which answer would be strongest in an ICT theory question about ${lesson?.title || module.moduleTitle}?`;
     generated.push({
       id: `${module.id}-auto-skill-${index + 1}`,
       topic: lesson?.title || module.moduleTitle,
-      question: `Which statement is true about ${lesson?.title || module.moduleTitle}?`,
+      question: questionStem,
       options: optionWindow(lessonStatements, statement, index + 1),
       correctIndex: 0,
       feedback: `Correct. ${statement}`
     });
-  });
+    index += 1;
+  }
 
   return generated;
 }
