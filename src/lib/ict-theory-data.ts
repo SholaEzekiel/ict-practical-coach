@@ -2141,7 +2141,7 @@ function generatedQuizForModule(module: IctTheoryModule, existingCount: number):
     if (existingCount + generated.length >= minimumQuizCount) return;
     generated.push({
       id: `${module.id}-auto-term-${index + 1}`,
-      topic: term.term,
+      topic: "Glossary recall",
       question: `Which term best matches this description: ${term.definition}`,
       options: optionWindow(glossaryTerms, term.term, index + 1),
       correctIndex: 0,
@@ -2179,6 +2179,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "External hardware includes input and output devices such as keyboards, mice, monitors, printers, speakers, and microphones.",
         "Application software is written for user tasks; system software manages the computer and supports hardware devices."
       ]
+    },
+    {
+      heading: "Paper 1 Recognition",
+      points: [
+        "A motherboard is the main printed circuit board that connects the CPU, memory, storage, and expansion components.",
+        "A graphics card prepares images and video for display; a network interface card lets a device connect to a network.",
+        "Portable device answers should link battery power, screen size, storage, wireless access, touchscreen input, and portability to the scenario."
+      ]
     }
   ],
   "ict-1-cpu-memory": [
@@ -2188,6 +2196,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "The CPU fetches instructions and data from memory, decodes what must happen, then executes the instruction.",
         "Cache improves speed by keeping frequently used instructions close to the processor.",
         "RAM is temporary working space; ROM keeps start-up instructions; secondary storage keeps files for later use."
+      ]
+    },
+    {
+      heading: "Performance Answers",
+      points: [
+        "More RAM can allow more programs or larger files to be handled at once, but it is not the same as permanent storage.",
+        "A faster processor can reduce response time for calculations and processing, but may produce more heat and use more power.",
+        "Cache, clock speed, number of cores, and RAM should be explained in terms of the task being performed."
       ]
     }
   ],
@@ -2219,6 +2235,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "MICR is suited to banking documents because magnetic characters can be read accurately and are harder to alter.",
         "OMR reads marks on forms; OCR converts printed text into editable text; RFID reads tagged items using radio waves."
       ]
+    },
+    {
+      heading: "Data Capture Questions",
+      points: [
+        "Barcode validation may use length, format, presence, range, or check digit checks; it cannot prove the item is the correct product.",
+        "RFID can read tags without line-of-sight and may scan several items quickly, but tags and readers cost more than printed barcodes.",
+        "Verification checks that data has been copied correctly; validation checks whether data is reasonable or follows required rules."
+      ]
     }
   ],
   "ict-2-output": [
@@ -2228,6 +2252,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "A monitor, projector, speaker, printer, plotter, actuator, or 3D printer should be chosen for the required output type.",
         "Laser printers suit high-volume text, inkjet printers suit colour images at low volume, and dot-matrix printers suit multipart forms.",
         "Actuators are output devices in control systems because they cause real-world movement or action."
+      ]
+    },
+    {
+      heading: "Output Trade-Offs",
+      points: [
+        "Hard copy is permanent and portable, but printers have running costs, can be slow, and may waste paper.",
+        "Screens allow immediate checking and editing, but they do not give a signed or physical copy.",
+        "Speakers, actuators, and alarms are chosen when the output is sound, movement, warning, or automatic control."
       ]
     }
   ],
@@ -2249,6 +2281,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "USB drives, memory cards, and SSDs are portable, quiet, compact, and resistant to movement.",
         "They are excellent for mobile devices, but cost per gigabyte and limited write cycles can matter."
       ]
+    },
+    {
+      heading: "Storage Comparisons",
+      points: [
+        "SSDs have faster access and no moving parts, so they suit operating systems, laptops, and devices that may be moved.",
+        "HDDs often offer lower cost per gigabyte, so they suit large-capacity storage where speed is less important.",
+        "Memory cards and USB drives are convenient for transfer, but are easier to lose and may have lower capacity than internal drives."
+      ]
     }
   ],
   "ict-3-optical-cloud": [
@@ -2259,6 +2299,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Write-once discs are useful where files should not be changed after recording; rewritable discs can be reused.",
         "Cloud storage is convenient for synchronising, sharing, and remote access, but depends on internet service and account security."
       ]
+    },
+    {
+      heading: "Access and Reliability",
+      points: [
+        "Cloud storage supports collaboration and access from different devices, but needs internet access and strong account protection.",
+        "Optical discs are useful for distribution or archiving, but have lower capacity and slower access than many modern storage options.",
+        "Compression reduces file size for storage or transfer, but students should know whether quality is preserved or reduced."
+      ]
     }
   ],
   "ict-4-network-types": [
@@ -2268,6 +2316,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "A LAN is usually within one site such as a home, school, or office and is often controlled by one organisation.",
         "A WAN connects larger geographical areas and may use telecoms links, leased lines, or the internet.",
         "Networks make sharing easier, but failure, malware, or poor security can affect many users at once."
+      ]
+    },
+    {
+      heading: "Exam Comparisons",
+      points: [
+        "LAN answers normally mention a small area, local ownership, shared printers/files, and faster local communication.",
+        "WAN answers normally mention large geographical distance, public or leased links, and connections between sites.",
+        "Benefits of networking should be balanced against security risks, dependency on network hardware, and possible congestion."
       ]
     }
   ],
@@ -2289,6 +2345,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Wi-Fi and mobile networks support mobility but can be affected by walls, distance, congestion, and interception risk.",
         "Bluetooth is best for short-range device links such as headphones, keyboards, controllers, and sensors."
       ]
+    },
+    {
+      heading: "Wireless Detail",
+      points: [
+        "Wi-Fi connects devices to a local wireless network; mobile networks use cellular coverage from a service provider.",
+        "Wireless communication is convenient for movement, but signals can be intercepted if encryption and access control are weak.",
+        "Fibre optic cable is fast and less affected by electrical interference, so it suits high-speed network links."
+      ]
     }
   ],
   "ict-5-employment": [
@@ -2298,6 +2362,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "ICT can increase employment in areas such as programming, web design, delivery logistics, cybersecurity, and technical support.",
         "It can reduce employment where repetitive office, retail, or factory tasks are automated.",
         "Strong answers normally consider both the business benefit and the effect on workers who may need retraining."
+      ]
+    },
+    {
+      heading: "Discuss Questions",
+      points: [
+        "Automation and robots can improve accuracy, speed, safety, and 24-hour working, especially for repetitive or dangerous tasks.",
+        "They can also create redundancy, require expensive setup, and increase the need for maintenance and technical training.",
+        "Strong extended answers give both sides and relate them to workers, employers, customers, and cost."
       ]
     }
   ],
@@ -2319,6 +2391,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Eye strain may be reduced by screen positioning, lighting control, breaks, and suitable brightness.",
         "Safe working also includes cable management, enough desk space, stable equipment, and accessible design."
       ]
+    },
+    {
+      heading: "Hazards and Causes",
+      points: [
+        "Trailing cables, overloaded sockets, unstable equipment, and drinks near devices can create safety risks.",
+        "Glare, small text, poor lighting, or a very bright screen can contribute to eye strain.",
+        "Back and neck pain are often linked to poor chair height, screen height, posture, and long periods without breaks."
+      ]
     }
   ],
   "ict-6-expert-systems": [
@@ -2338,6 +2418,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Booking, banking, library, retail, and stock systems all validate input, search records, update data, and produce output.",
         "A card transaction may check card details, available funds, merchant details, authorisation, and account balances.",
         "Retail stock control can reduce stock automatically after a sale and reorder when stock falls below a set level."
+      ]
+    },
+    {
+      heading: "Transaction Steps",
+      points: [
+        "A booking system searches availability, reserves the place, updates records, prevents double booking, and sends confirmation.",
+        "A transaction system should validate data, process the update, store the result, and produce evidence such as a receipt or ticket.",
+        "Real-time processing is useful where records must be updated immediately, such as payments, seats, stock, and bank balances."
       ]
     }
   ],
@@ -2369,6 +2457,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Normal data should be accepted, abnormal data should be rejected, and extreme data should test boundary values.",
         "A test plan records the test data, expected outcome, actual outcome, and whether the system passed."
       ]
+    },
+    {
+      heading: "Documentation Focus",
+      points: [
+        "Technical documentation may include file structures, data dictionaries, validation rules, algorithms, screen designs, and test plans.",
+        "User documentation should explain installation, login, common tasks, error messages, troubleshooting, and how to get help.",
+        "Design answers should state input formats, output formats, processing, storage, validation, and backup where relevant."
+      ]
     }
   ],
   "ict-7-implementation": [
@@ -2399,6 +2495,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Firewalls monitor and control traffic between a device or network and external networks.",
         "Security also includes antivirus, updates, access rights, backups, biometric checks, and two-factor authentication."
       ]
+    },
+    {
+      heading: "Authentication Detail",
+      points: [
+        "Two-factor authentication uses two different types of proof, such as something known, owned, biometric, or location-based.",
+        "Access levels limit users to the files and functions they need, reducing damage from mistakes or stolen accounts.",
+        "Backups protect availability after deletion, damage, or ransomware, but they must be stored securely and tested."
+      ]
     }
   ],
   "ict-8-encryption": [
@@ -2409,6 +2513,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Encryption protects confidentiality, but it does not stop files being deleted, lost, or sent to the wrong person.",
         "It is used in secure websites, messaging, stored files, wireless networks, and payment systems."
       ]
+    },
+    {
+      heading: "Secure Websites",
+      points: [
+        "HTTPS and a valid security certificate help show that data sent to a website is encrypted in transit.",
+        "A padlock alone does not prove a business is trustworthy; users should still check the address and source.",
+        "SSL/TLS is used to protect login details, payment data, and personal information while it travels across a network."
+      ]
     }
   ],
   "ict-9-audience": [
@@ -2418,6 +2530,14 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
         "Audience, purpose, language, reading level, accessibility, images, colour, and layout all affect communication quality.",
         "Content for children, adults, experts, customers, or school users should not use the same vocabulary or density.",
         "Legal, moral, ethical, and cultural issues should be considered when producing public digital material."
+      ]
+    },
+    {
+      heading: "Website Judgement",
+      points: [
+        "Information reliability can be judged by author, date, source, evidence, bias, accuracy, and comparison with other sources.",
+        "Search engines help find information quickly, but results may be sponsored, outdated, biased, or unsuitable.",
+        "Design choices should match the audience, including language level, navigation, contrast, images, and accessibility."
       ]
     }
   ],
