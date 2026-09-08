@@ -2,16 +2,46 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
+import { businessCaseStudyModules } from "@/lib/business-case-study-data";
 import { businessNoteModules } from "@/lib/business-note-data";
 import type { BusinessNoteLesson } from "@/lib/business-note-data";
 import { businessGlossaryTerms } from "@/lib/business-theory-data";
 import type { BusinessTheoryLesson } from "@/lib/business-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 
-type ContentTarget = string | "module-glossary" | "module-quiz";
+type ContentTarget = string | "module-glossary" | "module-quiz" | "case-study-practice";
+type BusinessKnowledgeQuestion = {
+  id: string;
+  prompt: string;
+  correct: BusinessTheoryLesson;
+  options: BusinessTheoryLesson[];
+};
 
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
 const businessQuizScoreStorageKey = "peak-business-quiz-scoreboard";
+const businessCaseScoreStorageKey = "peak-business-case-scoreboard";
+const businessMinimumQuizCount = 60;
+
+const businessExamNoteAdditions: Record<string, string> = {
+  "bus-note-1-3": "\nExam focus - growth and business size\nDo not just say a business is large or small; link the measure to the case. Number of employees suits labour-intensive businesses, output value can mislead when products have different prices, and capital employed suits businesses that use expensive assets.\nGrowth may bring economies of scale and market share, but overexpansion can create cash shortages, communication problems, and loss of control.",
+  "bus-note-1-4": "\nExam focus - ownership decisions\nA strong answer compares control, finance, continuity, liability, legal requirements, and the owner's objectives.\nFor franchises, application must use the brand support, fees, rules, supplies, or local market in the case; do not simply repeat the word franchise.",
+  "bus-note-1-5": "\nExam focus - objectives and stakeholders\nStakeholder conflict questions need both sides. For example, shareholders may want higher profit, while workers may want higher pay and the local community may want less noise or pollution.\nA justified conclusion should explain which objective matters most in the situation, such as survival for a new business or growth for an established one.",
+  "bus-note-2-1": "\nExam focus - motivation answers\nUse the business context when choosing a method of motivation. Piece rate may suit measurable output, commission may suit sales staff, and job enrichment may suit skilled employees needing responsibility.\nFor higher marks, explain how motivation affects productivity, labour turnover, absenteeism, quality, and customer service.",
+  "bus-note-2-2": "\nExam focus - management and structure\nA tall structure can improve supervision but slow communication; a wide span may speed decisions but reduce control.\nLeadership style depends on worker skill, urgency, task risk, and the need for ideas. Avoid saying one style is always best.",
+  "bus-note-2-3": "\nExam focus - recruitment and training\nApplication means using the vacancy and business situation. A shop supervisor, factory worker, and finance manager may need different selection methods and training.\nInduction introduces the workplace, on-the-job is practical and specific, and off-the-job may bring specialist skills but can be expensive.",
+  "bus-note-3-1": "\nExam focus - market research\nPrimary research is current and specific, but may be expensive or biased if the sample is poor. Secondary research is quicker and cheaper, but may be outdated or not fit the business's exact need.\nAccuracy can be affected by sample size, question wording, timing, bias, and whether respondents tell the truth.",
+  "bus-note-3-2": "\nExam focus - market and customers\nSegmentation should identify a useful group, such as age, income, lifestyle, location, or buying behaviour.\nA strong answer explains how knowing the segment helps the business adapt product, price, place, and promotion.",
+  "bus-note-3-3": "\nExam focus - marketing mix\nFor 8-mark and 12-mark questions, compare the marketing mix elements rather than listing them. A price change may need matching promotion, and a new product may need suitable distribution.\nA good judgement depends on target market, competition, costs, product image, and business objective.",
+  "bus-note-4-1": "\nExam focus - production methods\nJob production suits one-off or customised products, batch production suits groups of similar products, and flow production suits high-volume standardised output.\nThe best method depends on demand, variety, skill needs, machinery cost, flexibility, and quality requirements.",
+  "bus-note-4-2": "\nExam focus - inventory and break-even\nHigh inventory can prevent production stopping and meet sudden demand, but increases storage cost, risk of damage, and cash tied up in stock.\nBreak-even answers should link fixed costs, variable costs, selling price, contribution, break-even output, and margin of safety.",
+  "bus-note-4-3": "\nExam focus - quality\nQuality control checks finished output and can reject faulty products. Quality assurance builds checks into the process to prevent faults.\nQuality matters because it affects reputation, repeat purchases, waste, returns, and competitiveness.",
+  "bus-note-5-1": "\nExam focus - choosing finance\nThe best source of finance depends on amount required, purpose, repayment period, cost, business size, legal structure, risk, existing debts, and control.\nDebt keeps ownership but needs repayment and interest; equity avoids interest but may reduce control and share future profits.",
+  "bus-note-5-2": "\nExam focus - cash flow\nProfit is not the same as cash. A profitable business can fail if cash inflows arrive after wages, rent, suppliers, or loan payments are due.\nShort-term cash problems may be improved by overdrafts, delaying payments, encouraging faster customer payment, reducing inventory, or selling unused assets.",
+  "bus-note-5-5": "\nExam focus - accounts analysis\nRatios must be interpreted, not just calculated. Profitability shows how well profit is made from sales or capital; liquidity shows ability to pay short-term debts.\nCompare with previous years, competitors, and business objectives before making a judgement.",
+  "bus-note-6-1": "\nExam focus - economic change\nInflation can raise costs and reduce purchasing power. Higher interest rates can increase loan costs and reduce consumer spending.\nExchange rate appreciation makes imports cheaper and exports more expensive; depreciation usually has the opposite effect.",
+  "bus-note-6-2": "\nExam focus - ethics and environment\nEthical or environmental choices can raise costs in the short term but improve reputation, customer loyalty, and relationships with workers or communities.\nA balanced answer weighs profit impact against pressure groups, legal risks, brand image, and stakeholder expectations.",
+  "bus-note-6-3": "\nExam focus - international business\nGlobalisation can give access to larger markets, cheaper resources, and spreading risk, but may create transport costs, exchange-rate risk, cultural differences, and stronger competition.\nTariffs and quotas protect local businesses but may raise prices and reduce consumer choice."
+};
 
 const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: number }> = {
   "Primary Secondary Tertiary": {
@@ -120,7 +150,7 @@ function DefinitionLine({ line }: { line: string }) {
 }
 
 function BusinessNoteRenderer({ lesson }: { lesson: BusinessNoteLesson }) {
-  const lines = cleanLines(lesson.content);
+  const lines = cleanLines(`${lesson.content}${businessExamNoteAdditions[lesson.id] || ""}`);
   const elements = [];
   let index = 0;
 
@@ -177,6 +207,46 @@ function buildOptionSet(correct: BusinessTheoryLesson | undefined, pool: Busines
   return shuffle([correct, ...distractors]);
 }
 
+function cleanQuizPrompt(term: BusinessTheoryLesson) {
+  const customPrompts: Record<string, string> = {
+    Franchise: "Business arrangement where one business uses another successful business's brand name, products, support, and trading methods in return for fees.",
+    Franchisor: "The original business that allows another operator to use its established brand, products, and trading system.",
+    Franchisee: "The operator who pays to use an established business name, products, and trading method.",
+    Stakeholder: "A person or group with an interest in, or affected by, a business and its decisions.",
+    "Added Value": "The difference between the selling price of a product and the cost of bought-in materials and components."
+  };
+  if (customPrompts[term.title]) return customPrompts[term.title];
+
+  const words = term.title
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length > 3);
+  return words.reduce((prompt, word) => {
+    const pattern = new RegExp(`\\b${word}(?:s|es|ed|ing)?\\b`, "gi");
+    return prompt.replace(pattern, "this concept");
+  }, term.fullDefinition);
+}
+
+function buildKnowledgeQuestions(moduleGlossary: BusinessTheoryLesson[]) {
+  if (!moduleGlossary.length) return [];
+  const questions: BusinessKnowledgeQuestion[] = [];
+  let index = 0;
+
+  while (questions.length < Math.max(businessMinimumQuizCount, moduleGlossary.length)) {
+    const term = moduleGlossary[index % moduleGlossary.length];
+    const options = buildOptionSet(term, moduleGlossary);
+    questions.push({
+      id: `${term.id}-knowledge-${Math.floor(index / moduleGlossary.length) + 1}`,
+      prompt: cleanQuizPrompt(term),
+      correct: term,
+      options
+    });
+    index += 1;
+  }
+
+  return questions;
+}
+
 export function BusinessTheoryHub() {
   const [activeModuleId, setActiveModuleId] = useState(businessNoteModules[0]?.id || "");
   const [activeLessonId, setActiveLessonId] = useState<ContentTarget>(businessNoteModules[0]?.lessons[0]?.id || "");
@@ -184,19 +254,36 @@ export function BusinessTheoryHub() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [quizAttempts, setQuizAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
+  const [caseIndex, setCaseIndex] = useState(0);
+  const [caseQuestionIndex, setCaseQuestionIndex] = useState(0);
+  const [selectedCaseAnswer, setSelectedCaseAnswer] = useState<number | null>(null);
+  const [caseAttempts, setCaseAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
 
   const activeModule = businessNoteModules.find((module) => module.id === activeModuleId) || businessNoteModules[0];
   const moduleGlossary = useMemo(
     () => businessGlossaryTerms.filter((term) => term.id.startsWith(`bus-${activeModule?.moduleId}-`)),
     [activeModule?.moduleId],
   );
+  const knowledgeQuestions = useMemo(() => buildKnowledgeQuestions(moduleGlossary), [moduleGlossary]);
+  const moduleCaseData = businessCaseStudyModules.find((module) => module.unitId === activeModule?.moduleId);
+  const activeCase = moduleCaseData?.cases[caseIndex % Math.max(1, moduleCaseData.cases.length)];
+  const activeCaseQuestion = activeCase?.questions[caseQuestionIndex % Math.max(1, activeCase.questions.length)];
+  const activeCaseOptions = useMemo(() => (
+    activeCaseQuestion ? shuffle(activeCaseQuestion.options.map((option, index) => ({ option, index }))) : []
+  ), [activeCaseQuestion]);
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
 
   useEffect(() => {
-    setQuizOrder(shuffle(moduleGlossary.map((_, index) => index)));
+    setQuizOrder(shuffle(knowledgeQuestions.map((_, index) => index)));
     setQuizIndex(0);
     setSelectedAnswer(null);
-  }, [moduleGlossary]);
+  }, [knowledgeQuestions]);
+
+  useEffect(() => {
+    setCaseIndex(0);
+    setCaseQuestionIndex(0);
+    setSelectedCaseAnswer(null);
+  }, [activeModule?.id]);
 
   useEffect(() => {
     try {
@@ -213,16 +300,37 @@ export function BusinessTheoryHub() {
     window.localStorage.setItem(businessQuizScoreStorageKey, JSON.stringify(quizAttempts));
   }, [quizAttempts]);
 
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(businessCaseScoreStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as Record<string, { correct: number; attempted: number }>;
+      if (parsed && typeof parsed === "object") setCaseAttempts(parsed);
+    } catch {
+      window.localStorage.removeItem(businessCaseScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(businessCaseScoreStorageKey, JSON.stringify(caseAttempts));
+  }, [caseAttempts]);
+
   const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
-  const quizTerm = moduleGlossary[orderedIndex] || moduleGlossary[0] || businessGlossaryTerms[0];
-  const options = useMemo(() => buildOptionSet(quizTerm, moduleGlossary), [moduleGlossary, quizTerm]);
+  const quizQuestion = knowledgeQuestions[orderedIndex] || knowledgeQuestions[0];
+  const quizTerm = quizQuestion?.correct;
+  const options = quizQuestion?.options || [];
   const isCorrect = selectedAnswer === quizTerm?.title;
-  const quizProgress = moduleGlossary.length ? ((quizIndex % moduleGlossary.length) / moduleGlossary.length) * 100 : 0;
+  const quizProgress = knowledgeQuestions.length ? ((quizIndex % knowledgeQuestions.length) / knowledgeQuestions.length) * 100 : 0;
+  const caseTotalQuestions = moduleCaseData?.cases.reduce((total, caseStudy) => total + caseStudy.questions.length, 0) || 0;
+  const caseCurrentPosition = activeCase && activeCaseQuestion ? caseIndex * activeCase.questions.length + caseQuestionIndex + 1 : 0;
+  const caseProgress = caseTotalQuestions ? ((caseCurrentPosition - 1) / caseTotalQuestions) * 100 : 0;
+  const isCaseCorrect = selectedCaseAnswer === activeCaseQuestion?.correctIndex;
 
   function chooseModule(moduleId: string) {
     const nextModule = businessNoteModules.find((module) => module.id === moduleId);
     setActiveModuleId(moduleId);
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function chooseContent(moduleId: string, target: ContentTarget) {
@@ -231,6 +339,8 @@ export function BusinessTheoryHub() {
     }
     setActiveLessonId(target);
     setSelectedAnswer(null);
+    setSelectedCaseAnswer(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function nextQuestion() {
@@ -251,6 +361,46 @@ export function BusinessTheoryHub() {
         }
       };
     });
+  }
+
+  function chooseCaseAnswer(answerIndex: number) {
+    if (!activeCaseQuestion || selectedCaseAnswer !== null) return;
+    setSelectedCaseAnswer(answerIndex);
+    setCaseAttempts((current) => {
+      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
+      return {
+        ...current,
+        [activeModule.id]: {
+          attempted: moduleScore.attempted + 1,
+          correct: moduleScore.correct + (answerIndex === activeCaseQuestion.correctIndex ? 1 : 0)
+        }
+      };
+    });
+  }
+
+  function nextCaseQuestion() {
+    if (!activeCase || !moduleCaseData) return;
+    const nextQuestionIndex = caseQuestionIndex + 1;
+    if (nextQuestionIndex < activeCase.questions.length) {
+      setCaseQuestionIndex(nextQuestionIndex);
+    } else {
+      setCaseQuestionIndex(0);
+      setCaseIndex((index) => (index + 1) % moduleCaseData.cases.length);
+    }
+    setSelectedCaseAnswer(null);
+  }
+
+  function previousCaseQuestion() {
+    if (!activeCase || !moduleCaseData) return;
+    if (caseQuestionIndex > 0) {
+      setCaseQuestionIndex((index) => index - 1);
+    } else {
+      const previousCaseIndex = caseIndex === 0 ? moduleCaseData.cases.length - 1 : caseIndex - 1;
+      const previousCase = moduleCaseData.cases[previousCaseIndex];
+      setCaseIndex(previousCaseIndex);
+      setCaseQuestionIndex(previousCase.questions.length - 1);
+    }
+    setSelectedCaseAnswer(null);
   }
 
   return (
@@ -309,6 +459,16 @@ export function BusinessTheoryHub() {
                       <span className="min-w-0 break-words font-bold">Multiple choice questions</span>
                       <ChevronRight size={17} className="flex-none" aria-hidden="true" />
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => chooseContent(module.id, "case-study-practice")}
+                      className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left transition ${
+                        activeLessonId === "case-study-practice" ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
+                      }`}
+                    >
+                      <span className="min-w-0 break-words font-bold">Case study practice</span>
+                      <ChevronRight size={17} className="flex-none" aria-hidden="true" />
+                    </button>
                   </div>
                 </div>
               )}
@@ -356,7 +516,7 @@ export function BusinessTheoryHub() {
           </Card>
         )}
 
-        {activeLessonId === "module-quiz" && (
+        {activeLessonId === "module-quiz" && quizQuestion && (
           <Card>
             <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-start">
               <div>
@@ -394,15 +554,15 @@ export function BusinessTheoryHub() {
                 <div className="mt-5">
                   <div className="mb-2 flex justify-between text-sm font-medium">
                     <span>{activeModule?.moduleTitle}</span>
-                    <span>{(quizIndex % Math.max(1, moduleGlossary.length)) + 1}/{moduleGlossary.length || 1}</span>
+                    <span>{(quizIndex % Math.max(1, knowledgeQuestions.length)) + 1}/{knowledgeQuestions.length || 1}</span>
                   </div>
                   <ProgressBar value={quizProgress} />
                 </div>
               </div>
 
               <div className="rounded-lg border border-line bg-mist p-5">
-                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Definition</p>
-                <p className="mt-3 text-lg font-semibold leading-8 text-ink">{quizTerm?.fullDefinition}</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Business clue</p>
+                <p className="mt-3 text-lg font-semibold leading-8 text-ink">{quizQuestion.prompt}</p>
                 <div className="mt-5 grid gap-3">
                   {options.map((option) => {
                     const chosen = selectedAnswer === option.title;
@@ -431,6 +591,104 @@ export function BusinessTheoryHub() {
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {activeLessonId === "case-study-practice" && activeCase && activeCaseQuestion && (
+          <Card>
+            <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ListChecks size={20} className="text-ocean" aria-hidden="true" />
+                  <h2 className="text-2xl font-bold">Case study practice</h2>
+                </div>
+                <p className="mt-3 leading-7 text-slate-600">Practise spotting Knowledge, Application, Analysis, and Evaluation in exam-style responses.</p>
+                <div className="mt-4 rounded-lg border border-line bg-white p-4">
+                  <p className="text-sm font-bold text-ink">Scoreboard</p>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ocean">{caseAttempts[activeModule.id]?.correct || 0}</p>
+                      <p className="text-xs text-slate-600">Correct</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">{caseAttempts[activeModule.id]?.attempted || 0}</p>
+                      <p className="text-xs text-slate-600">Answered</p>
+                    </div>
+                    <div className="rounded-lg bg-mist p-3">
+                      <p className="font-bold text-ink">
+                        {caseAttempts[activeModule.id]?.attempted ? Math.round(((caseAttempts[activeModule.id]?.correct || 0) / caseAttempts[activeModule.id].attempted) * 100) : 0}%
+                      </p>
+                      <p className="text-xs text-slate-600">Accuracy</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCaseAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }))}
+                    className="mt-3 text-xs font-bold text-ocean hover:underline"
+                  >
+                    Reset module score
+                  </button>
+                </div>
+                <div className="mt-5">
+                  <div className="mb-2 flex justify-between text-sm font-medium">
+                    <span>Case {caseIndex + 1}/{moduleCaseData?.cases.length || 1}</span>
+                    <span>{caseCurrentPosition}/{caseTotalQuestions}</span>
+                  </div>
+                  <ProgressBar value={caseProgress} />
+                </div>
+                <div className="mt-5 rounded-lg border border-line bg-mist p-5">
+                  <Pill>Unit {activeModule.moduleId}</Pill>
+                  <h3 className="mt-3 text-xl font-bold text-ink">{activeCase.title}</h3>
+                  <p className="mt-3 leading-7 text-slate-700">{activeCase.scenario}</p>
+                  <div className="mt-4 grid gap-2">
+                    {activeCase.details.map((detail) => (
+                      <p key={detail} className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-700">{detail}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-line bg-white p-5">
+                <p className="text-xs font-bold uppercase tracking-wide text-ocean">{activeCaseQuestion.skill} skill focus</p>
+                <p className="mt-3 text-lg font-semibold leading-8 text-ink">{activeCaseQuestion.question}</p>
+                <div className="mt-5 grid gap-3">
+                  {activeCaseOptions.map(({ option, index }) => {
+                    const chosen = selectedCaseAnswer === index;
+                    const correct = activeCaseQuestion.correctIndex === index;
+                    return (
+                      <button
+                        key={`${activeCaseQuestion.id}-${option}`}
+                        type="button"
+                        onClick={() => chooseCaseAnswer(index)}
+                        className={`rounded-lg border px-4 py-3 text-left font-semibold leading-7 transition ${
+                          chosen ? (correct ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-amber-300 bg-amber-50 text-amber-800") : "border-line bg-white text-ink hover:border-ocean"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedCaseAnswer !== null && (
+                  <div className={`mt-4 rounded-lg border p-4 ${isCaseCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                    <p className="font-bold">{isCaseCorrect ? "Correct" : `Correct answer: ${activeCaseQuestion.options[activeCaseQuestion.correctIndex]}`}</p>
+                    <div className="mt-2 space-y-2">
+                      {activeCaseQuestion.feedback.map((line) => (
+                        <p key={line} className="text-sm leading-6 text-slate-700">{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <button type="button" onClick={previousCaseQuestion} className="rounded-lg border border-line bg-white px-4 py-2 text-sm font-bold text-ink hover:border-ocean">
+                    Previous
+                  </button>
+                  <button type="button" onClick={nextCaseQuestion} className="rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white">
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
           </Card>
