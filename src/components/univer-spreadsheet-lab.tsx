@@ -55,6 +55,8 @@ type QuizScore = {
 };
 
 const spreadsheetQuizScoreStorageKey = "peak-spreadsheet-quiz-scoreboard";
+const practiceRowCount = 500;
+const practiceColumnCount = 40;
 
 function colToIndex(column: string) {
   return column
@@ -84,8 +86,8 @@ function makeWorkbook(name: string, cellEntries: Array<[string, CellValue]> = []
       "sheet-01": {
         id: "sheet-01",
         name,
-        rowCount: 60,
-        columnCount: 18,
+        rowCount: practiceRowCount,
+        columnCount: practiceColumnCount,
         cellData
       }
     }
@@ -238,24 +240,70 @@ function ChartLegend({ data, colours }: { data: Array<{ label: string; value: nu
 }
 
 function parseCsv(text: string) {
-  return text
-    .trim()
-    .split(/\r?\n/)
-    .map((row) => row.split(",").map((value) => value.trim()));
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let value = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    const nextCharacter = text[index + 1];
+
+    if (character === "\"" && quoted && nextCharacter === "\"") {
+      value += "\"";
+      index += 1;
+      continue;
+    }
+
+    if (character === "\"") {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (character === "," && !quoted) {
+      row.push(value.trim());
+      value = "";
+      continue;
+    }
+
+    if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && nextCharacter === "\n") index += 1;
+      row.push(value.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      value = "";
+      continue;
+    }
+
+    value += character;
+  }
+
+  row.push(value.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function parseCellValue(value: unknown): CellValue {
+  if (typeof value === "number") return value;
+  const text = String(value ?? "").trim();
+  const asNumber = Number(text);
+  return Number.isFinite(asNumber) && /^-?\d+(\.\d+)?$/.test(text) ? asNumber : text;
+}
+
+function workbookFromRows(rows: unknown[][], name = "Imported Practice") {
+  const entries: Array<[string, CellValue]> = [];
+  rows.slice(0, practiceRowCount).forEach((row, rowIndex) => {
+    row.slice(0, practiceColumnCount).forEach((value, columnIndex) => {
+      const parsedValue = parseCellValue(value);
+      if (parsedValue === "") return;
+      entries.push([cellAddress(rowIndex, columnIndex), parsedValue]);
+    });
+  });
+  return makeWorkbook(name, entries);
 }
 
 function workbookFromCsv(text: string) {
-  const rows = parseCsv(text);
-  const entries: Array<[string, CellValue]> = [];
-  rows.slice(0, 60).forEach((row, rowIndex) => {
-    row.slice(0, 18).forEach((value, columnIndex) => {
-      if (!value) return;
-      const column = String.fromCharCode(65 + columnIndex);
-      const asNumber = Number(value);
-      entries.push([`${column}${rowIndex + 1}`, Number.isFinite(asNumber) && value.match(/^-?\d+(\.\d+)?$/) ? asNumber : value]);
-    });
-  });
-  return makeWorkbook("Imported Practice", entries);
+  return workbookFromRows(parseCsv(text), "Imported Practice");
 }
 
 function snapshotToCsv(snapshot: unknown) {
@@ -264,9 +312,9 @@ function snapshotToCsv(snapshot: unknown) {
   const sheetId = workbook.sheetOrder?.[0] || Object.keys(workbook.sheets || {})[0];
   const cellData = sheetId ? workbook.sheets?.[sheetId]?.cellData || {} : {};
   const rows: string[][] = [];
-  for (let row = 0; row < 60; row += 1) {
+  for (let row = 0; row < practiceRowCount; row += 1) {
     const values = [];
-    for (let column = 0; column < 18; column += 1) {
+    for (let column = 0; column < practiceColumnCount; column += 1) {
       values.push(String(cellData[String(row)]?.[String(column)]?.v ?? ""));
     }
     rows.push(values);
@@ -297,6 +345,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const [ready, setReady] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [csvText, setCsvText] = useState("");
+  const [importingFile, setImportingFile] = useState(false);
   const [previewVersion, setPreviewVersion] = useState(0);
   const [chartSettings, setChartSettings] = useState<ChartSettings>({
     type: "column",
@@ -523,12 +572,12 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   function importCsv() {
     if (!csvText.trim()) return;
     const rows = parseCsv(csvText);
-    if (rows.length > 60 || rows.some((row) => row.length > 18)) {
+    if (rows.length > practiceRowCount || rows.some((row) => row.length > practiceColumnCount)) {
       setFeedback({
         isCorrect: false,
         canAutoCheck: true,
         message: "Imported data is too large for this practice grid.",
-        nextStep: "Use no more than 60 rows and 18 columns, then import again."
+        nextStep: `Use no more than ${practiceRowCount} rows and ${practiceColumnCount} columns, then import again.`
       });
       return;
     }
@@ -539,6 +588,49 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       message: "CSV data imported.",
       nextStep: "You can now edit, format, sort, or practise formulae freely."
     });
+  }
+
+  async function importPracticeFile(file: File) {
+    setImportingFile(true);
+    try {
+      if (/\.csv$/i.test(file.name) || file.type.includes("csv")) {
+        const text = await file.text();
+        const rows = parseCsv(text);
+        if (rows.length > practiceRowCount || rows.some((row) => row.length > practiceColumnCount)) {
+          throw new Error(`Use no more than ${practiceRowCount} rows and ${practiceColumnCount} columns.`);
+        }
+        loadWorkbook(workbookFromRows(rows, file.name.replace(/\.[^.]+$/, "") || "Imported CSV"));
+      } else if (/\.xlsx?$/i.test(file.name)) {
+        const XLSX = await import("xlsx");
+        const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = sheetName ? workbook.Sheets[sheetName] : undefined;
+        if (!sheet) throw new Error("The workbook does not contain a readable sheet.");
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, blankrows: false }) as unknown[][];
+        if (rows.length > practiceRowCount || rows.some((row) => row.length > practiceColumnCount)) {
+          throw new Error(`Use no more than ${practiceRowCount} rows and ${practiceColumnCount} columns.`);
+        }
+        loadWorkbook(workbookFromRows(rows, sheetName || "Imported Excel"));
+      } else {
+        throw new Error("Import a CSV, XLS, or XLSX file.");
+      }
+
+      setFeedback({
+        isCorrect: true,
+        canAutoCheck: true,
+        message: "Practice file imported.",
+        nextStep: "You can now edit, format, sort, or practise formulae freely."
+      });
+    } catch (error) {
+      setFeedback({
+        isCorrect: false,
+        canAutoCheck: true,
+        message: "The file could not be imported.",
+        nextStep: error instanceof Error ? error.message : "Check the file format, then try again."
+      });
+    } finally {
+      setImportingFile(false);
+    }
   }
 
   function downloadCsv() {
@@ -671,6 +763,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             <Pill>Free Practice</Pill>
             <h1 className="mt-3 text-xl font-bold">Spreadsheet free practice</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">Import or paste data, practise freely, then download your work. This module does not affect lesson progress.</p>
+            <p className="mt-2 text-xs font-semibold text-slate-500">{practiceRowCount} rows x {practiceColumnCount} columns available for free practice imports.</p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <PracticeTimer compact />
@@ -692,8 +785,22 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             )}
           </div>
           <div className="grid gap-3 border-t border-line bg-white p-4">
+            <label className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90 ${importingFile ? "opacity-70" : ""}`}>
+              <FileUp size={16} /> {importingFile ? "Importing..." : "Import CSV or Excel"}
+              <input
+                type="file"
+                accept=".csv,.xls,.xlsx,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                className="sr-only"
+                disabled={importingFile}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void importPracticeFile(file);
+                  event.currentTarget.value = "";
+                }}
+              />
+            </label>
             <button onClick={importCsv} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
-              <FileUp size={16} /> Import CSV
+              <FileUp size={16} /> Import pasted CSV
             </button>
             <button onClick={() => loadWorkbook(getStarterWorkbook("free-practice"))} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-3 text-sm font-semibold text-ink hover:border-ocean">
               <Eraser size={16} /> Clear worksheet

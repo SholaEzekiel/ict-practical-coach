@@ -122,13 +122,6 @@ export const subjects: SubjectArea[] = [
       "Presentations",
       "Website authoring"
     ],
-    learningModel: [
-      "Read the instruction",
-      "Identify what the command word or tool means",
-      "Attempt the task in a simulated application workspace",
-      "Compare the expected result with the student's result",
-      "Receive feedback, corrections, and next-step practice"
-    ],
     routes: [
       { label: "Open ICT", href: "/subjects/ict" },
       { label: "Start spreadsheet practice", href: "/subjects/ict/spreadsheets" },
@@ -149,13 +142,6 @@ export const subjects: SubjectArea[] = [
       "Application",
       "Analysis",
       "Evaluation"
-    ],
-    learningModel: [
-      "Read the business scenario",
-      "Identify the key term or concept being tested",
-      "Choose or build a response using the right command-word depth",
-      "Compare against an original mark-guidance model",
-      "Revise weak terminology and evaluation habits"
     ],
     routes: [
       { label: "Open Business", href: "/subjects/business" }

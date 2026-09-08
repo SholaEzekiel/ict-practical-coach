@@ -25,7 +25,6 @@ export type SubjectArea = {
   title: string;
   summary: string;
   focus: string[];
-  learningModel: string[];
   routes: { label: string; href: string }[];
 };
 

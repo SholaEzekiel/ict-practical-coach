@@ -248,6 +248,10 @@ function VisualTile({ visual, index }: { visual: VisualCard; index: number }) {
 }
 
 function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
+  if (!visualSearchesByLesson[lesson.id] && lesson.example) {
+    return <LessonExamplePanel lesson={lesson} />;
+  }
+
   const visuals = lessonVisuals(lesson).slice(0, 4);
 
   return (
@@ -257,6 +261,53 @@ function LessonVisualPanel({ lesson }: { lesson: IctTheoryLesson }) {
         <VisualTile key={`${lesson.id}-${visual.title}`} visual={visual} index={index} />
       ))}
       </div>
+    </aside>
+  );
+}
+
+function LessonExamplePanel({ lesson }: { lesson: IctTheoryLesson }) {
+  const example = lesson.example;
+  if (!example) return null;
+
+  return (
+    <aside className="rounded-lg border border-line bg-slate-50 p-4">
+      <h4 className="text-sm font-bold uppercase tracking-wide text-ocean">{example.title}</h4>
+      {example.code && (
+        <pre className="mt-4 overflow-x-auto rounded-lg bg-ink p-4 text-xs leading-6 text-white">
+          <code>{example.code}</code>
+        </pre>
+      )}
+      {example.rows && (
+        <div className="mt-4 overflow-hidden rounded-lg border border-line bg-white">
+          <table className="min-w-full border-collapse text-left text-xs">
+            <tbody className="divide-y divide-line">
+              {example.rows.map((row, rowIndex) => (
+                <tr key={`${lesson.id}-example-${rowIndex}`}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={`${cell}-${cellIndex}`} className={`px-3 py-2 ${rowIndex === 0 ? "bg-ink font-bold text-white" : "text-slate-700"}`}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {example.result && (
+        <div className="mt-4 rounded-lg border border-ocean/20 bg-white p-4">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Result</p>
+          <p className="mt-2 whitespace-pre-line text-sm font-semibold leading-6 text-ink">{example.result}</p>
+        </div>
+      )}
+      {example.notes && (
+        <ul className="mt-4 space-y-2">
+          {example.notes.map((note) => (
+            <li key={note} className="flex gap-2 text-sm leading-6 text-slate-700">
+              <span className="mt-2.5 h-1.5 w-1.5 flex-none bg-gold" aria-hidden="true" />
+              <span>{note}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </aside>
   );
 }

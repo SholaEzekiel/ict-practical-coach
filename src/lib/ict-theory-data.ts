@@ -12,6 +12,13 @@ export type IctTheoryLesson = {
     headers: string[];
     rows: string[][];
   };
+  example?: {
+    title: string;
+    code?: string;
+    result?: string;
+    rows?: string[][];
+    notes?: string[];
+  };
   image?: {
     url: string;
     alt: string;
@@ -1243,6 +1250,423 @@ const baseIctTheoryModules: IctTheoryModule[] = [
   }
 ];
 
+const applicationTheoryModules: IctTheoryModule[] = [
+  {
+    id: "application-word-processing",
+    moduleId: 10,
+    moduleTitle: "Word Processing Theory",
+    overview: "Revise the document-production knowledge behind practical word-processing tasks: layout, styles, tables, proofing, and output evidence.",
+    lessons: [
+      {
+        id: "ict-10-document-layout",
+        number: "10.1",
+        title: "Page Layout and Document Structure",
+        summary: "A word-processed document must use layout settings that match the purpose, audience, and required output.",
+        keyPoints: [
+          "Page size, orientation, margins, columns, and breaks control how content fits on each printed or digital page.",
+          "Headers and footers are repeated areas used for details such as name, date, file name, page number, or document title.",
+          "Pagination matters because page breaks, widow/orphan control, and gutter margins affect how a document reads and binds."
+        ],
+        studyBlocks: [
+          {
+            heading: "Exam Knowledge",
+            points: [
+              "A page break starts content on a new page; a column break moves content to the next column.",
+              "Landscape orientation is wider than portrait and can help wide tables fit.",
+              "A gutter margin gives extra space for binding, so text is not hidden near the spine."
+            ]
+          }
+        ],
+        example: {
+          title: "Layout Evidence",
+          rows: [
+            ["Feature", "What it proves"],
+            ["Header: Candidate name", "Repeated identification on each page"],
+            ["Footer: Page 1 of 4", "Pagination is applied"],
+            ["Landscape page", "Wide content is fitted clearly"]
+          ],
+          result: "A clear printout shows correct page setup before marks are awarded."
+        }
+      },
+      {
+        id: "ict-10-formatting-output",
+        number: "10.2",
+        title: "Formatting, Tables, and Proofing",
+        summary: "Formatting should make the document consistent, readable, accurate, and suitable for the target audience.",
+        keyPoints: [
+          "Styles help apply consistent fonts, sizes, spacing, and headings across a document.",
+          "Tables organise data into rows and columns; borders, shading, alignment, and cell merging improve readability.",
+          "Proofing includes spell check, grammar check, find and replace, and visual checking for spacing, punctuation, and layout errors."
+        ],
+        studyBlocks: [
+          {
+            heading: "Useful Distinctions",
+            points: [
+              "Editing changes the content; formatting changes the appearance.",
+              "Alignment controls where text sits horizontally, while indentation controls where a paragraph begins.",
+              "A hyperlink can open a web page, email address, bookmark, or file, depending on its target."
+            ]
+          }
+        ],
+        compare: {
+          headers: ["Feature", "Purpose"],
+          rows: [
+            ["Style", "Applies consistent formatting quickly"],
+            ["Find and replace", "Changes repeated text accurately"],
+            ["Table", "Organises related data"],
+            ["Spell check", "Finds possible spelling errors"]
+          ]
+        }
+      }
+    ],
+    quiz: [
+      {
+        id: "ict-10-q1",
+        topic: "Page layout",
+        question: "Why might a document use landscape orientation?",
+        options: ["To fit wide content more clearly", "To remove all margins", "To convert text into a database", "To stop proofreading"],
+        correctIndex: 0,
+        feedback: "Correct. Landscape orientation gives more horizontal space for wide tables or diagrams."
+      },
+      {
+        id: "ict-10-q2",
+        topic: "Styles",
+        question: "What is the main benefit of using styles in a word-processed document?",
+        options: ["Consistent formatting can be applied quickly", "All images are deleted", "The document becomes a spreadsheet", "No checking is required"],
+        correctIndex: 0,
+        feedback: "Correct. Styles make repeated formatting consistent and easier to update."
+      }
+    ],
+    glossary: [
+      { term: "Orientation", definition: "The page direction, usually portrait or landscape." },
+      { term: "Margin", definition: "The blank space between page content and the page edge." },
+      { term: "Gutter margin", definition: "Extra margin space for binding." },
+      { term: "Header", definition: "Repeated content at the top of pages." },
+      { term: "Footer", definition: "Repeated content at the bottom of pages." },
+      { term: "Style", definition: "A named set of formatting applied consistently." },
+      { term: "Pagination", definition: "The way content is divided across pages." },
+      { term: "Proofing", definition: "Checking and correcting document errors before output." }
+    ]
+  },
+  {
+    id: "application-presentations",
+    moduleId: 11,
+    moduleTitle: "Presentation Theory",
+    overview: "Revise the theory behind slide production: audience, structure, master slides, objects, animation, links, notes, and output formats.",
+    lessons: [
+      {
+        id: "ict-11-slide-purpose",
+        number: "11.1",
+        title: "Purpose, Audience, and Slide Structure",
+        summary: "A presentation should communicate clearly to a specific audience, using slides that are easy to follow.",
+        keyPoints: [
+          "Slide content should be brief, relevant, and readable from the intended viewing distance.",
+          "Layouts control where titles, text, images, tables, charts, and media appear.",
+          "Speaker notes help the presenter remember details without overloading the slide."
+        ],
+        studyBlocks: [
+          {
+            heading: "Exam Knowledge",
+            points: [
+              "A slide title identifies the topic; body text gives the key supporting points.",
+              "Too much text, low contrast, or small fonts can reduce audience understanding.",
+              "Handouts, full-page slides, and presenter notes are different output formats."
+            ]
+          }
+        ],
+        example: {
+          title: "Slide Layout",
+          rows: [
+            ["Slide area", "Suitable content"],
+            ["Title placeholder", "Main point"],
+            ["Image placeholder", "Relevant visual evidence"],
+            ["Notes area", "Presenter detail, not audience text"]
+          ]
+        }
+      },
+      {
+        id: "ict-11-master-media",
+        number: "11.2",
+        title: "Master Slides, Media, and Movement",
+        summary: "Master slides and controlled effects keep a presentation consistent and professional.",
+        keyPoints: [
+          "A master slide stores repeated design features such as logo, font, background, footer, and placeholder positions.",
+          "Transitions control movement between slides; animations control movement of objects on a slide.",
+          "Hyperlinks and action buttons can navigate to another slide, file, web page, or email address."
+        ],
+        studyBlocks: [
+          {
+            heading: "Good Practice",
+            points: [
+              "Use animations only when they support understanding.",
+              "Use alt text and screen tips where accessibility or clarity is needed.",
+              "Keep fonts, colours, spacing, and object alignment consistent."
+            ]
+          }
+        ],
+        compare: {
+          headers: ["Term", "Meaning"],
+          rows: [
+            ["Master slide", "Controls repeated design"],
+            ["Transition", "Effect between slides"],
+            ["Animation", "Effect on an object"],
+            ["Action button", "Clickable navigation control"]
+          ]
+        }
+      }
+    ],
+    quiz: [
+      {
+        id: "ict-11-q1",
+        topic: "Master slides",
+        question: "Why are master slides useful?",
+        options: ["They keep repeated formatting consistent", "They prevent all images being used", "They replace the need for an audience", "They turn slides into rows"],
+        correctIndex: 0,
+        feedback: "Correct. A master slide controls repeated layout and formatting across slides."
+      }
+    ],
+    glossary: [
+      { term: "Slide layout", definition: "The arrangement of placeholders and objects on a slide." },
+      { term: "Master slide", definition: "A slide that controls repeated design features." },
+      { term: "Transition", definition: "An effect used when moving from one slide to another." },
+      { term: "Animation", definition: "An effect applied to an object on a slide." },
+      { term: "Speaker notes", definition: "Presenter-only notes linked to a slide." },
+      { term: "Action button", definition: "A clickable slide object used for navigation." },
+      { term: "Handout", definition: "A printed or exported layout showing multiple slides per page." }
+    ]
+  },
+  {
+    id: "application-spreadsheets",
+    moduleId: 12,
+    moduleTitle: "Spreadsheet Theory",
+    overview: "Revise spreadsheet concepts used in practical work: cells, formulae, functions, references, sorting, formatting, charts, and output.",
+    lessons: [
+      {
+        id: "ict-12-formulae-functions",
+        number: "12.1",
+        title: "Cells, Formulae, and Functions",
+        summary: "Spreadsheets use cells, rows, columns, formulae, and functions to calculate and model data.",
+        keyPoints: [
+          "A cell reference such as B4 identifies the column and row where a value is stored.",
+          "A formula is a calculation written by the user; a function is a built-in calculation such as SUM, AVERAGE, MAX, MIN, COUNT, IF, or lookup.",
+          "Relative references change when copied, while absolute references such as $B$2 stay fixed."
+        ],
+        studyBlocks: [
+          {
+            heading: "Exam Knowledge",
+            points: [
+              "Formulae usually begin with an equals sign.",
+              "Brackets control the order of operations.",
+              "Functions can be nested, for example using IF with another function inside it."
+            ]
+          }
+        ],
+        example: {
+          title: "Formula and Result",
+          rows: [
+            ["A", "B", "C"],
+            ["Item", "Price", "VAT"],
+            ["Keyboard", "25", "=B2*0.2"],
+            ["Mouse", "12", "2.4"]
+          ],
+          result: "The formula =B2*0.2 calculates 20% of the price."
+        }
+      },
+      {
+        id: "ict-12-data-output",
+        number: "12.2",
+        title: "Data Handling and Output",
+        summary: "Spreadsheet output must present the correct data clearly, using formatting, sorting, selection, charts, and page setup.",
+        keyPoints: [
+          "Sorting changes record order; selecting or filtering shows only records that match criteria.",
+          "Charts should use a suitable chart type, labels, titles, legend, and a correct data range.",
+          "Print settings include orientation, margins, print area, row/column headings, gridlines, scaling, headers, and footers."
+        ],
+        compare: {
+          headers: ["Task", "Why it matters"],
+          rows: [
+            ["Currency formatting", "Shows money values clearly"],
+            ["Conditional formatting", "Highlights values that meet a rule"],
+            ["Print area", "Outputs only the required cells"],
+            ["Chart title", "Explains what the graph shows"]
+          ]
+        }
+      }
+    ],
+    quiz: [
+      {
+        id: "ict-12-q1",
+        topic: "Cell references",
+        question: "What happens to an absolute reference such as $B$2 when copied?",
+        options: ["It stays fixed", "It becomes a chart", "It deletes the worksheet", "It changes to text only"],
+        correctIndex: 0,
+        feedback: "Correct. Dollar signs lock the column and row reference."
+      }
+    ],
+    glossary: [
+      { term: "Cell", definition: "A single box in a spreadsheet grid." },
+      { term: "Formula", definition: "A user-written calculation." },
+      { term: "Function", definition: "A built-in calculation such as SUM or IF." },
+      { term: "Relative reference", definition: "A cell reference that changes when copied." },
+      { term: "Absolute reference", definition: "A cell reference fixed with dollar signs." },
+      { term: "Lookup", definition: "A function used to find matching data in a table." },
+      { term: "Print area", definition: "The selected range that will be printed or exported." }
+    ]
+  },
+  {
+    id: "application-databases",
+    moduleId: 13,
+    moduleTitle: "Database Theory",
+    overview: "Revise database knowledge for theory and practical work: tables, fields, records, data types, keys, queries, forms, and reports.",
+    lessons: [
+      {
+        id: "ict-13-structure",
+        number: "13.1",
+        title: "Tables, Fields, Records, and Keys",
+        summary: "A database stores structured data so it can be searched, sorted, edited, and reported accurately.",
+        keyPoints: [
+          "A table stores data about one type of item; a record is one complete row; a field is one category of data.",
+          "Field data types include text, numeric, date/time, currency, and Boolean/logical.",
+          "A primary key uniquely identifies a record; a foreign key links a record to a related table."
+        ],
+        example: {
+          title: "Records and Fields",
+          rows: [
+            ["StudentID", "Surname", "Year", "Paid"],
+            ["S014", "Ade", "10", "Yes"],
+            ["S027", "Khan", "11", "No"]
+          ],
+          notes: ["StudentID can be a primary key because each value is unique.", "Paid is a Boolean/logical field because it has Yes/No values."]
+        }
+      },
+      {
+        id: "ict-13-queries-reports",
+        number: "13.2",
+        title: "Queries, Forms, and Reports",
+        summary: "Database tools let users input data safely, find matching records, and output selected information.",
+        keyPoints: [
+          "Forms provide a user-friendly way to enter or edit records and can include validation controls.",
+          "Queries search or select records using criteria such as AND, OR, NOT, LIKE, greater than, less than, and wildcards.",
+          "Reports present selected fields and records in a clear printed or exported layout."
+        ],
+        studyBlocks: [
+          {
+            heading: "Query Examples",
+            points: [
+              "City = 'Lagos' finds records where the city field is Lagos.",
+              "Score >= 80 AND Paid = Yes finds high-scoring students who have paid.",
+              "Surname LIKE 'A*' finds surnames that begin with A."
+            ]
+          }
+        ],
+        example: {
+          title: "Query and Result",
+          code: "SELECT Surname, Year\nFROM Students\nWHERE Year = 11 AND Paid = 'No';",
+          result: "Shows only Year 11 students whose Paid field is No."
+        }
+      }
+    ],
+    quiz: [
+      {
+        id: "ict-13-q1",
+        topic: "Database keys",
+        question: "What is the purpose of a primary key?",
+        options: ["To uniquely identify each record", "To format all text in bold", "To create a slide transition", "To delete every duplicate field name"],
+        correctIndex: 0,
+        feedback: "Correct. A primary key uniquely identifies a record in a table."
+      }
+    ],
+    glossary: [
+      { term: "Table", definition: "A database structure that stores related records." },
+      { term: "Record", definition: "One complete row of data about an item." },
+      { term: "Field", definition: "One category of data in a database table." },
+      { term: "Data type", definition: "The kind of data a field stores." },
+      { term: "Primary key", definition: "A field that uniquely identifies each record." },
+      { term: "Foreign key", definition: "A field that links to a primary key in another table." },
+      { term: "Query", definition: "A search or selection instruction using criteria." },
+      { term: "Report", definition: "A formatted database output." }
+    ]
+  },
+  {
+    id: "application-web-authoring",
+    moduleId: 14,
+    moduleTitle: "Web Authoring Theory",
+    overview: "Revise website-authoring knowledge for theory: HTML structure, CSS presentation, hyperlinks, media, metadata, file paths, and tables.",
+    lessons: [
+      {
+        id: "ict-14-html-structure",
+        number: "14.1",
+        title: "HTML Structure and Content",
+        summary: "HTML describes the content and structure of a web page using elements and attributes.",
+        keyPoints: [
+          "A web page normally has a head section for metadata and a body section for visible content.",
+          "Common body elements include headings, paragraphs, lists, tables, images, video, audio, divs, and hyperlinks.",
+          "Attributes add extra information, such as href for a link, src for an image, alt for image description, and id for a bookmark target."
+        ],
+        example: {
+          title: "HTML and Output",
+          code: "<h1>Peak Study Hub</h1>\n<p>Learn, practise, achieve.</p>",
+          result: "Peak Study Hub\nLearn, practise, achieve."
+        }
+      },
+      {
+        id: "ict-14-css-paths",
+        number: "14.2",
+        title: "CSS, Metadata, and File Paths",
+        summary: "CSS controls presentation, while metadata and file paths help the page work correctly in a browser.",
+        keyPoints: [
+          "The three web development layers are content, presentation, and behaviour.",
+          "CSS can be external, embedded, or inline, and cascading rules decide which style is applied.",
+          "Relative file paths point within the site structure; absolute URLs include the full web address."
+        ],
+        studyBlocks: [
+          {
+            heading: "Metadata",
+            points: [
+              "The title appears in the browser tab.",
+              "Charset helps the browser interpret text characters correctly.",
+              "Description and viewport metadata support search previews and responsive display."
+            ]
+          }
+        ],
+        example: {
+          title: "CSS Rule",
+          code: "h1 {\n  color: #0f7490;\n  font-size: 32px;\n}",
+          result: "All h1 headings using this rule display in teal at 32px."
+        },
+        compare: {
+          headers: ["Layer", "Example"],
+          rows: [
+            ["Content", "HTML text and image elements"],
+            ["Presentation", "CSS colour, size, spacing, borders"],
+            ["Behaviour", "Scripted interaction such as validation"]
+          ]
+        }
+      }
+    ],
+    quiz: [
+      {
+        id: "ict-14-q1",
+        topic: "HTML attributes",
+        question: "Which image attribute provides useful alternative text?",
+        options: ["alt", "href", "table", "font-size"],
+        correctIndex: 0,
+        feedback: "Correct. The alt attribute describes an image when it cannot be seen or loaded."
+      }
+    ],
+    glossary: [
+      { term: "HTML", definition: "Markup used to structure web page content." },
+      { term: "CSS", definition: "Styles used to control web page presentation." },
+      { term: "Element", definition: "A piece of HTML such as h1, p, img, or a." },
+      { term: "Attribute", definition: "Extra information added to an HTML element." },
+      { term: "Metadata", definition: "Information about a page stored in the head section." },
+      { term: "Relative path", definition: "A file path written from the current page location." },
+      { term: "Absolute URL", definition: "A full web address including the protocol and domain." },
+      { term: "Cascade", definition: "The rule system that decides which CSS style applies." }
+    ]
+  }
+];
+
 const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
   "computer-systems": [
     {
@@ -1780,7 +2204,7 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
   ]
 };
 
-export const ictTheoryModules: IctTheoryModule[] = baseIctTheoryModules.map((module) => ({
+export const ictTheoryModules: IctTheoryModule[] = [...baseIctTheoryModules, ...applicationTheoryModules].map((module) => ({
   ...module,
   lessons: module.lessons.map((lesson) => ({
     ...lesson,
