@@ -58,6 +58,15 @@ const spreadsheetQuizScoreStorageKey = "peak-spreadsheet-quiz-scoreboard";
 const practiceRowCount = 500;
 const practiceColumnCount = 40;
 
+function shuffle<T>(items: T[]) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function colToIndex(column: string) {
   return column
     .toUpperCase()
@@ -380,6 +389,10 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const progressValue = moduleCardsForRoute.length ? (completedModuleCards / moduleCardsForRoute.length) * 100 : 0;
   const quizScore = quizAttempts[moduleId || "spreadsheets"] || { correct: 0, attempted: 0 };
   const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
+  const quizOptions = useMemo(
+    () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
+    [card?.id, card?.quiz]
+  );
 
   useEffect(() => {
     setActiveIndex(0);
@@ -914,7 +927,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                   <p className="text-sm font-semibold text-ink">Knowledge check</p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
                   <div className="mt-3 grid gap-2">
-                    {card.quiz.options.map((option, index) => (
+                    {quizOptions.map(({ option, index }) => (
                       <label
                         key={option}
                         className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm font-semibold ${quizAnswers[card.id] === index ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700"}`}

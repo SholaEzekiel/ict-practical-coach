@@ -19,6 +19,15 @@ type QuizScore = {
 
 const databaseQuizScoreStorageKey = "peak-database-quiz-scoreboard";
 
+function shuffle<T>(items: T[]) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function cloneTable(table: DatabaseTable) {
   return {
     ...table,
@@ -184,6 +193,10 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const quizScoreKey = moduleId || module?.id || "databases";
   const quizScore = quizAttempts[quizScoreKey] || { correct: 0, attempted: 0 };
   const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
+  const quizOptions = useMemo(
+    () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
+    [card?.id, card?.quiz]
+  );
   const queryRows = useMemo(() => {
     const rows = selected?.rows || [];
     const filtered = query.field ? rows.filter((row) => compareValue(row[query.field], query.operator, query.value)) : rows;
@@ -425,7 +438,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
                       <h3 className="font-bold">Knowledge check</h3>
                       <p className="mt-1 text-sm leading-6 text-slate-700">{card.quiz.question}</p>
                       <div className="mt-2 space-y-2">
-                        {card.quiz.options.map((option, index) => (
+                        {quizOptions.map(({ option, index }) => (
                           <label key={option} className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm font-semibold ${quizAnswers[card.id] === index ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-slate-700"}`}>
                             <input type="radio" name={`quiz-${card.id}`} checked={quizAnswers[card.id] === index} onChange={() => chooseQuizAnswer(index)} disabled={quizAnswers[card.id] !== undefined} />
                             <span>{option}</span>

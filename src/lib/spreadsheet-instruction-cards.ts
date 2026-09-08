@@ -267,11 +267,11 @@ function moduleTitle(moduleId: string) {
 }
 
 const introCells = [
-  ["A1", "Start"], ["B2", "Desk"], ["C3", "Found"], ["D4", "Check"], ["E5", "Middle"],
-  ["F6", "Column"], ["G7", "Club"], ["H8", "Row"], ["I9", "Ready"], ["J10", "Target"],
-  ["K11", "Marker"], ["L12", "End"], ["A15", "Down"], ["C16", "Register"], ["E18", "Finish"],
-  ["G20", "Note"], ["I22", "House"], ["L24", "Wide"], ["B26", "Lower"], ["D28", "Point"],
-  ["F30", "Scroll"], ["H32", "Far"], ["J34", "Complete"], ["L36", "Last"], ["A40", "Done"]
+  ["A1", "Start"], ["D3", "Desk"], ["B7", "Found"], ["H2", "Check"], ["E9", "Middle"],
+  ["J5", "Column"], ["C12", "Club"], ["G4", "Row"], ["I10", "Ready"], ["F14", "Target"],
+  ["K8", "Marker"], ["B16", "End"], ["L3", "Down"], ["E18", "Register"], ["A21", "Finish"],
+  ["I24", "Note"], ["D27", "House"], ["M11", "Wide"], ["C30", "Lower"], ["H33", "Point"],
+  ["N6", "Scroll"], ["F36", "Far"], ["J39", "Complete"], ["L42", "Last"], ["G45", "Done"]
 ] as const;
 
 const introSpreadsheetCards = introCells.map(([cell, value], index) =>
