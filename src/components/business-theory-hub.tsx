@@ -205,24 +205,39 @@ function buildOptionSet(correct: BusinessTheoryLesson | undefined, pool: Busines
   return shuffle([correct, ...distractors]);
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function answerAliases(title: string) {
+  const withoutParentheses = title.replace(/\s*\([^)]*\)/g, "").trim();
+  const aliases = [title, withoutParentheses].filter(Boolean);
+  return [...new Set(aliases)].sort((first, second) => second.length - first.length);
+}
+
+function maskAnswerTitle(prompt: string, title: string) {
+  return answerAliases(title).reduce((current, alias) => {
+    if (alias.length < 4) return current;
+    const pattern = new RegExp(`\\b${escapeRegExp(alias)}(?:s|es)?\\b`, "gi");
+    return current.replace(pattern, "the business term");
+  }, prompt);
+}
+
 function cleanQuizPrompt(term: BusinessTheoryLesson) {
   const customPrompts: Record<string, string> = {
+    Want: "A good or service that people would like to have but is not essential for living.",
     Franchise: "Business arrangement where one business uses another successful business's brand name, products, support, and trading methods in return for fees.",
     Franchisor: "The original business that allows another operator to use its established brand, products, and trading system.",
     Franchisee: "The operator who pays to use an established business name, products, and trading method.",
     Stakeholder: "A person or group with an interest in, or affected by, a business and its decisions.",
-    "Added Value": "The difference between the selling price of a product and the cost of bought-in materials and components."
+    "Added Value": "The difference between the selling price of a product and the cost of bought-in materials and components.",
+    "Flow Production": "Large quantities of a standardised product are made in a continuous process, often on a production line.",
+    "Computer Integrated Manufacturing (CIM)": "Computer-aided design and computer-aided manufacture are linked so design data can feed directly into the manufacturing process.",
+    "Break-Even Charts": "Graphs that show how costs and revenues change with sales, including the output level where total revenue equals total cost."
   };
   if (customPrompts[term.title]) return customPrompts[term.title];
 
-  const words = term.title
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((word) => word.length > 3);
-  return words.reduce((prompt, word) => {
-    const pattern = new RegExp(`\\b${word}(?:s|es|ed|ing)?\\b`, "gi");
-    return prompt.replace(pattern, "this concept");
-  }, term.fullDefinition);
+  return maskAnswerTitle(term.fullDefinition, term.title);
 }
 
 function buildKnowledgeQuestions(moduleGlossary: BusinessTheoryLesson[]) {
