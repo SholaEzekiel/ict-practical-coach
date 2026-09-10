@@ -4,6 +4,7 @@ export type BusinessCaseStudyQuestion = {
   id: string;
   skill: BusinessAssessmentSkill;
   question: string;
+  examHint?: string;
   options: string[];
   correctIndex: number;
   feedback: string[];
@@ -44,7 +45,8 @@ function buildCase(seed: CaseSeed): BusinessCaseStudy {
       {
         id: `${seed.id}-q1`,
         skill: "APP",
-        question: `Which response uses the case information best when discussing ${seed.focus}?`,
+        question: `How is ${seed.focus} most relevant to this business?`,
+        examHint: "Skill hint: choose the answer that uses a real detail from the case, not just a general definition.",
         options: [
           seed.appliedPoint,
           seed.genericTheory,
@@ -60,12 +62,13 @@ function buildCase(seed: CaseSeed): BusinessCaseStudy {
       {
         id: `${seed.id}-q2`,
         skill: "K",
-        question: "Which option is mostly knowledge, with little or no application?",
+        question: `Which statement explains the basic business idea behind ${seed.focus}?`,
+        examHint: "Skill hint: this checks knowledge only. In a longer answer, this would need application to the case.",
         options: [
           seed.genericTheory,
-          seed.appliedPoint,
-          seed.analysisChain,
-          seed.evaluation
+          seed.weakApplication,
+          seed.unsupportedJudgement,
+          `A detail from this case is ${seed.details[0]}, but this alone does not explain the business concept.`
         ],
         correctIndex: 0,
         feedback: [
@@ -76,12 +79,13 @@ function buildCase(seed: CaseSeed): BusinessCaseStudy {
       {
         id: `${seed.id}-q3`,
         skill: "AN",
-        question: "Which response develops the clearest cause-and-effect chain?",
+        question: `What is the most likely effect of this decision on the business?`,
+        examHint: "Skill hint: a strong answer should show cause and effect, then link the effect back to the business.",
         options: [
           seed.analysisChain,
           seed.appliedPoint,
-          seed.genericTheory,
-          `This is a good idea because it will help the business.`
+          seed.unsupportedJudgement,
+          `The business should focus on ${seed.focus} because it is a topic in the case.`
         ],
         correctIndex: 0,
         feedback: [
@@ -92,7 +96,8 @@ function buildCase(seed: CaseSeed): BusinessCaseStudy {
       {
         id: `${seed.id}-q4`,
         skill: "EV",
-        question: "Which response has the weakest evaluation?",
+        question: `Which conclusion would be least convincing for this case?`,
+        examHint: "Skill hint: weak evaluation makes a judgement without weighing evidence from the case.",
         options: [
           seed.unsupportedJudgement,
           seed.evaluation,
@@ -108,7 +113,8 @@ function buildCase(seed: CaseSeed): BusinessCaseStudy {
       {
         id: `${seed.id}-q5`,
         skill: "EV",
-        question: "Which would be the strongest final judgement for a high-mark answer?",
+        question: `What final recommendation is best supported by the case?`,
+        examHint: "Skill hint: the strongest judgement should balance the case evidence before reaching a conclusion.",
         options: [
           seed.evaluation,
           seed.unsupportedJudgement,

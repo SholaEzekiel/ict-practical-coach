@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { businessNoteModules } from "@/lib/business-note-data";
 import type { BusinessNoteLesson } from "@/lib/business-note-data";
 import { businessGlossaryTerms } from "@/lib/business-theory-data";
@@ -205,24 +205,6 @@ function buildOptionSet(correct: BusinessTheoryLesson | undefined, pool: Busines
   return shuffle([correct, ...distractors]);
 }
 
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function answerAliases(title: string) {
-  const withoutParentheses = title.replace(/\s*\([^)]*\)/g, "").trim();
-  const aliases = [title, withoutParentheses].filter(Boolean);
-  return [...new Set(aliases)].sort((first, second) => second.length - first.length);
-}
-
-function maskAnswerTitle(prompt: string, title: string) {
-  return answerAliases(title).reduce((current, alias) => {
-    if (alias.length < 4) return current;
-    const pattern = new RegExp(`\\b${escapeRegExp(alias)}(?:s|es)?\\b`, "gi");
-    return current.replace(pattern, "the business term");
-  }, prompt);
-}
-
 function cleanQuizPrompt(term: BusinessTheoryLesson) {
   const customPrompts: Record<string, string> = {
     Want: "A good or service that people would like to have but is not essential for living.",
@@ -237,7 +219,7 @@ function cleanQuizPrompt(term: BusinessTheoryLesson) {
   };
   if (customPrompts[term.title]) return customPrompts[term.title];
 
-  return maskAnswerTitle(term.fullDefinition, term.title);
+  return term.fullDefinition;
 }
 
 function buildKnowledgeQuestions(moduleGlossary: BusinessTheoryLesson[]) {
@@ -322,6 +304,11 @@ export function BusinessTheoryHub() {
 
   function nextQuestion() {
     setQuizIndex((index) => index + 1);
+    setSelectedAnswer(null);
+  }
+
+  function previousQuestion() {
+    setQuizIndex((index) => Math.max(index - 1, 0));
     setSelectedAnswer(null);
   }
 
@@ -513,11 +500,28 @@ export function BusinessTheoryHub() {
                   <div className={`mt-4 rounded-lg border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                     <p className="font-bold">{isCorrect ? "Correct" : `Correct answer: ${quizTerm.title}`}</p>
                     <p className="mt-1 text-sm leading-6 text-slate-700">{quizTerm.definition}</p>
-                    <button type="button" onClick={nextQuestion} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white">
-                      Next question
-                    </button>
                   </div>
                 )}
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={previousQuestion}
+                    disabled={quizIndex === 0}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean disabled:cursor-not-allowed disabled:text-slate-400"
+                  >
+                    <ChevronLeft size={17} aria-hidden="true" />
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextQuestion}
+                    disabled={!selectedAnswer}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Next question
+                    <ChevronRight size={17} aria-hidden="true" />
+                  </button>
+                </div>
               </div>
             </div>
           </Card>

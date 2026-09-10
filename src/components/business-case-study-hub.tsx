@@ -205,6 +205,7 @@ export function BusinessCaseStudyHub() {
                 <p className="text-sm font-bold uppercase tracking-wide text-ocean">{activeQuestion.skill} skill focus</p>
               </div>
               <h3 className="mt-3 text-2xl font-bold leading-tight text-ink">{activeQuestion.question}</h3>
+              {activeQuestion.examHint && <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{activeQuestion.examHint}</p>}
             </div>
             <Pill>Question {questionIndex + 1}/{activeCase.questions.length}</Pill>
           </div>
@@ -246,7 +247,12 @@ export function BusinessCaseStudyHub() {
             <button type="button" onClick={previousQuestion} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean">
               <ChevronLeft size={18} aria-hidden="true" /> Previous
             </button>
-            <button type="button" onClick={nextQuestion} className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 font-bold text-white">
+            <button
+              type="button"
+              onClick={nextQuestion}
+              disabled={selectedAnswer === null}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
               Next <ChevronRight size={18} aria-hidden="true" />
             </button>
           </div>
