@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
+import { visibleSupportLines } from "@/lib/task-instructions";
 import { getPresentationCardsForModule, getPresentationModule } from "@/lib/presentation-instruction-cards";
 import type { PresentationCard, PresentationObject, PresentationSlide } from "@/lib/presentation-instruction-cards";
 
@@ -255,6 +256,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
+  const supportLines = card ? visibleSupportLines(card.supportDocument) : [];
   const selected = slides[activeSlide] || slides[0] || normaliseSlide(emptySlide);
   const selectedObject = selected.objects?.find((item) => item.id === selectedObjectId) || null;
 
@@ -461,10 +463,10 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
                 <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
                 <h2 className="mt-2 text-lg font-bold leading-7">{card.goal}</h2>
               </section>
-              <section className="rounded-lg border border-line bg-white p-4">
-                <h3 className="font-bold">Support document</h3>
-                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">{card.supportDocument.map((line) => <p key={line}>{line}</p>)}</div>
-              </section>
+              {supportLines.length > 0 && <section className="rounded-lg border border-line bg-white p-4">
+                <h3 className="font-bold">Task information</h3>
+                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">{supportLines.map((line) => <p key={line}>{line}</p>)}</div>
+              </section>}
               <section className="rounded-lg border border-line bg-white p-4">
                 <h3 className="font-bold">Steps</h3>
                 <ol className="mt-3 space-y-3">{card.steps.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span><span>{step}</span></li>)}</ol>

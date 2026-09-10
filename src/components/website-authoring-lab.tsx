@@ -8,6 +8,7 @@ import type { Editor as GrapesEditor } from "grapesjs";
 import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen, Upload } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
+import { visibleSupportLines } from "@/lib/task-instructions";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
 
@@ -364,6 +365,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   if (!card) return null;
 
   const currentComplete = completed.includes(card.id);
+  const earnedPoints = cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0);
+  const supportLines = visibleSupportLines(card.supportDocument);
 
   const layoutClass = instructionsOpen
     ? "mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1700px] gap-4 xl:grid-cols-[380px_minmax(0,1fr)_minmax(360px,0.85fr)]"
@@ -415,12 +418,14 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>
               </section>
 
-              <section className="rounded-lg border border-line bg-white p-4">
-                <h3 className="font-bold">Support document</h3>
-                <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-                  {card.supportDocument.map((line) => <p key={line} className="break-words [overflow-wrap:anywhere]">{line}</p>)}
-                </div>
-              </section>
+              {supportLines.length > 0 && (
+                <section className="rounded-lg border border-line bg-white p-4">
+                  <h3 className="font-bold">Task information</h3>
+                  <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                    {supportLines.map((line) => <p key={line} className="break-words [overflow-wrap:anywhere]">{line}</p>)}
+                  </div>
+                </section>
+              )}
 
               <section className="rounded-lg border border-line bg-white p-4">
                 <h3 className="font-bold">Steps</h3>
@@ -458,7 +463,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <CheckCircle2 size={18} aria-hidden="true" /> Check final result
               </button>
               <div className="mt-3 flex items-center gap-2">
-                <span className="mr-auto text-sm font-semibold text-ink">{currentComplete ? card.points : 0} points</span>
+                <span className="mr-auto text-sm font-semibold text-ink">{earnedPoints} points</span>
                 <button
                   type="button"
                   onClick={previewWebsite}

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
+import { compactSupportLines } from "@/lib/task-instructions";
 import { getWordProcessingCardsForModule, getWordProcessingModule } from "@/lib/word-processing-instruction-cards";
 import type { WordProcessingExpectedResult, WordProcessingInstructionCard } from "@/lib/word-processing-instruction-cards";
 
@@ -246,6 +247,21 @@ function mergeFirstTableRowContent(html: string) {
   return root.innerHTML;
 }
 
+function exactTaskLines(card: WordProcessingInstructionCard) {
+  const expected = card.expected;
+  const targetLines = [
+    ...(expected.textIncludes || []),
+    ...(expected.boldText || []),
+    ...(expected.italicText || []),
+    ...(expected.underlineText || []),
+    ...(expected.alignments?.map((item) => item.text) || []),
+    ...(expected.unorderedListItems || []),
+    ...(expected.orderedListItems || [])
+  ];
+  const complexOutput = Boolean(expected.table || expected.image || expected.columns || targetLines.length > 1);
+  return complexOutput ? [] : targetLines;
+}
+
 export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
@@ -261,6 +277,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const currentComplete = completed.includes(card.id);
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
+  const earnedPoints = cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0);
 
   useEffect(() => {
     if (!card) return;
@@ -363,8 +380,12 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   function runEditorCommand(name: string, value?: string) {
-    editorRef.current?.execCommand(name, false, value);
-    const nextContent = editorRef.current?.getContent() || content;
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    editor.execCommand(name, false, value);
+    editor.nodeChanged();
+    const nextContent = editor.getContent() || content;
     setContent(nextContent);
     refreshWordCount(nextContent);
   }
@@ -413,6 +434,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   if (!card) return null;
+  const supportLines = compactSupportLines(card.supportDocument, exactTaskLines(card));
 
   return (
     <div className="mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1600px] gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
@@ -445,12 +467,14 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             <h2 className="mt-2 text-xl font-bold leading-8">{card.goal}</h2>
           </section>
 
-          <section className="rounded-lg border border-line bg-white p-4">
-            <h3 className="font-bold">Support document</h3>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
-              {card.supportDocument.map((line) => <p key={line}>{line}</p>)}
-            </div>
-          </section>
+          {supportLines.length > 0 && (
+            <section className="rounded-lg border border-line bg-white p-4">
+              <h3 className="font-bold">Task information</h3>
+              <div className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                {supportLines.map((line) => <p key={line}>{line}</p>)}
+              </div>
+            </section>
+          )}
 
           <section className="rounded-lg border border-line bg-white p-4">
             <h3 className="font-bold">Steps</h3>
@@ -490,7 +514,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           <button type="button" onClick={openDocumentPreview} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ocean hover:bg-mist">
             <MonitorPlay size={18} aria-hidden="true" /> Preview / Print
           </button>
-          <span className="mr-auto text-sm font-semibold text-ink">{currentComplete ? card.points : 0} points</span>
+          <span className="mr-auto text-sm font-semibold text-ink">{earnedPoints} points</span>
           <button
             type="button"
             onClick={nextCard}

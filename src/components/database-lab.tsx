@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
+import { visibleSupportLines } from "@/lib/task-instructions";
 import { getDatabaseCardsForModule, getDatabaseModule, sourceTables } from "@/lib/database-instruction-cards";
 import type { DatabaseCard, DatabaseExpectedResult, DatabaseTable } from "@/lib/database-instruction-cards";
 
@@ -190,6 +191,8 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const fields = selected?.fields || [];
   const currentComplete = card ? completed.includes(card.id) : false;
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
+  const earnedPoints = cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0);
+  const supportLines = card ? visibleSupportLines(card.supportDocument) : [];
   const quizScoreKey = moduleId || module?.id || "databases";
   const quizScore = quizAttempts[quizScoreKey] || { correct: 0, attempted: 0 };
   const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
@@ -405,7 +408,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
                 <>
                   <section className="rounded-lg border border-line bg-mist p-3"><p className="text-xs font-bold uppercase tracking-wide text-ocean">Study focus</p><h2 className="mt-1 text-lg font-bold leading-7">{card.goal}</h2></section>
                   {card.accessPath && <section className="rounded-lg border border-line bg-white p-3"><h3 className="font-bold">Access path</h3><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-bold text-ocean">{card.accessPath.map((item, index) => <span key={`${item}-${index}`} className="inline-flex items-center gap-2"><span className="rounded-md bg-mist px-2 py-1">{item}</span>{index < card.accessPath!.length - 1 && <span className="text-slate-400">&gt;</span>}</span>)}</div></section>}
-                  <section className="rounded-lg border border-line bg-white p-3"><h3 className="font-bold">Support document</h3><div className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">{card.supportDocument.map((line) => <p key={line}>{line}</p>)}</div></section>
+                  {supportLines.length > 0 && <section className="rounded-lg border border-line bg-white p-3"><h3 className="font-bold">Task information</h3><div className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">{supportLines.map((line) => <p key={line}>{line}</p>)}</div></section>}
                   <section className="rounded-lg border border-line bg-white p-3"><h3 className="font-bold">Steps</h3><ol className="mt-2 space-y-2">{card.steps.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span><span>{step}</span></li>)}</ol></section>
                   {card.quiz && (
                     <section className="rounded-lg border border-line bg-white p-3">
@@ -458,8 +461,9 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
               {card.teacherReview && <section className="rounded-lg border border-sky-200 bg-sky-50 p-4"><h3 className="font-bold">Teacher review</h3><ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">{card.teacherReview.map((item) => <li key={item}>{item}</li>)}</ul></section>}
               {feedback && <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
             </div>
-            <div className="grid grid-cols-[1fr_auto] gap-3 border-t border-line p-3">
+            <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-t border-line p-3">
               <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-2.5 font-bold text-white hover:bg-leaf/90"><CheckCircle2 size={17} aria-hidden="true" /> Check final result</button>
+              <span className="text-sm font-semibold text-ink">{earnedPoints} points</span>
               <button type="button" onClick={nextCard} disabled={!currentComplete || activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Next</button>
             </div>
           </>
