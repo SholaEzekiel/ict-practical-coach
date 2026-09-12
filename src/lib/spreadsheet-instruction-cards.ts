@@ -129,27 +129,28 @@ function entryCard(moduleId: string, id: string, goal: string, scenario: string,
 }
 
 function formulaCard(id: string, goal: string, scenario: string, cell: string, formula: string, value: string | number, extraSteps: string[] = [], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing") {
+  const functionName = formula.replace(/^=/, "").split("(")[0] || "formula";
   return baseCard({
     id,
     moduleId: "formula",
     moduleTitle: "Formulae",
     category: "formula",
-    skill: formula.replace(/^=/, "").split("(")[0] || "Formula",
+    skill: functionName,
     studentGoal: goal,
     scenario,
-    studentSteps: [`Click ${cell}.`, `Type exactly "${formula}".`, "Press Enter.", ...extraSteps],
+    studentSteps: [`Click ${cell}.`, "Type = to start a formula.", ...extraSteps, "Use the worksheet labels to choose the correct cell references or range.", "Press Enter and check the result."],
     instruction: goal,
     meaning: "A formula must start with = and use cell references so the result updates if source data changes.",
-    clickPath: [`Cell ${cell}`, "Formula bar", `Type ${formula}`],
+    clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
     expectedSelection: cell,
     expectedAction: "formula",
-    expectedResult: `${cell} shows ${value} and contains the formula ${formula}.`,
+    expectedResult: `${cell} shows ${value} using a formula with the correct references.`,
     autoCheck: { cells: [{ cell, formula, value }] },
     commonMistakes: ["Typing the answer instead of a formula", "Using the wrong range", "Missing the equals sign"],
     feedback: {
       wrongSelection: `Place the formula in ${cell}.`,
       wrongTool: "Type the formula directly in the cell or in the formula bar.",
-      wrongResult: `${cell} must contain ${formula}, not a manually typed result.`
+      wrongResult: `${cell} must contain a formula using the correct references, not a manually typed result.`
     },
     hints: ["Formulae begin with =.", "Cell references are more useful than manually typed answers."],
     difficulty
@@ -157,18 +158,26 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
 }
 
 function formulaIncludesCard(id: string, goal: string, scenario: string, cell: string, formulaIncludes: string[], value: string | number, steps: string[], difficulty: SpreadsheetInstructionCard["difficulty"] = "confident") {
+  const functionName = formulaIncludes[0];
+  const guidedSteps = steps.filter((step) => !/^Type exactly |^Press Enter\.$/i.test(step));
   return baseCard({
     id,
     moduleId: "formula",
     moduleTitle: "Formulae",
     category: "formula",
-    skill: formulaIncludes[0],
+    skill: functionName,
     studentGoal: goal,
     scenario,
-    studentSteps: steps,
+    studentSteps: [
+      ...(guidedSteps.length ? guidedSteps : [`Click ${cell}.`]),
+      "Type = to start a formula.",
+      `Use ${functionName} for this task.`,
+      "Use the worksheet labels to identify the correct range, criteria, lookup table, or return column.",
+      "Press Enter and check the result."
+    ],
     instruction: goal,
     meaning: "Use the named function and references to produce a result that changes with the worksheet data.",
-    clickPath: [`Cell ${cell}`, "Formula bar", `Use ${formulaIncludes[0]}`],
+    clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
     expectedSelection: cell,
     expectedAction: "formula",
     expectedResult: `${cell} shows ${value} using a formula.`,
@@ -176,10 +185,10 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
     commonMistakes: ["Typing the displayed answer manually", "Using the wrong lookup range", "Leaving out exact match"],
     feedback: {
       wrongSelection: `Place the formula in ${cell}.`,
-      wrongTool: `Use a ${formulaIncludes[0]} formula in the cell or formula bar.`,
+      wrongTool: `Use a ${functionName} formula in the cell or formula bar.`,
       wrongResult: `${cell} must show ${value} using the required formula parts.`
     },
-    hints: ["Check commas and brackets carefully.", "Use absolute references for fixed lookup tables."],
+    hints: ["Check commas and brackets carefully.", "Use absolute references for fixed lookup tables.", "Do not type the displayed answer manually."],
     difficulty
   });
 }
@@ -227,6 +236,7 @@ function formatTaskCard(args: {
   difficulty?: SpreadsheetInstructionCard["difficulty"];
   extraChecks?: Omit<SpreadsheetInstructionCard["autoCheck"], "cells">;
   extraSteps?: string[];
+  toolStep?: string;
 }) {
   const setupSteps = args.setup.flatMap(([cell, value]) => [`Click ${cell}.`, `Type exactly "${value}".`, "Press Enter."]);
   return baseCard({
@@ -240,7 +250,7 @@ function formatTaskCard(args: {
     studentSteps: [
       ...setupSteps,
       `Select ${args.range}.`,
-      `Use the toolbar or three dots / More menu to choose ${args.command}.`,
+      args.toolStep || `Use the toolbar or three dots / More menu to choose ${args.command}.`,
       ...(args.extraSteps || []),
       "Click Check my result."
     ],
@@ -254,7 +264,7 @@ function formatTaskCard(args: {
     commonMistakes: ["Formatting before entering the setup data", "Selecting the wrong range", "Changing the value instead of the format"],
     feedback: {
       wrongSelection: `Enter the setup data, then select ${args.range}.`,
-      wrongTool: `Use ${args.command} from the toolbar or More menu.`,
+      wrongTool: args.toolStep || `Use ${args.command} from the toolbar or More menu.`,
       wrongResult: `Check the setup data and make sure ${args.range} visibly uses ${args.command}.`
     },
     hints: ["Do the setup cells first.", "Select the exact range before choosing the formatting command."],
@@ -353,16 +363,18 @@ const formattingCards = [
     setup: [["A10", "Item"], ["B10", "Stock"], ["C10", "Needed"], ["A11", "Mouse"], ["B11", 18], ["C11", 20]],
     range: "A10:C10",
     command: "Fill colour",
-    checks: ["A10", "B10", "C10"].map((cell) => ({ cell, format: { background: true } }))
+    checks: ["A10", "B10", "C10"].map((cell) => ({ cell, format: { background: true } })),
+    toolStep: "Open the fill colour control and choose light blue."
   }),
   formatTaskCard({
     id: "sheet-format-title-font-family",
     goal: "Change the title font.",
-    scenario: "The display title should use a standard sans-serif font.",
+    scenario: "The display title should use Arial so the heading is clear and easy to read.",
     setup: [["E1", "Peak Revision Timetable"]],
     range: "E1",
     command: "Font family",
-    checks: [{ cell: "E1", value: "Peak Revision Timetable", format: { fontFamilyIncludes: ["arial", "calibri", "aptos"] } }]
+    checks: [{ cell: "E1", value: "Peak Revision Timetable", format: { fontFamilyIncludes: ["arial"] } }],
+    toolStep: "Open the font family list and choose Arial."
   }),
   formatTaskCard({
     id: "sheet-format-title-font-size",
@@ -371,16 +383,18 @@ const formattingCards = [
     setup: [["E3", "Homework Tracker"]],
     range: "E3",
     command: "Font size",
-    checks: [{ cell: "E3", value: "Homework Tracker", format: { fontSizeAtLeast: 14 } }]
+    checks: [{ cell: "E3", value: "Homework Tracker", format: { fontSizeAtLeast: 18 } }],
+    toolStep: "Open the font size list and choose 18 pt."
   }),
   formatTaskCard({
     id: "sheet-format-title-font-colour",
     goal: "Change a title font colour.",
-    scenario: "The teacher wants the title to use a different text colour from the table.",
+    scenario: "The teacher wants the title text to be blue so it is easy to identify.",
     setup: [["E5", "Device Loan List"]],
     range: "E5",
     command: "Font colour",
-    checks: [{ cell: "E5", value: "Device Loan List", format: { fontColor: true } }]
+    checks: [{ cell: "E5", value: "Device Loan List", format: { fontColor: true } }],
+    toolStep: "Open the font colour control and choose blue."
   }),
   formatTaskCard({
     id: "sheet-format-note-italic",
@@ -508,11 +522,12 @@ const formattingCards = [
   formatTaskCard({
     id: "sheet-format-fill-and-font-colour",
     goal: "Use fill colour and font colour together.",
-    scenario: "A warning label should be easy to notice.",
+    scenario: "A warning label should use yellow fill and blue text so both changes are easy to identify.",
     setup: [["H33", "Deadline today"]],
     range: "H33",
     command: "Fill colour and font colour",
-    checks: [{ cell: "H33", value: "Deadline today", format: { background: true, fontColor: true } }]
+    checks: [{ cell: "H33", value: "Deadline today", format: { background: true, fontColor: true } }],
+    toolStep: "Choose yellow fill colour, then choose blue font colour."
   }),
   formatTaskCard({
     id: "sheet-format-budget-heading",
@@ -522,6 +537,7 @@ const formattingCards = [
     range: "A38:C38",
     command: "Bold and fill colour",
     checks: ["A38", "B38", "C38"].map((cell) => ({ cell, format: { bold: true, background: true } })),
+    toolStep: "Click Bold, then choose a light blue fill colour.",
     difficulty: "developing"
   }),
   formatTaskCard({
@@ -546,6 +562,7 @@ const formattingCards = [
       ...["F39", "G39", "F40", "G40"].map((cell) => ({ cell, format: { horizontalAlign: "center" as const } }))
     ],
     difficulty: "developing",
+    toolStep: "Use Bold, choose a light blue fill colour for the headings, and centre-align the Yes and No entries.",
     extraSteps: ["Bold and shade only the headings in E38:G38.", "Centre the Yes and No entries in F39:G40."]
   }),
   formatTaskCard({
@@ -570,6 +587,7 @@ const formattingCards = [
     range: "A48:C48",
     command: "Merge & Centre, font size, and font colour",
     checks: [{ cell: "A48", value: "Club Schedule", format: { horizontalAlign: "center", fontSizeAtLeast: 14, fontColor: true } }],
+    toolStep: "Use Merge & Centre, set the font size to 18 pt, and choose blue font colour.",
     difficulty: "developing"
   }),
   formatTaskCard({

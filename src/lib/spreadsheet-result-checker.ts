@@ -118,6 +118,12 @@ function styleValue(style: Record<string, unknown>, keys: string[]) {
   return undefined;
 }
 
+function styleTextValues(value: unknown): string[] {
+  if (value === undefined || value === null) return [];
+  if (typeof value !== "object") return [String(value).toLowerCase()];
+  return Object.values(value as Record<string, unknown>).flatMap(styleTextValues);
+}
+
 function hasTruthyStyle(style: Record<string, unknown>, keys: string[]) {
   const value = styleValue(style, keys);
   if (value === undefined || value === null || value === false) return false;
@@ -195,10 +201,14 @@ function formatMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
   }
 
   if (format.horizontalAlign) {
-    const align = String(styleValue(style, ["ht", "horizontalAlign", "textAlign", "align"]) ?? "").toLowerCase();
-    const expectedAlign = format.horizontalAlign.toLowerCase();
-    const centerAliases = ["2", "center", "centre", "middle"];
-    const matches = expectedAlign === "center" ? centerAliases.includes(align) : align.includes(expectedAlign);
+    const alignValues = styleTextValues(styleValue(style, ["ht", "horizontalAlign", "textAlign", "align", "horizontalAlignment"]));
+    const expectedAlign = format.horizontalAlign;
+    const alignAliases = {
+      left: ["1", "left"],
+      center: ["2", "center", "centre", "middle"],
+      right: ["3", "right"]
+    } as const;
+    const matches = alignValues.some((align) => alignAliases[expectedAlign].some((alias) => align === alias || align.includes(alias)));
     if (!matches) return { ok: false, message: `${expected.cell} should be ${format.horizontalAlign} aligned.` };
   }
 

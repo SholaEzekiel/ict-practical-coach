@@ -610,7 +610,7 @@ const extraFormattingSpecs = [
   ["wp-format-bold-results", "Practice Results Summary", "Make the results heading bold.", `<p>Practice Results Summary</p><p>Foundation learners start first.</p>`, "bold"],
   ["wp-format-bold-fastest", "Advanced learners", "Make Advanced learners bold.", `<p>Advanced learners are the fastest group.</p>`, "bold"],
   ["wp-format-italic-foundation", "Foundation learners", "Italicise Foundation learners.", `<p>Foundation learners start first.</p>`, "italic"],
-  ["wp-format-underline-community", "community newsletter", "Underline community newsletter.", typedStarter, "underline"],
+  ["wp-format-underline-community", "community newsletter", "Underline community newsletter.", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`, "underline"],
   ["wp-format-bold-information", "information desk", "Make information desk bold.", `<p>Meet at the information desk before the session.</p>`, "bold"],
   ["wp-format-italic-junior", "starter challenges", "Italicise starter challenges.", typedStarter, "italic"],
   ["wp-format-underline-final", "final article", "Underline final article.", `${typedStarter}<p>The final article should be clear enough for a community newsletter.</p>`, "underline"],
@@ -764,7 +764,7 @@ const extraTableCards: WordProcessingInstructionCard[] = [
     points: 20
   } as WordProcessingInstructionCard)),
   ...[
-    ["wp-table-sort-race-categories", "Sort skill groups", "Sort the category table alphabetically.", raceTableStarter, ["Intermediate", "Foundation", "Advanced"]],
+    ["wp-table-sort-race-categories", "Sort skill groups", "Sort the category table alphabetically.", raceTableStarter, ["Advanced", "Foundation", "Intermediate"]],
     ["wp-table-sort-club-extra", "Sort clubs again", "Sort the club table alphabetically.", tableStarter, ["Art", "Drama", "Robotics"]],
     ["wp-table-sort-winners", "Sort winner names", "Sort the winners table alphabetically.", `<table><tbody><tr><td>Winner</td><td>Category</td><td>Time</td></tr><tr><td>Zara</td><td>Advanced</td><td>10:10</td></tr><tr><td>Ana</td><td>Foundation</td><td>09:30</td></tr><tr><td>Milo</td><td>Intermediate</td><td>09:50</td></tr></tbody></table>`, ["Ana", "Milo", "Zara"]]
   ].map(([id, title, goal, starterHtml, sortedFirstColumn]) => ({
@@ -832,7 +832,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     goal: "Make the table headings bold and sort the first column alphabetically.",
     steps: ["Bold the heading row.", "Click in the table.", "Sort the first column from A to Z."],
     starterHtml: raceTableStarter,
-    expected: { boldText: ["Category", "Points", "Notes"], table: { headers: ["Category", "Points", "Notes"], sortedFirstColumn: ["Intermediate", "Foundation", "Advanced"] } },
+    expected: { boldText: ["Category", "Points", "Notes"], table: { headers: ["Category", "Points", "Notes"], sortedFirstColumn: ["Advanced", "Foundation", "Intermediate"] } },
     points: 30
   },
   {
@@ -848,7 +848,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     starterHtml: `<p>Learner Safety</p><p>All learners must bring their login details. Learners should follow marshal instructions throughout the event.</p><p>Login details</p><p>Water</p><p>Marshal instructions</p>`,
     expected: {
       boldText: ["Learner Safety"],
-      alignments: [{ text: "Learner Safety", value: "center" }, { text: "All learners must wear", value: "justify" }],
+      alignments: [{ text: "Learner Safety", value: "center" }, { text: "All learners must bring", value: "justify" }],
       unorderedListItems: ["Login details", "Water", "Marshal instructions"]
     },
     points: 30
@@ -882,7 +882,7 @@ const extraExamCards: WordProcessingInstructionCard[] = [
     goal: "Apply two columns and sort the results table.",
     steps: ["Click the two-column toolbar button.", "Click inside the results table.", "Click Sort A-Z."],
     starterHtml: `${typedStarter}${raceTableStarter}`,
-    expected: { columns: 2, table: { sortedFirstColumn: ["Intermediate", "Foundation", "Advanced"] } },
+    expected: { columns: 2, table: { sortedFirstColumn: ["Advanced", "Foundation", "Intermediate"] } },
     points: 30
   },
   {
