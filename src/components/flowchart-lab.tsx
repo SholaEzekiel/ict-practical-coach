@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { PointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, ListChecks, MousePointer2, Play, Plus, Redo2, RotateCcw, Square, Trash2, Undo2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, ListChecks, MousePointer2, Play, Plus, Printer, Redo2, RotateCcw, Square, Trash2, Undo2, XCircle } from "lucide-react";
 import { clsx } from "clsx";
 import { getFlowchartModule, flowchartModules } from "@/lib/flowchart-instruction-cards";
 import type { FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
@@ -155,6 +155,14 @@ function formatValue(value: unknown) {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
+function escapeHtml(value = "") {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const module = getFlowchartModule(moduleId) || flowchartModules[0];
   const moduleIndex = flowchartModules.findIndex((item) => item.id === module.id);
@@ -176,6 +184,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const [testRuns, setTestRuns] = useState<string[]>([]);
   const [sandboxInput, setSandboxInput] = useState("Student");
   const [sandboxOutput, setSandboxOutput] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [flowDescription, setFlowDescription] = useState("");
   const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
@@ -200,6 +210,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setTestRuns([]);
     setSandboxInput("Student");
     setSandboxOutput("");
+    setStudentName("");
+    setFlowDescription("");
   }, [module.id, module.starterEdges, module.starterNodes]);
 
   function rememberChange() {
@@ -220,6 +232,9 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setFeedback([]);
     setComplete(false);
     setTestRuns([]);
+    setSandboxOutput("");
+    setStudentName("");
+    setFlowDescription("");
   }
 
   function addNode(type: FlowNodeType) {
@@ -391,6 +406,86 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setComplete(false);
     setFeedback(["Redid the last edit."]);
     setTestRuns([]);
+  }
+
+  function openFlowchartPrint() {
+    const printWindow = window.open("", "peak-flowchart-print", "width=1100,height=850");
+    if (!printWindow) return;
+
+    const lines = edges.map((edge) => {
+      const from = nodes.find((node) => node.id === edge.from);
+      const to = nodes.find((node) => node.id === edge.to);
+      if (!from || !to) return "";
+      const start = nodeAnchorPoint(from, to);
+      const end = nodeAnchorPoint(to, from);
+      const labelX = (start.x + end.x) / 2;
+      const labelY = (start.y + end.y) / 2 - 8;
+      return `<g>
+        <line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="#16313f" stroke-width="3" marker-end="url(#arrow)" />
+        ${edge.label ? `<text x="${labelX}" y="${labelY}" text-anchor="middle" class="edge-label">${escapeHtml(edge.label)}</text>` : ""}
+      </g>`;
+    }).join("");
+
+    const nodeMarkup = nodes.map((node) => {
+      const size = nodeSize(node);
+      const label = escapeHtml(node.label);
+      if (node.type === "decision") {
+        return `<div class="node decision" style="left:${node.x}px;top:${node.y}px;width:${size.width}px;height:${size.height}px;"><span>${label}</span></div>`;
+      }
+      return `<div class="node ${node.type}" style="left:${node.x}px;top:${node.y}px;width:${size.width}px;height:${size.height}px;">${label}</div>`;
+    }).join("");
+
+    printWindow.document.write(`<!doctype html>
+<html>
+<head>
+  <title>Peak flowchart print</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; color: #10212b; background: #eef3f7; }
+    .toolbar { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: #10212b; color: white; }
+    .toolbar button { border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
+    .page { width: 960px; margin: 24px auto; background: white; padding: 28px; border: 1px solid #d6e0e8; }
+    h1 { margin: 0; font-size: 24px; }
+    .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0 20px; font-size: 14px; }
+    .meta div { border: 1px solid #d6e0e8; border-radius: 8px; padding: 10px; min-height: 44px; }
+    .meta strong { display: block; color: #0b6f8a; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+    .canvas { position: relative; width: 760px; height: 860px; margin: 0 auto; border: 1px solid #d6e0e8; background-color: #fff; background-image: linear-gradient(#e7edf3 1px, transparent 1px), linear-gradient(90deg, #e7edf3 1px, transparent 1px); background-size: 24px 24px; overflow: hidden; }
+    svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .edge-label { fill: #0b6f8a; font-size: 12px; font-weight: 700; }
+    .node { position: absolute; z-index: 2; display: grid; place-items: center; border: 2px solid #d29a17; background: #fff7df; padding: 8px; text-align: center; font-size: 13px; font-weight: 700; line-height: 1.25; overflow: hidden; }
+    .start { border-color: #2e8b68; background: #ecfdf5; border-radius: 999px; }
+    .stop { border-color: #10212b; background: #f1f5f9; border-radius: 999px; }
+    .input, .output { border-color: #0b6f8a; background: #ecfeff; transform: skewX(-10deg); }
+    .input, .output { }
+    .decision { border-color: #10212b; background: white; transform: rotate(45deg); }
+    .decision span { transform: rotate(-45deg); font-size: 12px; }
+    @media print {
+      body { background: white; }
+      .toolbar { display: none; }
+      .page { margin: 0; width: 100%; border: 0; padding: 12mm; }
+      .canvas { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><strong>Peak flowchart evidence</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>
+  <main class="page">
+    <h1>${escapeHtml(module.title)}</h1>
+    <section class="meta">
+      <div><strong>Name</strong>${studentName.trim() ? escapeHtml(studentName.trim()) : "Optional"}</div>
+      <div><strong>Description</strong>${flowDescription.trim() ? escapeHtml(flowDescription.trim()) : escapeHtml(module.scenario)}</div>
+    </section>
+    <section class="canvas">
+      <svg aria-hidden="true">
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16313f" /></marker></defs>
+        ${lines}
+      </svg>
+      ${nodeMarkup}
+    </section>
+  </main>
+</body>
+</html>`);
+    printWindow.document.close();
   }
 
   return (
@@ -569,7 +664,30 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
               <button onClick={deleteSelected} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
                 <Trash2 size={17} aria-hidden="true" /> Delete selected
               </button>
+              <button onClick={openFlowchartPrint} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
+                <Printer size={17} aria-hidden="true" /> Print flowchart
+              </button>
             </div>
+
+            <section className="mt-5 rounded-lg border border-line p-4">
+              <h3 className="font-bold text-ink">Student details</h3>
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="student-name">Name (optional)</label>
+              <input
+                id="student-name"
+                value={studentName}
+                onChange={(event) => setStudentName(event.target.value)}
+                placeholder="Student name"
+                className="mt-2 w-full rounded-lg border border-line p-2 text-sm"
+              />
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="flow-description">Description (optional)</label>
+              <textarea
+                id="flow-description"
+                value={flowDescription}
+                onChange={(event) => setFlowDescription(event.target.value)}
+                placeholder="Briefly describe what this flowchart does"
+                className="mt-2 min-h-20 w-full rounded-lg border border-line p-3 text-sm"
+              />
+            </section>
 
             {selectedNode && (
               <section className="mt-5 rounded-lg border border-line p-4">

@@ -132,7 +132,7 @@ function validateDatabase(card: DatabaseCard, tables: DatabaseTable[], selectedT
   expected.reportFields?.forEach((field) => {
     const fieldExists = selected?.fields.some((item) => item.name === field) || allFields.some((item) => item.name === field);
     if (!report.fields.includes(field) && !fieldExists) messages.push(`Make sure ${field} exists as a field.`);
-    else if (!report.fields.includes(field) && expected.reportFields && expected.reportFields.length <= 4) messages.push(`Add ${field} to the report fields.`);
+    else if (!report.fields.includes(field)) messages.push(`Add ${field} to the report fields.`);
   });
   if (expected.labelField && report.labelField !== expected.labelField) messages.push(`Set the label field to ${expected.labelField}.`);
 

@@ -603,7 +603,7 @@ const extendedIntroSpecs = [
 const extraFormattingSpecs = [
   ["wp-format-bold-showcase-title", "Peak Study Practice Showcase", "Make the article title bold.", typedStarter, "bold"],
   ["wp-format-italic-photo-note", "A photograph of a learner is available for the article.", "Italicise the photograph note.", `${typedStarter}<p>A photograph of a learner is available for the article.</p>`, "italic"],
-  ["wp-format-underline-start-times", "Visitors should check start times before arriving.", "Underline the start time warning.", typedStarter, "underline"],
+  ["wp-format-underline-start-times", "Visitors should check start times before arriving.", "Underline the start time warning.", `${typedStarter}<p>Visitors should check start times before arriving.</p>`, "underline"],
   ["wp-format-bold-winners", "progress showcase", "Make progress showcase bold.", typedStarter, "bold"],
   ["wp-format-italic-skills", "skills lab", "Italicise skills lab.", typedStarter, "italic"],
   ["wp-format-underline-login details", "All learners must bring their login details.", "Underline the login details instruction.", `<p>Safety Notice</p><p>All learners must bring their login details.</p>`, "underline"],

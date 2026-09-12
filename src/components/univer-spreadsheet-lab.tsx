@@ -821,6 +821,9 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             <button onClick={downloadCsv} className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-3 py-3 text-sm font-semibold text-white">
               <Download size={16} /> Download CSV
             </button>
+            <button onClick={openPrintPreview} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-3 text-sm font-semibold text-ink hover:border-ocean">
+              <Printer size={16} /> Print / Save PDF
+            </button>
           </div>
         </Card>
 
