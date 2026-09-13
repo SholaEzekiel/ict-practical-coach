@@ -30,6 +30,7 @@ export function BusinessCaseStudyHub() {
   const [activeUnitId, setActiveUnitId] = useState(businessCaseStudyModules[0]?.unitId || 1);
   const [caseIndex, setCaseIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [previousFloorPosition, setPreviousFloorPosition] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
 
   const activeModule = businessCaseStudyModules.find((module) => module.unitId === activeUnitId) || businessCaseStudyModules[0];
@@ -65,9 +66,8 @@ export function BusinessCaseStudyHub() {
   const accuracy = unitScore.attempted ? Math.round((unitScore.correct / unitScore.attempted) * 100) : 0;
   const selectedAnswer = activeQuestion ? answers[activeQuestion.id]?.selected ?? null : null;
   const isCorrect = selectedAnswer === activeQuestion.correctIndex;
-  const isFirstQuestion = safeCaseIndex === 0 && safeQuestionIndex === 0;
   const isLastQuestion = safeCaseIndex === activeModule.cases.length - 1 && safeQuestionIndex === activeCase.questions.length - 1;
-  const canGoPrevious = previousAnsweredPosition !== undefined;
+  const canGoPrevious = selectedAnswer !== null && previousAnsweredPosition !== undefined && currentQuestionPosition > previousFloorPosition;
 
   useEffect(() => {
     try {
@@ -93,6 +93,7 @@ export function BusinessCaseStudyHub() {
     setActiveUnitId(unitId);
     setCaseIndex(0);
     setQuestionIndex(0);
+    setPreviousFloorPosition(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -122,11 +123,13 @@ export function BusinessCaseStudyHub() {
 
   function nextQuestion() {
     if (selectedAnswer === null || isLastQuestion) return;
-    goToQuestionPosition(currentQuestionPosition + 1);
+    const nextPosition = currentQuestionPosition + 1;
+    setPreviousFloorPosition(Math.max(0, nextPosition - 3));
+    goToQuestionPosition(nextPosition);
   }
 
   function previousQuestion() {
-    if (previousAnsweredPosition === undefined) return;
+    if (!canGoPrevious || previousAnsweredPosition === undefined) return;
     goToQuestionPosition(previousAnsweredPosition);
   }
 
@@ -209,7 +212,10 @@ export function BusinessCaseStudyHub() {
             </div>
             <button
               type="button"
-              onClick={() => setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([id]) => !unitQuestionIdSet.has(id))))}
+              onClick={() => {
+                setPreviousFloorPosition(0);
+                setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([id]) => !unitQuestionIdSet.has(id))));
+              }}
               className="mt-3 text-xs font-bold text-ocean hover:underline"
             >
               Reset unit score
