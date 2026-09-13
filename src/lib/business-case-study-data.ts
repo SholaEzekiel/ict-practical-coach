@@ -34,100 +34,205 @@ type CaseSeed = {
   evaluation: string;
 };
 
-function buildCase(seed: CaseSeed): BusinessCaseStudy {
+function knowledgeQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "K",
+    question: `What is meant by ${seed.focus}?`,
+    examHint: "Skill hint: this is a knowledge question. Choose the accurate business meaning.",
+    options: [
+      seed.genericTheory,
+      seed.appliedPoint,
+      seed.unsupportedJudgement,
+      `${seed.details[0]} is a case detail, but it does not by itself explain the business idea.`
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this is accurate knowledge using appropriate business terminology.",
+      "In longer answers, this knowledge must be developed with case application and explanation."
+    ]
+  };
+}
+
+function knowledgeOnlyQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "K",
+    question: `Which statement correctly describes ${seed.focus}?`,
+    examHint: "Skill hint: this checks the business idea before using the case evidence.",
+    options: [
+      seed.genericTheory,
+      seed.weakApplication,
+      seed.unsupportedJudgement,
+      `${seed.details[1]} is useful evidence, but it is not a definition of the business idea.`
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: a general definition or explanation can show knowledge, but it is not enough for strong case-study answers.",
+      "Application begins when the answer uses relevant evidence from the scenario."
+    ]
+  };
+}
+
+function weakJudgementQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "K",
+    question: `Identify the key business idea in ${seed.title}.`,
+    examHint: "Skill hint: start with accurate knowledge before making any recommendation.",
+    options: [
+      seed.genericTheory,
+      seed.unsupportedJudgement,
+      seed.appliedPoint,
+      seed.analysisChain
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this gives the business knowledge needed before a recommendation can be justified.",
+      "A stronger answer would then apply this idea to the scenario and develop the effect on the business."
+    ]
+  };
+}
+
+function applicationQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "APP",
+    question: `Why might ${seed.focus} matter to this business?`,
+    examHint: `Skill hint: use details such as ${seed.details[0]} and ${seed.details[1]}, not only a general definition.`,
+    options: [
+      seed.appliedPoint,
+      seed.genericTheory,
+      seed.unsupportedJudgement,
+      seed.weakApplication
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this applies the business idea to evidence from the case.",
+      "Application should use meaningful case details, not just repeat the business name."
+    ]
+  };
+}
+
+function appliedNotAnalysisQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "APP",
+    question: `Explain one way ${seed.focus} is shown in this case.`,
+    examHint: `Skill hint: this checks application. Use a real detail such as ${seed.details[2]}; analysis would then explain the impact.`,
+    options: [
+      seed.appliedPoint,
+      seed.genericTheory,
+      seed.unsupportedJudgement,
+      `${seed.details[2]} is only a case detail unless it is linked to ${seed.focus}.`
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: the answer is applied because it uses the case, but it has not fully developed the effect on the business.",
+      "Analysis would add a clear chain showing how the point changes costs, sales, profit, cash flow, output, or reputation."
+    ]
+  };
+}
+
+function analysisQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "AN",
+    question: `What is the most likely effect on ${seed.title}?`,
+    examHint: `Skill hint: show the chain from the decision to its impact on ${seed.title.toLowerCase()}.`,
+    options: [
+      seed.analysisChain,
+      seed.appliedPoint,
+      seed.genericTheory,
+      seed.unsupportedJudgement
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this develops a cause-and-effect chain linked to the business.",
+      "Analysis should explain the consequence, not only identify the topic or quote the case."
+    ]
+  };
+}
+
+function weakEvaluationQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "EV",
+    question: "Which decision is most suitable for this business?",
+    examHint: "Skill hint: evaluation needs a justified judgement, not only one unsupported benefit.",
+    options: [
+      seed.evaluation,
+      seed.unsupportedJudgement,
+      seed.analysisChain,
+      seed.appliedPoint
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this is the strongest judgement because it weighs case evidence before reaching a decision.",
+      "Strong evaluation compares relevant evidence and explains why the chosen option is better than the alternative."
+    ]
+  };
+}
+
+function evaluationQuestion(seed: CaseSeed, id: string): BusinessCaseStudyQuestion {
+  return {
+    id,
+    skill: "EV",
+    question: `Recommend the best decision for ${seed.title}.`,
+    examHint: `Skill hint: the best answer should use knowledge, apply details such as ${seed.details[2]} or ${seed.details[3]}, develop an effect, and make a justified judgement.`,
+    options: [
+      seed.evaluation,
+      seed.unsupportedJudgement,
+      seed.genericTheory,
+      seed.weakApplication
+    ],
+    correctIndex: 0,
+    feedback: [
+      "Correct: this combines knowledge, application, analysis, and a justified judgement.",
+      "For a strong 12-mark answer, students should also explain why the rejected option is less suitable in the case."
+    ]
+  };
+}
+
+function buildCase(seed: CaseSeed, caseNumber: number): BusinessCaseStudy {
+  const questionSets = [
+    [
+      knowledgeQuestion(seed, `${seed.id}-q1`),
+      knowledgeOnlyQuestion(seed, `${seed.id}-q2`),
+      weakJudgementQuestion(seed, `${seed.id}-q3`),
+      applicationQuestion(seed, `${seed.id}-q4`),
+      appliedNotAnalysisQuestion(seed, `${seed.id}-q5`)
+    ],
+    [
+      knowledgeQuestion(seed, `${seed.id}-q1`),
+      knowledgeOnlyQuestion(seed, `${seed.id}-q2`),
+      applicationQuestion(seed, `${seed.id}-q3`),
+      appliedNotAnalysisQuestion(seed, `${seed.id}-q4`),
+      analysisQuestion(seed, `${seed.id}-q5`)
+    ],
+    [
+      knowledgeQuestion(seed, `${seed.id}-q1`),
+      weakJudgementQuestion(seed, `${seed.id}-q2`),
+      applicationQuestion(seed, `${seed.id}-q3`),
+      analysisQuestion(seed, `${seed.id}-q4`),
+      evaluationQuestion(seed, `${seed.id}-q5`)
+    ],
+    [
+      knowledgeQuestion(seed, `${seed.id}-q1`),
+      applicationQuestion(seed, `${seed.id}-q2`),
+      analysisQuestion(seed, `${seed.id}-q3`),
+      weakEvaluationQuestion(seed, `${seed.id}-q4`),
+      evaluationQuestion(seed, `${seed.id}-q5`)
+    ]
+  ];
+
   return {
     id: seed.id,
     unitId: seed.unitId,
     title: seed.title,
     scenario: seed.scenario,
     details: seed.details,
-    questions: [
-      {
-        id: `${seed.id}-q1`,
-        skill: "APP",
-        question: `How is ${seed.focus} most relevant to this business?`,
-        examHint: "Skill hint: choose the answer that uses a real detail from the case, not just a general definition.",
-        options: [
-          seed.appliedPoint,
-          seed.genericTheory,
-          `The business should choose the option because ${seed.focus} is always important.`,
-          seed.weakApplication
-        ],
-        correctIndex: 0,
-        feedback: [
-          "Correct: this is real application because it uses a specific detail from the case, not just the business name.",
-          "A copied definition or general statement would usually earn knowledge, but it would not show strong application."
-        ]
-      },
-      {
-        id: `${seed.id}-q2`,
-        skill: "K",
-        question: `Which statement explains the basic business idea behind ${seed.focus}?`,
-        examHint: "Skill hint: this checks knowledge only. In a longer answer, this would need application to the case.",
-        options: [
-          seed.genericTheory,
-          seed.weakApplication,
-          seed.unsupportedJudgement,
-          `A detail from this case is ${seed.details[0]}, but this alone does not explain the business concept.`
-        ],
-        correctIndex: 0,
-        feedback: [
-          "Correct: the statement is accurate business knowledge, but it does not use the evidence in the case.",
-          "In longer answers, knowledge is only the starting point. Students must add application and developed analysis."
-        ]
-      },
-      {
-        id: `${seed.id}-q3`,
-        skill: "AN",
-        question: `What is the most likely effect of this decision on the business?`,
-        examHint: "Skill hint: a strong answer should show cause and effect, then link the effect back to the business.",
-        options: [
-          seed.analysisChain,
-          seed.appliedPoint,
-          seed.unsupportedJudgement,
-          `The business should focus on ${seed.focus} because it is a topic in the case.`
-        ],
-        correctIndex: 0,
-        feedback: [
-          "Correct: analysis explains how one business decision leads to further consequences for the business.",
-          "A strong chain normally moves from decision, to immediate effect, to business impact."
-        ]
-      },
-      {
-        id: `${seed.id}-q4`,
-        skill: "EV",
-        question: `Which conclusion would be least convincing for this case?`,
-        examHint: "Skill hint: weak evaluation makes a judgement without weighing evidence from the case.",
-        options: [
-          seed.unsupportedJudgement,
-          seed.evaluation,
-          seed.analysisChain,
-          seed.appliedPoint
-        ],
-        correctIndex: 0,
-        feedback: [
-          "Correct: this judgement is weak because it makes a conclusion without enough case-based justification.",
-          "Evaluation should compare or weigh evidence, then reach a conclusion that fits the business situation."
-        ]
-      },
-      {
-        id: `${seed.id}-q5`,
-        skill: "EV",
-        question: `What final recommendation is best supported by the case?`,
-        examHint: "Skill hint: the strongest judgement should balance the case evidence before reaching a conclusion.",
-        options: [
-          seed.evaluation,
-          seed.unsupportedJudgement,
-          seed.genericTheory,
-          seed.weakApplication
-        ],
-        correctIndex: 0,
-        feedback: [
-          "Correct: this combines knowledge, application, analysis, and a justified judgement.",
-          "This is the pattern students need for strong 8-mark and 12-mark responses: K + APP + AN + EV where evaluation is required."
-        ]
-      }
-    ]
+    questions: questionSets[Math.min(caseNumber, questionSets.length - 1)]
   };
 }
 
@@ -157,7 +262,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "A business plan would help Leo estimate kiosk rent, repair equipment costs, and expected customer demand in the mall.",
     analysisChain: "If Leo plans cash needs before opening, he is less likely to run out of money for parts, so repairs can continue and customers are less likely to be lost.",
     weakApplication: "Leo should write a plan because all new businesses need one.",
-    unsupportedJudgement: "The plan will definitely make the kiosk successful.",
+    unsupportedJudgement: "The plan is the best option because it sets out Leo's ideas.",
     evaluation: "A plan will not guarantee success, but it is important because Leo has limited management experience and must judge whether mall rent can be covered by repair sales."
   },
   {
@@ -171,7 +276,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Becoming a private limited company could protect the friends' personal savings if the furniture workshop builds up debts.",
     analysisChain: "If the workshop becomes incorporated, it may also find it easier to raise capital, allowing it to buy better equipment and complete more custom table orders.",
     weakApplication: "The friends should become a company because limited liability is useful.",
-    unsupportedJudgement: "A private limited company is always better than a partnership.",
+    unsupportedJudgement: "A private limited company is the better choice because the workshop has debts.",
     evaluation: "A private limited company may suit the workshop if debt risk is increasing, although the friends must accept more legal requirements and possible shared control with shareholders."
   },
   {
@@ -185,7 +290,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Growing tomatoes is primary activity, but making bottled tomato sauce would move the farm into secondary production.",
     analysisChain: "Adding sauce production could increase added value because the family sells a finished product, which may allow a higher selling price than raw tomatoes.",
     weakApplication: "The farm should enter secondary industry because manufacturing is useful.",
-    unsupportedJudgement: "The farm should definitely make sauce because secondary production is better.",
+    unsupportedJudgement: "The farm should make sauce because it would be a manufactured product.",
     evaluation: "Making sauce could increase added value, but the family should only do it if it can afford equipment and has demand beyond its current tomato buyers."
   },
   {
@@ -213,7 +318,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Nia may benefit from the established clothing brand's advertising and supplier system, but she must pay fees and follow store rules.",
     analysisChain: "Using a known brand may attract customers faster, increasing early sales, but royalty fees reduce Nia's profit from each outlet sale.",
     weakApplication: "Nia should use this method because brand names are helpful.",
-    unsupportedJudgement: "The established brand makes this the safest option.",
+    unsupportedJudgement: "The established brand gives Nia a possible advantage.",
     evaluation: "This arrangement suits Nia if she lacks retail experience, but it is less suitable if she wants full control over clothing ranges, prices, and store decisions."
   },
   {
@@ -226,8 +331,8 @@ const caseSeeds: CaseSeed[] = [
     genericTheory: "Motivated employees are more likely to work hard and provide good service.",
     appliedPoint: "Improving motivation could reduce reception staff turnover and make hotel check-in more reliable for guests.",
     analysisChain: "If reception staff feel valued, they may stay longer, so the hotel spends less time recruiting and guests receive more experienced service.",
-    weakApplication: "The hotel should motivate workers because motivation is important.",
-    unsupportedJudgement: "Pay rises are definitely the best way to motivate the receptionists.",
+    weakApplication: "The hotel should motivate workers to improve the reception department.",
+    unsupportedJudgement: "Pay rises are the best way to motivate the receptionists.",
     evaluation: "The hotel should combine pay with training and recognition, because service complaints suggest both motivation and skill at reception need improvement."
   },
   {
@@ -241,7 +346,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "A more autocratic style may help the inexperienced school bag workers meet delivery deadlines through clearer instructions.",
     analysisChain: "Clearer instructions can reduce mistakes and delays, so orders may be completed on time and customer relationships may improve.",
     weakApplication: "The manager should change style because leadership affects workers.",
-    unsupportedJudgement: "Autocratic leadership is always the best style in factories.",
+    unsupportedJudgement: "Autocratic leadership is the best style because the work is done in a factory.",
     evaluation: "A more directive style may be useful short term because workers are inexperienced, but a democratic approach could be added later to improve motivation and ideas."
   },
   {
@@ -255,7 +360,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Promoting an internal supermarket worker could be quick because they already know store routines.",
     analysisChain: "However, if internal workers lack team-management experience, service standards may fall, causing queues and customer complaints.",
     weakApplication: "The supermarket should recruit internally because it is cheaper.",
-    unsupportedJudgement: "External recruitment is clearly better because new people have new ideas.",
+    unsupportedJudgement: "External recruitment should be chosen because new people bring ideas.",
     evaluation: "The supermarket should compare urgency with skill needs; internal recruitment is quick, but external recruitment may be better if no current worker can manage the large team."
   },
   {
@@ -269,7 +374,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Induction training should cover the café's hygiene rules, customer service standards, and till system.",
     analysisChain: "If staff are trained before serving customers, mistakes with payments and food handling may fall, protecting the café's reputation.",
     weakApplication: "The café needs training because employees need to learn.",
-    unsupportedJudgement: "Off-the-job training is always best for new workers.",
+    unsupportedJudgement: "Off-the-job training is the best choice because the workers are new.",
     evaluation: "Induction plus on-the-job till practice is likely to suit the café because workers need both safety knowledge and branch-specific routines."
   },
   {
@@ -283,7 +388,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Each supervisor may have too many call advisers to support, making the span of control very wide.",
     analysisChain: "If supervisors cannot monitor calls or coach advisers, problems take longer to solve and customer satisfaction may fall.",
     weakApplication: "The call centre should change its hierarchy because span of control matters.",
-    unsupportedJudgement: "A narrow span of control is always better.",
+    unsupportedJudgement: "A narrow span of control is better because advisers need supervisors.",
     evaluation: "Adding supervisors may improve service, but the call centre should weigh this against higher salary costs and whether better training could solve the delays."
   },
   {
@@ -311,7 +416,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Questionnaires with teenagers could help the start-up check demand for mango juice before spending on bottles and labels.",
     analysisChain: "If research shows teenagers dislike the flavour or price, the business can change the product before launch, reducing the risk of unsold inventory.",
     weakApplication: "The start-up should do market research because it helps businesses make decisions.",
-    unsupportedJudgement: "Primary research is definitely better than secondary research.",
+    unsupportedJudgement: "Primary research is the better choice because the product is new.",
     evaluation: "Low-cost primary research is suitable because finance is limited, but the sample must represent teenagers or the results may mislead the start-up."
   },
   {
@@ -325,7 +430,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "The shop can create different adverts for serious runners and casual gym users instead of using one message for all customers.",
     analysisChain: "Targeted adverts may improve promotion because each group sees products that match its needs, increasing the chance of sales.",
     weakApplication: "The shop should use segmentation because customers are different.",
-    unsupportedJudgement: "Segmentation is always worth doing.",
+    unsupportedJudgement: "Segmentation is worth doing because the shop has different customers.",
     evaluation: "Segmentation is likely useful because the two customer groups have different needs, but the shop should avoid too many adverts if its budget is small."
   },
   {
@@ -339,7 +444,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Raising prices may cover higher ingredient costs, but local families may reduce visits if meals become too expensive.",
     analysisChain: "If prices rise sharply, demand could fall, so total revenue may not increase and the restaurant may waste fresh ingredients.",
     weakApplication: "The restaurant should increase prices because costs have risen.",
-    unsupportedJudgement: "Keeping prices low is definitely best.",
+    unsupportedJudgement: "Keeping prices low is best because the market is competitive.",
     evaluation: "A small price rise with clear promotion of fresh ingredients may be best, because the restaurant must cover costs without losing price-sensitive families."
   },
   {
@@ -353,7 +458,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Social media promotion suits the jewellery seller because customers already discover products through photos online.",
     analysisChain: "Better product photos may increase interest and website visits, which could increase online orders if the jewellery looks attractive.",
     weakApplication: "Promotion is useful because it makes people aware of products.",
-    unsupportedJudgement: "Social media is always the cheapest and best promotion method.",
+    unsupportedJudgement: "Social media is the best promotion method because online photos are popular.",
     evaluation: "Social media is suitable because jewellery is visual and sold online, but the seller should track orders to check whether posts convert into sales."
   },
   {
@@ -395,7 +500,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Flow production suits the toy factory because it makes thousands of identical plastic cars every week.",
     analysisChain: "Using flow production can lower unit costs through specialisation and machinery, helping the factory meet stable retailer demand.",
     weakApplication: "The factory should use flow production because it is efficient.",
-    unsupportedJudgement: "Flow production is always better than batch production.",
+    unsupportedJudgement: "Flow production is better because the factory uses machinery.",
     evaluation: "Flow production is suitable because demand is stable and output is standardised, but it would be less flexible if toy designs changed often."
   },
   {
@@ -422,8 +527,8 @@ const caseSeeds: CaseSeed[] = [
     genericTheory: "Quality assurance checks quality throughout production rather than only at the end.",
     appliedPoint: "Quality assurance could help identify screen faults during laptop assembly before customers receive defective products.",
     analysisChain: "Finding faults earlier may reduce returns and repair costs, protecting the manufacturer's reputation for reliable laptops.",
-    weakApplication: "The manufacturer should improve quality because quality is important.",
-    unsupportedJudgement: "Quality assurance is always better than quality control.",
+    weakApplication: "The manufacturer should improve quality to reduce screen faults.",
+    unsupportedJudgement: "Quality assurance is better because it checks work during production.",
     evaluation: "Quality assurance is suitable because faults are reaching customers, but it must be supported by worker training and clear screen-testing procedures."
   },
   {
@@ -451,7 +556,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "The office-area location gives access to lunchtime customers, but rent will be higher.",
     analysisChain: "If the restaurant is near offices, customer footfall may rise at lunch, increasing revenue enough to cover higher rent.",
     weakApplication: "The restaurant should choose a good location because customers matter.",
-    unsupportedJudgement: "The office location is definitely best because more customers pass by.",
+    unsupportedJudgement: "The office location is best because more customers pass by.",
     evaluation: "The office location is likely better if lunchtime sales cover the extra rent; otherwise the cheaper side street may reduce risk while the restaurant builds demand."
   },
   {
@@ -465,7 +570,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Lean production could help the bicycle workshop reduce obsolete spare parts and release cash.",
     analysisChain: "If fewer unnecessary parts are stored, less cash is tied up in inventory, improving working capital for the workshop.",
     weakApplication: "The workshop should use lean production because waste is bad.",
-    unsupportedJudgement: "Lean production will solve all the cash problems.",
+    unsupportedJudgement: "Lean production should be chosen because holding less stock saves cash.",
     evaluation: "Lean methods may help because cash is tight, but the workshop must still keep enough common spare parts to avoid delaying bicycle repairs."
   },
   {
@@ -479,7 +584,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "A bank loan could let the salon buy the $3000 chairs immediately, even though retained profit is low.",
     analysisChain: "New chairs may improve customer comfort and sales, but loan repayments increase monthly cash outflows.",
     weakApplication: "The salon should use a loan because loans are useful.",
-    unsupportedJudgement: "The salon should always avoid borrowing.",
+    unsupportedJudgement: "The salon should avoid borrowing because it already has little retained profit.",
     evaluation: "A small loan may be suitable if steady cash inflows cover repayments, but delaying purchase may be safer if the salon already has high debts."
   },
   {
@@ -492,8 +597,8 @@ const caseSeeds: CaseSeed[] = [
     genericTheory: "Cash flow is the movement of money into and out of a business.",
     appliedPoint: "The shop may have a cash shortage in June and July because suppliers are paid before August uniform sales arrive.",
     analysisChain: "If the shop cannot pay suppliers, it may not receive enough uniforms, causing lost sales during its busiest month.",
-    weakApplication: "The shop should manage cash flow because cash is important.",
-    unsupportedJudgement: "An overdraft is definitely the best solution.",
+    weakApplication: "The shop should manage cash flow before the August selling period.",
+    unsupportedJudgement: "An overdraft is the best solution because the shortage is temporary.",
     evaluation: "An overdraft may suit the temporary shortage because August sales should bring cash in, but the shop should compare interest costs with negotiating later supplier payments."
   },
   {
@@ -520,7 +625,7 @@ const caseSeeds: CaseSeed[] = [
     genericTheory: "Liquidity is the ability to pay short-term debts.",
     appliedPoint: "The café may have poor liquidity because cakes are not cash and wages and rent are due soon.",
     analysisChain: "If the café cannot turn inventory into cash quickly, it may miss payments, damaging relationships with workers and the landlord.",
-    weakApplication: "The café should improve liquidity because liquidity is important.",
+    weakApplication: "The café should improve liquidity before wages and rent are due.",
     unsupportedJudgement: "The café should sell all cakes cheaply.",
     evaluation: "Discounting some cakes may improve cash quickly, but the café should avoid making customers expect permanent low prices."
   },
@@ -535,7 +640,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Issuing shares to existing shareholders could fund the desk company's new city expansion without loan interest.",
     analysisChain: "Avoiding interest helps cash flow during expansion, but existing owners may lose some control if more shares are issued.",
     weakApplication: "The company should issue shares because it raises finance.",
-    unsupportedJudgement: "Equity is always better than debt.",
+    unsupportedJudgement: "Equity is better because it avoids regular interest payments.",
     evaluation: "Share issue may suit expansion if shareholders are willing, but a loan may be preferable if directors want to avoid diluting control."
   },
   {
@@ -549,7 +654,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Pharmacy A appears more profitable, while Pharmacy B may be better able to pay short-term debts.",
     analysisChain: "A high gross margin may show strong pricing or low purchase costs, but weak liquidity could still cause payment problems.",
     weakApplication: "The best pharmacy is the one with better ratios.",
-    unsupportedJudgement: "Pharmacy A is better because profit is always most important.",
+    unsupportedJudgement: "Pharmacy A is better because it has the stronger profit margin.",
     evaluation: "The stronger business depends on the objective: investors may prefer Pharmacy A's margin, while suppliers may prefer Pharmacy B's ability to pay."
   },
   {
@@ -577,7 +682,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Appreciation may make the coffee exporter more expensive for overseas customers.",
     analysisChain: "If overseas buyers face higher prices, export demand may fall, reducing revenue for the coffee exporter.",
     weakApplication: "Exchange rates affect imports and exports.",
-    unsupportedJudgement: "Appreciation is always bad for every business.",
+    unsupportedJudgement: "Appreciation is bad because the coffee exporter sells overseas.",
     evaluation: "Appreciation is a threat because most coffee is exported, but the impact may be lower if customers value its quality and cannot easily switch suppliers."
   },
   {
@@ -590,7 +695,7 @@ const caseSeeds: CaseSeed[] = [
     genericTheory: "Ethical decisions consider what is morally right, not just what is legal or profitable.",
     appliedPoint: "Using certified ethical fabric may protect the clothing brand's reputation but increase material costs.",
     analysisChain: "Higher fabric costs may reduce profit margins, but avoiding poor worker conditions can strengthen customer trust and reduce pressure-group criticism.",
-    weakApplication: "The business should be ethical because ethics are important.",
+    weakApplication: "The business should be ethical to protect its clothing brand image.",
     unsupportedJudgement: "The cheapest supplier is best because costs will be lower.",
     evaluation: "The ethical supplier is likely better if customers care about worker treatment, because reputation damage could cost more than the saving from cheaper fabric."
   },
@@ -605,7 +710,7 @@ const caseSeeds: CaseSeed[] = [
     appliedPoint: "Cleaner technology may reduce pollution from the paint factory and improve relations with local residents.",
     analysisChain: "Although the equipment increases costs, fewer complaints may reduce pressure for fines or restrictions and protect the factory's reputation.",
     weakApplication: "The factory should protect the environment because pollution is harmful.",
-    unsupportedJudgement: "Cleaner technology is always the correct decision.",
+    unsupportedJudgement: "Cleaner technology is the correct decision because residents are complaining.",
     evaluation: "Cleaner technology is likely justified if pollution complaints risk legal action or lost reputation, but the factory must ensure it can finance the investment."
   },
   {
@@ -640,5 +745,5 @@ const caseSeeds: CaseSeed[] = [
 
 export const businessCaseStudyModules = [1, 2, 3, 4, 5, 6].map((unitId) => ({
   unitId,
-  cases: caseSeeds.filter((caseStudy) => caseStudy.unitId === unitId).map(buildCase)
+  cases: caseSeeds.filter((caseStudy) => caseStudy.unitId === unitId).map((caseStudy, index) => buildCase(caseStudy, index))
 }));

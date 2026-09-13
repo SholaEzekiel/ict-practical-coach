@@ -8,7 +8,14 @@ import { businessNoteModules } from "@/lib/business-note-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 
 type Score = { correct: number; attempted: number };
-const businessCaseScoreStorageKey = "peak-business-case-scoreboard";
+type AnswerRecord = { selected: number; correct: boolean };
+const businessCaseAnswersStorageKey = "peak-business-case-answers-v3";
+const skillLabels = {
+  K: "Knowledge",
+  APP: "Application",
+  AN: "Analysis",
+  EV: "Evaluation"
+} as const;
 
 function shuffle<T>(items: T[]) {
   const shuffled = [...items];
@@ -23,84 +30,104 @@ export function BusinessCaseStudyHub() {
   const [activeUnitId, setActiveUnitId] = useState(businessCaseStudyModules[0]?.unitId || 1);
   const [caseIndex, setCaseIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [scores, setScores] = useState<Record<string, Score>>({});
+  const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
 
   const activeModule = businessCaseStudyModules.find((module) => module.unitId === activeUnitId) || businessCaseStudyModules[0];
   const noteModule = businessNoteModules.find((module) => module.moduleId === activeUnitId);
-  const activeCase = activeModule.cases[caseIndex % Math.max(1, activeModule.cases.length)];
-  const activeQuestion = activeCase.questions[questionIndex % Math.max(1, activeCase.questions.length)];
+  const safeCaseIndex = Math.min(caseIndex, Math.max(0, activeModule.cases.length - 1));
+  const activeCase = activeModule.cases[safeCaseIndex] || activeModule.cases[0];
+  const safeQuestionIndex = Math.min(questionIndex, Math.max(0, activeCase.questions.length - 1));
+  const activeQuestion = activeCase.questions[safeQuestionIndex] || activeCase.questions[0];
   const options = useMemo(
     () => shuffle(activeQuestion.options.map((option, index) => ({ option, index }))),
     [activeQuestion]
   );
   const totalQuestions = activeModule.cases.reduce((total, caseStudy) => total + caseStudy.questions.length, 0);
+  const unitQuestionIds = useMemo(() => activeModule.cases.flatMap((caseStudy) => caseStudy.questions.map((question) => question.id)), [activeModule]);
+  const unitQuestionIdSet = useMemo(() => new Set(unitQuestionIds), [unitQuestionIds]);
   const currentQuestionPosition = activeModule.cases
-    .slice(0, caseIndex)
-    .reduce((total, caseStudy) => total + caseStudy.questions.length, 0) + questionIndex + 1;
-  const progress = totalQuestions ? ((currentQuestionPosition - 1) / totalQuestions) * 100 : 0;
-  const unitScoreKey = `unit-${activeUnitId}`;
-  const unitScore = scores[unitScoreKey] || { correct: 0, attempted: 0 };
+    .slice(0, safeCaseIndex)
+    .reduce((total, caseStudy) => total + caseStudy.questions.length, 0) + safeQuestionIndex;
+  const previousAnsweredPosition = unitQuestionIds
+    .slice(0, currentQuestionPosition)
+    .map((id, index) => (answers[id] ? index : -1))
+    .filter((index) => index >= 0)
+    .at(-1);
+  const unitScore: Score = unitQuestionIds.reduce((score, id) => {
+    const answer = answers[id];
+    if (!answer) return score;
+    return {
+      attempted: score.attempted + 1,
+      correct: score.correct + (answer.correct ? 1 : 0)
+    };
+  }, { correct: 0, attempted: 0 });
+  const progress = totalQuestions ? (unitScore.attempted / totalQuestions) * 100 : 0;
   const accuracy = unitScore.attempted ? Math.round((unitScore.correct / unitScore.attempted) * 100) : 0;
+  const selectedAnswer = activeQuestion ? answers[activeQuestion.id]?.selected ?? null : null;
   const isCorrect = selectedAnswer === activeQuestion.correctIndex;
+  const isFirstQuestion = safeCaseIndex === 0 && safeQuestionIndex === 0;
+  const isLastQuestion = safeCaseIndex === activeModule.cases.length - 1 && safeQuestionIndex === activeCase.questions.length - 1;
+  const canGoPrevious = previousAnsweredPosition !== undefined;
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(businessCaseScoreStorageKey);
+      const saved = window.localStorage.getItem(businessCaseAnswersStorageKey);
       if (!saved) return;
-      const parsed = JSON.parse(saved) as Record<string, Score>;
-      if (parsed && typeof parsed === "object") setScores(parsed);
+      const parsed = JSON.parse(saved) as Record<string, AnswerRecord>;
+      if (parsed && typeof parsed === "object") setAnswers(parsed);
     } catch {
-      window.localStorage.removeItem(businessCaseScoreStorageKey);
+      window.localStorage.removeItem(businessCaseAnswersStorageKey);
     }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(businessCaseScoreStorageKey, JSON.stringify(scores));
-  }, [scores]);
+    window.localStorage.setItem(businessCaseAnswersStorageKey, JSON.stringify(answers));
+  }, [answers]);
+
+  useEffect(() => {
+    setCaseIndex((index) => Math.min(index, Math.max(0, activeModule.cases.length - 1)));
+    setQuestionIndex((index) => Math.min(index, Math.max(0, activeCase.questions.length - 1)));
+  }, [activeCase.questions.length, activeModule.cases.length]);
 
   function chooseUnit(unitId: number) {
     setActiveUnitId(unitId);
     setCaseIndex(0);
     setQuestionIndex(0);
-    setSelectedAnswer(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function chooseAnswer(answerIndex: number) {
     if (selectedAnswer !== null) return;
-    setSelectedAnswer(answerIndex);
-    setScores((current) => {
-      const currentScore = current[unitScoreKey] || { correct: 0, attempted: 0 };
-      return {
-        ...current,
-        [unitScoreKey]: {
-          attempted: currentScore.attempted + 1,
-          correct: currentScore.correct + (answerIndex === activeQuestion.correctIndex ? 1 : 0)
-        }
-      };
-    });
+    setAnswers((current) => ({
+      ...current,
+      [activeQuestion.id]: {
+        selected: answerIndex,
+        correct: answerIndex === activeQuestion.correctIndex
+      }
+    }));
+  }
+
+  function goToQuestionPosition(position: number) {
+    let remaining = Math.max(0, Math.min(position, totalQuestions - 1));
+    for (let nextCaseIndex = 0; nextCaseIndex < activeModule.cases.length; nextCaseIndex += 1) {
+      const questionCount = activeModule.cases[nextCaseIndex].questions.length;
+      if (remaining < questionCount) {
+        setCaseIndex(nextCaseIndex);
+        setQuestionIndex(remaining);
+        return;
+      }
+      remaining -= questionCount;
+    }
   }
 
   function nextQuestion() {
-    if (questionIndex + 1 < activeCase.questions.length) {
-      setQuestionIndex((index) => index + 1);
-    } else {
-      setQuestionIndex(0);
-      setCaseIndex((index) => (index + 1) % activeModule.cases.length);
-    }
-    setSelectedAnswer(null);
+    if (selectedAnswer === null || isLastQuestion) return;
+    goToQuestionPosition(currentQuestionPosition + 1);
   }
 
   function previousQuestion() {
-    if (questionIndex > 0) {
-      setQuestionIndex((index) => index - 1);
-    } else {
-      const previousCaseIndex = caseIndex === 0 ? activeModule.cases.length - 1 : caseIndex - 1;
-      setCaseIndex(previousCaseIndex);
-      setQuestionIndex(activeModule.cases[previousCaseIndex].questions.length - 1);
-    }
-    setSelectedAnswer(null);
+    if (previousAnsweredPosition === undefined) return;
+    goToQuestionPosition(previousAnsweredPosition);
   }
 
   return (
@@ -152,7 +179,7 @@ export function BusinessCaseStudyHub() {
                 <p className="text-sm font-bold uppercase tracking-wide text-ocean">Business scenario</p>
                 <h3 className="mt-2 text-2xl font-bold text-ink">{activeCase.title}</h3>
               </div>
-              <Pill>Case {caseIndex + 1}/{activeModule.cases.length}</Pill>
+              <Pill>Case {safeCaseIndex + 1}/{activeModule.cases.length}</Pill>
             </div>
             <p className="mt-5 text-lg leading-8 text-slate-700">{activeCase.scenario}</p>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -182,7 +209,7 @@ export function BusinessCaseStudyHub() {
             </div>
             <button
               type="button"
-              onClick={() => setScores((current) => ({ ...current, [unitScoreKey]: { correct: 0, attempted: 0 } }))}
+              onClick={() => setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([id]) => !unitQuestionIdSet.has(id))))}
               className="mt-3 text-xs font-bold text-ocean hover:underline"
             >
               Reset unit score
@@ -190,7 +217,7 @@ export function BusinessCaseStudyHub() {
             <div className="mt-5">
               <div className="mb-2 flex justify-between text-sm font-medium">
                 <span>Question progress</span>
-                <span>{currentQuestionPosition}/{totalQuestions}</span>
+                <span>{unitScore.attempted}/{totalQuestions}</span>
               </div>
               <ProgressBar value={progress} />
             </div>
@@ -202,12 +229,12 @@ export function BusinessCaseStudyHub() {
             <div>
               <div className="flex items-center gap-2">
                 <ListChecks size={20} className="text-ocean" aria-hidden="true" />
-                <p className="text-sm font-bold uppercase tracking-wide text-ocean">{activeQuestion.skill} skill focus</p>
+                <p className="text-sm font-bold uppercase tracking-wide text-ocean">{skillLabels[activeQuestion.skill]} skill focus</p>
               </div>
               <h3 className="mt-3 text-2xl font-bold leading-tight text-ink">{activeQuestion.question}</h3>
               {activeQuestion.examHint && <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{activeQuestion.examHint}</p>}
             </div>
-            <Pill>Question {questionIndex + 1}/{activeCase.questions.length}</Pill>
+            <Pill>Question {safeQuestionIndex + 1}/{activeCase.questions.length}</Pill>
           </div>
 
           <div className="mt-5 grid gap-3 xl:grid-cols-2">
@@ -244,13 +271,13 @@ export function BusinessCaseStudyHub() {
           )}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <button type="button" onClick={previousQuestion} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean">
+            <button type="button" onClick={previousQuestion} disabled={!canGoPrevious} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:border-line">
               <ChevronLeft size={18} aria-hidden="true" /> Previous
             </button>
             <button
               type="button"
               onClick={nextQuestion}
-              disabled={selectedAnswer === null}
+              disabled={selectedAnswer === null || isLastQuestion}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               Next <ChevronRight size={18} aria-hidden="true" />
