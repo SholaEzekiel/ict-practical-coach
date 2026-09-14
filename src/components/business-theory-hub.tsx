@@ -15,9 +15,11 @@ type BusinessKnowledgeQuestion = {
   correct: BusinessTheoryLesson;
   options: BusinessTheoryLesson[];
 };
+type BusinessQuizScore = { correct: number; attempted: number };
 type BusinessQuizSelections = Record<string, Record<string, string>>;
 
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
+const businessQuizScoreStorageKey = "peak-business-quiz-scoreboard";
 const businessMinimumQuizCount = 60;
 
 const businessExamNoteAdditions: Record<string, string> = {
@@ -370,8 +372,8 @@ export function BusinessTheoryHub() {
   const [activeLessonId, setActiveLessonId] = useState<ContentTarget>(businessNoteModules[0]?.lessons[0]?.id || "");
   const [quizOrder, setQuizOrder] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
-  const [furthestReachedQuizIndex, setFurthestReachedQuizIndex] = useState(0);
   const [quizSelections, setQuizSelections] = useState<BusinessQuizSelections>({});
+  const [quizAttempts, setQuizAttempts] = useState<Record<string, BusinessQuizScore>>({});
 
   const activeModule = businessNoteModules.find((module) => module.id === activeModuleId) || businessNoteModules[0];
   const moduleGlossary = useMemo(
@@ -384,48 +386,38 @@ export function BusinessTheoryHub() {
   useEffect(() => {
     setQuizOrder(shuffle(knowledgeQuestions.map((_, index) => index)));
     setQuizIndex(0);
-    setFurthestReachedQuizIndex(0);
   }, [knowledgeQuestions]);
 
-  const orderedIndex = quizOrder.length ? quizOrder[Math.min(quizIndex, quizOrder.length - 1)] : 0;
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(businessQuizScoreStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as Record<string, BusinessQuizScore>;
+      if (parsed && typeof parsed === "object") setQuizAttempts(parsed);
+    } catch {
+      window.localStorage.removeItem(businessQuizScoreStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(businessQuizScoreStorageKey, JSON.stringify(quizAttempts));
+  }, [quizAttempts]);
+
+  const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
   const quizQuestion = knowledgeQuestions[orderedIndex] || knowledgeQuestions[0];
   const quizTerm = quizQuestion?.correct;
   const options = quizQuestion?.options || [];
   const selectedAnswer = activeModule && quizQuestion ? quizSelections[activeModule.id]?.[quizQuestion.id] || null : null;
   const isCorrect = selectedAnswer === quizTerm?.title;
-  const moduleSelections = activeModule ? quizSelections[activeModule.id] || {} : {};
-  const moduleScore = knowledgeQuestions.reduce(
-    (score, question) => {
-      const answer = moduleSelections[question.id];
-      if (!answer) return score;
-      return {
-        attempted: score.attempted + 1,
-        correct: score.correct + (answer === question.correct.title ? 1 : 0)
-      };
-    },
-    { correct: 0, attempted: 0 }
-  );
+  const moduleScore = quizAttempts[activeModule.id] || { correct: 0, attempted: 0 };
   const quizPoints = moduleScore.correct * 10;
   const answeredInModule = moduleScore.attempted;
   const quizProgress = knowledgeQuestions.length ? (answeredInModule / knowledgeQuestions.length) * 100 : 0;
-  const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
-  const previousOrderedIndex = quizOrder[quizIndex - 1];
-  const previousQuizQuestion = previousOrderedIndex !== undefined ? knowledgeQuestions[previousOrderedIndex] : undefined;
-  const minimumQuizPreviousIndex = Math.max(0, furthestReachedQuizIndex - 3);
-  const canGoPrevious = Boolean(
-    selectedAnswer &&
-    previousQuizQuestion &&
-    moduleSelections[previousQuizQuestion.id] &&
-    quizIndex > minimumQuizPreviousIndex
-  );
 
   function chooseModule(moduleId: string) {
     const nextModule = businessNoteModules.find((module) => module.id === moduleId);
     setActiveModuleId(moduleId);
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
-    setQuizIndex(0);
-    setFurthestReachedQuizIndex(0);
-    setQuizSelections({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -438,16 +430,10 @@ export function BusinessTheoryHub() {
   }
 
   function nextQuestion() {
-    if (!selectedAnswer || isLastQuizQuestion) return;
-    setQuizIndex((index) => {
-      const nextIndex = Math.min(index + 1, Math.max(0, quizOrder.length - 1));
-      setFurthestReachedQuizIndex((furthest) => Math.max(furthest, nextIndex));
-      return nextIndex;
-    });
+    setQuizIndex((index) => index + 1);
   }
 
   function previousQuestion() {
-    if (!canGoPrevious) return;
     setQuizIndex((index) => Math.max(index - 1, 0));
   }
 
@@ -461,6 +447,16 @@ export function BusinessTheoryHub() {
         [quizQuestion.id]: answer
       }
     }));
+    setQuizAttempts((current) => {
+      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
+      return {
+        ...current,
+        [activeModule.id]: {
+          attempted: moduleScore.attempted + 1,
+          correct: moduleScore.correct + (answer === quizTerm?.title ? 1 : 0)
+        }
+      };
+    });
   }
 
   return (
@@ -598,13 +594,13 @@ export function BusinessTheoryHub() {
                     <button
                       type="button"
                       onClick={() => {
+                        setQuizAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }));
                         setQuizSelections((current) => {
                           const next = { ...current };
                           delete next[activeModule.id];
                           return next;
                         });
                         setQuizIndex(0);
-                        setFurthestReachedQuizIndex(0);
                       }}
                       className="text-xs font-bold text-ocean hover:underline"
                     >
@@ -653,7 +649,7 @@ export function BusinessTheoryHub() {
                   <button
                     type="button"
                     onClick={previousQuestion}
-                    disabled={!canGoPrevious}
+                    disabled={quizIndex === 0}
                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean disabled:cursor-not-allowed disabled:text-slate-400"
                   >
                     <ChevronLeft size={17} aria-hidden="true" />
@@ -662,7 +658,7 @@ export function BusinessTheoryHub() {
                   <button
                     type="button"
                     onClick={nextQuestion}
-                    disabled={!selectedAnswer || isLastQuizQuestion}
+                    disabled={!selectedAnswer}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300 sm:min-w-[124px]"
                   >
                     Next
