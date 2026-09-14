@@ -19,7 +19,6 @@ type BusinessQuizScore = { correct: number; attempted: number };
 type BusinessQuizSelections = Record<string, Record<string, string>>;
 
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
-const businessQuizScoreStorageKey = "peak-business-quiz-scoreboard";
 const businessMinimumQuizCount = 60;
 
 const businessExamNoteAdditions: Record<string, string> = {
@@ -387,21 +386,6 @@ export function BusinessTheoryHub() {
     setQuizOrder(shuffle(knowledgeQuestions.map((_, index) => index)));
     setQuizIndex(0);
   }, [knowledgeQuestions]);
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(businessQuizScoreStorageKey);
-      if (!saved) return;
-      const parsed = JSON.parse(saved) as Record<string, BusinessQuizScore>;
-      if (parsed && typeof parsed === "object") setQuizAttempts(parsed);
-    } catch {
-      window.localStorage.removeItem(businessQuizScoreStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(businessQuizScoreStorageKey, JSON.stringify(quizAttempts));
-  }, [quizAttempts]);
 
   const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
   const quizQuestion = knowledgeQuestions[orderedIndex] || knowledgeQuestions[0];

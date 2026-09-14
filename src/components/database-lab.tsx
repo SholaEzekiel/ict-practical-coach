@@ -18,8 +18,6 @@ type QuizScore = {
   attempted: number;
 };
 
-const databaseQuizScoreStorageKey = "peak-database-quiz-scoreboard";
-
 function shuffle<T>(items: T[]) {
   const shuffled = [...items];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -220,19 +218,6 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const sqlPreview = selected
     ? `SELECT ${report.fields.length ? report.fields.join(", ") : "*"} FROM ${selected.name}${query.field ? ` WHERE ${query.field} ${query.operator} "${query.value}"` : ""}${query.sortField ? ` ORDER BY ${query.sortField} ${query.sortDirection === "Descending" ? "DESC" : "ASC"}` : ""};`
     : "Import or select a table to generate a query.";
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(databaseQuizScoreStorageKey);
-      if (saved) setQuizAttempts(JSON.parse(saved) as Record<string, QuizScore>);
-    } catch {
-      window.localStorage.removeItem(databaseQuizScoreStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(databaseQuizScoreStorageKey, JSON.stringify(quizAttempts));
-  }, [quizAttempts]);
 
   function importTable(name: string) {
     const source = sourceTables.find((table) => table.name === name);

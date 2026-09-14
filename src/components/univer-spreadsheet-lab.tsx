@@ -54,7 +54,6 @@ type QuizScore = {
   attempted: number;
 };
 
-const spreadsheetQuizScoreStorageKey = "peak-spreadsheet-quiz-scoreboard";
 const practiceRowCount = 500;
 const practiceColumnCount = 40;
 
@@ -421,19 +420,6 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       footerText: ""
     });
   }, [moduleId]);
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(spreadsheetQuizScoreStorageKey);
-      if (saved) setQuizAttempts(JSON.parse(saved) as Record<string, QuizScore>);
-    } catch {
-      window.localStorage.removeItem(spreadsheetQuizScoreStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(spreadsheetQuizScoreStorageKey, JSON.stringify(quizAttempts));
-  }, [quizAttempts]);
 
   useEffect(() => {
     if (!card?.chartCheck) return;

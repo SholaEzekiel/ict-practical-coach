@@ -13,7 +13,7 @@ const skillLabels = {
   K: "Knowledge",
   APP: "Application",
   AN: "Analysis",
-  EV: "Evaluation"
+  EVAL: "Evaluation"
 } as const;
 
 function shuffle<T>(items: T[]) {
