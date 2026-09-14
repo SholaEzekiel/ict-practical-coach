@@ -56,7 +56,6 @@ type VisualSearch = {
 };
 
 const visualFileNames = ["01-concept.jpg", "02-detail.jpg", "03-real-world.jpg", "04-context.jpg"];
-const quizScoreStorageKey = "peak-ict-theory-quiz-scoreboard";
 
 const visualSearchesByLesson: Record<string, VisualSearch[]> = {
   "ict-1-hardware-software": [
@@ -377,16 +376,29 @@ export function IctTheoryHub() {
   const [activeLessonId, setActiveLessonId] = useState<ContentTarget>(ictTheoryModules[0]?.lessons[0]?.id || "");
   const [quizOrder, setQuizOrder] = useState<number[]>([]);
   const [quizIndex, setQuizIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [quizAttempts, setQuizAttempts] = useState<Record<string, { correct: number; attempted: number }>>({});
+  const [quizSelections, setQuizSelections] = useState<Record<string, Record<string, number>>>({});
   const contentRef = useRef<HTMLDivElement>(null);
 
   const activeModule = ictTheoryModules.find((module) => module.id === activeModuleId) || ictTheoryModules[0];
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
-  const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
+  const orderedIndex = quizOrder.length ? quizOrder[Math.min(quizIndex, quizOrder.length - 1)] : 0;
   const quiz = activeModule?.quiz[orderedIndex] || activeModule?.quiz[0];
-  const quizProgress = activeModule?.quiz.length ? ((quizIndex % activeModule.quiz.length) / activeModule.quiz.length) * 100 : 0;
+  const moduleSelections = activeModule ? quizSelections[activeModule.id] || {} : {};
+  const selectedAnswer = quiz ? moduleSelections[quiz.id] ?? null : null;
+  const moduleScore = (activeModule?.quiz || []).reduce(
+    (score, question) => {
+      const answer = moduleSelections[question.id];
+      if (answer === undefined) return score;
+      return {
+        attempted: score.attempted + 1,
+        correct: score.correct + (answer === question.correctIndex ? 1 : 0)
+      };
+    },
+    { correct: 0, attempted: 0 }
+  );
+  const quizProgress = activeModule?.quiz.length ? (moduleScore.attempted / activeModule.quiz.length) * 100 : 0;
   const isCorrect = selectedAnswer === quiz?.correctIndex;
+  const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
   const shuffledOptions = useMemo(() => {
     if (!quiz) return [];
     return shuffle(quiz.options.map((option, index) => ({ option, index })));
@@ -395,36 +407,20 @@ export function IctTheoryHub() {
   useEffect(() => {
     setQuizOrder(shuffle((activeModule?.quiz || []).map((_, index) => index)));
     setQuizIndex(0);
-    setSelectedAnswer(null);
   }, [activeModule?.id, activeModule?.quiz]);
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(quizScoreStorageKey);
-      if (!saved) return;
-      const parsed = JSON.parse(saved) as Record<string, { correct: number; attempted: number }>;
-      if (parsed && typeof parsed === "object") setQuizAttempts(parsed);
-    } catch {
-      window.localStorage.removeItem(quizScoreStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(quizScoreStorageKey, JSON.stringify(quizAttempts));
-  }, [quizAttempts]);
 
   function chooseModule(moduleId: string) {
     const nextModule = ictTheoryModules.find((module) => module.id === moduleId);
     setActiveModuleId(moduleId);
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
-    setSelectedAnswer(null);
+    setQuizIndex(0);
+    setQuizSelections({});
     scrollToContent();
   }
 
   function chooseContent(moduleId: string, target: ContentTarget) {
     if (moduleId !== activeModuleId) setActiveModuleId(moduleId);
     setActiveLessonId(target);
-    setSelectedAnswer(null);
     scrollToContent();
   }
 
@@ -436,23 +432,19 @@ export function IctTheoryHub() {
   }
 
   function nextQuestion() {
-    setQuizIndex((index) => index + 1);
-    setSelectedAnswer(null);
+    if (selectedAnswer === null || isLastQuizQuestion) return;
+    setQuizIndex((index) => Math.min(index + 1, Math.max(0, quizOrder.length - 1)));
   }
 
   function chooseAnswer(index: number) {
     if (!quiz || selectedAnswer !== null) return;
-    setSelectedAnswer(index);
-    setQuizAttempts((current) => {
-      const moduleScore = current[activeModule.id] || { correct: 0, attempted: 0 };
-      return {
-        ...current,
-        [activeModule.id]: {
-          attempted: moduleScore.attempted + 1,
-          correct: moduleScore.correct + (index === quiz.correctIndex ? 1 : 0)
-        }
-      };
-    });
+    setQuizSelections((current) => ({
+      ...current,
+      [activeModule.id]: {
+        ...(current[activeModule.id] || {}),
+        [quiz.id]: index
+      }
+    }));
   }
 
   return (
@@ -571,23 +563,30 @@ export function IctTheoryHub() {
                   <p className="text-sm font-bold text-ink">Scoreboard</p>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
                     <div className="rounded-lg bg-mist p-3">
-                      <p className="font-bold text-ocean">{quizAttempts[activeModule.id]?.correct || 0}</p>
+                      <p className="font-bold text-ocean">{moduleScore.correct}</p>
                       <p className="text-xs text-slate-600">Correct</p>
                     </div>
                     <div className="rounded-lg bg-mist p-3">
-                      <p className="font-bold text-ink">{quizAttempts[activeModule.id]?.attempted || 0}</p>
+                      <p className="font-bold text-ink">{moduleScore.attempted}</p>
                       <p className="text-xs text-slate-600">Answered</p>
                     </div>
                     <div className="rounded-lg bg-mist p-3">
                       <p className="font-bold text-ink">
-                        {quizAttempts[activeModule.id]?.attempted ? Math.round(((quizAttempts[activeModule.id]?.correct || 0) / quizAttempts[activeModule.id].attempted) * 100) : 0}%
+                        {moduleScore.attempted ? Math.round((moduleScore.correct / moduleScore.attempted) * 100) : 0}%
                       </p>
                       <p className="text-xs text-slate-600">Accuracy</p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setQuizAttempts((current) => ({ ...current, [activeModule.id]: { correct: 0, attempted: 0 } }))}
+                    onClick={() => {
+                      setQuizSelections((current) => {
+                        const next = { ...current };
+                        delete next[activeModule.id];
+                        return next;
+                      });
+                      setQuizIndex(0);
+                    }}
                     className="mt-3 text-xs font-bold text-ocean hover:underline"
                   >
                     Reset module score
@@ -596,7 +595,7 @@ export function IctTheoryHub() {
                 <div className="mt-5">
                   <div className="mb-2 flex justify-between text-sm font-medium">
                     <span>{activeModule?.moduleTitle}</span>
-                    <span>{(quizIndex % Math.max(1, activeModule?.quiz.length || 1)) + 1}/{activeModule?.quiz.length || 1}</span>
+                    <span>{moduleScore.attempted}/{activeModule?.quiz.length || 1}</span>
                   </div>
                   <ProgressBar value={quizProgress} />
                 </div>
@@ -628,7 +627,7 @@ export function IctTheoryHub() {
                   <div className={`mt-4 rounded-lg border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                     <p className="font-bold">{isCorrect ? "Correct" : `Correct answer: ${quiz.options[quiz.correctIndex]}`}</p>
                     <p className="mt-1 text-sm leading-6 text-slate-700">{quiz.feedback}</p>
-                    <button type="button" onClick={nextQuestion} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white">
+                    <button type="button" onClick={nextQuestion} disabled={isLastQuizQuestion} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
                       Next question
                     </button>
                   </div>

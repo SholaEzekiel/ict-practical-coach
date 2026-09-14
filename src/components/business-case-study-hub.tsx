@@ -9,7 +9,6 @@ import { Card, Pill, ProgressBar } from "@/components/ui";
 
 type Score = { correct: number; attempted: number };
 type AnswerRecord = { selected: number; correct: boolean };
-const businessCaseAnswersStorageKey = "peak-business-case-answers-v3";
 const skillLabels = {
   K: "Knowledge",
   APP: "Application",
@@ -30,7 +29,7 @@ export function BusinessCaseStudyHub() {
   const [activeUnitId, setActiveUnitId] = useState(businessCaseStudyModules[0]?.unitId || 1);
   const [caseIndex, setCaseIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [previousFloorPosition, setPreviousFloorPosition] = useState(0);
+  const [furthestReachedPosition, setFurthestReachedPosition] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
 
   const activeModule = businessCaseStudyModules.find((module) => module.unitId === activeUnitId) || businessCaseStudyModules[0];
@@ -45,15 +44,10 @@ export function BusinessCaseStudyHub() {
   );
   const totalQuestions = activeModule.cases.reduce((total, caseStudy) => total + caseStudy.questions.length, 0);
   const unitQuestionIds = useMemo(() => activeModule.cases.flatMap((caseStudy) => caseStudy.questions.map((question) => question.id)), [activeModule]);
-  const unitQuestionIdSet = useMemo(() => new Set(unitQuestionIds), [unitQuestionIds]);
   const currentQuestionPosition = activeModule.cases
     .slice(0, safeCaseIndex)
     .reduce((total, caseStudy) => total + caseStudy.questions.length, 0) + safeQuestionIndex;
-  const previousAnsweredPosition = unitQuestionIds
-    .slice(0, currentQuestionPosition)
-    .map((id, index) => (answers[id] ? index : -1))
-    .filter((index) => index >= 0)
-    .at(-1);
+  const previousQuestionId = unitQuestionIds[currentQuestionPosition - 1];
   const unitScore: Score = unitQuestionIds.reduce((score, id) => {
     const answer = answers[id];
     if (!answer) return score;
@@ -67,33 +61,22 @@ export function BusinessCaseStudyHub() {
   const selectedAnswer = activeQuestion ? answers[activeQuestion.id]?.selected ?? null : null;
   const isCorrect = selectedAnswer === activeQuestion.correctIndex;
   const isLastQuestion = safeCaseIndex === activeModule.cases.length - 1 && safeQuestionIndex === activeCase.questions.length - 1;
-  const canGoPrevious = selectedAnswer !== null && previousAnsweredPosition !== undefined && currentQuestionPosition > previousFloorPosition;
-
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(businessCaseAnswersStorageKey);
-      if (!saved) return;
-      const parsed = JSON.parse(saved) as Record<string, AnswerRecord>;
-      if (parsed && typeof parsed === "object") setAnswers(parsed);
-    } catch {
-      window.localStorage.removeItem(businessCaseAnswersStorageKey);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(businessCaseAnswersStorageKey, JSON.stringify(answers));
-  }, [answers]);
+  const minimumPreviousPosition = Math.max(0, furthestReachedPosition - 3);
+  const previousQuestionAnswered = previousQuestionId !== undefined && Boolean(answers[previousQuestionId]);
+  const canGoPrevious = selectedAnswer !== null && previousQuestionAnswered && currentQuestionPosition > minimumPreviousPosition;
 
   useEffect(() => {
     setCaseIndex((index) => Math.min(index, Math.max(0, activeModule.cases.length - 1)));
     setQuestionIndex((index) => Math.min(index, Math.max(0, activeCase.questions.length - 1)));
-  }, [activeCase.questions.length, activeModule.cases.length]);
+    setFurthestReachedPosition((position) => Math.min(position, Math.max(0, totalQuestions - 1)));
+  }, [activeCase.questions.length, activeModule.cases.length, totalQuestions]);
 
   function chooseUnit(unitId: number) {
     setActiveUnitId(unitId);
     setCaseIndex(0);
     setQuestionIndex(0);
-    setPreviousFloorPosition(0);
+    setFurthestReachedPosition(0);
+    setAnswers({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -124,13 +107,13 @@ export function BusinessCaseStudyHub() {
   function nextQuestion() {
     if (selectedAnswer === null || isLastQuestion) return;
     const nextPosition = currentQuestionPosition + 1;
-    setPreviousFloorPosition(Math.max(0, nextPosition - 3));
+    setFurthestReachedPosition((position) => Math.max(position, nextPosition));
     goToQuestionPosition(nextPosition);
   }
 
   function previousQuestion() {
-    if (!canGoPrevious || previousAnsweredPosition === undefined) return;
-    goToQuestionPosition(previousAnsweredPosition);
+    if (!canGoPrevious) return;
+    goToQuestionPosition(currentQuestionPosition - 1);
   }
 
   return (
@@ -213,8 +196,10 @@ export function BusinessCaseStudyHub() {
             <button
               type="button"
               onClick={() => {
-                setPreviousFloorPosition(0);
-                setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([id]) => !unitQuestionIdSet.has(id))));
+                setFurthestReachedPosition(0);
+                setCaseIndex(0);
+                setQuestionIndex(0);
+                setAnswers({});
               }}
               className="mt-3 text-xs font-bold text-ocean hover:underline"
             >
