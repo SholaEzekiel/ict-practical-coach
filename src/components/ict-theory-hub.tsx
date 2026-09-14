@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpenCheck, CheckCircle2, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { ictTheoryModules } from "@/lib/ict-theory-data";
 import type { IctTheoryLesson } from "@/lib/ict-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
@@ -436,6 +436,10 @@ export function IctTheoryHub() {
     setQuizIndex((index) => Math.min(index + 1, Math.max(0, quizOrder.length - 1)));
   }
 
+  function previousQuestion() {
+    setQuizIndex((index) => Math.max(index - 1, 0));
+  }
+
   function chooseAnswer(index: number) {
     if (!quiz || selectedAnswer !== null) return;
     setQuizSelections((current) => ({
@@ -627,11 +631,28 @@ export function IctTheoryHub() {
                   <div className={`mt-4 rounded-lg border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                     <p className="font-bold">{isCorrect ? "Correct" : `Correct answer: ${quiz.options[quiz.correctIndex]}`}</p>
                     <p className="mt-1 text-sm leading-6 text-slate-700">{quiz.feedback}</p>
-                    <button type="button" onClick={nextQuestion} disabled={isLastQuizQuestion} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">
-                      Next question
-                    </button>
                   </div>
                 )}
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={previousQuestion}
+                    disabled={quizIndex === 0}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:border-ocean disabled:cursor-not-allowed disabled:text-slate-400"
+                  >
+                    <ChevronLeft size={17} aria-hidden="true" />
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextQuestion}
+                    disabled={selectedAnswer === null || isLastQuizQuestion}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300 sm:min-w-[124px]"
+                  >
+                    Next
+                    <ChevronRight size={17} aria-hidden="true" />
+                  </button>
+                </div>
               </div>
             </div>
           </Card>
