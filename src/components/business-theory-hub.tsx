@@ -93,6 +93,15 @@ const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: nu
 };
 
 const contentRepairs: Record<string, Array<[string, string]>> = {
+  "bus-note-1-1": [
+    ["To increase added value, you: 1. Increase selling price of product OR 2. Reduce cost of production", "Ways to increase added value:\nIncrease the selling price of the product\nReduce the cost of production"],
+    ["OR you can…", ""],
+    ["Adding value - methods of increasing added value", "Methods of adding value:"],
+    ["Branding Creating a unique brand image that makes the business identifiable to consumers.\nEssentially, brand reputation. E.g., people like buying branded bags", "Branding - Creating a recognisable identity and reputation that helps customers distinguish the business from competitors."],
+    ["Excellent Providing unique services that make the customer want to return. E.g., having a 2-\nservice year warranty", "Excellent service - Providing reliable or distinctive service, such as a two-year warranty, that encourages customers to return."],
+    ["Product Having unique product features that make it stand out from competitors, resulting in\nfeatures customer return.", "Product features - Adding useful or distinctive features that make the product stand out and encourage repeat purchases."],
+    ["Convenience The location in which the good/service is being sold. A customer would prefer\npurchasing bread at their nearest grocery store over driving 20 km for a similar\nvariety.", "Convenience - Making the product easy to buy, for example by selling bread near customers rather than requiring a long journey."],
+  ],
   "bus-note-3-1": [
     ["The rise of e-commerce and its convenience, so more start-ups are set up and goods are sold\nto a wider consumer base", "The rise of e-commerce and its convenience, so more start-ups are set up and goods are sold to a wider consumer base"],
     ["Privatisation of public companies, so business objectives shift to profit, and a larger amount of\nprivate business compete", "Privatisation of public companies, so business objectives shift to profit, and more private businesses compete"],
@@ -130,6 +139,32 @@ function cleanLines(content: string) {
     .filter((line) => line && !forbiddenLine.test(line));
 }
 
+function structuredLines(content: string) {
+  const source = cleanLines(content);
+  const lines: string[] = [];
+
+  for (let index = 0; index < source.length; index += 1) {
+    const line = source[index];
+    const table = tableCards[line];
+    if (table) {
+      lines.push(...source.slice(index, index + table.skip + 1));
+      index += table.skip;
+      continue;
+    }
+
+    const previous = lines[lines.length - 1];
+    const isContinuation = /^[a-z(]/.test(line) || /^(and|or|but|so|which|that|where|when|with)\b/i.test(line);
+    if (previous && isContinuation && !isSoftHeading(previous) && !tableCards[previous]) {
+      lines[lines.length - 1] = `${previous} ${line}`.replace(/\s+/g, " ");
+      continue;
+    }
+
+    lines.push(line);
+  }
+
+  return lines;
+}
+
 function definitionParts(line: string) {
   const match = line.match(/^([^:–-]{2,58})\s*[:\-]\s+(.+)$/);
   if (!match) return null;
@@ -141,7 +176,8 @@ function definitionParts(line: string) {
 function isSoftHeading(line: string) {
   if (line.endsWith("?")) return true;
   if (line.endsWith(":")) return true;
-  if (/^(key definitions|methods of|types of|reasons for|importance of|benefits of|purpose of|role of|leadership styles|communication barriers|private sector|public sector|social enterprises|stakeholders|objectives|financial|non financial|making work less boring|exam focus|factors influencing|benefits of segmentation|how markets can be segmented)/i.test(line)) return true;
+  if (/^(key definitions|methods of|types of|reasons for|importance of|benefits of|purpose of|role of|leadership styles|communication barriers|private sector|public sector|social enterprises|stakeholders|objectives|financial|non financial|making work less boring|exam focus|factors influencing|benefits of segmentation|how markets can be segmented|ways to|main methods|methods of adding value|product lifecycle|extension strategies|distribution channels|sources of|problems of|limitations of|impact of legal controls)/i.test(line)) return true;
+  if (/^(product|price|place|promotion|e-commerce|for the business|for consumers|for the consumers)$/i.test(line)) return true;
   if (/^(Maslow|Taylor|Herzberg|Internal recruitment|External recruitment|Part time|Full time|Trade unions)/i.test(line)) return true;
   return false;
 }
@@ -189,42 +225,22 @@ function DefinitionLine({ line }: { line: string }) {
   );
 }
 
-function BusinessNoteRenderer({ lesson }: { lesson: BusinessNoteLesson }) {
-  const lines = cleanLines(repairedContent(lesson));
+function NoteSectionContent({ lines }: { lines: string[] }) {
   const elements = [];
   let index = 0;
 
   while (index < lines.length) {
-    const line = lines[index];
-    const table = tableCards[line];
-
-    if (table) {
-      elements.push(<NoteTable key={`${lesson.id}-table-${index}`} headers={table.headers} rows={table.rows} />);
-      index += table.skip + 1;
-      continue;
-    }
-
-    if (isSoftHeading(line)) {
-      elements.push(
-        <h4 key={`${lesson.id}-heading-${index}`} className="mt-6 border-l-4 border-gold pl-3 text-lg font-bold text-ink first:mt-0">
-          {line.replace(/:$/, "")}
-        </h4>,
-      );
-      index += 1;
-      continue;
-    }
-
-    if (isBulletLine(line)) {
+    if (isBulletLine(lines[index])) {
       const bullets = [];
-      while (index < lines.length && isBulletLine(lines[index]) && !tableCards[lines[index]]) {
+      while (index < lines.length && isBulletLine(lines[index])) {
         bullets.push(lines[index].replace(/^\d+\.\s*/, ""));
         index += 1;
       }
       elements.push(
-        <ul key={`${lesson.id}-list-${index}`} className="my-4 space-y-2 pl-2">
-          {bullets.map((bullet) => (
-            <li key={bullet} className="flex gap-3 leading-7 text-slate-800">
-              <span className="mt-3 h-2 w-2 flex-none bg-gold" aria-hidden="true" />
+        <ul key={`bullets-${index}`} className="space-y-2">
+          {bullets.map((bullet, bulletIndex) => (
+            <li key={`${bullet}-${bulletIndex}`} className="flex gap-3 leading-7 text-slate-800">
+              <span className="mt-3 h-2 w-2 flex-none bg-ocean" aria-hidden="true" />
               <span>{bullet}</span>
             </li>
           ))}
@@ -233,11 +249,66 @@ function BusinessNoteRenderer({ lesson }: { lesson: BusinessNoteLesson }) {
       continue;
     }
 
-    elements.push(<DefinitionLine key={`${lesson.id}-line-${index}`} line={line} />);
+    elements.push(<DefinitionLine key={`line-${index}`} line={lines[index]} />);
     index += 1;
   }
 
-  return <div className="space-y-3 text-base">{elements}</div>;
+  return <div className="mt-3 space-y-3">{elements}</div>;
+}
+
+function BusinessNoteRenderer({ lesson }: { lesson: BusinessNoteLesson }) {
+  const lines = structuredLines(repairedContent(lesson));
+  const blocks: Array<
+    | { kind: "section"; heading?: string; lines: string[] }
+    | { kind: "table"; headers: string[]; rows: string[][] }
+  > = [];
+  let section: { kind: "section"; heading?: string; lines: string[] } = { kind: "section", lines: [] };
+  let index = 0;
+
+  const flushSection = () => {
+    if (section.heading || section.lines.length) blocks.push(section);
+    section = { kind: "section", lines: [] };
+  };
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const table = tableCards[line];
+
+    if (table) {
+      flushSection();
+      blocks.push({ kind: "table", headers: table.headers, rows: table.rows });
+      index += table.skip + 1;
+      continue;
+    }
+
+    if (isSoftHeading(line)) {
+      flushSection();
+      section.heading = line.replace(/:$/, "");
+      index += 1;
+      continue;
+    }
+
+    section.lines.push(line);
+    index += 1;
+  }
+  flushSection();
+
+  return (
+    <div className="grid gap-4 text-base">
+      {blocks.map((block, blockIndex) => {
+        if (block.kind === "table") {
+          return <NoteTable key={`${lesson.id}-table-${blockIndex}`} headers={block.headers} rows={block.rows} />;
+        }
+
+        return (
+          <section key={`${lesson.id}-section-${blockIndex}`} className="rounded-lg border border-line bg-slate-50 p-4">
+            {block.heading && <h4 className="font-bold text-ink">{block.heading}</h4>}
+            <NoteSectionContent lines={block.lines} />
+          </section>
+        );
+      })}
+    </div>
+  );
 }
 
 function buildOptionSet(correct: BusinessTheoryLesson | undefined, pool: BusinessTheoryLesson[]) {
