@@ -2111,63 +2111,34 @@ const extraIctTheoryQuizByModule: Record<string, IctTheoryQuiz[]> = {
   ]
 };
 
-const minimumQuizCount = 52;
-
-function optionWindow(items: string[], correct: string, start: number) {
-  const fallbackDistractors = [
-    "This is not the most accurate ICT answer.",
-    "This describes a different ICT concept.",
-    "This would not answer the question in this scenario.",
-    "This is too vague for a theory answer."
-  ];
-  const pool = [...items.filter((item) => item !== correct), ...fallbackDistractors.filter((item) => item !== correct)];
-  const distractors = Array.from({ length: 3 }, (_, index) => pool[(start + index) % pool.length]).filter(Boolean);
-  return [correct, ...distractors];
-}
-
-function generatedQuizForModule(module: IctTheoryModule, existingCount: number): IctTheoryQuiz[] {
-  const generated: IctTheoryQuiz[] = [];
-  const glossaryTerms = module.glossary.map((term) => term.term);
-  const lessonStatements = module.lessons.flatMap((lesson) => [
-    lesson.summary,
-    ...lesson.keyPoints,
-    ...(lesson.studyBlocks || []).flatMap((block) => block.points),
-    ...(lesson.compare?.rows || []).map((row) => `${row[0]} is linked with ${row.slice(1).join(" and ")}.`),
-    ...(lesson.example?.notes || []),
-    ...(lesson.example?.result ? [lesson.example.result] : [])
-  ]).filter(Boolean);
-
-  module.glossary.forEach((term, index) => {
-    if (existingCount + generated.length >= minimumQuizCount) return;
-    generated.push({
-      id: `${module.id}-auto-term-${index + 1}`,
-      topic: "Glossary recall",
-      question: `Which term best matches this description: ${term.definition}`,
-      options: optionWindow(glossaryTerms, term.term, index + 1),
-      correctIndex: 0,
-      feedback: `Correct. ${term.term}: ${term.definition}`
-    });
+// Every generated question tests one term; do not pad quizzes with unrelated facts.
+function generatedQuizForModule(module: IctTheoryModule): IctTheoryQuiz[] {
+  const terms = module.glossary.filter((entry, index, all) =>
+    all.findIndex((candidate) => candidate.term === entry.term || candidate.definition === entry.definition) === index
+  );
+  if (terms.length < 4) return [];
+  return terms.flatMap((entry, index) => {
+    const others = [...terms.slice(index + 1), ...terms.slice(0, index)].slice(0, 3);
+    const asksAboutFunction = /\b(controls?|performs?|processes?|stores?|provides?|allows?|enables?|used to|responsible for)\b/i.test(entry.definition);
+    return [
+      {
+        id: module.id + "-term-" + index,
+        topic: entry.term,
+        question: (asksAboutFunction ? "Which term performs this function? " : "Which term matches this description? ") + entry.definition,
+        options: [entry.term, ...others.map((other) => other.term)],
+        correctIndex: 0,
+        feedback: ""
+      },
+      {
+        id: module.id + "-meaning-" + index,
+        topic: entry.term,
+        question: "Which description correctly explains " + entry.term + "?",
+        options: [entry.definition, ...others.map((other) => other.definition)],
+        correctIndex: 0,
+        feedback: ""
+      }
+    ];
   });
-
-  let index = 0;
-  while (existingCount + generated.length < minimumQuizCount && lessonStatements.length) {
-    const statement = lessonStatements[index % lessonStatements.length];
-    const lesson = module.lessons[index % module.lessons.length];
-    const questionStem = index % 2 === 0
-      ? `Which statement is true about ${lesson?.title || module.moduleTitle}?`
-      : `Which answer would be strongest in an ICT theory question about ${lesson?.title || module.moduleTitle}?`;
-    generated.push({
-      id: `${module.id}-auto-skill-${index + 1}`,
-      topic: lesson?.title || module.moduleTitle,
-      question: questionStem,
-      options: optionWindow(lessonStatements, statement, index + 1),
-      correctIndex: 0,
-      feedback: `Correct. ${statement}`
-    });
-    index += 1;
-  }
-
-  return generated;
 }
 
 const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["studyBlocks"]>> = {
@@ -2561,6 +2532,6 @@ export const ictTheoryModules: IctTheoryModule[] = [...baseIctTheoryModules, ...
   })),
   quiz: (() => {
     const manualQuiz = [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])];
-    return [...manualQuiz, ...generatedQuizForModule(module, manualQuiz.length)];
+    return [...manualQuiz, ...generatedQuizForModule(module)];
   })()
 }));

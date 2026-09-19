@@ -594,6 +594,26 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
             </div>
           </div>
 
+          <section className="mx-4 mt-4 rounded-lg border border-line bg-white p-4">
+              <h3 className="font-bold text-ink">Flowchart details</h3>
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="student-name">Name (optional)</label>
+              <input
+                id="student-name"
+                value={studentName}
+                onChange={(event) => setStudentName(event.target.value)}
+                placeholder="Student name"
+                className="mt-2 w-full rounded-lg border border-line p-2 text-sm"
+              />
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="flow-description">Description (optional)</label>
+              <textarea
+                id="flow-description"
+                value={flowDescription}
+                onChange={(event) => setFlowDescription(event.target.value)}
+                placeholder="Briefly describe what this flowchart does"
+                className="mt-2 min-h-20 w-full rounded-lg border border-line p-3 text-sm"
+              />
+          </section>
+
           <div className="min-h-0 flex-1 overflow-auto p-4">
             <div className="relative h-[860px] min-w-[760px] overflow-hidden rounded-lg border border-line bg-white" style={{ backgroundImage: "linear-gradient(#e7edf3 1px, transparent 1px), linear-gradient(90deg, #e7edf3 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
               <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
@@ -668,26 +688,6 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                 <Printer size={17} aria-hidden="true" /> Print flowchart
               </button>
             </div>
-
-            <section className="mt-5 rounded-lg border border-line p-4">
-              <h3 className="font-bold text-ink">Student details</h3>
-              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="student-name">Name (optional)</label>
-              <input
-                id="student-name"
-                value={studentName}
-                onChange={(event) => setStudentName(event.target.value)}
-                placeholder="Student name"
-                className="mt-2 w-full rounded-lg border border-line p-2 text-sm"
-              />
-              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="flow-description">Description (optional)</label>
-              <textarea
-                id="flow-description"
-                value={flowDescription}
-                onChange={(event) => setFlowDescription(event.target.value)}
-                placeholder="Briefly describe what this flowchart does"
-                className="mt-2 min-h-20 w-full rounded-lg border border-line p-3 text-sm"
-              />
-            </section>
 
             {selectedNode && (
               <section className="mt-5 rounded-lg border border-line p-4">

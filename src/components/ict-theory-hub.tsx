@@ -17,6 +17,20 @@ function shuffle<T>(items: T[]) {
   return shuffled;
 }
 
+function usefulQuizFeedback(feedback: string, correctAnswer: string) {
+  const cleaned = feedback.replace(/^Correct[.:]?\s*/i, "").trim();
+  if (!cleaned) return "";
+
+  const normalise = (value: string) => value.toLowerCase().replace(/\s+/g, " ").replace(/[.:;!?]+$/g, "").trim();
+  if (normalise(cleaned) === normalise(correctAnswer)) return "";
+
+  if (normalise(cleaned).startsWith(normalise(correctAnswer))) {
+    return cleaned.slice(correctAnswer.length).replace(/^\s*[:;,.\-]\s*/, "").trim();
+  }
+
+  return cleaned;
+}
+
 function LessonTable({ table }: { table: NonNullable<IctTheoryLesson["compare"]> }) {
   return (
     <div className="mt-5 overflow-hidden rounded-lg border border-line">
@@ -398,6 +412,7 @@ export function IctTheoryHub() {
   );
   const quizProgress = activeModule?.quiz.length ? (moduleScore.attempted / activeModule.quiz.length) * 100 : 0;
   const isCorrect = selectedAnswer === quiz?.correctIndex;
+  const additionalFeedback = quiz ? usefulQuizFeedback(quiz.feedback, quiz.options[quiz.correctIndex]) : "";
   const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
   const shuffledOptions = useMemo(() => {
     if (!quiz) return [];
@@ -562,7 +577,7 @@ export function IctTheoryHub() {
                   <ListChecks size={20} className="text-ocean" aria-hidden="true" />
                   <h2 className="text-2xl font-bold">Multiple choice questions</h2>
                 </div>
-                <p className="mt-3 leading-7 text-slate-600">Read the scenario, then choose the best ICT theory answer for this module.</p>
+                <p className="mt-3 leading-7 text-slate-600">Read each question, then choose the term, description, or function that best answers it.</p>
                 <div className="mt-4 rounded-lg border border-line bg-white p-4">
                   <p className="text-sm font-bold text-ink">Scoreboard</p>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
@@ -630,7 +645,9 @@ export function IctTheoryHub() {
                 {selectedAnswer !== null && (
                   <div className={`mt-4 rounded-lg border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                     <p className="font-bold">{isCorrect ? "Correct" : `Correct answer: ${quiz.options[quiz.correctIndex]}`}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-700">{quiz.feedback}</p>
+                    {additionalFeedback && (
+                      <p className="mt-1 text-sm leading-6 text-slate-700">{additionalFeedback}</p>
+                    )}
                   </div>
                 )}
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">

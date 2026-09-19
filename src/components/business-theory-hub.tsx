@@ -72,7 +72,47 @@ const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: nu
     ],
     skip: 14,
   },
+  "Niche VS Mass marketing": {
+    headers: ["Market", "Definition", "Benefits", "Limitations"],
+    rows: [
+      [
+        "Niche market",
+        "Targets a small segment of a market with products designed for its particular customers.",
+        "Less competition; customers may be more loyal; a well-chosen niche can be profitable.",
+        "Smaller customer base; success may attract competitors; specialist products may fail.",
+      ],
+      [
+        "Mass market",
+        "Targets the needs and wants of the whole market with products intended for many customers.",
+        "Potentially high sales; economies of scale; growth can spread risk across a larger product range.",
+        "Strong competition; higher marketing costs; less customer loyalty when products are not distinctive.",
+      ],
+    ],
+    skip: 22,
+  },
 };
+
+const contentRepairs: Record<string, Array<[string, string]>> = {
+  "bus-note-3-1": [
+    ["The rise of e-commerce and its convenience, so more start-ups are set up and goods are sold\nto a wider consumer base", "The rise of e-commerce and its convenience, so more start-ups are set up and goods are sold to a wider consumer base"],
+    ["Privatisation of public companies, so business objectives shift to profit, and a larger amount of\nprivate business compete", "Privatisation of public companies, so business objectives shift to profit, and more private businesses compete"],
+    ["Market segmentation: splitting a market into groups based on specific characteristics of\ncustomers", "Market segmentation: splitting a market into groups based on specific customer characteristics"],
+    ["How markets can be segmentedby", "How markets can be segmented"],
+  ],
+  "bus-note-4-3": [
+    ["Quality - when a good or service is more than satisfactory in multiple areas such as function,\naesthetics and material under the judgement of consumers.", "Quality - when a good or service meets customer expectations in areas such as function, appearance, reliability, and materials."],
+    ["Quality control - when a business hires inspectors to check and remove defective products that\nare not of quality at the end of production.", "Quality control - inspectors check finished output and remove defective products at the end of production."],
+    ["Quality assurance - Inspectors and workers check for defective products during and after\nproduction in order to identify the reason for the defect.", "Quality assurance - workers check quality throughout production to prevent defects and identify their causes."],
+    ["Total Quality Management - Workers are pushed to maintain quality always and are trained to find\nways to cut wastage. This method is written out in documents and is carried out throughout the\nwhole of the production, ensuring that mistakes do not happen in the first place.", "Total Quality Management - every employee is responsible for maintaining quality, preventing mistakes, and continuously reducing waste throughout production."],
+  ],
+};
+
+function repairedContent(lesson: BusinessNoteLesson) {
+  return (contentRepairs[lesson.id] || []).reduce(
+    (content, [source, replacement]) => content.replace(source, replacement),
+    `${lesson.content}${businessExamNoteAdditions[lesson.id] || ""}`,
+  );
+}
 
 function shuffle<T>(items: T[]) {
   const shuffled = [...items];
@@ -99,8 +139,9 @@ function definitionParts(line: string) {
 }
 
 function isSoftHeading(line: string) {
+  if (line.endsWith("?")) return true;
   if (line.endsWith(":")) return true;
-  if (/^(key definitions|methods of|types of|reasons for|importance of|benefits of|purpose of|role of|leadership styles|communication barriers|private sector|public sector|social enterprises|stakeholders|objectives|financial|non financial|making work less boring)/i.test(line)) return true;
+  if (/^(key definitions|methods of|types of|reasons for|importance of|benefits of|purpose of|role of|leadership styles|communication barriers|private sector|public sector|social enterprises|stakeholders|objectives|financial|non financial|making work less boring|exam focus|factors influencing|benefits of segmentation|how markets can be segmented)/i.test(line)) return true;
   if (/^(Maslow|Taylor|Herzberg|Internal recruitment|External recruitment|Part time|Full time|Trade unions)/i.test(line)) return true;
   return false;
 }
@@ -149,7 +190,7 @@ function DefinitionLine({ line }: { line: string }) {
 }
 
 function BusinessNoteRenderer({ lesson }: { lesson: BusinessNoteLesson }) {
-  const lines = cleanLines(`${lesson.content}${businessExamNoteAdditions[lesson.id] || ""}`);
+  const lines = cleanLines(repairedContent(lesson));
   const elements = [];
   let index = 0;
 
