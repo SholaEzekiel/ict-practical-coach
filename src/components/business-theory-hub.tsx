@@ -186,6 +186,131 @@ const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: nu
     ],
     skip: 0,
   },
+  "Pricing methods comparison": {
+    headers: ["Method", "Meaning", "Suitable use or example"],
+    rows: [
+      ["Price skimming", "Set a high launch price, then reduce it as competition grows or demand slows.", "A new games console with distinctive features"],
+      ["Penetration pricing", "Set a low launch price to attract customers and gain market share quickly, then consider raising it later.", "A new streaming service entering a competitive market"],
+      ["Competitive pricing", "Set the price at, just below or just above competitors' prices.", "A supermarket matching the price of similar cereal brands"],
+      ["Cost-plus pricing", "Add a chosen profit mark-up to the cost of producing one unit.", "A bakery adds a 40% mark-up to a cake's unit cost"],
+      ["Promotional pricing", "Temporarily reduce the price or offer a deal to increase short-term sales.", "A buy-one-get-one-free offer"],
+      ["Psychological pricing", "Set a price that appears lower or better value to customers.", "$19.99 instead of $20.00"],
+    ],
+    skip: 0,
+  },
+  "Distribution channels comparison": {
+    headers: ["Channel", "Benefit", "Limitation"],
+    rows: [
+      ["Producer to consumer", "The producer controls the brand, customer contact and selling price.", "The producer must manage promotion, orders, payment and delivery."],
+      ["Producer to retailer to consumer", "Retailers provide convenient locations and access to many customers.", "The retailer takes part of the profit and may sell competing products."],
+      ["Producer to wholesaler to retailer to consumer", "Wholesalers buy in bulk and distribute to many small retailers.", "The longer channel reduces producer control and raises the final price."],
+    ],
+    skip: 0,
+  },
+  "E-commerce opportunities and threats": {
+    headers: ["Opportunities for the business", "Threats or limitations for the business"],
+    rows: [
+      ["Sell to customers in a wider market at any time", "Customers can compare prices quickly, increasing competition"],
+      ["Operate with lower shop and staffing costs", "Website, cybersecurity and delivery systems create costs"],
+      ["Use customer data to personalise promotion", "Data breaches or poor delivery can damage reputation"],
+      ["Display a wider product range than a small shop", "Some customers cannot or prefer not to buy online"],
+    ],
+    skip: 0,
+  },
+  "Foreign market problems and responses": {
+    headers: ["Possible problem", "Practical response"],
+    rows: [
+      ["Language and cultural differences", "Use local specialists and adapt the product or promotion"],
+      ["Limited knowledge of customers", "Carry out local market research and test the market"],
+      ["Different laws and product standards", "Obtain legal advice and redesign the product or packaging where required"],
+      ["Tariffs, quotas or transport costs", "Produce locally, use a local partner or choose a less restricted market"],
+      ["Exchange-rate changes", "Review prices and costs and avoid depending on one country"],
+    ],
+    skip: 0,
+  },
+  "Economies of scale examples": {
+    headers: ["Type", "How average cost may fall", "Example"],
+    rows: [
+      ["Purchasing", "Bulk orders allow discounts on inputs.", "A large bakery negotiates a lower price per bag of flour."],
+      ["Marketing", "One campaign is spread over more units of output.", "A national advert promotes millions of drinks."],
+      ["Financial", "Large, established firms may borrow at lower interest rates.", "A bank views a profitable chain as a lower lending risk."],
+      ["Managerial", "Specialist managers improve decisions and efficiency.", "A logistics manager reduces delivery costs."],
+      ["Technical", "Advanced machinery produces more units at a lower unit cost.", "An automated bottling line fills drinks rapidly."],
+    ],
+    skip: 0,
+  },
+  "Quality methods with examples": {
+    headers: ["Method", "How it works", "GCSE example"],
+    rows: [
+      ["Quality control", "Inspect finished output and remove products that do not meet the standard.", "A bottled-drink producer tests samples after filling and rejects leaking bottles."],
+      ["Quality assurance", "Check quality at every stage so faults are prevented rather than found only at the end.", "A bakery checks ingredient weights, oven temperature and packaging during production."],
+      ["Total Quality Management", "Every employee accepts responsibility for continuous quality improvement.", "Hotel staff record recurring complaints and redesign the service process to stop them."],
+    ],
+    skip: 0,
+  },
+  "Sources of finance comparison": {
+    headers: ["Source", "Type and term", "Main benefit", "Main limitation"],
+    rows: [
+      ["Owner's investment", "Internal; short or long term", "No interest and the owner keeps control", "The owner's funds may be limited"],
+      ["Retained profit", "Internal; usually long term", "No repayment or interest", "Only available to a profitable established business"],
+      ["Sale of unwanted assets", "Internal; usually short term", "Raises cash without borrowing", "The asset cannot be used after it is sold"],
+      ["Bank overdraft", "External; short term", "Flexible support for temporary cash shortages", "Interest is charged and the bank may reduce the limit"],
+      ["Trade credit", "External; short term", "Goods are received before suppliers are paid", "Late payment may damage supplier relationships"],
+      ["Bank loan", "External; medium or long term", "Provides a known sum with scheduled repayments", "Interest and security may be required"],
+      ["Leasing or hire purchase", "External; medium or long term", "Allows use of equipment without paying the full cost immediately", "Total payments can exceed the cash price"],
+      ["Share capital", "External; long term", "No compulsory interest or repayment", "Only companies can issue shares and ownership may be diluted"],
+      ["Venture capital", "External; long term", "Provides finance and business expertise to high-growth firms", "The investor receives ownership and influence"],
+      ["Crowdfunding", "External; varies", "Can raise finance while testing public interest", "The target may not be reached and the idea becomes public"],
+      ["Government grant", "External; usually long term", "Normally does not need to be repaid", "Eligibility conditions and application competition apply"],
+    ],
+    skip: 0,
+  },
+  "Cash-flow forecast example": {
+    headers: ["Bakery cash-flow forecast ($)", "January", "February", "March"],
+    rows: [
+      ["Opening balance", "1,000", "1,800", "2,900"],
+      ["Customer receipts", "4,000", "4,600", "3,800"],
+      ["Total cash inflow", "4,000", "4,600", "3,800"],
+      ["Ingredients", "1,200", "1,400", "1,300"],
+      ["Wages, rent and other payments", "2,000", "2,100", "2,100"],
+      ["Total cash outflow", "3,200", "3,500", "3,400"],
+      ["Net cash flow", "800", "1,100", "400"],
+      ["Closing balance", "1,800", "2,900", "3,300"],
+    ],
+    skip: 0,
+  },
+  "Income statement example": {
+    headers: ["School-uniform shop income statement", "$", "Calculation"],
+    rows: [
+      ["Revenue", "80,000", "Sales earned during the year"],
+      ["Cost of sales", "46,000", "Cost of the uniforms sold"],
+      ["Gross profit", "34,000", "Revenue - cost of sales"],
+      ["Expenses", "22,000", "Rent, wages, electricity and promotion"],
+      ["Profit before tax", "12,000", "Gross profit - expenses"],
+      ["Tax", "2,000", "Tax charged on profit"],
+      ["Profit after tax", "10,000", "Profit before tax - tax"],
+      ["Dividends", "3,000", "Profit distributed to shareholders"],
+      ["Retained profit", "7,000", "Profit after tax - dividends"],
+    ],
+    skip: 0,
+  },
+  "Statement of financial position example": {
+    headers: ["Community bakery statement of financial position", "$", "Meaning or calculation"],
+    rows: [
+      ["Non-current assets", "45,000", "Ovens, fittings and delivery van"],
+      ["Inventory", "6,000", "Ingredients and finished goods"],
+      ["Trade receivables", "4,000", "Customers who owe the bakery"],
+      ["Cash", "2,000", "Cash and bank balance"],
+      ["Total current assets", "12,000", "6,000 + 4,000 + 2,000"],
+      ["Current liabilities", "8,000", "Trade payables and overdraft"],
+      ["Working capital", "4,000", "Current assets - current liabilities"],
+      ["Net assets", "49,000", "Non-current assets + working capital"],
+      ["Owner's capital", "40,000", "Long-term finance invested by the owner"],
+      ["Accumulated profit", "9,000", "Profit retained in the business"],
+      ["Total equity", "49,000", "Owner's capital + accumulated profit"],
+    ],
+    skip: 0,
+  },
 };
 
 const lessonContentOverrides: Record<string, string> = {
@@ -328,6 +453,229 @@ The most suitable style depends on urgency, worker experience, task risk, organi
 Trade unions:
 Organisations that represent employees and protect their interests through advice, negotiation and collective bargaining.
 Trade union comparison`,
+  "bus-note-3-1": `Marketing - Identifying customer needs and satisfying them profitably
+The role of marketing:
+Identify customer needs through research
+Satisfy customer needs with a suitable product, price, place and promotion
+Maintain customer loyalty and build long-term relationships
+Respond to competitors and changes in the market
+Why consumer spending patterns may change:
+Disposable income rises or falls
+Fashions, tastes and social trends change
+Population size or age structure changes
+Technology creates new products and ways to buy
+Prices, interest rates and economic confidence change
+Why some markets have become more competitive:
+Globalisation allows foreign businesses to enter local markets
+Improved transport makes importing easier and cheaper
+E-commerce allows new businesses to reach customers quickly
+Privatisation may introduce more private-sector competitors
+How businesses can respond to changing spending patterns and increased competition:
+Carry out regular market research
+Improve existing products or introduce new ones
+Use competitive prices and targeted promotion
+Improve quality and customer service to build loyalty
+Use e-commerce and enter new market segments
+Market segmentation - Dividing a market into customer groups with similar characteristics
+Ways to segment a market:
+Age
+Income or social group
+Location
+Gender
+Lifestyle or interests
+Benefits of segmentation:
+Products and promotion can match a clear target market
+Resources are not wasted on customers unlikely to buy
+The business may identify a profitable niche
+Limitations of segmentation:
+Research and separate campaigns increase costs
+A segment may be too small or change quickly
+Competitors may target the same group`,
+  "bus-note-3-3": `The marketing mix - The combination of product, price, place and promotion used to satisfy a target market and achieve business objectives
+Product:
+Businesses decide product design, quality, features, brand, packaging and after-sales service.
+Products move through introduction, growth, maturity and decline. Extension strategies such as new packaging, promotion or new uses can delay decline.
+Price:
+Pricing methods comparison
+Price elasticity of demand - Measures how strongly quantity demanded responds to a change in price
+Elastic demand - A price change causes a proportionally larger change in demand. This is common for non-essential products with close substitutes, such as branded trainers.
+Inelastic demand - A price change causes a proportionally smaller change in demand. This is common for necessities or products with few substitutes, such as basic medicine.
+Why elasticity matters:
+With elastic demand, a price rise may reduce revenue because demand falls sharply.
+With inelastic demand, a price rise may increase revenue because demand falls only slightly.
+Place:
+Distribution channels comparison
+The best channel depends on the product, target market, desired control, delivery speed and cost.
+Promotion:
+Advertising - Paid communication through media such as social networks, television, websites or billboards
+Sales promotion - Short-term incentives such as discounts, samples, competitions or loyalty rewards
+Public relations - Activities that build a positive reputation, such as community events or press coverage
+Personal selling - Direct communication in which a salesperson explains and recommends a product
+E-commerce:
+E-commerce includes online shopping, mobile banking and online ticketing.
+E-commerce opportunities and threats
+For customers, e-commerce offers convenience, wider choice and easy price comparison, but there is no physical inspection before purchase and delivery, fraud or data-security problems may occur.`,
+  "bus-note-3-4": `Marketing strategy - A coordinated plan that combines product, price, place and promotion to achieve a marketing objective for a chosen target market
+Building a suitable strategy:
+Set a clear objective, such as increasing market share or launching a product
+Use market research to identify the target customer's needs
+Choose a consistent marketing mix
+Set a budget and timescale
+Measure results and adjust the strategy
+Why the elements must work together:
+A premium product needs suitable quality, packaging, price, promotion and distribution. A low price with luxury advertising, or a new product that customers cannot easily buy, creates an inconsistent strategy.
+Using technology in marketing:
+Businesses can sell through websites and apps, target digital adverts, use customer data to personalise offers and measure campaign results.
+Technology may reduce marketing cost and improve targeting, but it creates cybersecurity, privacy and reputation risks.
+Sustainability in marketing:
+Businesses may use recyclable packaging, reduce transport emissions or explain responsible sourcing.
+Environmental claims must be accurate. Misleading claims can damage trust and may break consumer law.
+Legal controls related to marketing:
+Controls protect customers from misleading promotion, unsafe or faulty goods and unfair information.
+Compliance may increase testing, packaging and advertising costs, but it can improve trust and reduce legal risk.
+Entering new markets in other countries:
+Benefits include higher sales, access to new customers, growth and spreading risk across markets.
+Foreign market problems and responses
+An appropriate strategy depends on local culture, income, competition, laws, exchange rates, transport costs and the business's resources.`,
+  "bus-note-4-2": `Cost - Money spent by a business to produce and sell goods or services
+Types of cost:
+Fixed cost - A cost that does not change with output in the short term, such as factory rent
+Variable cost - A cost that changes as output changes, such as flour used by a bakery
+Total cost - Fixed costs + total variable costs
+Average cost - Total cost / output
+Economies of scale - Reductions in average cost as a business increases its scale of production
+Economies of scale examples
+Diseconomies of scale - Increases in average cost when a business becomes too large to manage efficiently
+Examples of diseconomies of scale:
+Poor communication - More layers and locations delay or distort messages
+Weak coordination - Departments duplicate work or make inconsistent decisions
+Low employee commitment - Workers feel less recognised, reducing motivation and productivity
+Break-even analysis:
+Contribution per unit - Selling price - variable cost per unit
+Break-even output - Fixed costs / contribution per unit
+Margin of safety - Actual output - break-even output
+At break-even, total revenue equals total cost, so the business makes neither profit nor loss.
+Example:
+If fixed costs are $12,000, selling price is $10 and variable cost is $6, contribution is $4 and break-even output is 3,000 units.
+Uses of break-even analysis:
+Estimate the minimum sales needed to avoid a loss
+Compare the effects of changing price or cost
+Support decisions about a new product or expansion
+Limitations of break-even analysis:
+It assumes all output is sold
+Selling price and variable cost may change
+Fixed costs may rise when capacity expands
+Forecast sales may be inaccurate`,
+  "bus-note-4-3": `Quality - How well a good or service meets customer expectations and is fit for its purpose
+Why quality is important:
+Builds brand image and customer loyalty
+Reduces waste, returns and repair costs
+Helps the business compete and may support a higher price
+Quality methods with examples
+Choosing a method:
+Quality control may suit high-volume output where samples can be checked quickly, but faults are discovered after resources have been used.
+Quality assurance prevents faults earlier and involves employees throughout production, but training and monitoring take time and money.
+The best method depends on the cost of failure, production process, employee skills and customer expectations.`,
+  "bus-note-4-4": `Location decision - Choosing where a business operates
+Factors affecting the location of a manufacturing business:
+Distance from raw materials and suppliers
+Transport links and delivery costs
+Availability, skills and cost of labour
+Cost and size of land, buildings, energy and utilities
+Government grants, taxes and planning controls
+Factors affecting the location of a service business:
+Proximity to customers and customer footfall
+Visibility, parking and public transport
+Nearby competitors and complementary businesses
+Availability of suitable employees
+Rent, digital access and local income levels
+Factors when choosing a country:
+Market size and closeness to customers
+Wage levels, skills and productivity
+Infrastructure, suppliers and transport
+Taxes, grants, tariffs and trade barriers
+Political and economic stability
+Exchange rates, language and culture
+Why businesses may locate operations overseas:
+Reach a growing market and avoid some import barriers
+Access lower-cost or specialist labour
+Locate near raw materials or suppliers
+Spread risk and expand production capacity
+Role of legal controls and government decisions:
+Planning rules may restrict noise, pollution or building near homes and protected areas.
+Health, safety, minimum wage and environmental laws affect operating costs and suitable sites.
+Governments may offer grants or tax incentives to attract businesses to areas with high unemployment.
+Making a justified decision:
+A manufacturer may prioritise suppliers, land and transport, while a cafe may prioritise footfall and rent. The best choice depends on the particular business rather than the longest list of factors.`,
+  "bus-note-5-1": `Business finance - Money required to start, operate and grow a business
+Why businesses need finance:
+Start-up capital for premises, equipment and initial inventory
+Working capital for wages, rent, suppliers and other day-to-day payments
+Expansion, such as a new branch or additional capacity
+Replacement of non-current assets or investment in new technology
+Short-term and long-term needs:
+Short-term finance is usually required for less than one year, such as covering a temporary cash shortage or buying inventory.
+Long-term finance supports assets or growth that benefit the business for several years, such as machinery or a new factory.
+Internal and external finance:
+Internal finance comes from within the business or its owners. External finance comes from another person or organisation.
+Sources of finance comparison
+Factors affecting the choice of finance:
+Purpose and amount required
+Length of time the finance is needed
+Cost, including interest, fees or dividends
+Existing debts and ability to repay
+Business size, legal form and available security
+Effect on ownership and control
+Risk and speed of obtaining the finance
+Choosing appropriately:
+An overdraft may suit a temporary cash shortage, but it is risky for buying a factory. A bank loan, share capital or venture capital may suit long-term expansion, depending on the business's legal form, repayment ability and owners' willingness to share control.`,
+  "bus-note-5-2": `Cash - Money available in hand or in the bank for immediate payments
+Cash-flow forecast - An estimate of future cash inflows, cash outflows and balances over a period
+Why cash is important:
+A profitable business can fail if it cannot pay wages, suppliers, rent, tax or loan instalments when due.
+Constructing a forecast:
+Net cash flow - Total cash inflow - total cash outflow
+Closing balance - Opening balance + net cash flow
+The closing balance of one period becomes the next period's opening balance.
+Cash-flow forecast example
+The bakery expects a positive closing balance each month. A forecast negative balance would warn the owner to arrange finance or reduce payments before the shortage occurs.
+Ways to overcome a short-term cash shortage:
+Arrange an overdraft
+Delay non-essential spending or negotiate trade credit
+Encourage customers to pay sooner
+Reduce inventory or sell unused assets
+Working capital - Current assets - current liabilities
+Positive working capital helps a business meet short-term debts, but excessively high inventory or receivables may mean cash is being used inefficiently.`,
+  "bus-note-5-3": `Profit - The amount by which revenue exceeds total costs
+Why profit matters:
+Rewards owners for risk and enterprise
+Provides internal finance through retained profit
+Measures performance and supports future borrowing or investment
+Profit and cash are different:
+A credit sale can create profit before the customer pays. Buying equipment reduces cash immediately but is not treated as one period's operating expense. A business can therefore be profitable but short of cash.
+Income statement - A financial statement showing revenue, costs and profit over a period
+Key calculations:
+Gross profit - Revenue - cost of sales
+Profit before tax - Gross profit - expenses
+Retained profit - Profit after tax - dividends
+Income statement example
+The shop earned $34,000 gross profit from its sales and retained $7,000 after expenses, tax and dividends. Students should show each subtotal and calculation rather than list unrelated figures.`,
+  "bus-note-5-4": `Statement of financial position - A financial statement showing a business's assets, liabilities and equity on a particular date
+Key definitions:
+Non-current assets - Resources expected to be used for more than one year, such as machinery or vehicles
+Current assets - Resources expected to become cash or be used within one year, such as inventory, receivables and cash
+Current liabilities - Debts due within one year, such as trade payables or an overdraft
+Non-current liabilities - Debts due after more than one year, such as a long-term bank loan
+Working capital - Current assets - current liabilities
+Net assets - Total assets - total liabilities
+Equity - Finance belonging to the owners, including invested capital and accumulated retained profit
+Statement of financial position example
+The bakery has $4,000 working capital, so current assets exceed current liabilities. Its $49,000 net assets equal its $49,000 equity, which keeps the statement balanced.
+How the statement is used:
+Compare liquidity, debt and asset values over time
+Help lenders judge financial risk
+Help owners and investors assess the financial position
+It is a snapshot on one date and does not by itself show future cash flow or the current market value of every asset.`,
 };
 
 const contentRepairs: Record<string, Array<[string, string]>> = {
@@ -443,7 +791,12 @@ function NoteTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
             {rows.map((row, rowIndex) => (
               <tr key={`${row.join("-")}-${rowIndex}`}>
                 {row.map((cell, cellIndex) => (
-                  <td key={`${cell}-${cellIndex}`} className="max-w-sm align-top px-4 py-3 leading-6 text-slate-700">{cell}</td>
+                  <td
+                    key={`${cell}-${cellIndex}`}
+                    className={`max-w-sm align-top px-4 py-3 leading-6 ${cellIndex === 0 ? "font-semibold text-ink" : "text-slate-700"}`}
+                  >
+                    {cell}
+                  </td>
                 ))}
               </tr>
             ))}
