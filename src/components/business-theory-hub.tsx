@@ -21,6 +21,15 @@ type BusinessQuizSelections = Record<string, Record<string, string>>;
 const forbiddenLine = /(creativecommons|https?:\/\/|Grupp20fiskar|studyvaults?|studeyvaults?)/i;
 const businessMinimumQuizCount = 60;
 
+const unitSummaries: Record<string, string> = {
+  "unit-1": "Learn why businesses exist, how they are classified and measured, how they grow, the main forms of ownership, and how objectives affect stakeholders.",
+  "unit-2": "Explore employee motivation, organisational structure, leadership, recruitment, training, and effective internal and external communication.",
+  "unit-3": "Study customer needs, market research, segmentation, the marketing mix, and how businesses build marketing strategies in changing markets.",
+  "unit-4": "Understand production methods, efficiency, costs, economies of scale, break-even analysis, quality management, and business location decisions.",
+  "unit-5": "Learn how businesses choose finance, manage cash flow and working capital, prepare accounts, and use financial information to assess performance.",
+  "unit-6": "Examine how economic change, government policy, environmental and ethical concerns, and globalisation influence business decisions.",
+};
+
 const businessExamNoteAdditions: Record<string, string> = {
   "bus-note-1-3": "\nExam focus - growth and business size\nDo not just say a business is large or small; link the measure to the case. Number of employees suits labour-intensive businesses, output value can mislead when products have different prices, and capital employed suits businesses that use expensive assets.\nGrowth may bring economies of scale and market share, but overexpansion can create cash shortages, communication problems, and loss of control.",
   "bus-note-1-4": "\nExam focus - ownership decisions\nA strong answer compares control, finance, continuity, liability, legal requirements, and the owner's objectives.\nFor franchises, application must use the brand support, fees, rules, supplies, or local market in the case; do not simply repeat the word franchise.",
@@ -90,6 +99,235 @@ const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: nu
     ],
     skip: 22,
   },
+  "Economic sectors comparison": {
+    headers: ["Sector", "What it does", "Examples"],
+    rows: [
+      ["Primary", "Extracts or harvests natural resources.", "Farming, fishing, forestry and mining"],
+      ["Secondary", "Manufactures or constructs goods using raw materials.", "Factories, food processing and construction"],
+      ["Tertiary", "Provides services to consumers and other businesses.", "Retailing, banking, transport and education"],
+    ],
+    skip: 0,
+  },
+  "Business size measures comparison": {
+    headers: ["Measure", "Useful when", "Limitation"],
+    rows: [
+      ["Number of employees", "Comparing labour-intensive businesses", "Automation allows a large business to operate with relatively few workers"],
+      ["Value of output", "Comparing how much businesses produce", "Different products have different prices, so comparisons may mislead"],
+      ["Capital employed", "Comparing businesses that use expensive assets", "Less useful for labour-intensive businesses"],
+      ["Market share", "Comparing firms operating in the same market", "Reliable total-market sales data may be difficult to obtain"],
+    ],
+    skip: 0,
+  },
+  "Internal and external growth comparison": {
+    headers: ["Growth method", "Meaning", "Examples"],
+    rows: [
+      ["Internal growth", "The business expands using its own activities and resources.", "Increase sales, develop products, add production capacity or open new branches"],
+      ["External growth", "The business expands by combining with or purchasing another business.", "Merger, takeover, horizontal integration, vertical integration or conglomerate diversification"],
+    ],
+    skip: 0,
+  },
+  "Growth problems and responses": {
+    headers: ["Possible problem", "Possible response"],
+    rows: [
+      ["Managers lose control", "Divide the organisation into smaller units and delegate clearly"],
+      ["Communication becomes slower", "Use suitable communication channels and a clearer structure"],
+      ["The business runs short of finance", "Expand more gradually or secure appropriate long-term finance"],
+      ["Different management cultures cause conflict", "Agree responsibilities and introduce a consistent management approach"],
+    ],
+    skip: 0,
+  },
+  "Limited companies comparison": {
+    headers: ["Feature", "Private limited company", "Public limited company"],
+    rows: [
+      ["Share sales", "Shares are sold privately to approved investors", "Shares may be offered to the public through a stock exchange"],
+      ["Liability", "Shareholders have limited liability", "Shareholders have limited liability"],
+      ["Finance", "Can raise share capital but from a restricted group", "Can raise substantial share capital from the public"],
+      ["Control and disclosure", "Owners usually retain closer control and disclose less information", "Ownership may be widely spread and accounts face greater public scrutiny"],
+    ],
+    skip: 0,
+  },
+  "Franchisor and franchisee comparison": {
+    headers: ["Party", "Benefits", "Limitations"],
+    rows: [
+      ["Franchisor", "Receives initial fees and royalties; expands using franchisees' capital; increases brand coverage", "Must provide training and support; poor franchisees can damage the brand; has less direct control over each outlet"],
+      ["Franchisee", "Uses an established brand and business system; receives training and support; may face lower start-up risk", "Pays fees and royalties; must follow the franchisor's rules; has limited freedom over products, prices and promotion"],
+    ],
+    skip: 0,
+  },
+  "Internal and external stakeholders comparison": {
+    headers: ["Stakeholder type", "Meaning", "Examples and interests"],
+    rows: [
+      ["Internal stakeholders", "People or groups working within or owning the business", "Owners/shareholders seek returns; managers seek performance and career progress; employees seek pay, security and good conditions"],
+      ["External stakeholders", "People or groups outside the business who affect it or are affected by it", "Customers seek value and quality; suppliers seek payment; government seeks taxes and legal compliance; local communities seek jobs and limited pollution"],
+    ],
+    skip: 0,
+  },
+  "Organisation structures comparison": {
+    headers: ["Structure", "Characteristics", "Possible advantage", "Possible disadvantage"],
+    rows: [
+      ["Tall structure", "Many management levels and usually a narrow span of control", "Managers can supervise smaller teams closely", "Communication and decision-making may be slow"],
+      ["Flat structure", "Few management levels and usually a wide span of control", "Communication may be faster and employees may receive more responsibility", "Managers may become overloaded and exercise less direct control"],
+    ],
+    skip: 0,
+  },
+  "Leadership styles comparison": {
+    headers: ["Style", "How decisions are made", "When it may work well", "Possible limitation"],
+    rows: [
+      ["Autocratic", "The manager decides and gives instructions", "A crisis, strict safety requirements or an inexperienced workforce", "Employees may feel ignored or demotivated"],
+      ["Democratic", "Managers consult employees before deciding", "Skilled workers can contribute useful ideas", "Consultation takes time and disagreements may delay decisions"],
+      ["Laissez-faire", "Employees receive objectives but choose how to complete the work", "Experienced, creative and self-motivated specialists", "Weak direction can reduce coordination and accountability"],
+    ],
+    skip: 0,
+  },
+  "Trade union comparison": {
+    headers: ["Potential benefits for members", "Possible limitations"],
+    rows: [
+      ["Collective bargaining may improve pay and conditions; representation can protect employee rights; members may receive advice during disputes", "Members pay subscriptions; industrial action can reduce earnings; union decisions may not match every member's preference"],
+    ],
+    skip: 0,
+  },
+};
+
+const lessonContentOverrides: Record<string, string> = {
+  "bus-note-1-2": `Key definitions:
+Private sector - Businesses owned by individuals or private organisations, usually aiming to earn profit
+Public sector - Organisations owned or controlled by government to provide services; examples include a state school, public hospital or municipal transport service
+Mixed economy - An economy containing both private-sector businesses and public-sector organisations
+Economic sectors:
+Economic sectors comparison
+Why the importance of sectors changes:
+Industrialisation - A country becomes more dependent on manufacturing and construction as its secondary sector grows
+Deindustrialisation - Manufacturing becomes less important while service industries grow
+Developing economies may move workers and output from agriculture into manufacturing as investment, skills and infrastructure improve.
+More developed economies may experience deindustrialisation because production moves overseas, automation reduces factory employment, and demand for services rises.
+Development abbreviations:
+LEDC - Less Economically Developed Country
+NIC - Newly Industrialised Country
+MEDC - More Economically Developed Country
+These labels describe broad stages of economic development and should be supported with evidence when used in an answer.`,
+  "bus-note-1-3": `Characteristics of successful entrepreneurs:
+Creative
+Prepared to take calculated risks
+Decisive
+Open-minded
+Determined and resilient
+Optimistic and confident
+Business plan - A document explaining the business idea, objectives, market, operations and financial forecasts
+Why prepare a business plan?:
+Clarifies objectives and strategies
+Identifies possible problems before launch
+Supports applications for finance
+Provides targets against which performance can be checked
+Methods of measuring business size:
+Business size measures comparison
+Why might owners want the business to grow?:
+Increase sales, profit or market share
+Benefit from economies of scale
+Spread risk across more products or markets
+Reduce the threat from competitors
+Methods of business growth:
+Internal and external growth comparison
+Internal growth through selling and creating more products means increasing sales from the existing business, developing new products, expanding production capacity or opening additional branches.
+Types of external growth:
+Horizontal integration - Combining with a business in the same industry and at the same stage of production
+Vertical integration - Combining with a supplier or distributor at a different stage of production
+Conglomerate integration - Combining with a business in a different industry to diversify risk
+Problems linked to growth:
+Growth problems and responses
+Why governments support start-ups?:
+Create employment
+Increase competition and innovation
+Increase future tax revenue and exports
+Develop new industries or disadvantaged regions
+How governments support start-ups?:
+Grants or low-interest loans
+Training and business advice
+Incubators and shared workspaces
+Simpler registration procedures or temporary tax support
+Why some businesses remain small:
+The owner wants to retain personal control
+The market is small or specialised
+The service depends on personal contact, such as hairdressing
+The owner wants to avoid the risk and cost of expansion
+Causes of business failure:
+Weak management
+Poor financial planning or insufficient cash
+Failure to respond to competitors and changing customer needs
+Overexpansion
+Why new businesses are at greater risk of failing:
+Owners may have limited management experience
+The business may have little finance or no cash reserve
+Customers may not know or trust the new business
+Demand and costs may be harder to forecast without previous trading data`,
+  "bus-note-1-4": `Key definitions:
+Limited liability - Owners can lose the amount invested in the company, but their personal assets are normally protected from company debts
+Unlimited liability - The owner and business are not legally separate, so personal assets may be used to pay business debts
+Sole trader:
+A business owned by one person. It is easy to establish and the owner keeps the profit and control, but has unlimited liability, limited access to finance and no guaranteed continuity.
+Partnership:
+A business owned by two or more people. Partners can contribute more finance and a wider range of skills, but profits and decisions are shared and disagreements may occur.
+Limited companies:
+Limited companies comparison
+Franchise:
+A franchise allows a franchisee to operate an outlet using the franchisor's established brand, products and business system in return for fees and compliance with agreed rules.
+Franchisor and franchisee comparison
+Joint venture:
+Two or more businesses cooperate on a specific project while remaining separate organisations.
+Benefits of a joint venture:
+Costs and risks are shared
+Partners combine skills, ideas and market knowledge
+A local partner may provide access to a foreign market
+Limitations of a joint venture:
+Profit and control must be shared
+Different objectives or management styles may cause conflict
+Confidential knowledge may be shared with the partner`,
+  "bus-note-1-5": `Stakeholder - A person or group with an interest in a business or affected by its decisions
+Types of stakeholders:
+Internal and external stakeholders comparison
+Business objective - A target that directs business decisions and allows performance to be measured
+Why objectives are useful:
+Give employees and managers a shared direction
+Support faster and more consistent decisions
+Motivate employees through clear targets
+Allow actual performance to be compared with plans
+Private-sector objectives:
+Survival
+Profit
+Growth
+Increasing market share
+Improving customer satisfaction or ethical performance
+Public-sector objectives:
+Provide essential services and improve citizens' wellbeing
+Make services accessible and affordable
+Use public funds efficiently
+Examples include state schools, public hospitals and government-owned transport services.
+Social enterprises:
+Businesses that trade to earn revenue while pursuing a social or environmental objective. Any surplus is mainly used to support that objective.
+Stakeholder conflict:
+Stakeholders often want different outcomes. Higher employee wages may reduce short-term profit, while expansion may create jobs but increase traffic or pollution for the local community. A strong decision weighs the stakeholders and the business's circumstances.`,
+  "bus-note-2-2": `Key definitions:
+Span of control - The number of employees directly supervised by one manager
+Chain of command - The route through which authority and instructions pass in an organisation
+Delegation - Giving a subordinate authority to complete a task while the manager remains accountable
+Organisation structures:
+Organisation structures comparison
+Functions of management:
+Planning - Setting objectives and deciding how to achieve them
+Organising - Arranging people and resources and allocating tasks
+Commanding - Directing employees and giving clear instructions
+Coordinating - Ensuring departments and employees work together
+Controlling - Comparing performance with targets and correcting problems
+Why delegation matters:
+Reduces the manager's workload
+Speeds up routine decisions
+Develops employee skills and responsibility
+Requires clear instructions, suitable authority and trust in the employee
+Leadership styles:
+Leadership styles comparison
+The most suitable style depends on urgency, worker experience, task risk, organisational culture and whether employee ideas are valuable.
+Trade unions:
+Organisations that represent employees and protect their interests through advice, negotiation and collective bargaining.
+Trade union comparison`,
 };
 
 const contentRepairs: Record<string, Array<[string, string]>> = {
@@ -117,9 +355,10 @@ const contentRepairs: Record<string, Array<[string, string]>> = {
 };
 
 function repairedContent(lesson: BusinessNoteLesson) {
+  const sourceText = lessonContentOverrides[lesson.id] || lesson.content;
   return (contentRepairs[lesson.id] || []).reduce(
-    (content, [source, replacement]) => content.replace(source, replacement),
-    `${lesson.content}${businessExamNoteAdditions[lesson.id] || ""}`,
+    (content, [searchText, replacement]) => content.replace(searchText, replacement),
+    `${sourceText}${businessExamNoteAdditions[lesson.id] || ""}`,
   );
 }
 
@@ -623,7 +862,7 @@ export function BusinessTheoryHub() {
         <Card>
           <Pill>Unit {activeModule?.moduleId}</Pill>
           <h2 className="mt-4 text-3xl font-bold">{activeModule?.moduleTitle}</h2>
-          <p className="mt-3 text-slate-600">Open a lesson, then revise the exact topic notes, glossary, and multiple-choice practice for this unit.</p>
+          <p className="mt-3 max-w-4xl leading-7 text-slate-600">{unitSummaries[activeModule?.id || ""]}</p>
         </Card>
 
         {activeLesson && (
