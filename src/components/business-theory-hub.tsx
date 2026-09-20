@@ -47,8 +47,8 @@ const businessExamNoteAdditions: Record<string, string> = {
   "bus-note-5-2": "\nExam focus - cash flow\nProfit is not the same as cash. A profitable business can fail if cash inflows arrive after wages, rent, suppliers, or loan payments are due.\nShort-term cash problems may be improved by overdrafts, delaying payments, encouraging faster customer payment, reducing inventory, or selling unused assets.",
   "bus-note-5-5": "\nExam focus - accounts analysis\nRatios must be interpreted, not just calculated. Profitability shows how well profit is made from sales or capital; liquidity shows ability to pay short-term debts.\nCompare with previous years, competitors, and business objectives before making a judgement.",
   "bus-note-6-1": "\nExam focus - economic change\nInflation can raise costs and reduce purchasing power. Higher interest rates can increase loan costs and reduce consumer spending.\nExchange rate appreciation makes imports cheaper and exports more expensive; depreciation usually has the opposite effect.",
-  "bus-note-6-2": "\nExam focus - ethics and environment\nEthical or environmental choices can raise costs in the short term but improve reputation, customer loyalty, and relationships with workers or communities.\nA balanced answer weighs profit impact against pressure groups, legal risks, brand image, and stakeholder expectations.",
-  "bus-note-6-3": "\nExam focus - international business\nGlobalisation can give access to larger markets, cheaper resources, and spreading risk, but may create transport costs, exchange-rate risk, cultural differences, and stronger competition.\nTariffs and quotas protect local businesses but may raise prices and reduce consumer choice."
+  "bus-note-6-2": "\nExam focus - international business\nGlobalisation can give access to larger markets, cheaper resources, and opportunities to spread risk, but may create transport costs, exchange-rate risk, cultural differences, and stronger competition.\nTariffs and quotas may protect domestic businesses, but they can also raise prices, restrict supply and increase costs for firms using imported inputs.",
+  "bus-note-6-3": "\nExam focus - ethics and environment\nEthical or environmental choices can raise costs in the short term but improve reputation, customer loyalty, efficiency and relationships with workers or communities.\nA balanced answer weighs profit impact against pressure groups, legal risks, brand image, stakeholder expectations and the long-term sustainability of resources."
 };
 
 const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: number }> = {
@@ -308,6 +308,93 @@ const tableCards: Record<string, { headers: string[]; rows: string[][]; skip: nu
       ["Owner's capital", "40,000", "Long-term finance invested by the owner"],
       ["Accumulated profit", "9,000", "Profit retained in the business"],
       ["Total equity", "49,000", "Owner's capital + accumulated profit"],
+    ],
+    skip: 0,
+  },
+  "Business cycle stages": {
+    headers: ["Stage", "What happens in the economy", "Likely effect on businesses"],
+    rows: [
+      ["Growth", "Real GDP rises, employment and consumer incomes usually increase.", "Demand and sales may rise, so firms may recruit, invest and increase output."],
+      ["Boom", "Economic activity is near its peak; demand and employment are high and inflationary pressure may build.", "Sales can be high, but shortages of labour and materials may increase wages and other costs."],
+      ["Recession", "Real GDP falls for a sustained period; spending, investment and employment tend to decrease.", "Demand and cash inflows may fall, so firms may cut output, postpone investment or reduce staff."],
+      ["Slump", "Economic activity remains very low, with weak demand and high unemployment.", "Business failure risk increases, although labour and premises may be cheaper for firms able to invest."],
+    ],
+    skip: 0,
+  },
+  "Economic changes and business effects": {
+    headers: ["Change", "Possible opportunity", "Possible problem"],
+    rows: [
+      ["Higher employment", "More people earn incomes, which may raise demand.", "Labour becomes harder to recruit and workers may demand higher wages."],
+      ["Higher unemployment", "Recruitment may be easier and wage pressure may fall.", "Household income and demand may fall, especially for non-essential products."],
+      ["Higher inflation", "A firm may raise prices if customers continue buying.", "Input and wage costs rise; customers lose purchasing power; planning becomes harder."],
+      ["Economic growth", "Rising incomes can increase sales and support expansion.", "Strong demand may create shortages, higher costs and new competitors."],
+      ["Falling real GDP", "Some discount or repair businesses may gain demand.", "Most firms face weaker sales, excess capacity and pressure on profit."],
+    ],
+    skip: 0,
+  },
+  "Government policy effects": {
+    headers: ["Policy change", "Likely economic effect", "Possible business response"],
+    rows: [
+      ["Higher income tax", "Disposable income and consumer spending may fall.", "Review prices, offer better value or target less price-sensitive customers."],
+      ["Higher business or corporation tax", "Profit retained by businesses falls.", "Delay expansion, reduce avoidable costs or seek productivity improvements."],
+      ["Higher indirect tax", "The selling price of affected goods may rise and demand may fall.", "Absorb part of the tax, raise price, or redesign the product to reduce the tax burden."],
+      ["Higher government spending", "Demand may rise for suppliers and household incomes may increase.", "Increase capacity or bid for public-sector contracts where suitable."],
+      ["Higher interest rates", "Borrowing and spending become more expensive; saving is encouraged.", "Use less debt, delay investment and control inventory and cash more carefully."],
+      ["Lower interest rates", "Borrowing becomes cheaper and spending may increase.", "Consider investment or expansion, while checking that demand will last."],
+    ],
+    skip: 0,
+  },
+  "Globalisation opportunities and threats": {
+    headers: ["Opportunities", "Threats"],
+    rows: [
+      ["Access larger overseas markets and increase sales", "Face more competitors from other countries"],
+      ["Buy inputs from a wider choice of lower-cost suppliers", "Become dependent on distant suppliers and transport links"],
+      ["Locate production where skills or costs are favourable", "Face language, cultural, legal and exchange-rate differences"],
+      ["Spread risk across several markets", "Global economic shocks may affect several operations"],
+    ],
+    skip: 0,
+  },
+  "Tariffs and quotas compared": {
+    headers: ["Control", "Meaning", "Effect on businesses"],
+    rows: [
+      ["Import tariff", "A tax charged on imported goods or services.", "Raises import costs; domestic producers may become more competitive, while importers may raise prices or accept lower profit."],
+      ["Import quota", "A limit on the quantity or value of a product that may be imported.", "Restricts supply; domestic firms may gain sales, while firms relying on imported inputs may face shortages or higher prices."],
+    ],
+    skip: 0,
+  },
+  "MNC effects on a host country": {
+    headers: ["Potential benefits", "Potential disadvantages"],
+    rows: [
+      ["Creates jobs and may train local workers", "May pay low wages or provide poor conditions if regulation is weak"],
+      ["Adds output, exports and tax revenue", "May receive tax concessions or repatriate profit to its home country"],
+      ["Introduces investment, technology and management skills", "Can outcompete local businesses"],
+      ["Increases consumer choice and may improve infrastructure", "May exploit natural resources or cause environmental damage"],
+    ],
+    skip: 0,
+  },
+  "Exchange rate effects": {
+    headers: ["Exchange-rate change", "Importer effect", "Exporter effect"],
+    rows: [
+      ["Appreciation: the currency gains value", "Foreign inputs become cheaper in domestic currency, reducing costs.", "Domestic products become more expensive to overseas customers, reducing competitiveness."],
+      ["Depreciation: the currency loses value", "Foreign inputs become more expensive in domestic currency, increasing costs.", "Domestic products become cheaper to overseas customers, improving competitiveness if demand responds."],
+    ],
+    skip: 0,
+  },
+  "External costs and benefits": {
+    headers: ["Type", "Meaning", "Example"],
+    rows: [
+      ["External cost", "A negative effect of a business decision on people not directly involved in it.", "Factory pollution harms nearby residents who do not buy or make the product."],
+      ["External benefit", "A positive effect of a business decision on people not directly involved in it.", "A firm's worker training improves skills available to other local employers."],
+    ],
+    skip: 0,
+  },
+  "Being ethical compared": {
+    headers: ["Possible advantages", "Possible disadvantages"],
+    rows: [
+      ["Stronger reputation and customer loyalty", "Ethically sourced inputs and fair wages may cost more"],
+      ["Easier recruitment and better employee motivation", "Higher costs may require higher prices or reduce profit margins"],
+      ["Lower risk of boycotts, legal action and damaging publicity", "Checking suppliers and changing processes require time and expertise"],
+      ["May create a distinctive brand and new market opportunities", "Competitors using cheaper methods may undercut the business"],
     ],
     skip: 0,
   },
@@ -676,6 +763,127 @@ Compare liquidity, debt and asset values over time
 Help lenders judge financial risk
 Help owners and investors assess the financial position
 It is a snapshot on one date and does not by itself show future cash flow or the current market value of every asset.`,
+  "bus-note-6-1": `Key definitions:
+Business cycle - The repeated movement of an economy through periods of growth and decline
+Gross Domestic Product (GDP) - The total value of goods and services produced within a country during a period
+Real GDP - GDP adjusted for inflation, allowing output in different periods to be compared more accurately
+Economic growth - An increase in real GDP over time
+Inflation - A sustained increase in the general price level, reducing the purchasing power of money
+Unemployment - People who are willing and able to work but cannot find a job
+Interest rate - The cost of borrowing money or the reward for saving, expressed as a percentage
+Disposable income - Income remaining after direct taxes, available to spend or save
+Business cycle:
+Business cycle stages
+Effects of employment, inflation and economic growth:
+Economic changes and business effects
+Government economic objectives:
+Governments commonly aim for economic growth, low unemployment, stable prices and a sustainable balance between public spending and revenue.
+These objectives can conflict. Policies that increase demand and employment may also raise inflation, while policies used to reduce inflation may slow growth.
+Types of government policy:
+Direct tax - A tax paid directly from income or profit, such as income tax or corporation tax
+Indirect tax - A tax added to spending on goods or services
+Government spending - Money spent by government on services, infrastructure, wages and contracts
+Effects of policy and business responses:
+Government policy effects
+How businesses may respond:
+Forecast demand and cash flow under different economic conditions
+Change output, staffing, prices and inventory carefully
+Review borrowing when interest rates change
+Improve productivity instead of relying only on price increases
+Delay or accelerate investment according to demand, finance cost and risk
+Exam application:
+A boom does not simply mean the highest GDP. It is the peak stage of strong economic activity, where high demand can raise sales but also create labour shortages, higher wages, capacity pressure and inflation.`,
+  "bus-note-6-2": `Key definitions:
+Globalisation - The increasing connection of countries through trade, investment, technology, transport and communication
+Free trade agreement - An agreement between countries to reduce or remove barriers to trade
+Newly industrialised country - A country experiencing rapid growth in manufacturing and industrial development
+Import - A good or service purchased from another country
+Export - A good or service sold to another country
+Import tariff - A tax placed on an imported good or service
+Import quota - A limit on the quantity or value of a product that may be imported
+Multinational company (MNC) - A business with operations in more than one country
+Host country - A country in which a foreign multinational operates
+Repatriation of profit - Sending profit earned by an overseas operation back to the MNC's home country
+Exchange rate - The price of one currency expressed in another currency
+Appreciation - An increase in the value of a currency against another currency
+Depreciation - A decrease in the value of a currency against another currency
+Externality - An effect of a business decision on a third party who was not directly involved
+Reasons for globalisation:
+Faster and cheaper transport
+Improved internet, communication and production technology
+Free trade agreements and fewer trade barriers
+Growth of newly industrialised countries
+Businesses seeking larger markets, lower costs and new suppliers
+Opportunities and threats of globalisation:
+Globalisation opportunities and threats
+Import tariffs and quotas:
+Governments may use trade barriers to protect infant or strategic industries, protect jobs, respond to unfair competition, or reduce imports.
+Tariffs and quotas compared
+Trade barriers may help protected domestic producers, but they can increase prices, reduce consumer choice and raise costs for businesses using imported components.
+Why a business may become an MNC:
+Sell in new markets and spread risk
+Locate closer to customers and avoid some trade barriers
+Access skills, suppliers, resources or lower operating costs
+Increase scale and strengthen the global brand
+Effects of MNCs on the host country:
+MNC effects on a host country
+External costs and benefits of business decisions:
+External costs and benefits
+Governments may use taxes, regulations, fines, subsidies or planning controls to reduce external costs and encourage external benefits.
+Exchange-rate changes:
+Exchange rate effects
+The final effect depends on how much the business imports and exports, whether it can change suppliers or prices, and how strongly customers react to price changes. Exchange-rate calculations are not required here.`,
+  "bus-note-6-3": `Key definitions:
+Environment - The natural surroundings affected by business activity
+Pollution - Harmful contamination of air, land or water
+Resource depletion - Using natural resources faster than they can be replaced
+Sustainability - Meeting present needs without preventing future generations from meeting theirs
+Sustainable development - Economic development that considers long-term environmental and social effects
+Ethical decision - A decision based on what is considered morally right as well as what is legal and profitable
+Legal control - A law or regulation that restricts or requires business behaviour
+Pressure group - An organised group that tries to influence business or government decisions about a particular cause
+Boycott - A refusal to buy from a business in order to pressure it to change
+Petition - A written request signed by people who support a change
+How business activity can negatively affect the environment:
+Air pollution and greenhouse-gas emissions from factories and transport
+Water pollution from chemicals, waste or oil
+Land pollution from packaging and production waste
+Noise and traffic affecting local communities
+Deforestation, habitat loss and depletion of finite resources
+Why businesses respond to environmental issues:
+Meet legal requirements and avoid fines
+Protect reputation and respond to customers or pressure groups
+Reduce waste, energy use and long-term operating costs
+Attract environmentally conscious customers, employees and investors
+Protect access to resources needed for future production
+How businesses may respond:
+Use renewable energy and energy-efficient equipment
+Reduce, reuse and recycle materials and packaging
+Choose sustainable suppliers and redesign products to last longer
+Use cleaner production methods and lower-emission transport
+Set measurable environmental targets and report progress honestly
+Effects of legal controls:
+Governments may set emission limits, require waste treatment, protect natural areas, ban harmful materials or control where production can take place.
+Compliance may increase short-term costs and restrict how, what or where a business produces. It can also encourage innovation, create fair minimum standards and reduce environmental damage.
+Ethical issues faced by businesses:
+Child labour or unsafe working conditions
+Fair wages and equal treatment of employees
+Fair prices and payment terms for suppliers
+Honest promotion, product safety and responsible use of customer data
+Animal welfare and suppliers that damage the environment
+Avoiding bribery, corruption and tax evasion
+How businesses may respond to ethical issues:
+Create and enforce a supplier code of conduct
+Audit working conditions and trace the source of materials
+Pay fair wages and fair supplier prices
+Train employees and provide confidential reporting channels
+Stop using suppliers that fail required standards
+Publish accurate ethical and environmental information
+Advantages and disadvantages of being ethical:
+Being ethical compared
+How pressure groups influence business decisions:
+Pressure groups research and publicise business behaviour, organise petitions, demonstrations and boycotts, lobby governments and use social media to gain support.
+Their actions can reduce sales and damage reputation, encouraging a business to change suppliers, products or production methods. Businesses may respond through genuine policy changes and discussion; unsupported claims can create accusations of greenwashing.`,
 };
 
 const contentRepairs: Record<string, Array<[string, string]>> = {
