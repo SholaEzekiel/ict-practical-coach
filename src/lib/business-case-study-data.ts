@@ -49,15 +49,6 @@ const caseSkillProgression: BusinessAssessmentSkill[][] = [
   ["K", "APP", "AN", "EVAL", "EVAL"]
 ];
 
-const unitKnowledgeAngles: Record<number, [string, string, string]> = {
-  1: ["definition", "purpose", "ownership or size decision"],
-  2: ["definition", "people-management reason", "possible limitation"],
-  3: ["definition", "market decision", "risk or limitation"],
-  4: ["definition", "operations reason", "cost or quality issue"],
-  5: ["definition", "finance reason", "cash or ratio limitation"],
-  6: ["definition", "external influence", "business response"]
-};
-
 function caseOnlyDetail(seed: CaseSeed, index: number) {
   return `${seed.details[index]} is relevant case evidence, but it needs to be linked clearly to ${seed.focus}.`;
 }
@@ -86,58 +77,593 @@ function makeQuestion(seed: CaseSeed, id: string, skill: BusinessAssessmentSkill
   };
 }
 
-function knowledgeDraft(seed: CaseSeed, variant: number): QuestionDraft {
-  const angles = unitKnowledgeAngles[seed.unitId] || unitKnowledgeAngles[1];
-  const knowledgeOptions: [string, string, string, string] = [
-    seed.genericTheory,
-    seed.appliedPoint,
-    seed.analysisChain,
-    seed.evaluation
-  ];
-
-  if (variant === 0) {
-    return {
-      question: `What is meant by ${seed.focus}?`,
-      hint: `Know the business term before adding details from ${seed.title}.`,
-      options: knowledgeOptions,
-      feedback: [
-        `Correct: this gives accurate knowledge of ${seed.focus}.`,
-        "In longer answers, this knowledge should be followed by relevant application and explanation."
-      ]
-    };
-  }
-
-  if (variant === 1) {
-    return {
-      question: `Identify a valid ${angles[1]} linked to ${seed.focus}.`,
-      hint: `Think about the business reason before deciding how it applies to ${seed.title}.`,
-      options: [
-      seed.genericTheory,
-      caseOnlyDetail(seed, 0),
-      seed.analysisChain,
-      unsupportedAction(seed)
-    ] as [string, string, string, string],
-      feedback: [
-        "Correct: this is valid business knowledge from the unit.",
-        "Knowledge questions test whether the concept is understood before it is applied to a business."
-      ]
-    };
-  }
-
+function knowledgeItem(
+  question: string,
+  hint: string,
+  correct: string,
+  distractorOne: string,
+  distractorTwo: string,
+  distractorThree: string,
+  explanation: string
+): QuestionDraft {
   return {
-    question: `Which statement is most useful when answering a question about ${angles[2]}?`,
-    hint: `Think about the syllabus idea behind ${seed.focus}, not only the facts in the scenario.`,
-    options: [
-      seed.genericTheory,
-      seed.analysisChain,
-      seed.appliedPoint,
-      unsupportedAction(seed)
-    ] as [string, string, string, string],
-    feedback: [
-      `Correct: it gives the core business knowledge needed for ${seed.focus}.`,
-      "Case details and consequences can then be added for higher-skill answers."
-    ]
+    question,
+    hint,
+    options: [correct, distractorOne, distractorTwo, distractorThree],
+    feedback: [`Correct: ${explanation}`]
   };
+}
+
+const knowledgeBanks: Record<string, QuestionDraft[]> = {
+  "bus-case-1-1": [
+    knowledgeItem(
+      "What type of business organisation is Ama's bakery most likely to be, and which detail supports this?",
+      "Use the ownership information in the scenario.",
+      "A sole trader, because Ama owns the bakery herself.",
+      "A partnership, because the bakery employs eight workers.",
+      "A public limited company, because it sells premium products.",
+      "A franchise, because Ama wants to open a second shop.",
+      "a sole trader is a business owned by one person; employees do not become owners"
+    ),
+    knowledgeItem(
+      "Which production method is most suitable for making quantities of premium bread in separate baking runs?",
+      "Think about products made together in groups rather than one continuous flow.",
+      "Batch production",
+      "Flow production",
+      "Job production",
+      "Lean production",
+      "batch production makes a set quantity of one product before production changes to another batch"
+    ),
+    knowledgeItem(
+      "Which source could provide Ama with long-term external finance for a second shop?",
+      "Choose finance borrowed for several years rather than money generated inside the bakery.",
+      "A bank loan",
+      "Retained profit",
+      "Trade credit for flour",
+      "Reducing bread inventory",
+      "a bank loan is external finance repaid over an agreed period with interest"
+    )
+  ],
+  "bus-case-1-2": [
+    knowledgeItem(
+      "What is start-up capital?",
+      "Identify the finance needed before a new business begins trading.",
+      "Money used to establish a new business and buy its initial resources",
+      "Revenue earned after the business opens",
+      "Profit retained by an established company",
+      "The value of goods sold during one year",
+      "start-up capital pays for the assets and expenses needed to begin operating"
+    ),
+    knowledgeItem(
+      "Which part of Leo's business plan should estimate demand for phone repairs in the mall?",
+      "Choose the section that studies customers and competitors.",
+      "Market research and the marketing plan",
+      "The organisational chart",
+      "The production quality record",
+      "The statement of financial position",
+      "market research helps a start-up estimate customer demand and understand competitors"
+    )
+  ],
+  "bus-case-1-3": [
+    knowledgeItem(
+      "Which feature of a partnership explains why the owners' personal savings may be at risk?",
+      "Recall the liability normally faced by ordinary partners.",
+      "Partners usually have unlimited liability for business debts.",
+      "Partners can sell shares to the public.",
+      "The government owns the workshop's assets.",
+      "The workshop must operate as a social enterprise.",
+      "unlimited liability means owners may have to use personal assets to repay business debts"
+    )
+  ],
+  "bus-case-1-4": [
+    knowledgeItem(
+      "How would the farm's activity be classified after it turns tomatoes into bottled sauce?",
+      "Distinguish extracting or growing raw materials from manufacturing goods.",
+      "Sauce making is secondary-sector activity because it processes raw materials.",
+      "Sauce making is primary-sector activity because it grows tomatoes.",
+      "Sauce making is tertiary-sector activity because every product is a service.",
+      "Sauce making is public-sector activity because food is essential.",
+      "the secondary sector converts raw materials into finished or semi-finished goods"
+    )
+  ],
+  "bus-case-1-5": [
+    knowledgeItem(
+      "What feature makes the community gym a social enterprise?",
+      "Look for the combination of trading income and a social purpose.",
+      "It trades to meet a social aim while earning a surplus to continue operating.",
+      "It must distribute all surplus to private shareholders.",
+      "It is owned and controlled by central government.",
+      "It cannot charge customers for using its services.",
+      "a social enterprise uses business activity to pursue social objectives and normally reinvests surplus"
+    )
+  ],
+  "bus-case-1-6": [
+    knowledgeItem(
+      "Which statement correctly describes Nia's role in the franchise?",
+      "Distinguish the franchisee from the established brand owner.",
+      "Nia is the franchisee who pays to use the franchisor's brand and business system.",
+      "Nia is the franchisor because she follows another business's rules.",
+      "Nia becomes an employee with no investment or business risk.",
+      "Nia can change the brand and operating system without permission.",
+      "a franchisee buys the right to operate using the franchisor's established name and methods"
+    )
+  ],
+  "bus-case-2-1": [
+    knowledgeItem(
+      "What is labour turnover?",
+      "Choose the meaning related to employees leaving and being replaced.",
+      "The rate at which employees leave a business and are replaced",
+      "The value of hotel rooms sold during a period",
+      "The number of guests served by each receptionist",
+      "The movement of workers between shifts each day",
+      "labour turnover measures employees leaving an organisation over a period"
+    ),
+    knowledgeItem(
+      "Which non-financial method could motivate reception staff by giving them more responsibility?",
+      "Choose a method that makes the job more challenging and meaningful.",
+      "Job enrichment",
+      "A piece-rate payment",
+      "A wage reduction",
+      "Compulsory overtime",
+      "job enrichment adds responsibility and more demanding tasks to a role"
+    ),
+    knowledgeItem(
+      "Which payment method gives hotel staff a fixed amount for a year of work?",
+      "Distinguish an annual payment from payment per item produced.",
+      "A salary",
+      "Commission",
+      "Piece rate",
+      "Profit sharing only",
+      "a salary is a fixed annual payment usually paid in regular monthly instalments"
+    )
+  ],
+  "bus-case-2-2": [
+    knowledgeItem(
+      "What is laissez-faire leadership?",
+      "Focus on how much freedom employees receive when making work decisions.",
+      "A style in which employees are given substantial freedom to decide how to complete tasks",
+      "A style in which the manager makes every decision and gives close instructions",
+      "A style in which employees vote to dismiss the manager",
+      "A pay system based only on the number of bags made",
+      "laissez-faire leaders delegate considerable decision-making freedom to employees"
+    ),
+    knowledgeItem(
+      "Which leadership style involves the manager and employees discussing decisions together?",
+      "Choose the participative style.",
+      "Democratic leadership",
+      "Autocratic leadership",
+      "Laissez-faire leadership",
+      "Centralised ownership",
+      "democratic leadership involves employees in discussion and decision-making"
+    )
+  ],
+  "bus-case-2-3": [
+    knowledgeItem(
+      "What is internal recruitment?",
+      "Identify where candidates already work before applying for the vacancy.",
+      "Filling a vacancy with a person who already works for the business",
+      "Hiring a candidate through an outside employment agency",
+      "Training every employee for a different occupation",
+      "Moving the whole supermarket to another location",
+      "internal recruitment appoints an existing employee to a vacancy"
+    )
+  ],
+  "bus-case-2-4": [
+    knowledgeItem(
+      "Which training method teaches new café workers at the workplace while they perform the job?",
+      "The workers learn by doing the actual tasks with guidance.",
+      "On-the-job training",
+      "Off-the-job training",
+      "External recruitment",
+      "Job rotation without instruction",
+      "on-the-job training takes place at work while employees carry out their roles"
+    )
+  ],
+  "bus-case-2-5": [
+    knowledgeItem(
+      "What does span of control mean in the call centre?",
+      "Count the employees directly managed by one supervisor.",
+      "The number of subordinates directly responsible to a manager",
+      "The number of management levels in the whole organisation",
+      "The route through which instructions pass down the hierarchy",
+      "The number of customers waiting on the telephone",
+      "span of control is the number of employees directly supervised by a manager"
+    )
+  ],
+  "bus-case-2-6": [
+    knowledgeItem(
+      "What is redundancy in this delivery business?",
+      "The software removes some jobs rather than dismissing workers for misconduct.",
+      "A job is no longer required, so the employee performing it may be dismissed.",
+      "An employee is promoted because demand is growing.",
+      "A worker resigns voluntarily to join a competitor.",
+      "A driver receives additional training in route planning.",
+      "redundancy occurs when a role is no longer needed, often because technology changes operations"
+    )
+  ],
+  "bus-case-3-1": [
+    knowledgeItem(
+      "Which research method would collect primary data directly from teenage juice customers?",
+      "Primary research gathers new information for the business's specific purpose.",
+      "A questionnaire completed by teenagers in the target market",
+      "A government report on national drink sales",
+      "A competitor's published annual report",
+      "An article about last year's food trends",
+      "questionnaires collect original data directly from respondents"
+    ),
+    knowledgeItem(
+      "What is a sample in market research?",
+      "A business usually asks part of the target population rather than everyone.",
+      "A smaller group selected to represent the target population",
+      "A free bottle given to every potential customer",
+      "The total profit expected from the product",
+      "A list containing only the business's competitors",
+      "a sample is the subset of people chosen to represent the wider population"
+    ),
+    knowledgeItem(
+      "Which result would best indicate potential demand for the mango juice?",
+      "Choose evidence about customers' willingness to buy.",
+      "The percentage of surveyed teenagers likely to buy at the proposed price",
+      "The number of labels the printer can produce each hour",
+      "The start-up owner's preferred juice flavour",
+      "The historical cost of the bottling equipment",
+      "purchase intention at a stated price helps estimate likely market demand"
+    )
+  ],
+  "bus-case-3-2": [
+    knowledgeItem(
+      "What is market segmentation?",
+      "Think about dividing one market into customer groups with shared characteristics.",
+      "Dividing a market into groups of customers with similar needs or characteristics",
+      "Selling an identical product at the same price in every country",
+      "Reducing the number of products held in inventory",
+      "Combining two competing businesses into one company",
+      "segmentation separates a market into identifiable groups that can be targeted"
+    ),
+    knowledgeItem(
+      "Which basis for segmentation separates serious runners from casual gym users most directly?",
+      "The groups use sportswear for different activities and benefits.",
+      "Lifestyle or behavioural segmentation",
+      "Geographic segmentation by country only",
+      "Segmentation by business ownership",
+      "Segmentation by factory production cost",
+      "behavioural or lifestyle segmentation groups customers by how and why they use a product"
+    )
+  ],
+  "bus-case-3-3": [
+    knowledgeItem(
+      "What does price-elastic demand mean for the restaurant?",
+      "Price-sensitive customers change how much they buy when price changes.",
+      "A price change causes a proportionately larger change in quantity demanded.",
+      "Demand remains unchanged whenever the restaurant changes price.",
+      "The restaurant's fixed costs change whenever demand changes.",
+      "Customers buy more only because ingredient costs rise.",
+      "elastic demand is highly responsive to a change in price"
+    )
+  ],
+  "bus-case-3-4": [
+    knowledgeItem(
+      "Which promotional method is the craft seller using when it posts product photos to reach customers online?",
+      "Identify the digital communication channel described in the case.",
+      "Social media advertising",
+      "Personal selling in customers' homes",
+      "Trade credit",
+      "Cost-plus pricing",
+      "social media advertising promotes products through online platforms and visual content"
+    )
+  ],
+  "bus-case-3-5": [
+    knowledgeItem(
+      "What is a distribution channel?",
+      "Think about the route a product follows from producer to customer.",
+      "The path through which a product moves from the producer to the final customer",
+      "The amount added to cost when setting a price",
+      "A customer group with similar buying behaviour",
+      "The total number of tables made each week",
+      "a distribution channel is the route used to make a product available to customers"
+    )
+  ],
+  "bus-case-3-6": [
+    knowledgeItem(
+      "Which four elements make up the marketing mix for the eco soap?",
+      "Recall the four Ps.",
+      "Product, price, place and promotion",
+      "People, profit, planning and production",
+      "Price, productivity, packaging and profit",
+      "Product, payroll, premises and purchasing",
+      "the marketing mix consists of product, price, place and promotion"
+    )
+  ],
+  "bus-case-4-1": [
+    knowledgeItem(
+      "Which production method best suits 10 000 identical toy cars made every week?",
+      "Choose the method designed for continuous, standardised, high-volume output.",
+      "Flow production",
+      "Job production",
+      "Batch production",
+      "Cell production of one unique order",
+      "flow production makes standardised products continuously in large quantities"
+    ),
+    knowledgeItem(
+      "What is productivity in the toy factory?",
+      "Relate output to the inputs used to produce it.",
+      "The amount of output produced from a given quantity of inputs",
+      "The selling price of each toy car",
+      "The total fixed cost of the factory",
+      "The quantity of unsold cars held in inventory",
+      "productivity measures the efficiency with which inputs are converted into output"
+    ),
+    knowledgeItem(
+      "Which cost is most likely to be variable for the toy factory?",
+      "Choose a cost that rises as more cars are made.",
+      "Plastic used to manufacture each car",
+      "Annual factory rent",
+      "The purchase price of the factory building",
+      "A fixed yearly insurance premium",
+      "raw-material cost varies with the number of units produced"
+    )
+  ],
+  "bus-case-4-2": [
+    knowledgeItem(
+      "What is buffer inventory?",
+      "It is held to protect production against an unexpected shortage.",
+      "Extra inventory kept in case demand rises or a delivery is delayed",
+      "Damaged inventory that must be thrown away",
+      "Goods ordered only after every customer has paid",
+      "The maximum quantity a warehouse can physically hold",
+      "buffer inventory reduces the risk of running out when demand or delivery time changes"
+    ),
+    knowledgeItem(
+      "What is the opportunity cost of storing too much flour?",
+      "Consider what else the bakery could do with the cash and storage space tied up in flour.",
+      "The next best use of the money and space committed to excess flour",
+      "The selling price charged for each loaf of bread",
+      "The number of workers needed to unload flour",
+      "The total revenue received from bread customers",
+      "opportunity cost is the next best alternative forgone when a choice is made"
+    )
+  ],
+  "bus-case-4-3": [
+    knowledgeItem(
+      "How does quality assurance differ from quality control?",
+      "One approach prevents defects throughout production; the other checks output.",
+      "Quality assurance builds checks into production to prevent defects.",
+      "Quality assurance inspects only finished laptops after production.",
+      "Quality assurance means lowering the laptop's selling price.",
+      "Quality assurance replaces every worker with machinery.",
+      "quality assurance focuses on preventing faults during the production process"
+    )
+  ],
+  "bus-case-4-4": [
+    knowledgeItem(
+      "What is the break-even level of output?",
+      "At this output, the business makes neither profit nor loss.",
+      "The output where total revenue equals total cost",
+      "The output where variable cost becomes zero",
+      "The highest output the printer can produce",
+      "The output where sales revenue equals fixed cost only",
+      "break-even occurs when total revenue exactly covers fixed and variable costs"
+    )
+  ],
+  "bus-case-4-5": [
+    knowledgeItem(
+      "Which location factor is especially important because office workers are the restaurant's main lunchtime market?",
+      "Choose the factor concerned with being close to likely customers.",
+      "Proximity to the target market",
+      "Distance from raw material mines",
+      "Availability of port facilities",
+      "Access to agricultural land",
+      "proximity to customers can increase convenience and passing trade"
+    )
+  ],
+  "bus-case-4-6": [
+    knowledgeItem(
+      "What is lean production?",
+      "Focus on reducing activities and resources that do not add customer value.",
+      "An approach that reduces waste while maintaining value for customers",
+      "A method that keeps the maximum possible inventory at all times",
+      "A pricing method that adds a profit margin to cost",
+      "A recruitment method for employing fewer managers",
+      "lean production aims to minimise waste, delay and unnecessary inventory"
+    )
+  ],
+  "bus-case-5-1": [
+    knowledgeItem(
+      "Which source of finance lets the salon use the chairs while paying regular instalments?",
+      "The asset is used immediately but paid for over an agreed period.",
+      "Leasing",
+      "Trade credit on shampoo",
+      "A new share issue to the public",
+      "Debt factoring",
+      "leasing gives a business the use of an asset in return for regular payments"
+    ),
+    knowledgeItem(
+      "Why is an overdraft generally unsuitable for financing chairs used for several years?",
+      "Match the length of the finance source to the life of the asset.",
+      "An overdraft is short-term finance and can be withdrawn by the bank.",
+      "An overdraft transfers ownership of the salon to the bank.",
+      "An overdraft can only be used by public limited companies.",
+      "An overdraft must be repaid before the chairs are delivered.",
+      "long-lived non-current assets are normally financed with a more secure medium- or long-term source"
+    ),
+    knowledgeItem(
+      "What is retained profit?",
+      "It is an internal source accumulated from earlier trading.",
+      "Profit kept in the business rather than distributed to owners",
+      "Money borrowed from a bank and repaid with interest",
+      "Payment delayed by a supplier until a later date",
+      "Cash received by selling customer debts to a factor",
+      "retained profit is an internal source created when some profit remains in the business"
+    )
+  ],
+  "bus-case-5-2": [
+    knowledgeItem(
+      "What is a cash-flow forecast?",
+      "It predicts the timing of money entering and leaving the business.",
+      "An estimate of future cash inflows, cash outflows and balances",
+      "A record of profit earned in previous years only",
+      "A list of all non-current assets owned by a business",
+      "A calculation of gross profit margin",
+      "a cash-flow forecast estimates future cash movements and closing balances"
+    ),
+    knowledgeItem(
+      "Which entry is a cash outflow for the uniform shop?",
+      "Choose money leaving the business before the August sales season.",
+      "Payment made to uniform suppliers in June",
+      "Cash received from customers in August",
+      "An increase in the closing bank balance",
+      "Revenue recorded from selling uniforms",
+      "a supplier payment is cash leaving the business and is therefore an outflow"
+    )
+  ],
+  "bus-case-5-3": [
+    knowledgeItem(
+      "Which formula calculates the clothing retailer's operating profit?",
+      "Start with gross profit and deduct operating expenses such as rent and advertising.",
+      "Gross profit minus operating expenses",
+      "Revenue minus current liabilities",
+      "Current assets minus current liabilities",
+      "Sales revenue plus cost of sales",
+      "operating profit is the profit remaining after overheads are deducted from gross profit"
+    )
+  ],
+  "bus-case-5-4": [
+    knowledgeItem(
+      "What is working capital?",
+      "It measures short-term funds available after short-term debts are deducted.",
+      "Current assets minus current liabilities",
+      "Non-current assets minus long-term liabilities",
+      "Revenue minus cost of sales",
+      "Cash inflows minus fixed costs only",
+      "working capital is the difference between current assets and current liabilities"
+    )
+  ],
+  "bus-case-5-5": [
+    knowledgeItem(
+      "Why can this private limited company not sell its shares to the general public?",
+      "Recall the restriction attached to private company shares.",
+      "Its shares are privately held and cannot be offered for sale on a public stock exchange.",
+      "It has unlimited liability for every business debt.",
+      "It is owned by the government and cannot have shareholders.",
+      "It must use only short-term sources of finance.",
+      "a private limited company's shares are not available for purchase by the general public"
+    )
+  ],
+  "bus-case-5-6": [
+    knowledgeItem(
+      "What does a higher gross profit margin usually show?",
+      "Relate gross profit to sales revenue before overheads are deducted.",
+      "A larger proportion of sales revenue remains after cost of sales is deducted.",
+      "The business definitely has more cash in its bank account.",
+      "Current liabilities are greater than current assets.",
+      "Every product has a lower selling price than its variable cost.",
+      "gross profit margin shows gross profit as a percentage of revenue"
+    )
+  ],
+  "bus-case-6-1": [
+    knowledgeItem(
+      "What is inflation?",
+      "Focus on the general price level over time, not one product's price.",
+      "A sustained increase in the average price level of goods and services",
+      "A fall in a country's total population",
+      "A rise in the external value of a currency",
+      "A temporary increase in one shop's sales revenue",
+      "inflation is a continuing rise in the general level of prices"
+    ),
+    knowledgeItem(
+      "Which type of cost is the milk used in each batch of ice cream?",
+      "The amount used changes with production output.",
+      "A variable cost",
+      "A fixed cost",
+      "A sunk cost",
+      "A dividend payment",
+      "milk is a direct input whose total cost rises as more ice cream is produced"
+    ),
+    knowledgeItem(
+      "What is disposable income?",
+      "It affects how much customers can spend on non-essential items.",
+      "Income remaining after direct taxes have been paid",
+      "A business's revenue after cost of sales",
+      "The total value of output produced in a country",
+      "Money a company keeps after paying dividends",
+      "disposable income is the income consumers have available to spend or save after direct tax"
+    )
+  ],
+  "bus-case-6-2": [
+    knowledgeItem(
+      "What does an appreciation of the local currency mean?",
+      "Compare how much foreign currency one unit of local currency can buy.",
+      "The local currency rises in value against other currencies.",
+      "The local currency is replaced by a foreign currency.",
+      "Domestic inflation falls to zero immediately.",
+      "The government places a quota on all exports.",
+      "appreciation means a currency can buy more of another currency than before"
+    ),
+    knowledgeItem(
+      "What is an export?",
+      "The coffee is produced locally and sold to customers abroad.",
+      "A good or service sold to a buyer in another country",
+      "A good purchased from another country for domestic use",
+      "A tax charged by a government on imported goods",
+      "A limit on the quantity of foreign goods entering a country",
+      "an export is a domestically produced good or service sold overseas"
+    )
+  ],
+  "bus-case-6-3": [
+    knowledgeItem(
+      "What is an ethical business decision?",
+      "Consider the effect on stakeholders as well as whether the action is legal or profitable.",
+      "A decision based on moral principles about right and fair behaviour",
+      "A decision that always chooses the lowest possible cost",
+      "A decision made only to increase short-term sales",
+      "A decision that ignores workers if no law is broken",
+      "ethical decisions consider moral responsibilities to people, communities and the environment"
+    )
+  ],
+  "bus-case-6-4": [
+    knowledgeItem(
+      "What is an external cost of the paint factory's production?",
+      "Choose a cost imposed on people outside the business transaction.",
+      "River pollution suffered by local residents and other river users",
+      "The factory's payment for paint ingredients",
+      "Wages paid to production workers",
+      "The purchase price of cleaner machinery",
+      "an external cost is a harmful effect borne by third parties rather than the producer or customer"
+    )
+  ],
+  "bus-case-6-5": [
+    knowledgeItem(
+      "What is globalisation?",
+      "Think about growing connections between national markets and businesses.",
+      "The increasing integration and interdependence of countries and markets",
+      "A government preventing every business from trading abroad",
+      "A retailer selling only to customers in its home town",
+      "A fall in the number of communication and transport links",
+      "globalisation increases economic links and the movement of goods, services, finance and ideas across borders"
+    )
+  ],
+  "bus-case-6-6": [
+    knowledgeItem(
+      "What is a sales tax?",
+      "It is an indirect tax added to spending on goods and services.",
+      "A tax charged on the sale of goods and services",
+      "A direct tax charged only on a worker's income",
+      "A payment made by government to reduce business costs",
+      "Interest charged by a bank on business borrowing",
+      "sales tax is an indirect tax applied when goods or services are sold"
+    )
+  ]
+};
+
+function knowledgeDraft(seed: CaseSeed, variant: number): QuestionDraft {
+  const bank = knowledgeBanks[seed.id];
+  const draft = bank?.[variant];
+
+  if (!draft) {
+    throw new Error(`Missing knowledge question ${variant + 1} for ${seed.id}`);
+  }
+
+  return draft;
 }
 
 function applicationDraft(seed: CaseSeed, variant: number): QuestionDraft {
