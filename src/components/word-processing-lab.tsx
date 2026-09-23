@@ -23,6 +23,7 @@ import {
   MonitorPlay,
   Pilcrow,
   Ruler,
+  Sparkles,
   Table2,
   TextCursorInput,
   Underline
@@ -30,6 +31,7 @@ import {
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { compactSupportLines } from "@/lib/task-instructions";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { getWordProcessingCardsForModule, getWordProcessingModule } from "@/lib/word-processing-instruction-cards";
 import type { WordProcessingExpectedResult, WordProcessingInstructionCard } from "@/lib/word-processing-instruction-cards";
 
@@ -247,21 +249,6 @@ function mergeFirstTableRowContent(html: string) {
   return root.innerHTML;
 }
 
-function exactTaskLines(card: WordProcessingInstructionCard) {
-  const expected = card.expected;
-  const targetLines = [
-    ...(expected.textIncludes || []),
-    ...(expected.boldText || []),
-    ...(expected.italicText || []),
-    ...(expected.underlineText || []),
-    ...(expected.alignments?.map((item) => item.text) || []),
-    ...(expected.unorderedListItems || []),
-    ...(expected.orderedListItems || [])
-  ];
-  const complexOutput = Boolean(expected.table || expected.image || expected.columns || targetLines.length > 1);
-  return complexOutput ? [] : targetLines;
-}
-
 export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
@@ -278,6 +265,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const currentComplete = completed.includes(card.id);
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
   const earnedPoints = cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0);
+  const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
 
   useEffect(() => {
     if (!card) return;
@@ -390,6 +378,12 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     refreshWordCount(nextContent);
   }
 
+  function previousCard() {
+    if (activeIndex === 0) return;
+    setFeedback(null);
+    setActiveIndex((index) => Math.max(index - 1, 0));
+  }
+
   function insertContent(html: string) {
     editorRef.current?.insertContent(html);
     const nextContent = editorRef.current?.getContent() || content;
@@ -434,7 +428,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   if (!card) return null;
-  const supportLines = compactSupportLines(card.supportDocument, exactTaskLines(card));
+  const supportLines = compactSupportLines(card.supportDocument);
 
   return (
     <div className="mx-auto grid h-[calc(100vh-112px)] min-h-0 max-w-[1600px] gap-4 lg:grid-cols-[380px_minmax(0,1fr)]">
@@ -460,7 +454,12 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+        <div
+          className="min-h-0 flex-1 select-none space-y-4 overflow-y-auto p-5"
+          onCopy={(event) => event.preventDefault()}
+          onCut={(event) => event.preventDefault()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
           {isFreePractice && <PracticeTimer compact />}
           <section className="rounded-lg border border-line bg-mist p-4">
             <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
@@ -498,7 +497,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           )}
 
           {feedback && (
-            <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+            <section ref={feedbackRef} className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
               <h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3>
               <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
                 {feedback.messages.map((message) => <li key={message}>{message}</li>)}
@@ -514,7 +513,15 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           <button type="button" onClick={openDocumentPreview} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-bold text-ocean hover:bg-mist">
             <MonitorPlay size={18} aria-hidden="true" /> Preview / Print
           </button>
-          <span className="mr-auto text-sm font-semibold text-ink">{earnedPoints} points</span>
+          <span className="mr-auto inline-flex items-center gap-2 text-sm font-semibold text-ink"><Sparkles size={16} className="text-amber" aria-hidden="true" /> {earnedPoints} points</span>
+          <button
+            type="button"
+            onClick={previousCard}
+            disabled={activeIndex === 0}
+            className="rounded-lg border border-line bg-white px-4 py-3 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+          >
+            Previous
+          </button>
           <button
             type="button"
             onClick={nextCard}

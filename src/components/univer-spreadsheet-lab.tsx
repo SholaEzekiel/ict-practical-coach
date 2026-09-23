@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
 import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { getSpreadsheetCardsForModule, getSpreadsheetModule } from "@/lib/spreadsheet-instruction-cards";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { PracticeTimer } from "@/components/practice-timer";
 import { Card, Pill, ProgressBar } from "./ui";
 
@@ -392,6 +393,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
     [card?.id, card?.quiz]
   );
+  const feedbackRef = useFeedbackAutoScroll<HTMLDivElement>(feedback, Boolean(feedback && !feedback.isCorrect));
 
   useEffect(() => {
     setActiveIndex(0);
@@ -777,7 +779,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
             />
             </div>
             {feedback && (
-              <div className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
+              <div ref={feedbackRef} className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
                 <p className="font-semibold">{feedback.message}</p>
                 <p className="mt-1 text-slate-700">{feedback.nextStep}</p>
               </div>
@@ -936,7 +938,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
               )}
 
               {feedback && (
-                <div className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
+                <div ref={feedbackRef} className={`mt-4 rounded-lg border p-4 text-sm leading-6 ${feedback.isCorrect ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`} role="status">
                   <p className="font-semibold">{feedback.message}</p>
                   <p className="mt-1 text-slate-700">{feedback.nextStep}</p>
                   <button type="button" className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-ocean">

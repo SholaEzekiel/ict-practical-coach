@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import type { PointerEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, ListChecks, MousePointer2, Play, Plus, Printer, Redo2, RotateCcw, Square, Trash2, Undo2, XCircle } from "lucide-react";
 import { clsx } from "clsx";
 import { getFlowchartModule, flowchartModules } from "@/lib/flowchart-instruction-cards";
-import type { FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
+import type { FlowchartModule, FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
+import { parseFlowchartInputs, runFlowchart, valuesMatch } from "@/lib/flowchart-interpreter";
+import type { FlowValue } from "@/lib/flowchart-interpreter";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { PracticeTimer } from "@/components/practice-timer";
 import { Pill, ProgressBar } from "@/components/ui";
 
@@ -101,21 +104,6 @@ function validateFreePracticeFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) 
   return feedback;
 }
 
-function validateFreeSandboxFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) {
-  const feedback: string[] = [];
-  const startCount = nodes.filter((node) => node.type === "start").length;
-  const stopCount = nodes.filter((node) => node.type === "stop").length;
-  const connectedIds = new Set(edges.flatMap((edge) => [edge.from, edge.to]));
-
-  if (startCount !== 1) feedback.push("Use exactly one START block.");
-  if (stopCount !== 1) feedback.push("Use exactly one STOP block.");
-  if (edges.length < 1) feedback.push("Connect the blocks before running the test.");
-  if (!nodes.some((node) => node.type === "output")) feedback.push("Add an OUTPUT block so the test plate has something to display.");
-  if (nodes.some((node) => !connectedIds.has(node.id))) feedback.push("Every block should be connected to the flow.");
-
-  return feedback;
-}
-
 type FlowSnapshot = {
   nodes: FlowNodeSeed[];
   edges: FlowEdgeSeed[];
@@ -155,6 +143,32 @@ function formatValue(value: unknown) {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
+function officialTests(module: FlowchartModule) {
+  if (module.inputs.length === module.expectedOutputs.length && module.expectedOutputs.length > 1) {
+    return module.inputs.map((input, index) => ({
+      inputs: (Array.isArray(input) ? input : [input]) as FlowValue[],
+      expected: [module.expectedOutputs[index]]
+    }));
+  }
+  return [{ inputs: module.inputs as FlowValue[], expected: module.expectedOutputs }];
+}
+
+function initialTestInput(module: FlowchartModule) {
+  const first = officialTests(module)[0]?.inputs || [];
+  if (first.length === 1 && typeof first[0] === "string") return first[0];
+  if (first.length === 1) return String(first[0]);
+  return JSON.stringify(first);
+}
+
+function inputNames(module: FlowchartModule) {
+  const names = module.solutionNodes
+    .filter((node) => node.type === "input")
+    .flatMap((node) => node.label.replace(/^\s*input\s*/i, "").split(","))
+    .map((name) => name.trim())
+    .filter(Boolean);
+  return [...new Set(names)].join(", ");
+}
+
 function escapeHtml(value = "") {
   return value
     .replace(/&/g, "&amp;")
@@ -169,7 +183,6 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const previousModule = flowchartModules[moduleIndex - 1];
   const nextModule = flowchartModules[moduleIndex + 1];
   const isFreePractice = module.id === "free-practice";
-  const isFreeSandbox = module.id === "free-practice-test";
   const [nodes, setNodes] = useState(() => cloneNodes(module.starterNodes));
   const [edges, setEdges] = useState(() => cloneEdges(module.starterEdges));
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(nodes[0]?.id || null);
@@ -182,18 +195,17 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const [historyFuture, setHistoryFuture] = useState<FlowSnapshot[]>([]);
   const [showModelChecklist, setShowModelChecklist] = useState(false);
   const [testRuns, setTestRuns] = useState<string[]>([]);
-  const [sandboxInput, setSandboxInput] = useState("Student");
-  const [sandboxOutput, setSandboxOutput] = useState("");
+  const [testInput, setTestInput] = useState(() => initialTestInput(module));
+  const [testOutput, setTestOutput] = useState("");
   const [studentName, setStudentName] = useState("");
   const [flowDescription, setFlowDescription] = useState("");
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
+  const labelSnapshotRef = useRef<FlowSnapshot | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
-  const progress = isFreePractice || isFreeSandbox ? (complete ? 100 : 0) : complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
-
-  const simulationText = useMemo(() => {
-    return module.inputs.map((input, index) => `Run ${index + 1}: ${JSON.stringify(input)} → ${JSON.stringify(module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)])}`).join("\n");
-  }, [module]);
+  const progress = isFreePractice ? (complete ? 100 : 0) : complete ? 100 : Math.round((moduleIndex / flowchartModules.length) * 100);
+  const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, feedback.length > 0 && !complete);
 
   useEffect(() => {
     setNodes(cloneNodes(module.starterNodes));
@@ -208,10 +220,11 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setHistoryFuture([]);
     setShowModelChecklist(false);
     setTestRuns([]);
-    setSandboxInput("Student");
-    setSandboxOutput("");
+    setTestInput(initialTestInput(module));
+    setTestOutput("");
     setStudentName("");
     setFlowDescription("");
+    setEditingNodeId(null);
   }, [module.id, module.starterEdges, module.starterNodes]);
 
   function rememberChange() {
@@ -220,7 +233,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setFeedback([]);
     setComplete(false);
     setTestRuns([]);
-    setSandboxOutput("");
+    setTestOutput("");
   }
 
   function resetModule() {
@@ -232,7 +245,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setFeedback([]);
     setComplete(false);
     setTestRuns([]);
-    setSandboxOutput("");
+    setTestOutput("");
     setStudentName("");
     setFlowDescription("");
   }
@@ -254,19 +267,38 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setSelectedNodeId(null);
   }
 
-  function updateSelectedLabel(label: string) {
-    if (!selectedNodeId) return;
-    rememberChange();
-    setNodes((current) => current.map((node) => node.id === selectedNodeId ? { ...node, label } : node));
+  function beginLabelEdit(nodeId: string) {
+    setSelectedNodeId(nodeId);
+    setEditingNodeId(nodeId);
+    labelSnapshotRef.current = snapshotOf(nodes, edges);
   }
 
-  function beginDrag(event: PointerEvent<HTMLButtonElement>, nodeId: string) {
+  function updateNodeLabel(nodeId: string, label: string) {
+    if (labelSnapshotRef.current) {
+      setHistoryPast((current) => [...current, labelSnapshotRef.current!].slice(-30));
+      setHistoryFuture([]);
+      labelSnapshotRef.current = null;
+    }
+    setFeedback([]);
+    setComplete(false);
+    setTestRuns([]);
+    setTestOutput("");
+    setNodes((current) => current.map((node) => node.id === nodeId ? { ...node, label } : node));
+  }
+
+  function finishLabelEdit() {
+    setEditingNodeId(null);
+    labelSnapshotRef.current = null;
+  }
+
+  function beginDrag(event: PointerEvent<HTMLDivElement>, nodeId: string) {
+    if (editingNodeId === nodeId) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     setDraggingId(nodeId);
     dragSnapshotRef.current = snapshotOf(nodes, edges);
   }
 
-  function dragNode(event: PointerEvent<HTMLButtonElement>, nodeId: string) {
+  function dragNode(event: PointerEvent<HTMLDivElement>, nodeId: string) {
     if (draggingId !== nodeId) return;
     const rect = event.currentTarget.parentElement?.getBoundingClientRect();
     if (!rect) return;
@@ -279,10 +311,12 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
       setTestRuns([]);
       dragSnapshotRef.current = null;
     }
+    const node = nodes.find((item) => item.id === nodeId);
+    const size = node ? nodeSize(node) : { width: 160, height: 68 };
     setNodes((current) => current.map((node) => node.id === nodeId ? {
       ...node,
-      x: Math.max(20, Math.min(600, event.clientX - rect.left - 80)),
-      y: Math.max(20, Math.min(760, event.clientY - rect.top - 34))
+      x: Math.max(20, Math.min(rect.width - size.width - 20, event.clientX - rect.left - size.width / 2)),
+      y: Math.max(20, Math.min(rect.height - size.height - 20, event.clientY - rect.top - size.height / 2))
     } : node));
   }
 
@@ -296,62 +330,10 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   }
 
   function runValidation() {
-    if (isFreeSandbox) {
-      const result = validateFreeSandboxFlow(nodes, edges);
-      setFeedback(result.length ? result : ["Free Practice Test is ready. Run test data to display the output from your flowchart."]);
-      setComplete(result.length === 0);
-      return;
-    }
-
     if (isFreePractice) {
       const result = validateFreePracticeFlow(nodes, edges);
-      setFeedback(result.length ? result : ["Free practice structure looks clear. Use your own test data to review whether the logic gives the output you expect."]);
+      setFeedback(result.length ? result : ["Free practice structure is complete. Run test data separately to review its behaviour."]);
       setComplete(result.length === 0);
-      return;
-    }
-
-    const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
-    setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Use Run test data to compare the test inputs with the expected outputs."]);
-    setComplete(result.length === 0);
-  }
-
-  function runTestData() {
-    if (isFreeSandbox) {
-      const result = validateFreeSandboxFlow(nodes, edges);
-      if (result.length) {
-        setFeedback(result);
-        setComplete(false);
-        setSandboxOutput("");
-        setTestRuns(["Fix the structure first, then run the test again."]);
-        return;
-      }
-
-      const outputLabels = nodes
-        .filter((node) => node.type === "output")
-        .map((node) => renderSandboxOutput(node.label, sandboxInput));
-
-      setComplete(true);
-      setFeedback(["Free Practice Test ran. Compare the output plate with what you expected."]);
-      setSandboxOutput(outputLabels.join("\n"));
-      setTestRuns(outputLabels.map((output, index) => `OUTPUT ${index + 1}: ${output}`));
-      return;
-    }
-
-    if (isFreePractice) {
-      const result = validateFreePracticeFlow(nodes, edges);
-      if (result.length) {
-        setFeedback(result);
-        setComplete(false);
-        setTestRuns(["Fix the structure first, then test your own input and expected output manually."]);
-        return;
-      }
-      setComplete(true);
-      setFeedback(["Free practice structure is ready for self-testing."]);
-      setTestRuns([
-        "Choose an input value for your own problem.",
-        "Trace the flowchart path by path.",
-        "Compare the result with the output you expected before running the trace."
-      ]);
       return;
     }
 
@@ -359,16 +341,35 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     if (result.length) {
       setFeedback(result);
       setComplete(false);
-      setTestRuns(["Fix the flowchart structure first, then run the test data again."]);
       return;
     }
 
-    setComplete(true);
-    setFeedback(["Flowchart structure is valid. Test data matches the expected outputs for this practice task."]);
-    setTestRuns(module.inputs.map((input, index) => {
-      const output = module.expectedOutputs[Math.min(index, module.expectedOutputs.length - 1)];
-      return `PASS Run ${index + 1}: input ${formatValue(input)} gives expected output ${formatValue(output)}`;
-    }));
+    try {
+      const failedRun = officialTests(module).find((test) => !valuesMatch(runFlowchart(nodes, edges, test.inputs).outputs, test.expected));
+      if (failedRun) {
+        setFeedback(["The structure is present, but the algorithm does not produce the required result for every assessment test. Check the calculations and decision routes."]);
+        setComplete(false);
+        return;
+      }
+      setFeedback(["Flowchart structure and algorithm behaviour are correct."]);
+      setComplete(true);
+    } catch (error) {
+      setFeedback([error instanceof Error ? error.message : "The flowchart could not be executed."]);
+      setComplete(false);
+    }
+  }
+
+  function runTestData() {
+    try {
+      const result = runFlowchart(nodes, edges, parseFlowchartInputs(testInput));
+      const output = result.outputs.length ? result.outputs.map(formatValue).join("\n") : "The flow reached STOP without producing output.";
+      setTestOutput(output);
+      setTestRuns([`Test completed in ${result.steps} steps. This does not submit or complete the task.`]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The flowchart could not be executed.";
+      setTestOutput("");
+      setTestRuns([message]);
+    }
   }
 
   function undo() {
@@ -381,19 +382,6 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setComplete(false);
     setFeedback(["Undid the last edit."]);
     setTestRuns([]);
-  }
-
-  function renderSandboxOutput(label: string, inputValue: string) {
-    const cleanInput = inputValue.trim() || "Student";
-    let output = label
-      .replace(/^(output|display)\s*/i, "")
-      .replace(/\{name\}/gi, cleanInput)
-      .replace(/\bname\b/gi, cleanInput)
-      .trim();
-
-    if (!output) output = cleanInput;
-    if (/^welcome$/i.test(output)) return `Welcome ${cleanInput}`;
-    return output;
   }
 
   function redo() {
@@ -510,54 +498,47 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            {(isFreePractice || isFreeSandbox) && (
+            {isFreePractice && (
               <div className="mb-4">
                 <PracticeTimer compact />
               </div>
             )}
-            {isFreeSandbox ? (
-              <section className="rounded-lg border border-line bg-slate-50 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Open sandbox</p>
-                <h2 className="mt-3 text-xl font-bold leading-8 text-ink">Create any flowchart idea and test its output.</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">Use the block tools, connector labels, and test plate. There is no fixed task in this mode.</p>
-              </section>
-            ) : (
-              <>
-                <section className="rounded-lg border border-line bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-ocean">Goal</p>
-                  <h2 className="mt-3 text-xl font-bold leading-8 text-ink">{module.scenario}</h2>
-                </section>
-                <section className="mt-4 rounded-lg border border-line p-4">
-                  <h3 className="font-bold text-ink">Steps</h3>
-                  <ol className="mt-3 space-y-3">
-                    {module.steps.map((step, index) => (
-                      <li key={step} className="flex gap-3 leading-7 text-slate-700">
-                        <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ocean text-sm font-bold text-white">{index + 1}</span>
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-                <section className="mt-4 rounded-lg border border-line p-4">
-                  <h3 className="font-bold text-ink">Support</h3>
-                  <ul className="mt-3 space-y-2">
-                    {module.support.map((item) => (
-                      <li key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
-                        <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-gold" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </>
-            )}
+            <section className="rounded-lg border border-line bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-wide text-ocean">{isFreePractice ? "Open practice" : "Goal"}</p>
+              <h2 className="mt-3 text-xl font-bold leading-8 text-ink">{module.scenario}</h2>
+            </section>
+            <section className="mt-4 rounded-lg border border-line p-4">
+              <h3 className="font-bold text-ink">Steps</h3>
+              <ol className="mt-3 space-y-3">
+                {module.steps.map((step, index) => (
+                  <li key={step} className="flex gap-3 leading-7 text-slate-700">
+                    <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ocean text-sm font-bold text-white">{index + 1}</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+            <section className="mt-4 rounded-lg border border-line p-4">
+              <h3 className="font-bold text-ink">Support</h3>
+              <ul className="mt-3 space-y-2">
+                {module.support.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
+                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-gold" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
 
           <div className="border-t border-line p-4">
             <button onClick={runValidation} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white">
               <CheckCircle2 size={20} aria-hidden="true" /> Check final result
             </button>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-[auto_1fr_1fr] gap-2">
+              <button onClick={openFlowchartPrint} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 text-sm font-bold text-ocean" title="Preview and print flowchart">
+                <Printer size={17} aria-hidden="true" /> Print
+              </button>
               <Link href={previousModule ? `/subjects/ict/flowcharts/${previousModule.id}` : "#"} className={clsx("inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold", !previousModule && "pointer-events-none text-slate-300")}>
                 <ChevronLeft size={17} aria-hidden="true" /> Previous
               </Link>
@@ -582,6 +563,12 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                 <button onClick={redo} disabled={historyFuture.length === 0} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-ocean disabled:text-slate-300 disabled:hover:border-line">
                   <Redo2 size={16} aria-hidden="true" /> Redo
                 </button>
+                <button onClick={resetModule} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-ocean">
+                  <RotateCcw size={16} aria-hidden="true" /> Reset
+                </button>
+                <button onClick={deleteSelected} disabled={!selectedNodeId} className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-ocean disabled:text-slate-300 disabled:hover:border-line">
+                  <Trash2 size={16} aria-hidden="true" /> Delete
+                </button>
                 {module.allowedBlocks.map((type) => {
                   const Icon = paletteIcons[type];
                   return (
@@ -594,28 +581,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
             </div>
           </div>
 
-          <section className="mx-4 mt-4 rounded-lg border border-line bg-white p-4">
-              <h3 className="font-bold text-ink">Flowchart details</h3>
-              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="student-name">Name (optional)</label>
-              <input
-                id="student-name"
-                value={studentName}
-                onChange={(event) => setStudentName(event.target.value)}
-                placeholder="Student name"
-                className="mt-2 w-full rounded-lg border border-line p-2 text-sm"
-              />
-              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="flow-description">Description (optional)</label>
-              <textarea
-                id="flow-description"
-                value={flowDescription}
-                onChange={(event) => setFlowDescription(event.target.value)}
-                placeholder="Briefly describe what this flowchart does"
-                className="mt-2 min-h-20 w-full rounded-lg border border-line p-3 text-sm"
-              />
-          </section>
-
           <div className="min-h-0 flex-1 overflow-auto p-4">
-            <div className="relative h-[860px] min-w-[760px] overflow-hidden rounded-lg border border-line bg-white" style={{ backgroundImage: "linear-gradient(#e7edf3 1px, transparent 1px), linear-gradient(90deg, #e7edf3 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
+            <div className="relative h-[980px] min-w-[900px] overflow-hidden rounded-lg border border-line bg-white" style={{ backgroundImage: "linear-gradient(#e7edf3 1px, transparent 1px), linear-gradient(90deg, #e7edf3 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
               <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full" aria-hidden="true">
                 <defs>
                   <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -640,11 +607,18 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
               </svg>
 
               {nodes.map((node) => (
-                <button
+                <div
                   key={node.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${nodeLabels[node.type]} block: ${node.label}. Double-click to edit.`}
                   onClick={() => {
                     setSelectedNodeId(node.id);
                     if (connectFromId) connectTo(node.id);
+                  }}
+                  onDoubleClick={() => beginLabelEdit(node.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") beginLabelEdit(node.id);
                   }}
                   onPointerDown={(event) => beginDrag(event, node.id)}
                   onPointerMove={(event) => dragNode(event, node.id)}
@@ -652,11 +626,29 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                     setDraggingId(null);
                     dragSnapshotRef.current = null;
                   }}
-                  className={clsx("absolute z-10 grid h-[68px] w-40 place-items-center border-2 px-3 text-center text-sm font-bold shadow-sm transition", nodeStyles[node.type], selectedNodeId === node.id && "ring-4 ring-ocean/20", node.type === "decision" && "h-[92px] w-[92px]")}
+                  className={clsx("absolute z-10 grid h-[68px] w-40 cursor-move place-items-center border-2 px-3 text-center text-sm font-bold shadow-sm transition", nodeStyles[node.type], selectedNodeId === node.id && "ring-4 ring-ocean/20", node.type === "decision" && "h-[92px] w-[92px]")}
                   style={{ left: node.x, top: node.y }}
                 >
-                  <span className={clsx("line-clamp-3", node.type === "decision" && "-rotate-45 text-xs")}>{node.label}</span>
-                </button>
+                  {editingNodeId === node.id ? (
+                    <textarea
+                      autoFocus
+                      value={node.label}
+                      onClick={(event) => event.stopPropagation()}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onChange={(event) => updateNodeLabel(node.id, event.target.value)}
+                      onBlur={finishLabelEdit}
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape" || (event.key === "Enter" && !event.shiftKey)) {
+                          event.preventDefault();
+                          event.currentTarget.blur();
+                        }
+                      }}
+                      className={clsx("h-[52px] w-[136px] resize-none rounded border border-ocean bg-white p-1 text-center text-xs font-semibold text-ink outline-none", node.type === "decision" && "h-[66px] w-[66px] -rotate-45")}
+                    />
+                  ) : (
+                    <span className={clsx("line-clamp-3", node.type === "decision" && "-rotate-45 text-xs")}>{node.label}</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -665,35 +657,33 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
         <aside className="flex min-h-full flex-col border-l border-line bg-white">
           <div className="border-b border-line p-5">
             <h2 className="flex items-center gap-2 text-xl font-bold text-ink"><MousePointer2 size={20} aria-hidden="true" /> Tools and validation</h2>
-            <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-700">
-              <p className="font-bold text-ink">Test inputs</p>
-              <code className="mt-2 block whitespace-pre-wrap rounded bg-white p-2 text-xs">{JSON.stringify(module.inputs)}</code>
-              <p className="mt-3 font-bold text-ink">Expected outputs</p>
-              <code className="mt-2 block whitespace-pre-wrap rounded bg-white p-2 text-xs">{JSON.stringify(module.expectedOutputs)}</code>
-            </div>
+            <section className="mt-4 rounded-lg border border-line bg-slate-50 p-3">
+              <h3 className="font-bold text-ink">Flowchart details</h3>
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="student-name">Name (optional)</label>
+              <input id="student-name" value={studentName} onChange={(event) => setStudentName(event.target.value)} placeholder="Student name" className="mt-2 w-full rounded-lg border border-line bg-white p-2 text-sm" />
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="flow-description">Description (optional)</label>
+              <textarea id="flow-description" value={flowDescription} onChange={(event) => setFlowDescription(event.target.value)} placeholder="Brief description" className="mt-2 min-h-20 w-full rounded-lg border border-line bg-white p-2 text-sm" />
+            </section>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
-            <div className="grid gap-3">
-              <button onClick={() => setShowModelChecklist((current) => !current)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
-                <ListChecks size={17} aria-hidden="true" /> {showModelChecklist ? "Hide model checklist" : "Show model checklist"}
-              </button>
-              <button onClick={resetModule} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
-                <RotateCcw size={17} aria-hidden="true" /> Reset starter
-              </button>
-              <button onClick={deleteSelected} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
-                <Trash2 size={17} aria-hidden="true" /> Delete selected
-              </button>
-              <button onClick={openFlowchartPrint} className="inline-flex items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-slate-700">
-                <Printer size={17} aria-hidden="true" /> Print flowchart
-              </button>
-            </div>
+            <button onClick={() => setShowModelChecklist((current) => !current)} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
+              <ListChecks size={17} aria-hidden="true" /> {showModelChecklist ? "Hide model checklist" : "Show model checklist"}
+            </button>
 
             {selectedNode && (
               <section className="mt-5 rounded-lg border border-line p-4">
                 <h3 className="font-bold text-ink">Selected block</h3>
+                <p className="mt-2 text-xs leading-5 text-slate-500">Double-click the block to type there, or edit the same label below.</p>
                 <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="node-label">Label</label>
-                <textarea id="node-label" value={selectedNode.label} onChange={(event) => updateSelectedLabel(event.target.value)} className="mt-2 min-h-24 w-full rounded-lg border border-line p-3 text-sm" />
+                <textarea
+                  id="node-label"
+                  value={selectedNode.label}
+                  onFocus={() => beginLabelEdit(selectedNode.id)}
+                  onChange={(event) => updateNodeLabel(selectedNode.id, event.target.value)}
+                  onBlur={finishLabelEdit}
+                  className="mt-2 min-h-24 w-full rounded-lg border border-line p-3 text-sm"
+                />
                 <button onClick={() => setConnectFromId(selectedNode.id)} className={clsx("mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 font-bold", connectFromId === selectedNode.id ? "bg-ocean text-white" : "border border-line text-ocean")}>
                   <Plus size={17} aria-hidden="true" /> Start connector here
                 </button>
@@ -716,37 +706,32 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
 
             <section className="mt-5 rounded-lg border border-line p-4">
               <h3 className="flex items-center gap-2 font-bold text-ink"><Play size={17} aria-hidden="true" /> Simulation preview</h3>
-              {isFreeSandbox ? (
-                <div className="mt-3 space-y-3">
-                  <label className="block text-sm font-bold text-slate-600" htmlFor="sandbox-input">Test input</label>
-                  <input
-                    id="sandbox-input"
-                    value={sandboxInput}
-                    onChange={(event) => setSandboxInput(event.target.value)}
-                    placeholder="Type a name or value"
-                    className="w-full rounded-lg border border-line p-2 text-sm"
-                  />
-                  <div className="rounded-lg border border-line bg-slate-50 p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-ocean">Output plate</p>
-                    <pre className="mt-2 min-h-20 whitespace-pre-wrap rounded-lg bg-ink p-3 text-sm leading-6 text-white">{sandboxOutput || "Run test data to display your flowchart output."}</pre>
-                  </div>
-                </div>
-              ) : (
-                <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-ink p-3 text-xs leading-5 text-white">{simulationText}</pre>
-              )}
+              <label className="mt-3 block text-sm font-bold text-slate-600" htmlFor="test-input">Test input{inputNames(module) ? ` (${inputNames(module)})` : ""}</label>
+              <textarea
+                id="test-input"
+                value={testInput}
+                onChange={(event) => setTestInput(event.target.value)}
+                placeholder={isFreePractice ? "Type one value, or use [1, 2, 3] for several inputs" : "Type a value or JSON list"}
+                className="mt-2 min-h-16 w-full rounded-lg border border-line p-2 text-sm"
+              />
+              <p className="mt-2 text-xs leading-5 text-slate-500">For several INPUT steps, enter a JSON list such as [10, 20, 30].</p>
+              <div className="mt-3 rounded-lg border border-line bg-slate-50 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-ocean">Output</p>
+                <pre className="mt-2 min-h-20 whitespace-pre-wrap rounded-lg bg-ink p-3 text-sm leading-6 text-white">{testOutput || "Run test data to execute this flowchart."}</pre>
+              </div>
               <button onClick={runTestData} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 font-bold text-ocean">
                 <Play size={17} aria-hidden="true" /> Run test data
               </button>
               {testRuns.length > 0 && (
                 <div className="mt-3 space-y-2 rounded-lg bg-slate-50 p-3">
                   {testRuns.map((item) => (
-                    <p key={item} className={clsx("text-sm leading-6", item.startsWith("PASS") ? "text-leaf" : "text-red-700")}>{item}</p>
+                    <p key={item} className={clsx("text-sm leading-6", item.startsWith("Test completed") ? "text-leaf" : "text-red-700")}>{item}</p>
                   ))}
                 </div>
               )}
             </section>
 
-            <section className="mt-5 rounded-lg border border-line p-4">
+            <section ref={feedbackRef} className="mt-5 rounded-lg border border-line p-4">
               <h3 className="font-bold text-ink">Validation feedback</h3>
               <div className="mt-3 space-y-2">
                 {feedback.length === 0 ? (

@@ -46,7 +46,7 @@ export const wordProcessingModules: WordProcessingModule[] = [
   {
     id: "intro",
     title: "Document Basics",
-    description: "Open a support document, enter original text, recognise paragraphs, and build simple document structure."
+    description: "Use task information, enter original text, recognise paragraphs, and build simple document structure."
   },
   {
     id: "text-formatting",
@@ -61,7 +61,7 @@ export const wordProcessingModules: WordProcessingModule[] = [
   {
     id: "lists",
     title: "Lists",
-    description: "Create bullet lists and numbered lists from support document instructions."
+    description: "Create bullet lists and numbered lists from task information."
   },
   {
     id: "tables",
@@ -391,19 +391,19 @@ const generatedFormattingTasks: WordProcessingInstructionCard[] = [
 } as WordProcessingInstructionCard));
 
 const generatedIntroTasks: WordProcessingInstructionCard[] = [
-  ["wp-intro-type-opening-hours", "Library opening hours", "Type the library opening sentence.", "The library opens at 08:15 each morning."],
-  ["wp-intro-type-borrowing-rule", "Library borrowing rule", "Type the borrowing rule exactly.", "Students may borrow two books at a time."],
-  ["wp-intro-type-quiet-study", "Quiet study note", "Type the quiet study sentence.", "Quiet study is available during lunch."],
-  ["wp-intro-type-consent", "Consent reminder", "Type the consent reminder.", "Return forms by Friday."],
-  ["wp-intro-type-reference", "Document reference", "Type the document reference.", "Reference: PE/24"]
-].map(([id, title, goal, text]) => ({
+  ["wp-intro-type-opening-hours", "Library opening hours", "Type the library opening sentence.", "The library opens at 08:15 each morning.", libraryText],
+  ["wp-intro-type-borrowing-rule", "Library borrowing rule", "Type the borrowing rule exactly.", "Students may borrow two books at a time.", libraryText],
+  ["wp-intro-type-quiet-study", "Quiet study note", "Type the quiet study sentence.", "Quiet study is available during lunch.", libraryText],
+  ["wp-intro-type-consent", "Consent reminder", "Type the consent reminder.", "Return forms by Friday.", ["Task information: Consent Form", "Return forms by Friday."]],
+  ["wp-intro-type-reference", "Document reference", "Type the document reference.", "Reference: PE/24", ["Task information: PE Notice", "Reference: PE/24"]]
+].map(([id, title, goal, text, supportDocument]) => ({
   id,
   moduleId: "intro",
   moduleTitle: "Document Basics",
   category: "intro",
   title,
   scenario: "A short support document has been provided. Copy the required sentence accurately into the document.",
-  supportDocument: libraryText,
+  supportDocument: supportDocument as string[],
   goal,
   steps: ["Click inside the document.", `Type ${text}`, "Check the capital letters and punctuation."],
   starterHtml: blankDocument,
@@ -575,7 +575,7 @@ const typedStarter = `
 const extendedIntroSpecs = [
   ["wp-intro-showcase-title", "Create a showcase article title", "Type the article title from the support document.", "Peak Study Practice Showcase", showcaseSupport],
   ["wp-intro-cycle-audience", "Add the audience sentence", "Enter the sentence about the community newsletter.", "The final article should be clear enough for a community newsletter.", showcaseSupport],
-  ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", showcaseSupport],
+  ["wp-intro-start-times", "Add the start time warning", "Enter the sentence about checking start times.", "Visitors should check start times before arriving.", ["Task information: Peak Study Practice Showcase", "Visitors should check start times before arriving."]],
   ["wp-intro-learner-photo-note", "Add an image note", "Enter the sentence that explains the photograph.", "A photograph of a learner is available for the article.", showcaseSupport],
   ["wp-intro-charity-sessions", "Add the charity session detail", "Type the detail about guided practice sessions.", "Guided practice sessions are included in the showcase programme.", ["Support document: Peak Study Practice Showcase", "Guided practice sessions are included in the showcase programme."]],
   ["wp-intro-skills-zone", "Add the skills lab detail", "Type the sentence about the skills lab.", "The skills lab opens after the starter challenges.", ["Support document: Peak Study Practice Showcase", "The skills lab opens after the starter challenges."]],
@@ -1244,8 +1244,33 @@ function removeCopyableTypingText(card: WordProcessingInstructionCard): WordProc
   };
 }
 
+function standardiseTaskLanguage(value: string) {
+  return value
+    .replace(/a short support document has been provided\.\s*copy/gi, "Task information has been provided. Enter")
+    .replace(/support document instructions/gi, "task information")
+    .replace(/the support information/gi, "the task information")
+    .replace(/the support document/gi, "the task information")
+    .replace(/a support document/gi, "task information")
+    .replace(/support text/gi, "task information");
+}
+
+function prepareInstructionCard(card: WordProcessingInstructionCard): WordProcessingInstructionCard {
+  const protectedCard = removeCopyableTypingText(card);
+  const uniqueSteps = protectedCard.steps
+    .map(standardiseTaskLanguage)
+    .filter((step, index, steps) => steps.findIndex((candidate) => candidate.toLowerCase().replace(/\s+/g, " ").trim() === step.toLowerCase().replace(/\s+/g, " ").trim()) === index);
+
+  return {
+    ...protectedCard,
+    title: standardiseTaskLanguage(protectedCard.title),
+    scenario: standardiseTaskLanguage(protectedCard.scenario),
+    goal: standardiseTaskLanguage(protectedCard.goal),
+    steps: uniqueSteps
+  };
+}
+
 export const allWordProcessingInstructionCards = rawWordProcessingCards
-  .map(removeCopyableTypingText);
+  .map(prepareInstructionCard);
 
 const moduleOrder = new Map(wordProcessingModules.map((module, index) => [module.id, index]));
 

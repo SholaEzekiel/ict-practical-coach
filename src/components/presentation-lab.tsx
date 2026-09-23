@@ -23,12 +23,14 @@ import {
   PanelRightOpen,
   Plus,
   Square,
+  Sparkles,
   Trash2,
   Type
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { visibleSupportLines } from "@/lib/task-instructions";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { getPresentationCardsForModule, getPresentationModule } from "@/lib/presentation-instruction-cards";
 import type { PresentationCard, PresentationObject, PresentationSlide } from "@/lib/presentation-instruction-cards";
 
@@ -259,6 +261,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   const supportLines = card ? visibleSupportLines(card.supportDocument) : [];
   const selected = slides[activeSlide] || slides[0] || normaliseSlide(emptySlide);
   const selectedObject = selected.objects?.find((item) => item.id === selectedObjectId) || null;
+  const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
 
   useEffect(() => {
     if (!card) return;
@@ -471,7 +474,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
                 <h3 className="font-bold">Steps</h3>
                 <ol className="mt-3 space-y-3">{card.steps.map((step, index) => <li key={step} className="flex gap-3 text-sm leading-6 text-slate-700"><span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-ocean text-xs font-bold text-white">{index + 1}</span><span>{step}</span></li>)}</ol>
               </section>
-              {feedback && <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
+              {feedback && <section ref={feedbackRef} className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
             </div>
           </>
         ) : (
@@ -574,7 +577,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
         </div>
         <div className="flex flex-wrap items-center gap-3 border-t border-line bg-white p-3">
           <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-3 font-bold text-white hover:bg-leaf/90"><CheckCircle2 size={18} aria-hidden="true" /> Check final result</button>
-          <span className="mr-auto font-bold">{cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0)} points</span>
+          <span className="mr-auto inline-flex items-center gap-2 font-bold"><Sparkles size={16} className="text-amber" aria-hidden="true" /> {cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0)} points</span>
           <button type="button" onClick={previousCard} disabled={activeIndex === 0} className="inline-flex items-center gap-2 rounded-lg border border-line px-4 py-3 font-bold disabled:cursor-not-allowed disabled:text-slate-300"><ChevronLeft size={18} /> Previous</button>
           <button type="button" onClick={nextCard} disabled={!currentComplete || activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Next</button>
         </div>

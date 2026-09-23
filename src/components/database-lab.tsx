@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Tags } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Sparkles, Tags } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { visibleSupportLines } from "@/lib/task-instructions";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { getDatabaseCardsForModule, getDatabaseModule, sourceTables } from "@/lib/database-instruction-cards";
 import type { DatabaseCard, DatabaseExpectedResult, DatabaseTable } from "@/lib/database-instruction-cards";
 
@@ -198,6 +199,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
     () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
     [card?.id, card?.quiz]
   );
+  const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
   const queryRows = useMemo(() => {
     const rows = selected?.rows || [];
     const filtered = query.field ? rows.filter((row) => compareValue(row[query.field], query.operator, query.value)) : rows;
@@ -347,6 +349,12 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
     setFeedback(null);
   }
 
+  function previousCard() {
+    if (activeIndex === 0) return;
+    setFeedback(null);
+    setActiveIndex((index) => Math.max(index - 1, 0));
+  }
+
   function openToolPanel(nextPanel: typeof panel) {
     setPanel(nextPanel);
     setToolsOpen(true);
@@ -444,11 +452,12 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
                 </>
               )}
               {card.teacherReview && <section className="rounded-lg border border-sky-200 bg-sky-50 p-4"><h3 className="font-bold">Teacher review</h3><ul className="mt-2 space-y-2 text-sm leading-6 text-slate-700">{card.teacherReview.map((item) => <li key={item}>{item}</li>)}</ul></section>}
-              {feedback && <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
+              {feedback && <section ref={feedbackRef} className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}><h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3><ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">{feedback.messages.map((message) => <li key={message}>{message}</li>)}</ul></section>}
             </div>
-            <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-t border-line p-3">
+            <div className="flex flex-wrap items-center gap-3 border-t border-line p-3">
               <button type="button" onClick={checkWork} className="inline-flex items-center justify-center gap-2 rounded-lg bg-leaf px-4 py-2.5 font-bold text-white hover:bg-leaf/90"><CheckCircle2 size={17} aria-hidden="true" /> Check final result</button>
-              <span className="text-sm font-semibold text-ink">{earnedPoints} points</span>
+              <span className="mr-auto inline-flex items-center gap-2 text-sm font-semibold text-ink"><Sparkles size={16} className="text-amber" aria-hidden="true" /> {earnedPoints} points</span>
+              <button type="button" onClick={previousCard} disabled={activeIndex === 0} className="inline-flex items-center gap-1 rounded-lg border border-line bg-white px-4 py-2.5 font-bold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"><ChevronLeft size={16} aria-hidden="true" /> Previous</button>
               <button type="button" onClick={nextCard} disabled={!currentComplete || activeIndex === cards.length - 1} className="rounded-lg bg-ink px-5 py-2.5 font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Next</button>
             </div>
           </>

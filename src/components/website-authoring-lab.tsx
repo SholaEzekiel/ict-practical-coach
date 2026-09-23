@@ -5,10 +5,11 @@ import Link from "next/link";
 import MonacoEditor from "@monaco-editor/react";
 import grapesjs from "grapesjs";
 import type { Editor as GrapesEditor } from "grapesjs";
-import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, Code2, Eye, FileCode2, PanelLeftClose, PanelLeftOpen, Sparkles, Upload } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { visibleSupportLines } from "@/lib/task-instructions";
+import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
 
@@ -233,6 +234,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const previewReady = hasPreviewableDocument(html);
   const resolvedHtml = useMemo(() => resolveActivityFilePaths(html, activityFiles), [activityFiles, html]);
   const resolvedCss = useMemo(() => resolveActivityFilePaths(css, activityFiles), [activityFiles, css]);
+  const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
 
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
 
@@ -449,7 +451,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
               )}
 
               {feedback && (
-                <section className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                <section ref={feedbackRef} className={`rounded-lg border p-4 ${feedback.ok ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                   <h3 className="font-bold">{feedback.ok ? "Correct result" : "Check these points"}</h3>
                   <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
                     {feedback.messages.map((message) => <li key={message} className="break-words [overflow-wrap:anywhere]">{message}</li>)}
@@ -463,7 +465,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 <CheckCircle2 size={18} aria-hidden="true" /> Check final result
               </button>
               <div className="mt-3 flex items-center gap-2">
-                <span className="mr-auto text-sm font-semibold text-ink">{earnedPoints} points</span>
+                <span className="mr-auto inline-flex items-center gap-2 text-sm font-semibold text-ink"><Sparkles size={16} className="text-amber" aria-hidden="true" /> {earnedPoints} points</span>
                 <button
                   type="button"
                   onClick={previewWebsite}

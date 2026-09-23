@@ -1,5 +1,6 @@
 const hiddenSupportPatterns = [
   /^support document\s*:/i,
+  /^task information\s*:/i,
   /^checked requirements\s*:/i,
   /\b(?:simulator|checker|peak)\s+validates\b/i
 ];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
+import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, Sparkles, XCircle } from "lucide-react";
 import { businessNoteModules } from "@/lib/business-note-data";
 import type { BusinessNoteLesson } from "@/lib/business-note-data";
 import { businessGlossaryTerms } from "@/lib/business-theory-data";
@@ -1486,7 +1486,7 @@ export function BusinessTheoryHub() {
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-ocean">{quizPoints} points</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-mist px-3 py-1 text-xs font-bold text-ocean"><Sparkles size={14} className="text-amber" aria-hidden="true" /> {quizPoints} points</span>
                     <button
                       type="button"
                       onClick={() => {
