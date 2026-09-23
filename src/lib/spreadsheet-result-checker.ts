@@ -213,8 +213,10 @@ function formatMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
   }
 
   if (format.numberPatternIncludes?.length) {
-    const numberFormat = String(styleValue(style, ["n", "numberFormat", "numFmt", "pattern", "format"]) ?? "").toLowerCase();
-    const found = format.numberPatternIncludes.some((part) => numberFormat.includes(part.toLowerCase()));
+    const numberFormats = styleTextValues(styleValue(style, ["n", "numberFormat", "numFmt", "pattern", "format"]));
+    const found = format.numberPatternIncludes.some((part) =>
+      numberFormats.some((numberFormat) => numberFormat.includes(part.toLowerCase()))
+    );
     if (!found) return { ok: false, message: `${expected.cell} should use the requested number format.` };
   }
 
