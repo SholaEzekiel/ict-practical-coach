@@ -845,6 +845,9 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
           type="button"
           onClick={() => setInstructionsOpen((value) => !value)}
           className="flex items-center justify-between border-b border-line p-3 text-sm font-semibold text-ocean"
+          aria-expanded={instructionsOpen}
+          aria-label={instructionsOpen ? "Hide guide" : "Show guide"}
+          title={instructionsOpen ? "Hide guide" : "Show guide"}
         >
           <span>{instructionsOpen ? "Hide guide" : "Guide"}</span>
           {instructionsOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}

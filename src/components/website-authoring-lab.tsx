@@ -382,6 +382,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
           onClick={() => setInstructionsOpen((value) => !value)}
           className="flex items-center justify-between gap-2 border-b border-line p-3 text-sm font-semibold text-ocean hover:bg-mist"
           aria-expanded={instructionsOpen}
+          aria-label={instructionsOpen ? "Hide guide" : "Show guide"}
+          title={instructionsOpen ? "Hide guide" : "Show guide"}
         >
           <span>{instructionsOpen ? "Hide guide" : "Guide"}</span>
           {instructionsOpen ? <PanelLeftClose size={18} aria-hidden="true" /> : <PanelLeftOpen size={18} aria-hidden="true" />}

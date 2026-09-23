@@ -375,8 +375,8 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
         {instructionsOpen ? (
           <>
             <div className="flex items-center justify-between border-b border-line px-4 py-2">
-              <button type="button" onClick={() => { setInstructionsOpen(false); setToolsOpen(true); }} className="inline-flex items-center gap-2 text-sm font-bold text-ocean">
-                <PanelLeftClose size={16} /> Collapse Instructions
+              <button type="button" onClick={() => { setInstructionsOpen(false); setToolsOpen(true); }} className="inline-flex items-center gap-2 text-sm font-bold text-ocean" aria-expanded="true" aria-label="Hide guide">
+                <PanelLeftClose size={16} aria-hidden="true" /> Hide guide
               </button>
             </div>
             <div className="border-b border-line px-4 py-3">
@@ -462,8 +462,8 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
             </div>
           </>
         ) : (
-          <button type="button" onClick={() => setInstructionsOpen(true)} className="flex h-full items-center justify-center text-ocean" title="Show Instructions">
-            <PanelLeftOpen size={22} />
+          <button type="button" onClick={() => setInstructionsOpen(true)} className="flex h-full items-center justify-center text-ocean" aria-expanded="false" aria-label="Show guide" title="Show guide">
+            <PanelLeftOpen size={22} aria-hidden="true" />
           </button>
         )}
       </aside>

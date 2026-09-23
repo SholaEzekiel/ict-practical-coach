@@ -2,11 +2,18 @@
 
 import { useEffect } from "react";
 
-export function PwaRegistrar() {
+export function PwaCleanup() {
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || process.env.NODE_ENV !== "production") return;
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // Install support should fail quietly if a browser blocks service workers.
+    if (!("serviceWorker" in navigator)) return;
+
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => {
+        if (registration.scope.startsWith(window.location.origin)) {
+          void registration.unregister();
+        }
+      });
+    }).catch(() => {
+      // Cleanup should not interrupt study activities if service workers are unavailable.
     });
   }, []);
 
