@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, Circle, Diamond, Li
 import { clsx } from "clsx";
 import { getFlowchartModule, flowchartModules } from "@/lib/flowchart-instruction-cards";
 import type { FlowchartModule, FlowEdgeSeed, FlowNodeSeed, FlowNodeType } from "@/lib/flowchart-instruction-cards";
-import { parseFlowchartInputs, runFlowchart, valuesMatch } from "@/lib/flowchart-interpreter";
+import { parseFlowchartInputs, runFlowchart } from "@/lib/flowchart-interpreter";
 import type { FlowValue } from "@/lib/flowchart-interpreter";
 import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { PracticeTimer } from "@/components/practice-timer";
@@ -338,25 +338,8 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     }
 
     const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
-    if (result.length) {
-      setFeedback(result);
-      setComplete(false);
-      return;
-    }
-
-    try {
-      const failedRun = officialTests(module).find((test) => !valuesMatch(runFlowchart(nodes, edges, test.inputs).outputs, test.expected));
-      if (failedRun) {
-        setFeedback(["The structure is present, but the algorithm does not produce the required result for every assessment test. Check the calculations and decision routes."]);
-        setComplete(false);
-        return;
-      }
-      setFeedback(["Flowchart structure and algorithm behaviour are correct."]);
-      setComplete(true);
-    } catch (error) {
-      setFeedback([error instanceof Error ? error.message : "The flowchart could not be executed."]);
-      setComplete(false);
-    }
+    setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Use Run test data separately to review its behaviour."]);
+    setComplete(result.length === 0);
   }
 
   function runTestData() {
