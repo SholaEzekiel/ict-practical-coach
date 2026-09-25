@@ -5,6 +5,7 @@ import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListC
 import { ictTheoryModules } from "@/lib/ict-theory-data";
 import type { IctTheoryLesson } from "@/lib/ict-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
+import { spacedShuffle } from "@/lib/spaced-shuffle";
 
 type ContentTarget = string | "module-glossary" | "module-quiz";
 
@@ -420,7 +421,10 @@ export function IctTheoryHub() {
   }, [quiz]);
 
   useEffect(() => {
-    setQuizOrder(shuffle((activeModule?.quiz || []).map((_, index) => index)));
+    setQuizOrder(spacedShuffle(
+      (activeModule?.quiz || []).map((_, index) => index),
+      (index) => activeModule?.quiz[index]?.question.trim().toLowerCase() || String(index),
+    ));
     setQuizIndex(0);
   }, [activeModule?.id, activeModule?.quiz]);
 
@@ -604,6 +608,10 @@ export function IctTheoryHub() {
                         delete next[activeModule.id];
                         return next;
                       });
+                      setQuizOrder(spacedShuffle(
+                        (activeModule?.quiz || []).map((_, index) => index),
+                        (index) => activeModule?.quiz[index]?.question.trim().toLowerCase() || String(index),
+                      ));
                       setQuizIndex(0);
                     }}
                     className="mt-3 text-xs font-bold text-ocean hover:underline"

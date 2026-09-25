@@ -6,6 +6,7 @@ import { businessNoteModules } from "@/lib/business-note-data";
 import type { BusinessNoteLesson } from "@/lib/business-note-data";
 import { businessGlossaryTerms } from "@/lib/business-theory-data";
 import type { BusinessTheoryLesson } from "@/lib/business-theory-data";
+import { spacedShuffle } from "@/lib/spaced-shuffle";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 
 type ContentTarget = string | "module-glossary" | "module-quiz";
@@ -1295,7 +1296,10 @@ export function BusinessTheoryHub() {
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
 
   useEffect(() => {
-    setQuizOrder(shuffle(knowledgeQuestions.map((_, index) => index)));
+    setQuizOrder(spacedShuffle(
+      knowledgeQuestions.map((_, index) => index),
+      (index) => knowledgeQuestions[index].correct.id,
+    ));
     setQuizIndex(0);
   }, [knowledgeQuestions]);
 
@@ -1309,6 +1313,7 @@ export function BusinessTheoryHub() {
   const quizPoints = moduleScore.correct * 10;
   const answeredInModule = moduleScore.attempted;
   const quizProgress = knowledgeQuestions.length ? (answeredInModule / knowledgeQuestions.length) * 100 : 0;
+  const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
 
   function chooseModule(moduleId: string) {
     const nextModule = businessNoteModules.find((module) => module.id === moduleId);
@@ -1326,7 +1331,8 @@ export function BusinessTheoryHub() {
   }
 
   function nextQuestion() {
-    setQuizIndex((index) => index + 1);
+    if (!selectedAnswer || isLastQuizQuestion) return;
+    setQuizIndex((index) => Math.min(index + 1, Math.max(0, quizOrder.length - 1)));
   }
 
   function previousQuestion() {
@@ -1496,6 +1502,10 @@ export function BusinessTheoryHub() {
                           delete next[activeModule.id];
                           return next;
                         });
+                        setQuizOrder(spacedShuffle(
+                          knowledgeQuestions.map((_, index) => index),
+                          (index) => knowledgeQuestions[index].correct.id,
+                        ));
                         setQuizIndex(0);
                       }}
                       className="text-xs font-bold text-ocean hover:underline"
@@ -1554,7 +1564,7 @@ export function BusinessTheoryHub() {
                   <button
                     type="button"
                     onClick={nextQuestion}
-                    disabled={!selectedAnswer}
+                    disabled={!selectedAnswer || isLastQuizQuestion}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300 sm:min-w-[124px]"
                   >
                     Next
