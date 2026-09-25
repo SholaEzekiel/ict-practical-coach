@@ -1,3 +1,5 @@
+import { businessCoursebookGlossaryAdditions } from "@/lib/business-coursebook-glossary-additions";
+
 export type BusinessTheoryLesson = {
   id: string;
   title: string;
@@ -1204,4 +1206,7 @@ export const businessTheoryModules: BusinessTheoryModule[] = [
   }
 ];
 
-export const businessGlossaryTerms = businessTheoryModules.flatMap((module) => module.lessons.map((lesson) => ({ ...lesson, moduleTitle: module.moduleTitle })));
+export const businessGlossaryTerms = businessTheoryModules.flatMap((module) => (
+  [...module.lessons, ...(businessCoursebookGlossaryAdditions[module.moduleId] || [])]
+    .map((lesson) => ({ ...lesson, moduleTitle: module.moduleTitle }))
+));
