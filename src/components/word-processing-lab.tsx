@@ -591,15 +591,17 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             init={{
               height: "100%",
               min_height: 640,
-              menubar: false,
+              menubar: isFreePractice ? "edit insert format table tools" : false,
               branding: false,
               promotion: false,
-              statusbar: false,
+              statusbar: isFreePractice,
               plugins: "lists table link image wordcount code",
-              toolbar:
-                "undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | table image link | code",
+              toolbar: isFreePractice
+                ? "undo redo | blocks fontfamily fontsize lineheight | bold italic underline strikethrough | forecolor backcolor removeformat | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table image link | code"
+                : "undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | table image link | code",
               font_family_formats: "Arial=arial,helvetica,sans-serif;Calibri=calibri,arial,sans-serif;Times New Roman=times new roman,times,serif",
               fontsize_formats: "10pt 11pt 12pt 14pt 18pt 24pt 36pt",
+              line_height_formats: "1 1.15 1.5 2",
               body_class: `word-document ${documentClasses}`,
               content_style: `
                 body.word-document {
@@ -621,15 +623,43 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 body.word-document h1 { margin: 0 0 16px; font-size: 28px; font-weight: 700; }
                 body.word-document h2 { margin: 0 0 12px; font-size: 22px; font-weight: 700; }
                 body.word-document p { margin: 0 0 12px; }
-                body.word-document table { margin: 16px 0; width: 100%; border-collapse: collapse; }
-                body.word-document td, body.word-document th { min-width: 120px; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
+                body.word-document table { margin: 16px 0; ${isFreePractice ? "max-width: 100%;" : "width: 100%;"} border-collapse: collapse; }
+                body.word-document td, body.word-document th { min-width: ${isFreePractice ? "32px" : "120px"}; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
                 body.word-document img { display: inline-block; margin: 12px 0; max-width: 100%; }
                 .doc-header, .doc-footer { border-bottom: 1px solid #cbd5e1; color: #475569; font-size: 13px; margin-bottom: 16px; padding-bottom: 6px; text-align: right; }
                 .doc-footer { border-bottom: 0; border-top: 1px solid #cbd5e1; margin-bottom: 0; margin-top: 20px; padding-bottom: 0; padding-top: 6px; }
                 .page-number { border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block; min-width: 24px; padding: 0 4px; text-align: center; }
               `,
               table_default_attributes: { border: "1" },
-              table_default_styles: { borderCollapse: "collapse", width: "100%" },
+              table_default_styles: { borderCollapse: "collapse", width: isFreePractice ? "auto" : "100%" },
+              table_sizing_mode: isFreePractice ? "fixed" : "relative",
+              table_column_resizing: isFreePractice ? "resizetable" : "preservetable",
+              table_resize_bars: true,
+              object_resizing: isFreePractice ? "img table" : "img",
+              table_toolbar: isFreePractice
+                ? "tableprops tablecellprops | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells"
+                : "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+              browser_spellcheck: true,
+              contextmenu: isFreePractice ? "link image table" : "table",
+              paste_data_images: isFreePractice,
+              file_picker_types: isFreePractice ? "image" : undefined,
+              images_file_types: "jpg,jpeg,png,gif,webp",
+              file_picker_callback: isFreePractice
+                ? (callback, _value, meta) => {
+                    if (meta.filetype !== "image") return;
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = ".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp";
+                    input.onchange = () => {
+                      const file = input.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => callback(String(reader.result), { alt: file.name, title: file.name });
+                      reader.readAsDataURL(file);
+                    };
+                    input.click();
+                  }
+                : undefined,
               automatic_uploads: false
             }}
           />
