@@ -267,10 +267,19 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setSelectedNodeId(null);
   }
 
-  function beginLabelEdit(nodeId: string) {
+  function beginLabelChange(nodeId: string) {
     setSelectedNodeId(nodeId);
+    if (!labelSnapshotRef.current) labelSnapshotRef.current = snapshotOf(nodes, edges);
+  }
+
+  function beginCanvasLabelEdit(nodeId: string) {
+    beginLabelChange(nodeId);
     setEditingNodeId(nodeId);
-    labelSnapshotRef.current = snapshotOf(nodes, edges);
+  }
+
+  function beginSidebarLabelEdit(nodeId: string) {
+    beginLabelChange(nodeId);
+    setEditingNodeId(null);
   }
 
   function updateNodeLabel(nodeId: string, label: string) {
@@ -599,9 +608,9 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                     setSelectedNodeId(node.id);
                     if (connectFromId) connectTo(node.id);
                   }}
-                  onDoubleClick={() => beginLabelEdit(node.id)}
+                  onDoubleClick={() => beginCanvasLabelEdit(node.id)}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") beginLabelEdit(node.id);
+                    if (event.key === "Enter") beginCanvasLabelEdit(node.id);
                   }}
                   onPointerDown={(event) => beginDrag(event, node.id)}
                   onPointerMove={(event) => dragNode(event, node.id)}
@@ -662,7 +671,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                 <textarea
                   id="node-label"
                   value={selectedNode.label}
-                  onFocus={() => beginLabelEdit(selectedNode.id)}
+                  onFocus={() => beginSidebarLabelEdit(selectedNode.id)}
                   onChange={(event) => updateNodeLabel(selectedNode.id, event.target.value)}
                   onBlur={finishLabelEdit}
                   className="mt-2 min-h-24 w-full rounded-lg border border-line p-3 text-sm"

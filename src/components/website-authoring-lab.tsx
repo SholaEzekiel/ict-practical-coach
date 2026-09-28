@@ -71,6 +71,26 @@ function getActivityPath(file: File) {
   return `${folder}/${safeName}`;
 }
 
+function activityFileKind(file: ActivityFile) {
+  if (file.type.startsWith("image/") || /\.(avif|gif|jpe?g|png|svg|webp)$/i.test(file.name)) return "image";
+  if (file.type.startsWith("audio/")) return "audio";
+  if (file.type.startsWith("video/")) return "video";
+  return null;
+}
+
+function matchingUploadedFiles(card: WebsiteAuthoringCard, activityFiles: ActivityFile[]) {
+  const expected = card.expected.uploadedFile;
+  if (!expected) return activityFiles;
+
+  return activityFiles.filter((file) => {
+    const kindMatches = activityFileKind(file) === expected.kind;
+    const nameMatches = expected.nameStartsWith
+      ? file.name.replace(/\.[^.]+$/, "").startsWith(expected.nameStartsWith.toLowerCase())
+      : true;
+    return kindMatches && nameMatches;
+  });
+}
+
 function resolveActivityFilePaths(source: string, files: ActivityFile[]) {
   return files.reduce((current, file) => {
     const escapedPath = escapeRegExp(file.virtualPath);
@@ -87,6 +107,20 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
   const parser = new DOMParser();
   const document = parser.parseFromString(html, "text/html");
   const allText = normalise(document.body.textContent || "");
+  const expectedUploadedFiles = matchingUploadedFiles(card, activityFiles);
+  const uploadedImagePaths = expectedUploadedFiles
+    .filter((file) => activityFileKind(file) === "image")
+    .map((file) => normalise(file.virtualPath));
+
+  if (card.expected.uploadedFile && expectedUploadedFiles.length === 0) {
+    const expected = card.expected.uploadedFile;
+    const hasRightKind = activityFiles.some((file) => activityFileKind(file) === expected.kind);
+    if (hasRightKind && expected.nameStartsWith) {
+      messages.push(`Rename your chosen ${expected.kind} so its filename begins with ${expected.nameStartsWith}, then upload it again.`);
+    } else {
+      messages.push(`Upload a ${expected.kind}${expected.nameStartsWith ? ` whose filename begins with ${expected.nameStartsWith}` : ""}.`);
+    }
+  }
 
   if (card.expected.htmlIncludes?.some((text) => normalise(text).includes("<!doctype html>")) && !/<!doctype\s+html>/i.test(html)) {
     messages.push("Add <!doctype html> as the first line.");
@@ -96,6 +130,32 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     const sourceTitle = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
     if (sourceTitle !== card.expected.title) messages.push(`Set the page title to ${card.expected.title}.`);
   }
+
+  if (card.expected.htmlLang && normalise(document.documentElement.getAttribute("lang") || "") !== normalise(card.expected.htmlLang)) {
+    messages.push(`Set the html language attribute to ${card.expected.htmlLang}.`);
+  }
+
+  card.expected.metadata?.forEach((expectedMeta) => {
+    const metas = Array.from(document.head.querySelectorAll("meta"));
+    const found = metas.some((meta) => {
+      const charsetOk = expectedMeta.charset
+        ? normalise(meta.getAttribute("charset") || "") === normalise(expectedMeta.charset)
+        : true;
+      const nameOk = expectedMeta.name
+        ? normalise(meta.getAttribute("name") || "") === normalise(expectedMeta.name)
+        : true;
+      const contentOk = expectedMeta.content
+        ? normalise(meta.getAttribute("content") || "") === normalise(expectedMeta.content)
+        : true;
+      return charsetOk && nameOk && contentOk;
+    });
+
+    if (!found) {
+      if (expectedMeta.charset) messages.push(`Add <meta charset="${expectedMeta.charset}"> inside head.`);
+      else if (expectedMeta.name === "viewport" && expectedMeta.content) messages.push(`Set the viewport content to ${expectedMeta.content} inside head.`);
+      else if (expectedMeta.name) messages.push(`Add a meta element with name="${expectedMeta.name}" inside head.`);
+    }
+  });
 
   card.expected.htmlIncludes?.forEach((text) => {
     if (normalise(text).includes("<!doctype html>")) return;
@@ -143,11 +203,20 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
   card.expected.images?.forEach((expectedImage) => {
     const images = Array.from(document.querySelectorAll("img"));
     const found = images.some((image) => {
-      const srcOk = expectedImage.srcIncludes ? image.getAttribute("src")?.includes(expectedImage.srcIncludes) : true;
+      const imageSrc = normalise(image.getAttribute("src") || "");
+      const srcOk = expectedImage.srcFromUploadedImage
+        ? uploadedImagePaths.includes(imageSrc)
+        : expectedImage.srcIncludes
+          ? imageSrc.includes(normalise(expectedImage.srcIncludes))
+          : true;
       const altOk = expectedImage.alt ? normalise(image.getAttribute("alt") || "") === normalise(expectedImage.alt) : true;
       return srcOk && altOk;
     });
-    if (!found) messages.push("Add the required image with the correct source and alt text.");
+    if (!found) {
+      messages.push(expectedImage.srcFromUploadedImage
+        ? "Use the displayed path of your uploaded image in src and add the required alt text."
+        : "Add the required image with the correct source and alt text.");
+    }
 
     if (expectedImage.srcIncludes && !/^https?:\/\//i.test(expectedImage.srcIncludes)) {
       const uploadFound = activityFiles.some((file) => file.virtualPath.includes(expectedImage.srcIncludes || "") || expectedImage.srcIncludes?.includes(file.name.toLowerCase()));
@@ -170,6 +239,17 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     if (!found) messages.push(`Add the link ${expectedLink.text || ""} to ${expectedLink.href || "the required target"}.`);
   });
 
+  card.expected.containedTags?.forEach(({ container, tag }) => {
+    if (!document.querySelector(`${container} ${tag}`)) messages.push(`Place the ${tag} element inside ${container}.`);
+  });
+
+  card.expected.containedText?.forEach(({ container, text }) => {
+    const element = document.querySelector(container);
+    if (!element || !normalise(element.textContent || "").includes(normalise(text))) {
+      messages.push(`Place this text inside ${container}: ${text}`);
+    }
+  });
+
   card.expected.containedLinks?.forEach((expectedLink) => {
     const container = document.querySelector(expectedLink.container);
     const links = Array.from(container?.querySelectorAll("a") || []);
@@ -186,7 +266,12 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     const found = links.some((link) => {
       const hrefOk = expectedImageLink.href ? link.getAttribute("href") === expectedImageLink.href : true;
       const image = link.querySelector("img");
-      const srcOk = expectedImageLink.srcIncludes ? image?.getAttribute("src")?.includes(expectedImageLink.srcIncludes) : true;
+      const imageSrc = normalise(image?.getAttribute("src") || "");
+      const srcOk = expectedImageLink.srcFromUploadedImage
+        ? uploadedImagePaths.includes(imageSrc)
+        : expectedImageLink.srcIncludes
+          ? imageSrc.includes(normalise(expectedImageLink.srcIncludes))
+          : true;
       const altOk = expectedImageLink.alt ? normalise(image?.getAttribute("alt") || "") === normalise(expectedImageLink.alt) : true;
       return hrefOk && Boolean(image) && srcOk && altOk;
     });
@@ -255,7 +340,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
           { id: "heading", label: "Heading", content: "<h1>Peak Study Hub Open Day</h1>" },
           { id: "paragraph", label: "Paragraph", content: "<p>Practical digital skills for confident learners.</p>" },
           { id: "link", label: "Link", content: '<a href="index.html">Home</a>' },
-          { id: "image", label: "Image", content: '<img src="images/peak-study-card.svg" alt="Peak uploaded practice image">' },
+          { id: "image", label: "Image", content: '<img src="" alt="Uploaded activity image">' },
           {
             id: "table",
             label: "Table",

@@ -7,11 +7,16 @@ export type WebsiteAuthoringModule = {
 export type WebsiteExpectedResult = {
   htmlIncludes?: string[];
   requiredTags?: string[];
-  images?: Array<{ srcIncludes?: string; alt?: string }>;
+  htmlLang?: string;
+  metadata?: Array<{ charset?: string; name?: string; content?: string }>;
+  images?: Array<{ srcIncludes?: string; srcFromUploadedImage?: boolean; alt?: string }>;
+  uploadedFile?: { kind: "image" | "audio" | "video"; nameStartsWith?: string };
   uploadedPaths?: string[];
   links?: Array<{ text?: string; href?: string }>;
+  containedTags?: Array<{ container: string; tag: string }>;
+  containedText?: Array<{ container: string; text: string }>;
   containedLinks?: Array<{ container: string; text?: string; href?: string }>;
-  linkedImages?: Array<{ href?: string; srcIncludes?: string; alt?: string }>;
+  linkedImages?: Array<{ href?: string; srcIncludes?: string; srcFromUploadedImage?: boolean; alt?: string }>;
   cssIncludes?: string[];
   tableHeaders?: string[];
   title?: string;
@@ -390,29 +395,178 @@ const introCards: WebsiteAuthoringCard[] = [
     points: 15
   }),
   moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-meta-charset",
+    title: "Declare the character set",
+    scenario: "Character-set metadata tells the browser how to read letters, numbers, and symbols correctly. Metadata belongs inside head because it describes the page rather than appearing on it.",
+    supportDocument: ["Metadata location: inside <head>", "Character set: UTF-8", "Element to create: <meta charset=\"UTF-8\">"],
+    goal: "Add UTF-8 character-set metadata inside head.",
+    steps: ["Find the opening and closing head tags.", "On a new line inside head, add a meta element.", "Give it the charset attribute with the value UTF-8."],
+    starterHtml: htmlShell,
+    expected: { requiredTags: ["meta"], metadata: [{ charset: "UTF-8" }] },
+    points: 10
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-meta-language",
+    title: "Identify the page language",
+    scenario: "The lang attribute identifies the page language for browsers, screen readers, and search tools. It belongs on the opening html tag.",
+    supportDocument: ["Page language: English", "Language code: en", "Change the opening tag to <html lang=\"en\">"],
+    goal: "Set English as the language of the HTML document.",
+    steps: ["Find the opening html tag below the doctype.", "Add the lang attribute inside that opening tag.", "Use en as its value; do not add lang to body."],
+    starterHtml: htmlShell,
+    expected: { htmlLang: "en" },
+    points: 10
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-meta-viewport-name",
+    title: "Name the viewport metadata",
+    scenario: "A viewport meta element gives the browser instructions for displaying the page on different screen sizes. The name attribute identifies which browser setting the metadata controls.",
+    supportDocument: ["Metadata location: inside <head>", "Attribute to add: name", "Attribute value: viewport"],
+    goal: "Change the empty meta element into viewport metadata.",
+    steps: ["Find <meta> inside head.", "Inside that tag, add name=\"viewport\".", "Leave the meta element inside head; its display instructions will be added in the next tasks."],
+    starterHtml: htmlShell.replace("    <title>", "    <meta>\n    <title>"),
+    expected: { requiredTags: ["meta"], metadata: [{ name: "viewport" }] },
+    points: 10
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-meta-device-width",
+    title: "Match the page to device width",
+    scenario: "The content attribute stores the viewport instructions. width=device-width tells the browser to make the page viewport match the width of the student's device.",
+    supportDocument: ["Meta name: viewport", "Attribute to add: content", "First content instruction: width=device-width"],
+    goal: "Add the device-width instruction to the viewport metadata.",
+    steps: ["Find <meta name=\"viewport\"> inside head.", "Add a content attribute to the same meta element.", "Set its value to width=device-width."],
+    starterHtml: htmlShell.replace("    <title>", "    <meta name=\"viewport\">\n    <title>"),
+    expected: { requiredTags: ["meta"], metadata: [{ name: "viewport", content: "width=device-width" }] },
+    points: 10
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-meta-initial-scale",
+    title: "Set the initial page scale",
+    scenario: "initial-scale=1.0 tells the browser to open the page at its normal starting zoom. It is a second instruction in the same viewport content value.",
+    supportDocument: ["Existing instruction: width=device-width", "Second instruction: initial-scale=1.0", "Separate the instructions with a comma"],
+    goal: "Add the initial-scale instruction to the viewport metadata.",
+    steps: ["Find the viewport meta element inside head.", "After width=device-width, type a comma and a space.", "Add initial-scale=1.0 inside the same content value."],
+    starterHtml: htmlShell.replace("    <title>", "    <meta name=\"viewport\" content=\"width=device-width\">\n    <title>"),
+    expected: { requiredTags: ["meta"], metadata: [{ name: "viewport", content: "width=device-width, initial-scale=1.0" }] },
+    points: 10
+  }),
+  moduleCard("intro", "HTML Foundations", {
     id: "web-intro-metadata",
-    title: "Add page metadata",
-    scenario: "Metadata belongs in head after the student understands the visible page structure.",
-    supportDocument: ["Required charset: <meta charset=\"UTF-8\">", "Required viewport: <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">", "Language attribute: <html lang=\"en\">"],
-    goal: "Add charset, viewport, and lang metadata.",
-    steps: ["Change <html> to <html lang=\"en\">.", "Add the charset meta tag inside head.", "Add the viewport meta tag inside head."],
-    starterHtml: apexStarterHtml,
-    expected: { requiredTags: ["meta"], htmlIncludes: ["<html lang=\"en\">", "charset=\"UTF-8\"", "name=\"viewport\"", "width=device-width"] },
+    title: "Consolidate page metadata",
+    scenario: "A complete head can combine character encoding and responsive viewport instructions, while the html tag identifies the page language.",
+    supportDocument: ["Language: en on the opening html tag", "Inside head: UTF-8 character-set metadata", "Inside head: viewport metadata using width=device-width and initial-scale=1.0"],
+    goal: "Combine the language, charset, and complete viewport settings.",
+    steps: ["Add lang=\"en\" to the opening html tag.", "Inside head, add <meta charset=\"UTF-8\">.", "Below it, add the viewport meta element with both content instructions practised earlier."],
+    starterHtml: htmlShell,
+    expected: { requiredTags: ["meta"], htmlLang: "en", metadata: [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }] },
     points: 20
   }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-basic", title: "Practical Task 1: Build a basic page", heading: "Peak Study Practice Club", paragraph: "Students meet every Friday to improve practical ICT skills." }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-structured", title: "Practical Task 2: Build a structured page", heading: "Peak Study Notice", paragraph: "Bring your workbook and complete one practical task before leaving.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-headings", title: "Practical Task 3: Build a heading hierarchy", heading: "Peak Skills Morning", paragraph: "Teachers check headings, paragraphs, sections, and page structure.", tags: ["html", "head", "title", "body", "main", "section", "h1", "h2", "h3", "h4", "p"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-event", title: "Practical Task 4: Build an event page", heading: "Peak Revision Day", paragraph: "Families can visit the practical rooms and see student work.", tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "h2", "p", "footer"] }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-clinic", title: "Practical Task 5: Build a clinic page", heading: "Peak Coding Clinic", paragraph: "Students practise tags in short steps before building a full page." }),
-  fullPagePractice("intro", "HTML Foundations", { slug: "practice-support", title: "Practical Task 6: Build a support page", heading: "Peak Support Desk", paragraph: "Ask for help after checking the preview and source code." }),
-  fullPagePractice("intro", "HTML Foundations", {
-    slug: "practice-final",
-    title: "Practical Task 7: Final foundation build",
-    heading: "Peak Foundation Check",
-    paragraph: "A complete page uses structure, headings, text, comments, and metadata.",
-    tags: ["html", "head", "meta", "title", "body", "header", "main", "section", "h1", "h2", "h4", "p", "footer"],
-    expected: { htmlIncludes: ["<html lang=\"en\">", "charset=\"UTF-8\"", "name=\"viewport\"", "<!--"] },
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-basic",
+    title: "Milestone 1: Create the document frame",
+    scenario: "Create the non-visible frame for a simple Staff Notice webpage before adding the letter itself.",
+    supportDocument: ["First line: <!doctype html>", "Root element: html", "Page-information area: head", "Browser-tab title: Staff Notice"],
+    goal: "Build the doctype, html, head, and title foundation.",
+    steps: ["Add the doctype on line 1 and create the html element below it.", "Inside html, create head.", "Inside head, set the title to Staff Notice."],
+    starterHtml: blankHtml,
+    expected: { requiredTags: ["html", "head", "title"], htmlIncludes: ["<!doctype html>"], title: "Staff Notice" },
+    points: 20
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-structured",
+    title: "Milestone 2: Add the staff message",
+    scenario: "Continue the Staff Notice webpage by adding the visible title and the first paragraph of the message.",
+    supportDocument: ["Visible content belongs inside body.", "Inside body, create main.", "Main heading in h1: Message to Staff", "Paragraph below it: Please remember that the staff meeting begins at 3:30 pm on Friday."],
+    goal: "Add body, main, the notice heading, and its paragraph.",
+    steps: ["Inside html, add body after head.", "Inside body, create main and place an h1 inside it.", "Below the h1, add the supplied sentence in a p element."],
+    starterHtml: `<!doctype html>\n<html>\n  <head>\n    <title>Staff Notice</title>\n  </head>\n\n</html>`,
+    expected: {
+      requiredTags: ["body", "main", "h1", "p"],
+      htmlIncludes: ["Message to Staff", "Please remember that the staff meeting begins at 3:30 pm on Friday."],
+      containedTags: [{ container: "body", tag: "main" }, { container: "main", tag: "h1" }, { container: "main", tag: "p" }],
+      containedText: [{ container: "h1", text: "Message to Staff" }, { container: "main p", text: "Please remember that the staff meeting begins at 3:30 pm on Friday." }]
+    },
+    points: 20
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-headings",
+    title: "Milestone 3: Organise the notice",
+    scenario: "Give the Staff Notice clear page regions and add a separate section for preparation details.",
+    supportDocument: ["Move the h1 into header.", "Keep the meeting paragraph inside main.", "Inside main, add a section with h2 text: Before the meeting", "Section paragraph: Bring your progress notes and one question.", "Footer text: School Office"],
+    goal: "Organise the notice with header, main, section, h2, and footer.",
+    steps: ["Create header before main and place the existing h1 inside it.", "Inside main, keep the meeting paragraph and add a section below it.", "Put the supplied h2 and paragraph inside section, then add footer after main."],
+    starterHtml: `<!doctype html>\n<html>\n  <head>\n    <title>Staff Notice</title>\n  </head>\n  <body>\n    <h1>Message to Staff</h1>\n    <main>\n      <p>Please remember that the staff meeting begins at 3:30 pm on Friday.</p>\n    </main>\n  </body>\n</html>`,
+    expected: {
+      requiredTags: ["header", "main", "section", "h1", "h2", "p", "footer"],
+      htmlIncludes: ["Before the meeting", "Bring your progress notes and one question.", "School Office"],
+      containedTags: [{ container: "header", tag: "h1" }, { container: "main", tag: "section" }, { container: "section", tag: "h2" }, { container: "section", tag: "p" }],
+      containedText: [{ container: "section h2", text: "Before the meeting" }, { container: "section p", text: "Bring your progress notes and one question." }, { container: "footer", text: "School Office" }]
+    },
+    points: 25
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-event",
+    title: "Milestone 4: Add two useful lists",
+    scenario: "Extend the Staff Notice with an equipment list where order is unimportant and an arrival checklist where order matters.",
+    supportDocument: ["Under h2 Staff should bring, add an unordered list: Progress notes; Pen; Staff ID", "Under h2 On arrival, add an ordered list: Sign in; Collect the agenda; Take a seat"],
+    goal: "Use ul for equipment and ol for ordered arrival steps.",
+    steps: ["Inside main, add an h2 followed by a ul with the three equipment li items.", "Below it, add a second h2 followed by an ol.", "Add the three arrival li items in the supplied order."],
+    starterHtml: `<!doctype html>\n<html>\n  <head><title>Staff Notice</title></head>\n  <body>\n    <main>\n      <h1>Message to Staff</h1>\n      <p>Please remember that the staff meeting begins at 3:30 pm on Friday.</p>\n    </main>\n  </body>\n</html>`,
+    expected: {
+      requiredTags: ["ul", "ol", "li"],
+      htmlIncludes: ["Staff should bring", "Progress notes", "Pen", "Staff ID", "On arrival", "Sign in", "Collect the agenda", "Take a seat"],
+      containedTags: [{ container: "main", tag: "ul" }, { container: "main", tag: "ol" }, { container: "ul", tag: "li" }, { container: "ol", tag: "li" }]
+    },
+    points: 25
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-clinic",
+    title: "Consolidation 1: Build a student support page",
+    scenario: "Build a complete small webpage for students who need help with practical work, using the document and content structures already practised.",
+    supportDocument: ["Browser title: Student Support", "Main heading in h1: Practical Support Desk", "Introductory paragraph: Ask for help after checking your instructions and preview.", "Section heading in h2: What to bring", "Section paragraph: Bring your workbook and a screenshot of the problem."],
+    goal: "Combine the document frame with a clear heading, paragraph, and section.",
+    steps: ["Build doctype, html, head, title, and body.", "Inside body, create main with the supplied h1 and introductory paragraph.", "Below the paragraph, create section containing the supplied h2 and second paragraph."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "main", "section", "h1", "h2", "p"],
+      htmlIncludes: ["<!doctype html>", "Practical Support Desk", "Ask for help after checking your instructions and preview.", "What to bring", "Bring your workbook and a screenshot of the problem."],
+      title: "Student Support",
+      containedTags: [{ container: "body", tag: "main" }, { container: "main", tag: "h1" }, { container: "main", tag: "section" }, { container: "section", tag: "h2" }, { container: "section", tag: "p" }]
+    },
+    points: 40
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-support",
+    title: "Consolidation 2: Build a revision checklist",
+    scenario: "Build a revision webpage that combines page regions, explanatory text, and the two list types already practised.",
+    supportDocument: ["Browser title and h1: Revision Checklist", "Header contains h1.", "Main paragraph: Complete these checks before submitting your work.", "Unordered list: Spelling; File name; Page preview", "Ordered list: Save the file; Open the preview; Submit evidence", "Footer text: ICT Department"],
+    goal: "Combine structure, page regions, text, and both list types.",
+    steps: ["Build the document frame and place h1 inside header.", "Inside main, add the supplied paragraph, then the ul and ol with their li items.", "Add the supplied footer after main."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "title", "body", "header", "main", "h1", "p", "ul", "ol", "li", "footer"],
+      htmlIncludes: ["<!doctype html>", "Complete these checks before submitting your work.", "Spelling", "File name", "Page preview", "Save the file", "Open the preview", "Submit evidence", "ICT Department"],
+      title: "Revision Checklist",
+      containedTags: [{ container: "header", tag: "h1" }, { container: "body", tag: "main" }, { container: "main", tag: "ul" }, { container: "main", tag: "ol" }]
+    },
+    points: 50
+  }),
+  moduleCard("intro", "HTML Foundations", {
+    id: "web-intro-practice-final",
+    title: "Final foundation build: Staff training page",
+    scenario: "Create a complete responsive Staff Training webpage from a clear content brief. This final task combines only skills practised earlier in this module.",
+    supportDocument: ["Language: en", "Inside head: UTF-8 charset, complete responsive viewport, and title Staff Training", "Above main: comment main training content", "Header h1: Staff Training", "Main paragraph: Training begins in Room 4 at 9:00 am on Monday.", "Section h2: Preparation", "Unordered list: Staff ID; Notebook; Laptop", "Footer: School Office"],
+    goal: "Build the complete staff training page from the supplied brief.",
+    steps: ["Build the document frame, metadata, browser title, and language setting.", "Inside body, create header, the required comment, and main with its paragraph and preparation section.", "Inside section add the h2 and unordered list, then place the footer after main."],
+    starterHtml: blankHtml,
+    expected: {
+      requiredTags: ["html", "head", "meta", "title", "body", "header", "main", "section", "h1", "h2", "p", "ul", "li", "footer"],
+      htmlIncludes: ["<!doctype html>", "<!-- main training content -->", "Training begins in Room 4 at 9:00 am on Monday.", "Preparation", "Staff ID", "Notebook", "Laptop", "School Office"],
+      title: "Staff Training",
+      htmlLang: "en",
+      metadata: [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }],
+      containedTags: [{ container: "header", tag: "h1" }, { container: "body", tag: "main" }, { container: "main", tag: "section" }, { container: "section", tag: "h2" }, { container: "section", tag: "ul" }, { container: "ul", tag: "li" }],
+      containedText: [{ container: "header h1", text: "Staff Training" }, { container: "footer", text: "School Office" }]
+    },
     points: 70
   })
 ];
@@ -423,9 +577,9 @@ function mediaPractice(slug: string, title: string, heading: string, alt: string
     title,
     heading,
     paragraph: "Peak students use media to understand practical tasks before building their own pages.",
-    extraSupport: ["Upload file: peak-study-card.svg", "Use the shown relative image path after upload.", `Alternative text: ${alt}`, `Caption: ${caption}`],
+    extraSupport: ["Choose an image and make its filename begin with student-activity before uploading it.", "Use the relative image path shown after upload.", `Alternative text: ${alt}`, `Caption: ${caption}`],
     tags: ["html", "head", "title", "body", "header", "main", "section", "h1", "p", "figure", "img", "figcaption"],
-    expected: { uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt }], htmlIncludes: [caption] },
+    expected: { uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt }], htmlIncludes: [caption] },
     points: 55
   });
 }
@@ -434,86 +588,86 @@ const textMediaCards: WebsiteAuthoringCard[] = [
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-upload",
     title: "Upload an activity image",
-    scenario: "Online students must upload their own activity file before using it in HTML.",
-    supportDocument: ["Upload file: peak-study-card.svg", "The editor will show a relative path such as images/peak-study-card.svg."],
-    goal: "Upload peak-study-card.svg using Add activity file.",
-    steps: ["Click Add activity file.", "Choose peak-study-card.svg from the practice files.", "Read the relative path shown under the button."],
+    scenario: "Web authors give image files meaningful names before uploading and using them in HTML.",
+    supportDocument: ["Choose a JPG, PNG, WEBP, GIF, AVIF, or SVG image from your device.", "Before uploading, make its filename begin with student-activity. Keep its existing file extension.", "The editor will display the image's relative path after upload."],
+    goal: "Upload an image whose filename begins with student-activity.",
+    steps: ["Choose an image on your device and rename it so the filename begins with student-activity.", "Click Add activity file and select the renamed image.", "Read the relative path displayed under the button."],
     starterHtml: apexPageHtml,
-    expected: { uploadedPaths: ["images/peak-study-card.svg"] },
+    expected: { uploadedFile: { kind: "image", nameStartsWith: "student-activity" } },
     points: 10
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-img",
     title: "Insert an image",
     scenario: "The img element displays an uploaded image when src points to the correct relative path.",
-    supportDocument: ["Image path after upload: images/peak-study-card.svg"],
+    supportDocument: ["Use the exact relative path displayed after uploading your student-activity image."],
     goal: "Add an img element using the uploaded image path.",
-    steps: ["Upload the image file first.", "Inside main, add <img src=\"images/peak-study-card.svg\">.", "Check that the preview shows the image."],
+    steps: ["Upload your student-activity image first.", "Inside main, add an img element.", "Copy the displayed relative path into its src attribute and check that the preview shows your image."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["img"], images: [{ srcIncludes: "peak-study-card.svg" }], uploadedPaths: ["images/peak-study-card.svg"] },
+    expected: { requiredTags: ["img"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true }] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-alt",
     title: "Add alternative text",
     scenario: "The alt attribute describes an image for users who cannot see it.",
-    supportDocument: ["Upload file if needed: peak-study-card.svg", "Image path: images/peak-study-card.svg", "Alternative text: Peak study practice card"],
+    supportDocument: ["Upload your student-activity image if needed.", "Use its displayed relative path.", "Alternative text: Peak study practice card"],
     goal: "Set the image alt text to Peak study practice card.",
-    steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Add alt=\"Peak study practice card\" and keep src in the same img tag."],
-    starterHtml: insertIntoSessionsSection(`        <img src="images/peak-study-card.svg">`),
-    expected: { requiredTags: ["img"], uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak study practice card" }] },
+    steps: ["Upload your student-activity image if it is not already listed.", "Find the img element and place the displayed path in src.", "Add alt=\"Peak study practice card\" in the same img tag."],
+    starterHtml: insertIntoSessionsSection(`        <img src="">`),
+    expected: { requiredTags: ["img"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak study practice card" }] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-figure",
     title: "Group the image with figure",
     scenario: "The figure element groups media with its caption.",
-    supportDocument: ["Upload file if needed: peak-study-card.svg", "Use <figure> around the image."],
+    supportDocument: ["Upload your student-activity image if needed and use its displayed path.", "Use <figure> around the image."],
     goal: "Wrap the image in a figure element.",
-    steps: ["Upload the image file if it is not already listed.", "Find the img element.", "Place <figure> before it and </figure> after it."],
-    starterHtml: insertIntoSessionsSection(`        <img src="images/peak-study-card.svg" alt="Peak study practice card">`),
-    expected: { requiredTags: ["figure", "img"], uploadedPaths: ["images/peak-study-card.svg"] },
+    steps: ["Upload your student-activity image if it is not already listed.", "Find the img element and place the displayed path in src.", "Place <figure> before it and </figure> after it."],
+    starterHtml: insertIntoSessionsSection(`        <img src="" alt="Peak study practice card">`),
+    expected: { requiredTags: ["figure", "img"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak study practice card" }] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-figcaption",
     title: "Add a caption",
     scenario: "The figcaption element explains the image.",
-    supportDocument: ["Upload file if needed: peak-study-card.svg", "Caption: Guided practice workspace"],
+    supportDocument: ["Upload your student-activity image if needed and use its displayed path.", "Caption: Guided practice workspace"],
     goal: "Add Guided practice workspace inside figcaption.",
-    steps: ["Upload the image file if it is not already listed.", "Find the figure element.", "Below the img, type <figcaption>Guided practice workspace</figcaption> and keep it inside figure."],
+    steps: ["Upload your student-activity image if it is not already listed and place its displayed path in src.", "Find the figure element.", "Below the img, type <figcaption>Guided practice workspace</figcaption> and keep it inside figure."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/peak-study-card.svg" alt="Peak study practice card">
+          <img src="" alt="Peak study practice card">
         </figure>`),
-    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["Guided practice workspace"] },
+    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak study practice card" }], htmlIncludes: ["Guided practice workspace"] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-size",
     title: "Set image size attributes",
     scenario: "Width and height attributes reserve space for an image and help avoid layout jumps.",
-    supportDocument: ["Upload file if needed: peak-study-card.svg", "Width: 320", "Height: 180"],
+    supportDocument: ["Upload your student-activity image if needed and use its displayed path.", "Width: 320", "Height: 180"],
     goal: "Add width and height attributes to the img element.",
-    steps: ["Upload the image file if it is not already listed.", "Find the img tag.", "Add width=\"320\" and height=\"180\" while keeping the alt text."],
+    steps: ["Upload your student-activity image if it is not already listed and place its displayed path in src.", "Find the img tag.", "Add width=\"320\" and height=\"180\" while keeping the alt text."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/peak-study-card.svg" alt="Peak study practice card">
+          <img src="" alt="Peak study practice card">
           <figcaption>Guided practice workspace</figcaption>
         </figure>`),
-    expected: { requiredTags: ["img"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["width=\"320\"", "height=\"180\""] },
+    expected: { requiredTags: ["img"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak study practice card" }], htmlIncludes: ["width=\"320\"", "height=\"180\""] },
     points: 15
   }),
   moduleCard("text-media", "Text and Images", {
     id: "web-text-media-section",
     title: "Create a media section",
     scenario: "Media should sit inside a clear section with a heading.",
-    supportDocument: ["Upload file if needed: peak-study-card.svg", "Section heading: Visual preview", "Caption: Guided practice workspace"],
+    supportDocument: ["Upload your student-activity image if needed and use its displayed path.", "Section heading: Visual preview", "Caption: Guided practice workspace"],
     goal: "Create a section containing h2, figure, img, and figcaption.",
-    steps: ["Upload the image file if it is not already listed.", "Inside main, add a section with <h2>Visual preview</h2>.", "Move or add the figure inside the section."],
+    steps: ["Upload your student-activity image if it is not already listed and place its displayed path in src.", "Inside main, add a section with <h2>Visual preview</h2>.", "Move or add the figure inside the section."],
     starterHtml: insertIntoSessionsSection(`        <figure>
-          <img src="images/peak-study-card.svg" alt="Peak study practice card">
+          <img src="" alt="Peak study practice card">
           <figcaption>Guided practice workspace</figcaption>
         </figure>`),
-    expected: { requiredTags: ["section", "h2", "figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], htmlIncludes: ["Visual preview", "Guided practice workspace"] },
+    expected: { requiredTags: ["section", "h2", "figure", "img", "figcaption"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak study practice card" }], htmlIncludes: ["Visual preview", "Guided practice workspace"] },
     points: 20
   }),
   mediaPractice("practice-card", "Practical Task 1: Build an image card", "Peak Study Practice Feature", "Peak practice feature card", "Students practise one skill at a time."),
@@ -613,16 +767,16 @@ const linksNavigationCards: WebsiteAuthoringCard[] = [
     id: "web-links-image",
     title: "Use an image as a link",
     scenario: "An img element can sit inside an a element to make the image clickable.",
-    supportDocument: ["Upload file: peak-study-card.svg", "Href: index.html", "Image path: images/peak-study-card.svg", "Alt text: Peak Study home card"],
+    supportDocument: ["Choose an image whose filename begins with student-activity and upload it.", "Use the relative path displayed after upload.", "Href: index.html", "Alt text: Peak Study home card"],
     goal: "Create a linked image that returns to index.html.",
-    steps: ["Upload peak-study-card.svg first.", "Create an a element with href=\"index.html\".", "Place <img src=\"images/peak-study-card.svg\" alt=\"Peak Study home card\"> inside the link."],
+    steps: ["Upload your student-activity image first.", "Create an a element with href=\"index.html\".", "Place an img element inside the link, use the displayed path in src, and add alt=\"Peak Study home card\"."],
     starterHtml: apexPageHtml,
     expected: {
       requiredTags: ["a", "img"],
-      uploadedPaths: ["images/peak-study-card.svg"],
+      uploadedFile: { kind: "image", nameStartsWith: "student-activity" },
       links: [{ href: "index.html" }],
-      images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak Study home card" }],
-      linkedImages: [{ href: "index.html", srcIncludes: "peak-study-card.svg", alt: "Peak Study home card" }]
+      images: [{ srcFromUploadedImage: true, alt: "Peak Study home card" }],
+      linkedImages: [{ href: "index.html", srcFromUploadedImage: true, alt: "Peak Study home card" }]
     },
     points: 20
   }),
@@ -849,8 +1003,8 @@ function examPractice(slug: string, title: string, heading: string): WebsiteAuth
     paragraph: "Practical digital skills for confident learners.",
     extraSupport: [
       "Navigation: Home/index.html, Sessions/#sessions, Register/#register, Contact/contact.html",
-      "Image file to upload: peak-study-card.svg",
-      "Image path after upload: images/peak-study-card.svg",
+      "Choose an image and make its filename begin with student-activity before uploading it.",
+      "Use the relative image path displayed after upload.",
       `Image alt text: ${heading} practice image`,
       "Table caption: Peak session timetable",
       "Table headings: Activity, Room, Time",
@@ -860,10 +1014,11 @@ function examPractice(slug: string, title: string, heading: string): WebsiteAuth
     tags: ["html", "head", "meta", "title", "body", "header", "nav", "a", "main", "section", "h1", "h2", "p", "figure", "img", "figcaption", "table", "caption", "tr", "th", "td", "footer"],
     expected: {
       links: [{ text: "Home", href: "index.html" }, { text: "Sessions", href: "#sessions" }, { text: "Register", href: "#register" }, { text: "Contact", href: "contact.html" }],
-      uploadedPaths: ["images/peak-study-card.svg"],
-      images: [{ srcIncludes: "peak-study-card.svg", alt: `${heading} practice image` }],
+      uploadedFile: { kind: "image", nameStartsWith: "student-activity" },
+      images: [{ srcFromUploadedImage: true, alt: `${heading} practice image` }],
       tableHeaders: ["Activity", "Room", "Time"],
-      htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\"", "Peak session timetable", "Spreadsheet", "Documents", "Websites"],
+      metadata: [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }],
+      htmlIncludes: ["Peak session timetable", "Spreadsheet", "Documents", "Websites"],
       cssIncludes: ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "img", "max-width", "table", "border"]
     },
     points: 90
@@ -885,12 +1040,12 @@ const examBuildCards: WebsiteAuthoringCard[] = [
   moduleCard("exam-build", "Exam Website Build", {
     id: "web-exam-metadata",
     title: "Prepare the document metadata",
-    scenario: "The final build starts with reliable document setup before visible content.",
-    supportDocument: ["Use charset UTF-8, viewport, and title: Peak Study Hub Open Day"],
-    goal: "Set up head with charset, viewport, and title.",
-    steps: ["Find the head element.", "Add charset and viewport meta tags.", "Set the title to Peak Study Hub Open Day."],
+    scenario: "Apply the metadata skills practised in HTML Foundations to prepare the Open Day page before adding visible content.",
+    supportDocument: ["All three elements belong inside head.", "UTF-8 tells the browser how to read characters.", "The viewport must match device width and start at normal scale.", "Browser-tab title: Peak Study Hub Open Day"],
+    goal: "Consolidate the known charset, viewport, and title settings inside head.",
+    steps: ["Inside head, add UTF-8 character-set metadata.", "Below it, add viewport metadata with width=device-width and initial-scale=1.0.", "Set the title element to Peak Study Hub Open Day."],
     starterHtml: htmlShell,
-    expected: { requiredTags: ["meta", "title"], htmlIncludes: ["charset=\"UTF-8\"", "name=\"viewport\""], title: "Peak Study Hub Open Day" },
+    expected: { requiredTags: ["meta", "title"], metadata: [{ charset: "UTF-8" }, { name: "viewport", content: "width=device-width, initial-scale=1.0" }], title: "Peak Study Hub Open Day" },
     points: 20
   }),
   moduleCard("exam-build", "Exam Website Build", {
@@ -919,11 +1074,11 @@ const examBuildCards: WebsiteAuthoringCard[] = [
     id: "web-exam-media",
     title: "Add accessible media",
     scenario: "Images need upload, src, alt text, and caption so they work online and remain accessible.",
-    supportDocument: ["Upload file: peak-study-card.svg", "Image path after upload: images/peak-study-card.svg", "Alt text: Peak Study open day practice image", "Caption: Students practise before the final check."],
+    supportDocument: ["Choose an image whose filename begins with student-activity and upload it.", "Use the relative path displayed after upload.", "Alt text: Peak Study open day practice image", "Caption: Students practise before the final check."],
     goal: "Add a figure with image and caption.",
     steps: ["Upload the image.", "Add figure, img, and figcaption inside main.", "Use the uploaded path and exact alt text."],
     starterHtml: apexPageHtml,
-    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedPaths: ["images/peak-study-card.svg"], images: [{ srcIncludes: "peak-study-card.svg", alt: "Peak Study open day practice image" }], htmlIncludes: ["Students practise before the final check."] },
+    expected: { requiredTags: ["figure", "img", "figcaption"], uploadedFile: { kind: "image", nameStartsWith: "student-activity" }, images: [{ srcFromUploadedImage: true, alt: "Peak Study open day practice image" }], htmlIncludes: ["Students practise before the final check."] },
     points: 30
   }),
   moduleCard("exam-build", "Exam Website Build", {
