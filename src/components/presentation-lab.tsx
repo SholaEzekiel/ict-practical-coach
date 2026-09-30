@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlignCenter,
@@ -46,6 +46,15 @@ type MasterDesign = {
   logoText: string;
   background: string;
   fontFamily: string;
+};
+
+type PresentationDraft = {
+  slides: PresentationSlide[];
+  activeSlide: number;
+  theme: "clean" | "ocean" | "leaf" | "contrast";
+  slideNumbers: boolean;
+  masterMode: boolean;
+  master: MasterDesign;
 };
 
 const emptySlide: PresentationSlide = { title: "", body: "", bullets: [], layout: "title-content", objects: [] };
@@ -253,6 +262,7 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   const [propertiesOpen, setPropertiesOpen] = useState(true);
   const dragRef = useRef<{ id: string; mode: "move" | "resize"; startX: number; startY: number; item: PresentationObject; rect: DOMRect } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const draftsRef = useRef(new Map<string, PresentationDraft>());
 
   const card = cards[activeIndex];
   const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
@@ -262,17 +272,6 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
   const selected = slides[activeSlide] || slides[0] || normaliseSlide(emptySlide);
   const selectedObject = selected.objects?.find((item) => item.id === selectedObjectId) || null;
   const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
-
-  useEffect(() => {
-    if (!card) return;
-    setSlides(card.starterDeck?.map(normaliseSlide) || [normaliseSlide(emptySlide)]);
-    setActiveSlide(0);
-    setSelectedObjectId(null);
-    setTheme("clean");
-    setSlideNumbers(false);
-    setMasterMode(false);
-    setFeedback(null);
-  }, [card]);
 
   function updateSlide(patch: Partial<PresentationSlide>) {
     setSlides((items) => items.map((slide, index) => index === activeSlide ? syncLegacyFields({ ...slide, ...patch }) : slide));
@@ -333,13 +332,37 @@ export function PresentationLab({ moduleId }: { moduleId?: string }) {
     if (result.ok) setCompleted((items) => items.includes(card.id) ? items : [...items, card.id]);
   }
 
+  function loadCard(index: number) {
+    const next = cards[index];
+    if (!next) return;
+    draftsRef.current.set(card.id, {
+      slides: slides.map(normaliseSlide),
+      activeSlide,
+      theme,
+      slideNumbers,
+      masterMode,
+      master: { ...master }
+    });
+    const draft = draftsRef.current.get(next.id);
+    setActiveIndex(index);
+    setSlides(draft?.slides.map(normaliseSlide) || next.starterDeck?.map(normaliseSlide) || [normaliseSlide(emptySlide)]);
+    setActiveSlide(draft?.activeSlide ?? 0);
+    setSelectedObjectId(null);
+    setTheme(draft?.theme ?? "clean");
+    setSlideNumbers(draft?.slideNumbers ?? false);
+    setMasterMode(draft?.masterMode ?? false);
+    setMaster(draft ? { ...draft.master } : defaultMaster);
+    setFeedback(null);
+  }
+
   function nextCard() {
     if (!currentComplete || activeIndex === cards.length - 1) return;
-    setActiveIndex((index) => index + 1);
+    loadCard(activeIndex + 1);
   }
 
   function previousCard() {
-    setActiveIndex((index) => Math.max(0, index - 1));
+    if (activeIndex === 0) return;
+    loadCard(Math.max(0, activeIndex - 1));
   }
 
   function startDrag(event: React.PointerEvent, item: PresentationObject, mode: "move" | "resize") {

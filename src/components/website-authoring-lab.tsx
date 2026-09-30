@@ -29,6 +29,12 @@ type ActivityFile = {
   virtualPath: string;
 };
 
+type WebsiteAuthoringDraft = {
+  html: string;
+  css: string;
+  mode: "html" | "css";
+};
+
 function normalise(value: string) {
   return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
@@ -55,6 +61,10 @@ function sourceHasBodyTag(html: string, tag: string) {
 function getBodyInnerHtml(html: string) {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   return match?.[1]?.trim() || "";
+}
+
+function replaceBodyInnerHtml(source: string, bodyHtml: string) {
+  return source.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1\n${bodyHtml}\n$2`);
 }
 
 function hasPreviewableDocument(html: string) {
@@ -100,6 +110,13 @@ function resolveActivityFilePaths(source: string, files: ActivityFile[]) {
       .replace(new RegExp(`(["'])(images|media)/${escapedName}\\1`, "gi"), `$1${file.url}$1`)
       .replace(new RegExp(`url\\((["']?)${escapedPath}\\1\\)`, "gi"), `url($1${file.url}$1)`);
   }, source);
+}
+
+function restoreActivityFilePaths(source: string, files: ActivityFile[]) {
+  return files.reduce(
+    (current, file) => current.replace(new RegExp(escapeRegExp(file.url), "g"), file.virtualPath),
+    source
+  );
 }
 
 function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, activityFiles: ActivityFile[]): Feedback {
@@ -316,6 +333,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const editorPasteCleanupRef = useRef<(() => void) | null>(null);
   const syncingFromCodeRef = useRef(false);
   const activityFilesRef = useRef<ActivityFile[]>([]);
+  const draftsRef = useRef(new Map<string, WebsiteAuthoringDraft>());
   const previewReady = hasPreviewableDocument(html);
   const resolvedHtml = useMemo(() => resolveActivityFilePaths(html, activityFiles), [activityFiles, html]);
   const resolvedCss = useMemo(() => resolveActivityFilePaths(css, activityFiles), [activityFiles, css]);
@@ -351,6 +369,13 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     });
 
     visualEditorRef.current = editor;
+    editor.on("update", () => {
+      if (syncingFromCodeRef.current) return;
+      const bodyHtml = restoreActivityFilePaths(editor.getHtml(), activityFilesRef.current);
+      const nextCss = restoreActivityFilePaths(editor.getCss() || "", activityFilesRef.current);
+      setHtml((current) => hasPreviewableDocument(current) ? replaceBodyInnerHtml(current, bodyHtml) : current);
+      setCss(nextCss);
+    });
 
     return () => {
       editor.destroy();
@@ -387,15 +412,19 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   function loadCard(index: number) {
     const next = cards[index];
     if (!next) return;
+    draftsRef.current.set(card.id, { html, css, mode });
+    const draft = draftsRef.current.get(next.id);
+    const nextHtml = draft?.html ?? next.starterHtml;
+    const nextCss = draft?.css ?? next.starterCss;
     setActiveIndex(index);
-    setHtml(next.starterHtml);
-    setCss(next.starterCss);
-    setMode("html");
+    setHtml(nextHtml);
+    setCss(nextCss);
+    setMode(draft?.mode ?? "html");
     setFeedback(null);
     if (visualEditorRef.current) {
       syncingFromCodeRef.current = true;
-      visualEditorRef.current.setComponents(hasPreviewableDocument(next.starterHtml) ? getBodyInnerHtml(resolveActivityFilePaths(next.starterHtml, activityFilesRef.current)) : "");
-      visualEditorRef.current.setStyle(next.starterCss);
+      visualEditorRef.current.setComponents(hasPreviewableDocument(nextHtml) ? getBodyInnerHtml(resolveActivityFilePaths(nextHtml, activityFilesRef.current)) : "");
+      visualEditorRef.current.setStyle(resolveActivityFilePaths(nextCss, activityFilesRef.current));
       queueMicrotask(() => {
         syncingFromCodeRef.current = false;
       });

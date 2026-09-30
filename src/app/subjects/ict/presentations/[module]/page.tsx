@@ -22,7 +22,7 @@ export default function PresentationModulePage({ params }: PresentationModulePag
 
   return (
     <main className="bg-mist px-4 py-4 sm:px-6 lg:px-8">
-      <PresentationLab moduleId={params.module} />
+      <PresentationLab key={params.module} moduleId={params.module} />
     </main>
   );
 }

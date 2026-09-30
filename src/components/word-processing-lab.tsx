@@ -44,6 +44,11 @@ type WordProcessingLabProps = {
   moduleId?: string;
 };
 
+type WordProcessingDraft = {
+  content: string;
+  documentClasses: string;
+};
+
 function normalise(value: string) {
   return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
@@ -259,6 +264,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const [wordCount, setWordCount] = useState(0);
   const [content, setContent] = useState(cards[0]?.starterHtml || "");
   const [documentClasses, setDocumentClasses] = useState("");
+  const draftsRef = useRef(new Map<string, WordProcessingDraft>());
 
   const card = cards[activeIndex];
   const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
@@ -266,14 +272,6 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const progress = cards.length ? (completed.length / cards.length) * 100 : 0;
   const earnedPoints = cards.filter((item) => completed.includes(item.id)).reduce((total, item) => total + item.points, 0);
   const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
-
-  useEffect(() => {
-    if (!card) return;
-    setContent(card.starterHtml);
-    setDocumentClasses("");
-    setFeedback(null);
-    refreshWordCount(card.starterHtml);
-  }, [card]);
 
   useEffect(() => {
     const body = editorRef.current?.getBody();
@@ -338,10 +336,23 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     preview.document.close();
   }
 
+  function loadCard(index: number) {
+    const next = cards[index];
+    if (!next) return;
+    draftsRef.current.set(card.id, { content, documentClasses });
+    const draft = draftsRef.current.get(next.id);
+    const nextContent = draft?.content ?? next.starterHtml;
+    setActiveIndex(index);
+    setContent(nextContent);
+    setDocumentClasses(draft?.documentClasses ?? "");
+    setFeedback(null);
+    editorRef.current?.setContent(nextContent);
+    refreshWordCount(nextContent);
+  }
+
   function nextCard() {
     if (!currentComplete || activeIndex === cards.length - 1) return;
-    setFeedback(null);
-    setActiveIndex((index) => Math.min(index + 1, cards.length - 1));
+    loadCard(Math.min(activeIndex + 1, cards.length - 1));
   }
 
   function toolbarButton(label: string, Icon: typeof Bold, onClick: () => void) {
@@ -380,8 +391,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
 
   function previousCard() {
     if (activeIndex === 0) return;
-    setFeedback(null);
-    setActiveIndex((index) => Math.max(index - 1, 0));
+    loadCard(Math.max(activeIndex - 1, 0));
   }
 
   function insertContent(html: string) {

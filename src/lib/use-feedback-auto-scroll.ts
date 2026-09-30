@@ -8,7 +8,7 @@ export function useFeedbackAutoScroll<T extends HTMLElement>(feedback: unknown, 
   useEffect(() => {
     if (!feedback || !shouldScroll) return;
     const frame = window.requestAnimationFrame(() => {
-      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [feedback, shouldScroll]);

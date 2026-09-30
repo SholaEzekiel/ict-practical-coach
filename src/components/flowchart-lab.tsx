@@ -52,39 +52,89 @@ function normalise(value: string) {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+function comparableNodeLabel(type: FlowNodeType, value: string) {
+  const typePrefix = new RegExp(`^${nodeLabels[type]}\\s*`, "i");
+  return value
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(typePrefix, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+
+function labelsMatch(type: FlowNodeType, actual: string, expected: string) {
+  return comparableNodeLabel(type, actual) === comparableNodeLabel(type, expected);
+}
+
+type FlowFeedbackItem = {
+  message: string;
+  ok: boolean;
+};
+
 function validateFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[], solutionNodes: FlowNodeSeed[], solutionEdges: FlowEdgeSeed[]) {
-  const feedback: string[] = [];
+  const errors: FlowFeedbackItem[] = [];
+  const confirmations: FlowFeedbackItem[] = [];
   const typeCounts = new Map<FlowNodeType, number>();
   nodes.forEach((node) => typeCounts.set(node.type, (typeCounts.get(node.type) || 0) + 1));
+  const matchedNodeIds = new Map<string, string>();
+  const unusedNodeIds = new Set(nodes.map((node) => node.id));
+  const correctNodeLabels: string[] = [];
 
+  // Match equivalent labels first so repeated block types cannot be paired with the wrong model block.
   for (const solutionNode of solutionNodes) {
-    const match = nodes.find((node) => node.type === solutionNode.type && normalise(node.label) === normalise(solutionNode.label));
-    if (!match) feedback.push(`Missing ${nodeLabels[solutionNode.type]} block: ${solutionNode.label}`);
+    const match = nodes.find((node) => unusedNodeIds.has(node.id) && node.type === solutionNode.type && labelsMatch(node.type, node.label, solutionNode.label));
+    if (!match) continue;
+    matchedNodeIds.set(solutionNode.id, match.id);
+    unusedNodeIds.delete(match.id);
+    correctNodeLabels.push(solutionNode.label);
+  }
+
+  // Pair any remaining block by type so a label correction does not create false connector errors.
+  for (const solutionNode of solutionNodes) {
+    if (matchedNodeIds.has(solutionNode.id)) continue;
+    const match = nodes.find((node) => unusedNodeIds.has(node.id) && node.type === solutionNode.type);
+    if (!match) {
+      errors.push({ message: `Add the missing ${nodeLabels[solutionNode.type]} block: ${solutionNode.label}.`, ok: false });
+      continue;
+    }
+    matchedNodeIds.set(solutionNode.id, match.id);
+    unusedNodeIds.delete(match.id);
+    errors.push({ message: `Change the ${nodeLabels[solutionNode.type]} block label from "${match.label}" to "${solutionNode.label}".`, ok: false });
   }
 
   const startCount = typeCounts.get("start") || 0;
   const stopCount = typeCounts.get("stop") || 0;
-  if (startCount !== 1) feedback.push("Use exactly one START block.");
-  if (stopCount !== 1) feedback.push("Use exactly one STOP block.");
+  if (startCount !== 1) errors.push({ message: "Use exactly one START block.", ok: false });
+  if (stopCount !== 1) errors.push({ message: "Use exactly one STOP block.", ok: false });
 
-  const labelToId = new Map(nodes.map((node) => [normalise(node.label), node.id]));
+  let correctConnectorCount = 0;
   for (const solutionEdge of solutionEdges) {
     const fromLabel = solutionNodes.find((node) => node.id === solutionEdge.from)?.label;
     const toLabel = solutionNodes.find((node) => node.id === solutionEdge.to)?.label;
     if (!fromLabel || !toLabel) continue;
 
-    const fromId = labelToId.get(normalise(fromLabel));
-    const toId = labelToId.get(normalise(toLabel));
+    const fromId = matchedNodeIds.get(solutionEdge.from);
+    const toId = matchedNodeIds.get(solutionEdge.to);
+    if (!fromId || !toId) continue;
     const edgeMatch = edges.find((edge) => {
       const labelOk = solutionEdge.label ? normalise(edge.label || "") === normalise(solutionEdge.label) : true;
       return edge.from === fromId && edge.to === toId && labelOk;
     });
     if (!edgeMatch) {
-      feedback.push(`Missing connector: ${fromLabel} → ${toLabel}${solutionEdge.label ? ` (${solutionEdge.label})` : ""}`);
+      errors.push({ message: `Connect ${fromLabel} to ${toLabel}${solutionEdge.label ? ` with the label ${solutionEdge.label}` : ""}.`, ok: false });
+    } else {
+      correctConnectorCount += 1;
     }
   }
 
-  return feedback;
+  if (correctNodeLabels.length) {
+    confirmations.push({ message: `Already correct blocks: ${correctNodeLabels.join("; ")}.`, ok: true });
+  }
+  if (correctConnectorCount) {
+    confirmations.push({ message: `Already correct connectors: ${correctConnectorCount} of ${solutionEdges.length}.`, ok: true });
+  }
+
+  return { ok: errors.length === 0, items: [...confirmations, ...errors] };
 }
 
 function validateFreePracticeFlow(nodes: FlowNodeSeed[], edges: FlowEdgeSeed[]) {
@@ -108,6 +158,19 @@ type FlowSnapshot = {
   nodes: FlowNodeSeed[];
   edges: FlowEdgeSeed[];
 };
+
+type FlowchartDraft = FlowSnapshot & {
+  feedback: FlowFeedbackItem[];
+  complete: boolean;
+  testInput: string;
+  testOutput: string;
+  testRuns: string[];
+  studentName: string;
+  flowDescription: string;
+};
+
+// Intentionally memory-only: route navigation keeps work, while a refresh starts clean.
+const flowchartDrafts = new Map<string, FlowchartDraft>();
 
 function nodeSize(node: FlowNodeSeed) {
   return node.type === "decision" ? { width: 92, height: 92 } : { width: 160, height: 68 };
@@ -179,26 +242,27 @@ function escapeHtml(value = "") {
 
 export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const module = getFlowchartModule(moduleId) || flowchartModules[0];
+  const initialDraft = useRef(flowchartDrafts.get(module.id)).current;
   const moduleIndex = flowchartModules.findIndex((item) => item.id === module.id);
   const previousModule = flowchartModules[moduleIndex - 1];
   const nextModule = flowchartModules[moduleIndex + 1];
   const isFreePractice = module.id === "free-practice";
-  const [nodes, setNodes] = useState(() => cloneNodes(module.starterNodes));
-  const [edges, setEdges] = useState(() => cloneEdges(module.starterEdges));
+  const [nodes, setNodes] = useState(() => cloneNodes(initialDraft?.nodes || module.starterNodes));
+  const [edges, setEdges] = useState(() => cloneEdges(initialDraft?.edges || module.starterEdges));
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(nodes[0]?.id || null);
   const [connectFromId, setConnectFromId] = useState<string | null>(null);
   const [edgeLabel, setEdgeLabel] = useState("");
-  const [feedback, setFeedback] = useState<string[]>([]);
-  const [complete, setComplete] = useState(false);
+  const [feedback, setFeedback] = useState<FlowFeedbackItem[]>(initialDraft?.feedback || []);
+  const [complete, setComplete] = useState(initialDraft?.complete || false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [historyPast, setHistoryPast] = useState<FlowSnapshot[]>([]);
   const [historyFuture, setHistoryFuture] = useState<FlowSnapshot[]>([]);
   const [showModelChecklist, setShowModelChecklist] = useState(false);
-  const [testRuns, setTestRuns] = useState<string[]>([]);
-  const [testInput, setTestInput] = useState(() => initialTestInput(module));
-  const [testOutput, setTestOutput] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [flowDescription, setFlowDescription] = useState("");
+  const [testRuns, setTestRuns] = useState<string[]>(initialDraft?.testRuns || []);
+  const [testInput, setTestInput] = useState(() => initialDraft?.testInput ?? initialTestInput(module));
+  const [testOutput, setTestOutput] = useState(initialDraft?.testOutput || "");
+  const [studentName, setStudentName] = useState(initialDraft?.studentName || "");
+  const [flowDescription, setFlowDescription] = useState(initialDraft?.flowDescription || "");
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const dragSnapshotRef = useRef<FlowSnapshot | null>(null);
   const labelSnapshotRef = useRef<FlowSnapshot | null>(null);
@@ -208,24 +272,18 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, feedback.length > 0 && !complete);
 
   useEffect(() => {
-    setNodes(cloneNodes(module.starterNodes));
-    setEdges(cloneEdges(module.starterEdges));
-    setSelectedNodeId(module.starterNodes[0]?.id || null);
-    setConnectFromId(null);
-    setEdgeLabel("");
-    setFeedback([]);
-    setComplete(false);
-    setDraggingId(null);
-    setHistoryPast([]);
-    setHistoryFuture([]);
-    setShowModelChecklist(false);
-    setTestRuns([]);
-    setTestInput(initialTestInput(module));
-    setTestOutput("");
-    setStudentName("");
-    setFlowDescription("");
-    setEditingNodeId(null);
-  }, [module.id, module.starterEdges, module.starterNodes]);
+    flowchartDrafts.set(module.id, {
+      nodes: cloneNodes(nodes),
+      edges: cloneEdges(edges),
+      feedback,
+      complete,
+      testInput,
+      testOutput,
+      testRuns,
+      studentName,
+      flowDescription
+    });
+  }, [complete, edges, feedback, flowDescription, module.id, nodes, studentName, testInput, testOutput, testRuns]);
 
   function rememberChange() {
     setHistoryPast((current) => [...current, snapshotOf(nodes, edges)].slice(-30));
@@ -341,14 +399,16 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
   function runValidation() {
     if (isFreePractice) {
       const result = validateFreePracticeFlow(nodes, edges);
-      setFeedback(result.length ? result : ["Free practice structure is complete. Run test data separately to review its behaviour."]);
+      setFeedback(result.length
+        ? result.map((message) => ({ message, ok: false }))
+        : [{ message: "Free practice structure is complete. Run test data separately to review its behaviour.", ok: true }]);
       setComplete(result.length === 0);
       return;
     }
 
     const result = validateFlow(nodes, edges, module.solutionNodes, module.solutionEdges);
-    setFeedback(result.length ? result : ["Flowchart structure matches the required algorithm. Use Run test data separately to review its behaviour."]);
-    setComplete(result.length === 0);
+    setFeedback(result.items);
+    setComplete(result.ok);
   }
 
   function runTestData() {
@@ -372,7 +432,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setNodes(cloneNodes(previous.nodes));
     setEdges(cloneEdges(previous.edges));
     setComplete(false);
-    setFeedback(["Undid the last edit."]);
+    setFeedback([{ message: "Undid the last edit.", ok: true }]);
     setTestRuns([]);
   }
 
@@ -384,7 +444,7 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
     setNodes(cloneNodes(next.nodes));
     setEdges(cloneEdges(next.edges));
     setComplete(false);
-    setFeedback(["Redid the last edit."]);
+    setFeedback([{ message: "Redid the last edit.", ok: true }]);
     setTestRuns([]);
   }
 
@@ -729,9 +789,9 @@ export function FlowchartLab({ moduleId }: { moduleId: string }) {
                 {feedback.length === 0 ? (
                   <p className="text-sm leading-6 text-slate-600">Run validation when your blocks and connectors are ready.</p>
                 ) : feedback.map((item) => (
-                  <p key={item} className={clsx("flex gap-2 text-sm leading-6", complete ? "text-leaf" : "text-red-700")}>
-                    {complete ? <CheckCircle2 size={17} className="mt-1 flex-none" /> : <XCircle size={17} className="mt-1 flex-none" />}
-                    <span>{item}</span>
+                  <p key={item.message} className={clsx("flex gap-2 text-sm leading-6", item.ok ? "text-leaf" : "text-red-700")}>
+                    {item.ok ? <CheckCircle2 size={17} className="mt-1 flex-none" /> : <XCircle size={17} className="mt-1 flex-none" />}
+                    <span>{item.message}</span>
                   </p>
                 ))}
               </div>

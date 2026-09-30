@@ -22,7 +22,7 @@ export default function WordProcessingModulePage({ params }: WordProcessingModul
 
   return (
     <main className="bg-mist px-4 py-4 sm:px-6 lg:px-8">
-      <WordProcessingLab moduleId={params.module} />
+      <WordProcessingLab key={params.module} moduleId={params.module} />
     </main>
   );
 }

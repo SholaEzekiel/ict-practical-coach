@@ -22,7 +22,7 @@ export default function WebsiteAuthoringModulePage({ params }: WebsiteAuthoringM
 
   return (
     <main className="bg-mist px-4 py-4 sm:px-6 lg:px-8">
-      <WebsiteAuthoringLab moduleId={params.module} />
+      <WebsiteAuthoringLab key={params.module} moduleId={params.module} />
     </main>
   );
 }
