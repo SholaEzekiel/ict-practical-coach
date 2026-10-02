@@ -880,6 +880,28 @@ const tableCards: WebsiteAuthoringCard[] = [
     expected: { requiredTags: ["table", "tr", "th"], htmlIncludes: ["colspan=\"3\"", "Peak Weekly Scores"] },
     points: 20
   }),
+  moduleCard("tables", "HTML Tables", {
+    id: "web-tables-rowspan",
+    title: "Use rowspan",
+    scenario: "The rowspan attribute lets one cell extend vertically through more than one row.",
+    supportDocument: ["Activity cell text: Spreadsheet Sprint", "Attribute: rowspan=\"2\""],
+    goal: "Make one activity cell span two timetable rows.",
+    steps: ["Find the first Spreadsheet Sprint td opening tag.", "Add rowspan=\"2\" inside that opening td tag.", "Add a second data row for another room and time, without repeating the activity cell."],
+    starterHtml: tableStarterHtml,
+    expected: { requiredTags: ["table", "tr", "td"], htmlIncludes: ["rowspan=\"2\"", "Spreadsheet Sprint"] },
+    points: 20
+  }),
+  moduleCard("tables", "HTML Tables", {
+    id: "web-tables-spans-review",
+    title: "Practise row and column spans together",
+    scenario: "A clear timetable can use colspan for a title row and rowspan for a repeated activity.",
+    supportDocument: ["Title: Peak Workshop Programme", "Use colspan=\"3\" on the title heading", "Use rowspan=\"2\" on the Spreadsheet Sprint activity cell"],
+    goal: "Use colspan and rowspan correctly in one table.",
+    steps: ["Add a title row containing one th with colspan=\"3\".", "Type Peak Workshop Programme in that heading.", "Add rowspan=\"2\" to the Spreadsheet Sprint td cell.", "Add the second room-and-time row without duplicating Spreadsheet Sprint."],
+    starterHtml: tableStarterHtml,
+    expected: { requiredTags: ["table", "tr", "th", "td"], htmlIncludes: ["colspan=\"3\"", "rowspan=\"2\"", "Peak Workshop Programme", "Spreadsheet Sprint"] },
+    points: 25
+  }),
   tablePractice("practice-basic", "Practical Task 1: Build a timetable", "Peak Workshop Timetable", ["Session", "Room", "Time"]),
   tablePractice("practice-scores", "Practical Task 2: Build a scores table", "Peak Weekly Scores", ["Rank", "Learner", "Score"]),
   tablePractice("practice-comparison", "Practical Task 3: Build a comparison table", "Peak Option Comparison", ["Feature", "Basic", "Premium"]),

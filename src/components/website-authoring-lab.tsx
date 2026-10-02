@@ -332,6 +332,9 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const visualContainerRef = useRef<HTMLDivElement>(null);
   const editorPasteCleanupRef = useRef<(() => void) | null>(null);
   const syncingFromCodeRef = useRef(false);
+  const visualInteractionRef = useRef(false);
+  const lastCodeSyncAtRef = useRef(0);
+  const visualUpdateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activityFilesRef = useRef<ActivityFile[]>([]);
   const draftsRef = useRef(new Map<string, WebsiteAuthoringDraft>());
   const previewReady = hasPreviewableDocument(html);
@@ -369,15 +372,23 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     });
 
     visualEditorRef.current = editor;
+    editor.on("component:selected", () => {
+      visualInteractionRef.current = true;
+    });
     editor.on("update", () => {
-      if (syncingFromCodeRef.current) return;
-      const bodyHtml = restoreActivityFilePaths(editor.getHtml(), activityFilesRef.current);
-      const nextCss = restoreActivityFilePaths(editor.getCss() || "", activityFilesRef.current);
-      setHtml((current) => hasPreviewableDocument(current) ? replaceBodyInnerHtml(current, bodyHtml) : current);
-      setCss(nextCss);
+      if (!visualInteractionRef.current || syncingFromCodeRef.current || Date.now() - lastCodeSyncAtRef.current < 500) return;
+      if (visualUpdateTimerRef.current) clearTimeout(visualUpdateTimerRef.current);
+      visualUpdateTimerRef.current = setTimeout(() => {
+        if (!visualInteractionRef.current || syncingFromCodeRef.current || Date.now() - lastCodeSyncAtRef.current < 500) return;
+        const bodyHtml = restoreActivityFilePaths(editor.getHtml(), activityFilesRef.current);
+        const nextCss = restoreActivityFilePaths(editor.getCss() || "", activityFilesRef.current);
+        setHtml((current) => hasPreviewableDocument(current) ? replaceBodyInnerHtml(current, bodyHtml) : current);
+        setCss(nextCss);
+      }, 150);
     });
 
     return () => {
+      if (visualUpdateTimerRef.current) clearTimeout(visualUpdateTimerRef.current);
       editor.destroy();
       visualEditorRef.current = null;
     };
@@ -401,12 +412,16 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
 
   useEffect(() => {
     if (!visualEditorRef.current) return;
+    lastCodeSyncAtRef.current = Date.now();
+    visualInteractionRef.current = false;
     syncingFromCodeRef.current = true;
     visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(resolvedHtml) : "");
     visualEditorRef.current.setStyle(resolvedCss);
-    queueMicrotask(() => {
-      syncingFromCodeRef.current = false;
-    });
+    window.setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        syncingFromCodeRef.current = false;
+      });
+    }, 0);
   }, [css, html, resolvedCss, resolvedHtml]);
 
   function loadCard(index: number) {
@@ -422,12 +437,16 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     setMode(draft?.mode ?? "html");
     setFeedback(null);
     if (visualEditorRef.current) {
+      lastCodeSyncAtRef.current = Date.now();
+      visualInteractionRef.current = false;
       syncingFromCodeRef.current = true;
       visualEditorRef.current.setComponents(hasPreviewableDocument(nextHtml) ? getBodyInnerHtml(resolveActivityFilePaths(nextHtml, activityFilesRef.current)) : "");
       visualEditorRef.current.setStyle(resolveActivityFilePaths(nextCss, activityFilesRef.current));
-      queueMicrotask(() => {
-        syncingFromCodeRef.current = false;
-      });
+      window.setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          syncingFromCodeRef.current = false;
+        });
+      }, 0);
     }
   }
 

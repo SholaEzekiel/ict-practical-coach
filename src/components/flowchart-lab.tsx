@@ -55,9 +55,12 @@ function normalise(value: string) {
 function comparableNodeLabel(type: FlowNodeType, value: string) {
   const typePrefix = new RegExp(`^${nodeLabels[type]}\\s*`, "i");
   return value
+    .normalize("NFKC")
     .replace(/[\u201c\u201d]/g, '"')
     .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
     .replace(typePrefix, "")
+    .replace(/[.;:]+$/g, "")
     .replace(/\s+/g, "")
     .toLowerCase();
 }

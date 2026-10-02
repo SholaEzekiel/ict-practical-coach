@@ -16,11 +16,14 @@ import {
   FileText,
   Hash,
   Image as ImageIcon,
+  ImagePlus,
   Italic,
+  Languages,
   List,
   ListOrdered,
   Merge,
   MonitorPlay,
+  PaintBucket,
   Pilcrow,
   Ruler,
   Sparkles,
@@ -48,6 +51,13 @@ type WordProcessingDraft = {
   content: string;
   documentClasses: string;
 };
+
+const SPELLCHECK_LANGUAGES = [
+  { value: "en-GB", label: "English (UK)" },
+  { value: "en-US", label: "English (US)" },
+  { value: "fr-FR", label: "French" },
+  { value: "es-ES", label: "Spanish" }
+];
 
 function normalise(value: string) {
   return value.replace(/\s+/g, " ").trim().toLowerCase();
@@ -258,12 +268,15 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
   const editorRef = useRef<TinyMCEEditor | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [completed, setCompleted] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [content, setContent] = useState(cards[0]?.starterHtml || "");
   const [documentClasses, setDocumentClasses] = useState("");
+  const [spellcheckLanguage, setSpellcheckLanguage] = useState("en-GB");
+  const [cellFillColor, setCellFillColor] = useState("#dbeafe");
   const draftsRef = useRef(new Map<string, WordProcessingDraft>());
 
   const card = cards[activeIndex];
@@ -277,6 +290,14 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     const body = editorRef.current?.getBody();
     if (body) body.className = `word-document ${documentClasses}`;
   }, [documentClasses]);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !isFreePractice) return;
+    editor.getBody().lang = spellcheckLanguage;
+    editor.getBody().spellcheck = true;
+    editor.getDoc().documentElement.lang = spellcheckLanguage;
+  }, [isFreePractice, spellcheckLanguage]);
 
   function refreshWordCount(html = content) {
     const root = createDocumentRoot(html);
@@ -422,6 +443,48 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
 
   function insertStudyImage() {
     insertContent(`<p style="text-align:center"><img src="/assets/peak-study-card.svg" alt="peak study workspace" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
+  }
+
+  function importLocalImage(file?: File) {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      editor.focus();
+      editor.insertContent(`<img src="${String(reader.result)}" alt="${editor.dom.encode(file.name)}" />`);
+      const nextContent = editor.getContent();
+      setContent(nextContent);
+      refreshWordCount(nextContent);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function ignoreSelectedSpelling() {
+    const editor = editorRef.current;
+    if (!editor || editor.selection.isCollapsed()) return;
+    const selectedHtml = editor.selection.getContent({ format: "html" });
+    if (!selectedHtml) return;
+    editor.selection.setContent(`<span lang="${spellcheckLanguage}" spellcheck="false" data-spellcheck-ignore="true">${selectedHtml}</span>`);
+    editor.nodeChanged();
+    setContent(editor.getContent());
+  }
+
+  function selectedTableCells(editor: TinyMCEEditor) {
+    const selected = editor.dom.select("td[data-mce-selected], th[data-mce-selected]") as HTMLTableCellElement[];
+    if (selected.length) return selected;
+    const current = editor.dom.getParent(editor.selection.getNode(), "td,th") as HTMLTableCellElement | null;
+    return current ? [current] : [];
+  }
+
+  function applyCellFill(color: string) {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const cells = selectedTableCells(editor);
+    cells.forEach((cell) => editor.dom.setStyle(cell, "background-color", color));
+    if (!cells.length) return;
+    editor.nodeChanged();
+    setContent(editor.getContent());
   }
 
   function insertTable() {
@@ -584,6 +647,78 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             {wordCount} words
           </span>
         </div>
+        {isFreePractice && (
+          <div className="flex flex-wrap items-center gap-2 border-b border-line bg-white px-4 py-2">
+            <label className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-2 text-sm font-semibold text-ink" title="Document spell-check language">
+              <Languages size={17} aria-hidden="true" />
+              <span className="sr-only">Spell-check language</span>
+              <select
+                aria-label="Spell-check language"
+                value={spellcheckLanguage}
+                onChange={(event) => setSpellcheckLanguage(event.target.value)}
+                className="bg-transparent text-sm outline-none"
+              >
+                {SPELLCHECK_LANGUAGES.map((language) => <option key={language.value} value={language.value}>{language.label}</option>)}
+              </select>
+            </label>
+            <button
+              type="button"
+              title="Ignore spelling for the selected word"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={ignoreSelectedSpelling}
+              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
+            >
+              Ignore selected word
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                importLocalImage(event.target.files?.[0]);
+                event.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              title="Import an image from this computer"
+              onClick={() => imageInputRef.current?.click()}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-bold text-ocean hover:bg-mist"
+            >
+              <ImagePlus size={17} aria-hidden="true" /> Import image
+            </button>
+            <label className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-2 text-sm font-semibold text-ink" title="Choose table-cell fill colour">
+              <PaintBucket size={17} aria-hidden="true" />
+              <span className="sr-only">Table-cell fill colour</span>
+              <input
+                type="color"
+                aria-label="Table-cell fill colour"
+                value={cellFillColor}
+                onChange={(event) => setCellFillColor(event.target.value)}
+                className="h-6 w-7 cursor-pointer border-0 bg-transparent p-0"
+              />
+            </label>
+            <button
+              type="button"
+              title="Apply the chosen fill to the selected table cell"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => applyCellFill(cellFillColor)}
+              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
+            >
+              Fill cell
+            </button>
+            <button
+              type="button"
+              title="Remove fill from the selected table cell"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => applyCellFill("")}
+              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
+            >
+              Clear fill
+            </button>
+          </div>
+        )}
         <div className="min-h-0 flex-1 overflow-auto bg-slate-100 p-6">
           <Editor
             tinymceScriptSrc="/tinymce/tinymce.min.js"
@@ -592,6 +727,11 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             onInit={(_, editor) => {
               editorRef.current = editor;
               editor.getBody().className = `word-document ${documentClasses}`;
+              if (isFreePractice) {
+                editor.getBody().lang = spellcheckLanguage;
+                editor.getBody().spellcheck = true;
+                editor.getDoc().documentElement.lang = spellcheckLanguage;
+              }
               refreshWordCount(editor.getContent());
             }}
             onEditorChange={(value) => {
@@ -605,9 +745,11 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               branding: false,
               promotion: false,
               statusbar: isFreePractice,
-              plugins: "lists table link image wordcount code",
+              plugins: isFreePractice
+                ? "advlist autolink charmap fullscreen image link lists nonbreaking pagebreak searchreplace table visualblocks wordcount code"
+                : "lists table link image wordcount code",
               toolbar: isFreePractice
-                ? "undo redo | blocks fontfamily fontsize lineheight | bold italic underline strikethrough | forecolor backcolor removeformat | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table image link | code"
+                ? "undo redo searchreplace | blocks fontfamily fontsize lineheight | bold italic underline strikethrough superscript subscript | forecolor backcolor removeformat | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table image link charmap pagebreak | visualblocks fullscreen code"
                 : "undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | table image link | code",
               font_family_formats: "Arial=arial,helvetica,sans-serif;Calibri=calibri,arial,sans-serif;Times New Roman=times new roman,times,serif",
               fontsize_formats: "10pt 11pt 12pt 14pt 18pt 24pt 36pt",
@@ -636,14 +778,15 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 body.word-document table { margin: 16px 0; ${isFreePractice ? "max-width: 100%;" : "width: 100%;"} border-collapse: collapse; }
                 body.word-document td, body.word-document th { min-width: ${isFreePractice ? "32px" : "120px"}; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
                 body.word-document img { display: inline-block; margin: 12px 0; max-width: 100%; }
+                body.word-document span[data-spellcheck-ignore="true"] { text-decoration: none; }
                 .doc-header, .doc-footer { border-bottom: 1px solid #cbd5e1; color: #475569; font-size: 13px; margin-bottom: 16px; padding-bottom: 6px; text-align: right; }
                 .doc-footer { border-bottom: 0; border-top: 1px solid #cbd5e1; margin-bottom: 0; margin-top: 20px; padding-bottom: 0; padding-top: 6px; }
                 .page-number { border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block; min-width: 24px; padding: 0 4px; text-align: center; }
               `,
               table_default_attributes: { border: "1" },
-              table_default_styles: { borderCollapse: "collapse", width: isFreePractice ? "auto" : "100%" },
+              table_default_styles: { borderCollapse: "collapse", width: "100%" },
               table_sizing_mode: isFreePractice ? "fixed" : "relative",
-              table_column_resizing: isFreePractice ? "resizetable" : "preservetable",
+              table_column_resizing: "preservetable",
               table_resize_bars: true,
               object_resizing: isFreePractice ? "img table" : "img",
               table_toolbar: isFreePractice

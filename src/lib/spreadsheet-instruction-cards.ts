@@ -138,7 +138,7 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
     skill: functionName,
     studentGoal: goal,
     scenario,
-    studentSteps: [`Click ${cell}.`, "Type = to start a formula.", ...extraSteps, "Use the worksheet labels to choose the correct cell references or range.", "Press Enter and check the result."],
+    studentSteps: [`Click ${cell}.`, `Type ${formula} to calculate this result.`, ...extraSteps, "Press Enter and check the result."],
     instruction: goal,
     meaning: "A formula must start with = and use cell references so the result updates if source data changes.",
     clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
@@ -644,15 +644,15 @@ const formattingCards = [
 
 const formulaDataCards = [
   entryCard("formula", "sheet-formula-enter-title", "Create the formula practice title.", "Start a clean formula worksheet by entering the title.", [["A1", "Formula Practice"]]),
-  entryCard("formula", "sheet-formula-enter-headings", "Enter the formula table headings.", "The formula table needs labels before numbers are entered.", [["A3", "Item"], ["B3", "Sold"], ["C3", "Sessions"], ["D3", "Average"], ["E3", "Status"]]),
+  entryCard("formula", "sheet-formula-enter-headings", "Enter the formula table headings.", "The formula table needs labels before numbers are entered.", [["A3", "Item"], ["B3", "Sold"], ["C3", "Sessions"], ["D3", "Sold per session"], ["E3", "Status"]]),
   entryCard("formula", "sheet-formula-enter-items", "Enter the item names.", "Type the source labels for the formula tasks.", [["A4", "Drama"], ["A5", "Robotics"], ["A6", "Coding"], ["A7", "Art"]]),
   entryCard("formula", "sheet-formula-enter-numbers", "Enter the source numbers.", "Type the values that the formulas will use.", [["B4", 18], ["C4", 6], ["B5", 22], ["C5", 6], ["B6", 16], ["C6", 5], ["B7", 20], ["C7", 5]], "developing")
 ];
 
 const formulaCards = [
   ...formulaDataCards,
-  formulaCard("sheet-formula-divide", "Calculate the first average.", "Divide sold values by sessions for Drama.", "D4", "=B4/C4", 3),
-  formulaIncludesCard("sheet-formula-copy-average", "Copy the average formula down.", "Use the fill handle so each row calculates its own average.", "D7", ["B7/C7"], 4, ["Click D4.", "Point at the small fill handle at the bottom-right corner of D4.", "Drag the fill handle down to D7.", "Check that D5:D7 use their own row references."]),
+  formulaCard("sheet-formula-divide", "Calculate sold per session for Drama.", "Divide Drama's Sold value in B4 by its Sessions value in C4.", "D4", "=B4/C4", 3),
+  formulaIncludesCard("sheet-formula-copy-average", "Copy the sold-per-session formula down.", "Use the fill handle so each row divides Sold by Sessions.", "D7", ["B7/C7"], 4, ["Click D4.", "Point at the small fill handle at the bottom-right corner of D4.", "Drag the fill handle down to D7.", "Check that D5:D7 divide the Sold value by Sessions on their own row."]),
   formulaCard("sheet-formula-sum-sold", "Calculate total sold.", "Use SUM to add all sold values.", "B8", "=SUM(B4:B7)", 76),
   formulaCard("sheet-formula-sum-sessions", "Calculate total sessions.", "Use SUM again with a different range.", "C8", "=SUM(C4:C7)", 22),
   formulaCard("sheet-formula-average-sold", "Calculate average sold.", "Use AVERAGE to find the mean sold value.", "B9", "=AVERAGE(B4:B7)", 19),

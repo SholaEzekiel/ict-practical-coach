@@ -43,7 +43,7 @@ function normaliseText(value: unknown) {
 }
 
 function normaliseFormula(value: unknown) {
-  return String(value ?? "").trim().replace(/\s+/g, "").toUpperCase();
+  return String(value ?? "").trim().replace(/^=/, "").replace(/\s+/g, "").toUpperCase();
 }
 
 function nearlyEqual(actual: unknown, expected: number) {
@@ -272,6 +272,7 @@ function checkColumns(snapshot: WorkbookSnapshot, columns: Array<{ column: strin
 
 function cellMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
   const actual = getCell(snapshot, expected.cell);
+  const hasFormulaExpectation = Boolean(expected.formula || expected.formulaIncludes?.length);
 
   if (expected.formula && normaliseFormula(actual?.f) !== normaliseFormula(expected.formula)) {
     return {
@@ -292,14 +293,16 @@ function cellMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
     }
   }
 
-  if (expected.value !== undefined && typeof expected.value === "number" && !nearlyEqual(actual?.v, expected.value)) {
+  // Univer may save the committed formula before its calculated value cache updates.
+  // A matching required formula is authoritative and still prevents typed-value shortcuts.
+  if (!hasFormulaExpectation && expected.value !== undefined && typeof expected.value === "number" && !nearlyEqual(actual?.v, expected.value)) {
     return {
       ok: false,
       message: `${expected.cell} should show ${expected.value}.`
     };
   }
 
-  if (expected.value !== undefined && typeof expected.value !== "number" && normaliseText(actual?.v) !== normaliseText(expected.value)) {
+  if (!hasFormulaExpectation && expected.value !== undefined && typeof expected.value !== "number" && normaliseText(actual?.v) !== normaliseText(expected.value)) {
     return {
       ok: false,
       message: `${expected.cell} should show ${expected.value}.`
