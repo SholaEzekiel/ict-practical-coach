@@ -41,12 +41,12 @@ type QuestionDraft = {
 };
 
 const caseSkillProgression: BusinessAssessmentSkill[][] = [
-  ["K", "K", "K", "APP", "APP"],
-  ["K", "K", "APP", "APP", "AN"],
-  ["K", "APP", "APP", "AN", "EVAL"],
-  ["K", "APP", "AN", "AN", "EVAL"],
-  ["K", "APP", "AN", "EVAL", "EVAL"],
-  ["K", "APP", "AN", "EVAL", "EVAL"]
+  ["K", "K", "APP", "AN", "EVAL"],
+  ["K", "K", "APP", "AN", "EVAL"],
+  ["K", "K", "APP", "AN", "EVAL"],
+  ["K", "K", "APP", "AN", "EVAL"],
+  ["K", "K", "APP", "AN", "EVAL"],
+  ["K", "K", "APP", "AN", "EVAL"]
 ];
 
 function caseOnlyDetail(seed: CaseSeed, index: number) {
@@ -659,11 +659,22 @@ function knowledgeDraft(seed: CaseSeed, variant: number): QuestionDraft {
   const bank = knowledgeBanks[seed.id];
   const draft = bank?.[variant];
 
-  if (!draft) {
-    throw new Error(`Missing knowledge question ${variant + 1} for ${seed.id}`);
-  }
+  if (draft) return draft;
 
-  return draft;
+  return {
+    question: `Which statement best explains ${seed.focus} in the context of ${seed.title}?`,
+    hint: "Choose the statement that gives the relevant business meaning, not merely a case detail or an unsupported recommendation.",
+    options: [
+      seed.genericTheory,
+      caseOnlyDetail(seed, 0),
+      unsupportedAction(seed),
+      `${seed.details[3]} means that ${seed.focus} has no effect on the business.`
+    ],
+    feedback: [
+      `Correct: ${seed.genericTheory}`,
+      "Knowledge identifies the relevant business concept before it is applied to the case."
+    ]
+  };
 }
 
 function applicationDraft(seed: CaseSeed, variant: number): QuestionDraft {
@@ -794,8 +805,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-1",
     unitId: 1,
-    title: "Small Bakery Expansion",
-    scenario: "Ama owns a small bakery with 8 workers. It sells premium handmade bread and is considering opening a second shop, but finance is limited.",
+    title: "Ama's Artisan Bakery",
+    scenario: "Ama owns a bakery with eight workers and sells premium handmade bread to households and two local cafés. The bakery opens six days a week, uses batch production, and often sells out before closing. Ama is considering a second shop near a busy bus station, but her finance is limited and a nearby supermarket sells cheaper bread. She also plans to replace the staff uniforms next year.",
     details: ["8 workers", "premium handmade products", "limited finance", "possible second shop"],
     focus: "business growth",
     genericTheory: "Business growth can increase sales and market share.",
@@ -806,8 +817,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-2",
     unitId: 1,
-    title: "Phone Repair Start-Up",
-    scenario: "Leo wants to start a phone repair kiosk in a busy mall. He has strong technical skills but little experience of managing cash or marketing.",
+    title: "Leo Mobile Repairs",
+    scenario: "Leo wants to open a phone repair kiosk in a busy shopping mall where three phone retailers already trade. He has strong technical skills and owns basic repair tools, but has little experience of cash management or promotion. The landlord requires three months' rent in advance, while customers usually want repairs completed on the same day. Leo prefers a blue shop sign, although this will not determine whether the kiosk succeeds.",
     details: ["new start-up", "technical repair skills", "busy mall", "limited management experience"],
     focus: "enterprise and business plans",
     genericTheory: "A business plan sets out objectives, finance, marketing, and operations.",
@@ -818,8 +829,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-3",
     unitId: 1,
-    title: "Furniture Partnership",
-    scenario: "Two friends operate a furniture workshop as a partnership. They make custom tables and are worried about personal savings being at risk if debts rise.",
+    title: "Oak & Pine Workshop",
+    scenario: "Mina and Joel operate Oak & Pine Workshop as a partnership and employ four skilled carpenters. The business makes custom dining tables, so each order requires different measurements and finishes. Demand is increasing, but the partners may need a bank loan for new machinery and are worried that personal savings could be at risk if debts rise. Their workshop is painted green, which customers rarely see.",
     details: ["partnership", "custom tables", "two owners", "personal savings at risk"],
     focus: "legal structure",
     genericTheory: "Limited liability means owners do not usually risk personal assets for company debts.",
@@ -830,8 +841,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-4",
     unitId: 1,
-    title: "Farm and Food Producer",
-    scenario: "A family farm grows tomatoes and now wants to make bottled tomato sauce. It must decide whether to stay in farming or add production work.",
+    title: "Kofi Family Foods",
+    scenario: "Kofi Family Foods grows tomatoes and sells most of them to wholesalers at harvest time. The family is considering using part of the crop to make bottled tomato sauce, which would require cooking equipment, packaging, and food-safety training. Sauce could be sold throughout the year at a higher price, but the farm has limited production experience. The family also grows flowers beside the farmhouse for decoration.",
     details: ["primary activity", "tomatoes", "possible sauce production", "family business"],
     focus: "business classification",
     genericTheory: "Primary businesses extract or grow raw materials, while secondary businesses manufacture goods.",
@@ -842,8 +853,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-5",
     unitId: 1,
-    title: "Community Gym Objectives",
-    scenario: "A community gym is run as a social enterprise. It wants to keep membership fees low while also making enough surplus to replace old equipment.",
+    title: "Riverside Community Gym",
+    scenario: "Riverside Community Gym is a social enterprise serving a low-income neighbourhood. It employs five trainers, offers discounted youth sessions, and wants membership fees to remain affordable. Several exercise machines are old, so the gym must generate enough surplus to replace them without abandoning its social objective. Members have also requested brighter changing-room walls.",
     details: ["social enterprise", "low membership fees", "needs surplus", "old equipment"],
     focus: "business objectives",
     genericTheory: "Business objectives can include survival, profit, growth, market share, and social aims.",
@@ -854,8 +865,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-1-6",
     unitId: 1,
-    title: "Clothing Brand Franchise",
-    scenario: "Nia wants to open a clothing outlet using an established brand's store design, supplier system, and advertising support. She must pay fees and follow rules.",
+    title: "Nia Style Outlet",
+    scenario: "Nia is considering opening an outlet of a well-known clothing franchise in her town. The franchisor provides store design, approved suppliers, staff training, and national advertising, but Nia must pay an initial fee and a percentage of sales. Local customers recognise the brand, although Nia would have limited freedom to stock independent designers. The proposed shop has a small staff kitchen at the rear.",
     details: ["established clothing brand", "store design", "supplier system", "fees and rules"],
     focus: "franchising",
     genericTheory: "A franchise lets one business use another business's name, products, and operating methods.",
@@ -866,8 +877,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-1",
     unitId: 2,
-    title: "Hotel Staff Motivation",
-    scenario: "A hotel has high labour turnover among reception staff. Guests complain that check-in is slow and service quality is inconsistent.",
+    title: "Harbour View Hotel",
+    scenario: "Harbour View Hotel has 80 rooms and employs six receptionists on rotating shifts. Labour turnover at reception is high because pay is close to the legal minimum and staff receive little recognition. Guests increasingly complain about slow check-in and inconsistent information, while experienced staff spend time training replacements. The hotel recently replaced the plants in its entrance.",
     details: ["hotel reception", "high labour turnover", "guest complaints", "slow check-in"],
     focus: "motivation",
     genericTheory: "Motivated employees are more likely to work hard and provide good service.",
@@ -878,8 +889,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-2",
     unitId: 2,
-    title: "Factory Leadership",
-    scenario: "A factory producing school bags has missed several delivery deadlines. The manager currently uses a laissez-faire style with inexperienced workers.",
+    title: "BrightBag Manufacturing",
+    scenario: "BrightBag Manufacturing produces school bags for several retailers and has missed three recent delivery deadlines. Its production team includes many inexperienced workers, but the manager uses a laissez-faire leadership style and gives few instructions. Retailers may move future orders elsewhere if delays continue. The factory canteen changed its lunch menu last month.",
     details: ["school bag factory", "missed deadlines", "laissez-faire style", "inexperienced workers"],
     focus: "leadership style",
     genericTheory: "Autocratic leadership involves making decisions without much employee input.",
@@ -890,8 +901,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-3",
     unitId: 2,
-    title: "Supermarket Recruitment",
-    scenario: "A supermarket needs a new store supervisor quickly. Internal candidates know the store, but none have managed a large team before.",
+    title: "FreshMart Central",
+    scenario: "FreshMart Central needs a store supervisor before the busy holiday period begins in four weeks. Several internal candidates understand its stock system and customers, but none has managed a team of 35 employees. External recruitment may bring stronger leadership skills, although advertising and selection would take time. The store is also planning a new display for imported fruit.",
     details: ["supermarket", "new supervisor", "urgent vacancy", "internal staff lack management experience"],
     focus: "recruitment",
     genericTheory: "Internal recruitment is cheaper and can motivate existing employees.",
@@ -902,8 +913,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-4",
     unitId: 2,
-    title: "New Café Training",
-    scenario: "A café chain opens a branch with ten new workers. It wants consistent food hygiene, customer service, and use of the till system.",
+    title: "Corner Cup Café",
+    scenario: "Corner Cup Café is opening a branch with ten newly recruited workers, most of whom have not worked in food service before. The company needs consistent food hygiene, customer service, and correct use of its digital till from the first week. Managers can train employees at the new branch or pay for an external course before opening. The branch will use the same furniture colour as the other cafés.",
     details: ["new café branch", "ten new workers", "food hygiene", "till system"],
     focus: "training",
     genericTheory: "Induction training introduces new employees to the workplace and procedures.",
@@ -914,8 +925,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-5",
     unitId: 2,
-    title: "Call Centre Span of Control",
-    scenario: "A call centre has 60 advisers and only two supervisors. Customers wait too long for problems to be resolved.",
+    title: "ConnectCare Services",
+    scenario: "ConnectCare Services handles customer enquiries for utility companies using 60 advisers and only two supervisors. Advisers need approval for unusual refunds, but supervisors are often unavailable and customer problems remain unresolved. The business is considering adding team leaders or giving advisers more authority. Its office lease still has two years remaining.",
     details: ["60 advisers", "two supervisors", "long customer waits", "service problems"],
     focus: "span of control",
     genericTheory: "Span of control is the number of subordinates directly managed by one manager.",
@@ -926,8 +937,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-2-6",
     unitId: 2,
-    title: "Delivery Business Redundancy",
-    scenario: "A delivery business introduces route-planning software. Fewer office workers are needed to schedule drivers, but customer demand is still growing.",
+    title: "SwiftRoute Deliveries",
+    scenario: "SwiftRoute Deliveries has introduced software that automatically plans routes for 45 drivers. Fewer office workers are now needed for scheduling, even though customer demand and parcel volumes continue to grow. Management wants to reduce labour costs but is concerned about redundancy payments and the motivation of employees who remain. The company has recently repainted five delivery vans.",
     details: ["route-planning software", "fewer office workers needed", "delivery demand growing", "drivers still needed"],
     focus: "workforce planning",
     genericTheory: "Redundancy occurs when a job is no longer needed.",
@@ -938,8 +949,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-1",
     unitId: 3,
-    title: "Juice Market Research",
-    scenario: "A drinks start-up wants to launch mango juice for teenagers. It has limited finance and needs evidence before ordering bottles and labels.",
+    title: "ZestUp Drinks",
+    scenario: "ZestUp Drinks plans to launch a mango juice aimed at teenagers in a market dominated by fizzy drinks. The start-up has limited finance and must choose a flavour, price, bottle size, and advertising channel before ordering packaging. Its founders have asked friends for opinions, but those responses may not represent the target market. One founder already owns a delivery bicycle.",
     details: ["drinks start-up", "teenage target market", "limited finance", "new mango juice"],
     focus: "market research",
     genericTheory: "Primary market research collects new data for a specific purpose.",
@@ -950,8 +961,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-2",
     unitId: 3,
-    title: "Sportswear Segment",
-    scenario: "A sportswear shop sells to both serious runners and casual gym users. The owner wants to target advertising more accurately.",
+    title: "StridePoint Sportswear",
+    scenario: "StridePoint Sportswear sells specialist running shoes, gym clothing, and low-priced accessories. Its customers include serious runners who value performance and casual gym users who focus more on style and price. The owner has one advertising budget and wants messages to reach each group more accurately. Saturday is the shop's busiest day, partly because a market operates nearby.",
     details: ["sportswear shop", "serious runners", "casual gym users", "targeted advertising"],
     focus: "market segmentation",
     genericTheory: "Market segmentation divides a market into groups with similar characteristics.",
@@ -962,8 +973,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-3",
     unitId: 3,
-    title: "Restaurant Pricing",
-    scenario: "A family restaurant faces rising ingredient costs. It serves local families who are price sensitive but value fresh meals.",
+    title: "Maple Table Restaurant",
+    scenario: "Maple Table Restaurant serves fresh meals mainly to local families and competes with two lower-priced fast-food outlets. Ingredient and energy costs have risen, reducing profit on each meal. Customers value freshness but are price sensitive, so a large price increase may reduce demand. The owner is also choosing new music for the dining room.",
     details: ["family restaurant", "rising ingredient costs", "price-sensitive customers", "fresh meals"],
     focus: "pricing",
     genericTheory: "Pricing affects demand, revenue, and how customers view a product.",
@@ -974,8 +985,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-4",
     unitId: 3,
-    title: "Online Craft Promotion",
-    scenario: "A craft seller uses e-commerce to sell handmade jewellery. Most customers discover products through social media photos.",
+    title: "LunaCraft Jewellery",
+    scenario: "LunaCraft Jewellery sells handmade earrings and necklaces through its own website. Most customers first discover products through social media photographs, but many visitors leave the website without ordering. The owner has limited money and must decide whether to improve product photography, pay influencers, or offer discounts. Packaging is currently silver, although buyers rarely mention it.",
     details: ["handmade jewellery", "e-commerce", "social media photos", "small seller"],
     focus: "promotion",
     genericTheory: "Promotion informs and persuades customers about products.",
@@ -986,8 +997,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-5",
     unitId: 3,
-    title: "Furniture Distribution",
-    scenario: "A furniture maker sells bulky tables. It is choosing between selling through local retailers or delivering directly from its workshop.",
+    title: "Oakline Furniture",
+    scenario: "Oakline Furniture makes bulky dining tables in a workshop outside the city. It currently sells directly, but local retailers have offered to display the tables and manage customer orders in return for a margin. Retailers could increase market coverage, while direct delivery gives Oakline more control over service and custom orders. The workshop roof was repaired last year.",
     details: ["bulky tables", "local retailers", "direct delivery", "workshop"],
     focus: "place and distribution",
     genericTheory: "Distribution is how products move from producer to customer.",
@@ -998,8 +1009,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-3-6",
     unitId: 3,
-    title: "Eco Soap Marketing Mix",
-    scenario: "An eco soap brand sells higher-priced soap made from natural oils. It wants to enter supermarkets where many cheaper soaps are already sold.",
+    title: "PureLeaf Soap",
+    scenario: "PureLeaf Soap makes higher-priced bars from natural oils and uses recyclable paper packaging. It wants to enter supermarkets where many cheaper soaps already have strong shelf positions. The owners must coordinate product design, price, distribution, and promotion without weakening the premium environmental image. Their office printer is due for replacement.",
     details: ["eco soap", "higher price", "natural oils", "supermarket competition"],
     focus: "marketing mix",
     genericTheory: "The marketing mix combines product, price, place, and promotion.",
@@ -1010,8 +1021,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-1",
     unitId: 4,
-    title: "Toy Factory Production",
-    scenario: "A toy factory makes 10 000 identical plastic cars each week. Demand is stable and retailers expect consistent supply.",
+    title: "PlayMotion Toys",
+    scenario: "PlayMotion Toys employs 80 workers and makes 10 000 identical plastic cars each week on a machinery-based production line. A national retailer has placed regular monthly orders and expects consistent quality and delivery, so demand is stable. A smaller customer has asked for personalised colours, but changing the line would interrupt production. The factory also stores an older puzzle product that is unrelated to the car order.",
     details: ["10 000 identical cars", "weekly output", "stable demand", "retailer supply"],
     focus: "production method",
     genericTheory: "Flow production is used for large quantities of standardised products.",
@@ -1022,8 +1033,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-2",
     unitId: 4,
-    title: "Bakery Inventory",
-    scenario: "A bakery buys flour in bulk to avoid shortages. Storage space is limited and flour can be damaged if kept too long.",
+    title: "Sunrise Bakes",
+    scenario: "Sunrise Bakes produces bread, cakes, and pastries for its own shop and three cafés. Its flour supplier offers a discount for large orders, and managers want enough inventory to avoid stopping production. Storage space is limited, flour can be damaged if kept too long, and cash is needed for weekly wages. The bakery is also considering a new design for its wedding-cake boxes.",
     details: ["bulk flour", "avoid shortages", "limited storage", "risk of damage"],
     focus: "inventory control",
     genericTheory: "Inventory is materials, work in progress, or finished goods held by a business.",
@@ -1034,8 +1045,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-3",
     unitId: 4,
-    title: "Laptop Quality Assurance",
-    scenario: "A laptop manufacturer receives complaints about faulty screens. It wants to reduce defects before finished laptops reach customers.",
+    title: "NovaBook Technologies",
+    scenario: "NovaBook Technologies assembles 12 000 laptops each month for electronics retailers. Customer complaints about faulty screens have increased, and returned laptops create repair, delivery, and reputation costs. Managers are considering quality checks at each stage of assembly rather than relying mainly on final inspection. A separate team is redesigning the cardboard packaging.",
     details: ["laptop manufacturer", "faulty screens", "customer complaints", "prevent defects"],
     focus: "quality assurance",
     genericTheory: "Quality assurance checks quality throughout production rather than only at the end.",
@@ -1046,8 +1057,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-4",
     unitId: 4,
-    title: "Printing Break-Even",
-    scenario: "A print shop is deciding whether to buy a new printer. It expects fixed costs to rise but variable cost per poster to fall.",
+    title: "InkWorks Studio",
+    scenario: "InkWorks Studio prints posters for schools, events, and small businesses using two ageing printers. A faster printer would raise annual fixed costs but reduce ink and labour cost per poster, and it could increase maximum output. Demand is high during festival months but uncertain during the rest of the year, so the owner is calculating a new break-even level before buying. The studio's current lease ends in eighteen months.",
     details: ["print shop", "new printer", "higher fixed costs", "lower variable cost per poster"],
     focus: "break-even",
     genericTheory: "Break-even is where total revenue equals total costs.",
@@ -1058,8 +1069,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-5",
     unitId: 4,
-    title: "Restaurant Location",
-    scenario: "A restaurant is choosing between a cheaper side street and an expensive location near offices. Lunchtime customers are its main target.",
+    title: "CityLunch Kitchen",
+    scenario: "CityLunch Kitchen is choosing between a low-rent side street and a more expensive site beside several large offices. Office workers are its main target and most sales are expected between noon and 2 p.m. The office site has much higher footfall but limited parking, while the side street has space for evening deliveries. Both premises have recently fitted kitchens.",
     details: ["restaurant", "cheaper side street", "expensive office area", "lunchtime customers"],
     focus: "location",
     genericTheory: "Location decisions can depend on customers, labour, suppliers, competitors, rent, and transport.",
@@ -1070,8 +1081,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-4-6",
     unitId: 4,
-    title: "Lean Production Workshop",
-    scenario: "A bicycle workshop wants to reduce waste. It keeps many spare parts, but cash is tight and some parts become obsolete.",
+    title: "CycleFix Workshop",
+    scenario: "CycleFix Workshop repairs bicycles and keeps a large range of spare parts so common jobs can be completed quickly. Cash is tight, several specialist parts have become obsolete, and shelves are crowded with items rarely requested. The owner is considering lean inventory methods but suppliers sometimes take five days to deliver. A new cycle path near the workshop may increase future demand.",
     details: ["bicycle workshop", "many spare parts", "cash is tight", "obsolete parts"],
     focus: "lean production",
     genericTheory: "Lean production aims to reduce waste and improve efficiency.",
@@ -1082,8 +1093,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-1",
     unitId: 5,
-    title: "Salon Finance Choice",
-    scenario: "A hair salon needs new chairs costing $3000. It has steady cash inflows but little retained profit.",
+    title: "Glow Hair Studio",
+    scenario: "Glow Hair Studio needs four replacement chairs costing $3000 in total because customers complain that the current chairs are uncomfortable. The salon receives steady weekly cash inflows and has regular clients, but little retained profit after refurbishing its reception area. A bank has offered a small loan with monthly repayments. The owner also wants to change the staff aprons later in the year.",
     details: ["hair salon", "$3000 chairs", "steady cash inflows", "little retained profit"],
     focus: "source of finance",
     genericTheory: "A bank loan provides finance that is repaid with interest over time.",
@@ -1094,8 +1105,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-2",
     unitId: 5,
-    title: "Cash Flow Problem",
-    scenario: "A school uniform shop sells most products in August, but must pay suppliers in June and July before customers buy uniforms.",
+    title: "SmartStart Uniforms",
+    scenario: "SmartStart Uniforms earns most of its annual sales in August before the school year begins. It must order and pay suppliers in June and July, before most customers buy, and still pay rent and wages during those months. Last year several popular sizes sold out, so ordering too little may also lose sales. The shop window is decorated differently each season.",
     details: ["school uniform shop", "seasonal sales", "supplier payments before sales", "August revenue"],
     focus: "cash flow",
     genericTheory: "Cash flow is the movement of money into and out of a business.",
@@ -1106,8 +1117,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-3",
     unitId: 5,
-    title: "Income Statement Trend",
-    scenario: "A clothing retailer's revenue has increased, but advertising and rent costs have risen faster than gross profit.",
+    title: "Threadline Clothing",
+    scenario: "Threadline Clothing operates three stores and reports higher revenue than last year. However, rent and online advertising costs have risen faster than gross profit, while managers have also discounted old inventory. The owners are deciding whether the revenue growth represents improved performance or hides weaker operating profit. Employee uniforms remained unchanged this year.",
     details: ["clothing retailer", "higher revenue", "advertising costs", "rent costs"],
     focus: "profit",
     genericTheory: "Operating profit is gross profit minus overheads.",
@@ -1118,8 +1129,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-4",
     unitId: 5,
-    title: "Liquidity at a Café",
-    scenario: "A café has high inventory of cakes but little cash. It must pay wages and rent next week.",
+    title: "Bean & Crumb Café",
+    scenario: "Bean & Crumb Café has display cases full of cakes and ingredients in storage but very little cash in its bank account. Wages, rent, and a supplier invoice are due next week, and some cakes may become unsellable within two days. A weekend promotion could turn inventory into cash, although heavy discounts may reduce margins. The café recently bought new menu boards using cash.",
     details: ["café", "high cake inventory", "little cash", "wages and rent due"],
     focus: "liquidity",
     genericTheory: "Liquidity is the ability to pay short-term debts.",
@@ -1130,8 +1141,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-5",
     unitId: 5,
-    title: "Share Issue for Expansion",
-    scenario: "A private limited company making desks wants to expand into another city. The directors are considering issuing more shares to existing shareholders.",
+    title: "MetroDesk Ltd",
+    scenario: "MetroDesk Ltd is a private limited company that manufactures office desks and wants a second factory in another city. The expansion requires long-term finance for premises and machinery before additional sales begin. Directors are considering issuing shares to existing shareholders instead of taking a large loan, but they want to retain control. The company has already chosen a logo for the new factory.",
     details: ["private limited company", "desk manufacturer", "new city", "existing shareholders"],
     focus: "equity finance",
     genericTheory: "Issuing shares raises capital without regular interest payments.",
@@ -1142,8 +1153,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-5-6",
     unitId: 5,
-    title: "Ratio Comparison",
-    scenario: "Two pharmacies have similar sales. Pharmacy A has a higher gross profit margin, but Pharmacy B has a stronger current ratio.",
+    title: "HealthChoice Pharmacies",
+    scenario: "HealthChoice is considering buying one of two independent pharmacies with similar annual sales. Pharmacy A has a higher gross profit margin but holds little cash, while Pharmacy B has a stronger current ratio and slower inventory turnover. The buyer must compare profitability and liquidity rather than relying on one figure. Both pharmacies close at the same time each evening.",
     details: ["two pharmacies", "similar sales", "different gross margins", "different liquidity"],
     focus: "ratio analysis",
     genericTheory: "Profitability ratios measure profit performance; liquidity ratios measure ability to pay short-term debts.",
@@ -1154,8 +1165,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-1",
     unitId: 6,
-    title: "Ice Cream and Inflation",
-    scenario: "An ice cream producer faces higher milk and electricity prices. Customers are already reducing non-essential spending.",
+    title: "Frosty Fields",
+    scenario: "Frosty Fields produces ice cream for supermarkets and independent cafés. Milk, sugar, packaging, and electricity prices have risen during a period of inflation, while households are reducing non-essential spending. The business must decide whether to raise prices, reduce pack size, or accept a lower margin. Its delivery vans are already fully owned.",
     details: ["ice cream producer", "higher milk prices", "higher electricity prices", "lower non-essential spending"],
     focus: "inflation",
     genericTheory: "Inflation is a sustained rise in the general price level.",
@@ -1166,8 +1177,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-2",
     unitId: 6,
-    title: "Exporter and Exchange Rates",
-    scenario: "A local coffee exporter sells most output overseas. The local currency appreciates against key customer countries.",
+    title: "Highland Coffee Exports",
+    scenario: "Highland Coffee Exports buys beans from local farmers and sells 75% of its output to overseas cafés. The local currency has appreciated against currencies used by its main customers, while contracts are priced in the local currency. Overseas buyers can switch to suppliers in two other countries, although Highland has a reputation for quality. Its warehouse uses solar lighting.",
     details: ["coffee exporter", "overseas customers", "currency appreciation", "export prices"],
     focus: "exchange rates",
     genericTheory: "Currency appreciation means one currency rises in value compared with another.",
@@ -1178,8 +1189,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-3",
     unitId: 6,
-    title: "Ethical Clothing Supplier",
-    scenario: "A clothing brand can buy cheaper fabric from a supplier accused of poor worker conditions, or pay more for certified ethical fabric.",
+    title: "FairThread Clothing",
+    scenario: "FairThread Clothing sells garments to customers who often ask about sustainable production. A new supplier offers cheaper fabric but has been accused of unsafe worker conditions; a certified supplier charges more and publishes independent audit results. Choosing the cheaper source could improve short-term margins but may attract customer and pressure-group criticism. Both suppliers offer the same fabric colours.",
     details: ["clothing brand", "cheaper fabric", "worker conditions concern", "ethical fabric"],
     focus: "ethical decisions",
     genericTheory: "Ethical decisions consider what is morally right, not just what is legal or profitable.",
@@ -1190,8 +1201,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-4",
     unitId: 6,
-    title: "Factory Pollution",
-    scenario: "A paint factory near a river can install cleaner technology. It is expensive, but local residents complain about pollution.",
+    title: "RiverTone Paints",
+    scenario: "RiverTone Paints operates beside a river and employs 120 people from the local area. Residents report unpleasant smells and possible water pollution, while regulators are reviewing the factory's permit. Cleaner technology is expensive and may interrupt production during installation, but it could reduce waste and complaints. The company sponsors a local football team.",
     details: ["paint factory", "river location", "cleaner technology", "resident complaints"],
     focus: "environmental pressure",
     genericTheory: "Business activity can create external costs such as pollution.",
@@ -1202,8 +1213,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-5",
     unitId: 6,
-    title: "Online Retail Globalisation",
-    scenario: "An online retailer in country X wants to sell handmade bags internationally. Delivery costs are high but social media interest is growing overseas.",
+    title: "Mara Bags Online",
+    scenario: "Mara Bags Online sells handmade bags through an e-commerce site and receives growing social media interest from overseas users. International sales could enlarge its market, but delivery charges, customs delays, currency changes, and returns may increase costs. The owner is considering testing two countries before offering worldwide delivery. Domestic customers receive bags in recycled boxes.",
     details: ["online retailer", "handmade bags", "international customers", "high delivery costs"],
     focus: "globalisation",
     genericTheory: "Globalisation increases connections and trade between countries.",
@@ -1214,8 +1225,8 @@ const caseSeeds: CaseSeed[] = [
   {
     id: "bus-case-6-6",
     unitId: 6,
-    title: "Government Tax Change",
-    scenario: "A bicycle shop faces an increase in sales tax. Many customers compare prices online before buying.",
+    title: "CityCycle Shop",
+    scenario: "CityCycle Shop sells bicycles and accessories in a market where customers compare prices online before visiting stores. The government has increased sales tax, which may raise final prices or reduce the shop's margin if it absorbs some of the change. Larger online competitors may be able to spread costs across more sales. The shop also provides free tyre-pressure checks.",
     details: ["bicycle shop", "higher sales tax", "online price comparison", "price-sensitive customers"],
     focus: "government economic policy",
     genericTheory: "Taxes can increase business costs or prices paid by customers.",
