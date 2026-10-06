@@ -911,62 +911,183 @@ const tableCards: WebsiteAuthoringCard[] = [
   tablePractice("practice-final", "Practical Task 7: Final table build", "Peak Table Evidence", ["Activity", "Room", "Time"])
 ];
 
-function cssPractice(slug: string, title: string, heading: string, cssParts: string[]): WebsiteAuthoringCard {
-  return fullPagePractice("css-layout", "CSS Layout", {
-    slug,
+type GuidedCssSpec = {
+  id: string;
+  title: string;
+  selector: string;
+  property: string;
+  value: string;
+  explanation: string;
+  starterHtml?: string;
+  starterCss?: string;
+};
+
+function guidedCssCard(spec: GuidedCssSpec): WebsiteAuthoringCard {
+  return moduleCard("css-layout", "CSS Layout", {
+    id: spec.id,
+    title: spec.title,
+    scenario: spec.explanation,
+    supportDocument: [
+      `Selector: ${spec.selector} - chooses the element to style.`,
+      `Property: ${spec.property} - identifies what will change.`,
+      `Value: ${spec.value} - states how it will change.`,
+      `Complete declaration: ${spec.property}: ${spec.value};`
+    ],
+    goal: `Use CSS to apply ${spec.property}: ${spec.value}; to ${spec.selector}.`,
+    steps: [
+      "Open the CSS tab. Do not type this rule in the HTML tab.",
+      `Type ${spec.selector}, then add an opening { and a closing } brace.`,
+      `Between the braces, type ${spec.property}: ${spec.value};`,
+      "Read the rule as: select the element, change the property, use the stated value.",
+      "Check the visual preview and identify the change before checking the result."
+    ],
+    starterHtml: spec.starterHtml || apexPageHtml,
+    starterCss: spec.starterCss || "",
+    expected: { cssIncludes: [spec.selector, spec.property, spec.value] },
+    points: 15
+  });
+}
+
+function cssPractice(
+  slug: string,
+  title: string,
+  heading: string,
+  cssParts: string[],
+  purpose: string,
+  starterHtml = apexPageHtml
+): WebsiteAuthoringCard {
+  return moduleCard("css-layout", "CSS Layout", {
+    id: `web-css-layout-${slug}`,
     title,
-    heading,
-    paragraph: "Peak students practise the page, then check the browser preview.",
-    extraSupport: ["Link: Start practice -> practice.html", `CSS requirements: ${cssParts.join(", ")}`],
-    tags: ["html", "head", "title", "body", "header", "nav", "a", "main", "section", "h1", "p"],
-    expected: { links: [{ text: "Start practice", href: "practice.html" }], cssIncludes: cssParts },
-    points: 60
+    scenario: purpose,
+    supportDocument: [
+      `Page heading already supplied in HTML: ${heading}`,
+      `CSS selectors, properties, and values to use: ${cssParts.join(", ")}`,
+      "Work only in the CSS tab unless the task specifically tells you to add a class or id in HTML.",
+      "After each rule, check which visible element changed and why."
+    ],
+    goal: `Style the supplied ${heading} page using the listed CSS requirements.`,
+    steps: [
+      "Preview the supplied HTML before adding CSS so you know its starting appearance.",
+      "Open the CSS tab and create one rule at a time.",
+      "For each rule, type the selector first, then place property: value; declarations between braces.",
+      "Preview after every rule. If the expected element does not change, check the selector and punctuation.",
+      "Use Check final result only after every listed CSS requirement is present."
+    ],
+    starterHtml: starterHtml.split("Peak Study Hub Open Day").join(heading),
+    starterCss: "",
+    expected: { cssIncludes: cssParts },
+    points: 40
   });
 }
 
 const cssCards: WebsiteAuthoringCard[] = [
+  guidedCssCard({
+    id: "web-css-rule-anatomy",
+    title: "Build your first CSS rule",
+    selector: "p",
+    property: "color",
+    value: "#334155",
+    explanation: "A CSS rule has a selector and a declaration. The selector chooses an element; the property and value describe the visual change."
+  }),
+  guidedCssCard({
+    id: "web-css-background",
+    title: "Set the page background",
+    selector: "body",
+    property: "background-color",
+    value: "#f1f5f9",
+    explanation: "background-color fills the area behind an element. Styling body changes the background behind the whole visible page."
+  }),
   moduleCard("css-layout", "CSS Layout", {
     id: "web-css-style",
-    title: "Add internal CSS",
-    scenario: "The style element holds CSS inside the head of an HTML document.",
-    supportDocument: ["Required tag: <style></style>", "Place it inside head."],
+    title: "Recognise internal CSS",
+    scenario: "CSS can be written in a style element inside head. In this practice app, later tasks use the separate CSS tab so the HTML structure and CSS rules remain easy to inspect.",
+    supportDocument: ["Required tag: <style></style>", "Place style inside head, not body.", "Code between <style> and </style> is CSS, not visible page text."],
     goal: "Add a style element inside head.",
-    steps: ["Find the head element.", "Add <style></style> before </head>.", "Keep CSS code inside the style element."],
+    steps: ["Stay on the HTML tab for this task.", "Find </head>, which closes the page-information area.", "Add <style></style> immediately before </head>.", "Do not place the style element inside body; body contains visible page content.", "Check the result, then notice where internal CSS belongs in a complete document."],
     starterHtml: apexStarterHtml,
     expected: { requiredTags: ["style"] },
     points: 10
   }),
-  moduleCard("css-layout", "CSS Layout", {
+  guidedCssCard({
     id: "web-css-body",
     title: "Style the body",
-    scenario: "The body selector can apply a font or background to the whole visible page.",
-    supportDocument: ["CSS selector: body", "Property: font-family"],
-    goal: "Add a body CSS rule with font-family.",
-    steps: ["Open the CSS tab.", "Type a body selector.", "Add a font-family property inside the rule."],
-    starterHtml: apexPageHtml,
-    starterCss: "",
-    expected: { cssIncludes: ["body", "font-family"] },
-    points: 15
+    selector: "body",
+    property: "font-family",
+    value: "Arial, sans-serif",
+    explanation: "A rule for body can give all visible text a consistent typeface. The second font is a fallback if Arial is unavailable."
   }),
-  moduleCard("css-layout", "CSS Layout", {
+  guidedCssCard({
     id: "web-css-color",
     title: "Change heading colour",
-    scenario: "The color property changes text colour.",
-    supportDocument: ["Selector: h1", "Property: color", "Colour: #0f6f8c"],
-    goal: "Style h1 text with the Peak blue colour.",
-    steps: ["Open the CSS tab.", "Create an h1 rule.", "Add color: #0f6f8c; inside the rule."],
-    starterHtml: apexPageHtml,
-    starterCss: "",
-    expected: { cssIncludes: ["h1", "color", "#0f6f8c"] },
-    points: 15
+    selector: "h1",
+    property: "color",
+    value: "#0f6f8c",
+    explanation: "The color property changes the foreground colour of text. A hexadecimal value beginning with # identifies the exact colour."
+  }),
+  guidedCssCard({
+    id: "web-css-font-size",
+    title: "Change heading size",
+    selector: "h1",
+    property: "font-size",
+    value: "32px",
+    explanation: "font-size controls the size of text. px is a fixed screen unit, so 32px makes the main heading clearly larger than paragraph text."
+  }),
+  guidedCssCard({
+    id: "web-css-line-height",
+    title: "Improve paragraph readability",
+    selector: "p",
+    property: "line-height",
+    value: "1.6",
+    explanation: "line-height controls the vertical space between lines of text. A unit-free value scales with the paragraph's font size."
+  }),
+  guidedCssCard({
+    id: "web-css-text-align",
+    title: "Align the main heading",
+    selector: "h1",
+    property: "text-align",
+    value: "center",
+    explanation: "text-align controls the horizontal alignment of inline content inside an element. Here it centres the h1 text within its available width."
+  }),
+  guidedCssCard({
+    id: "web-css-padding",
+    title: "Add space inside a section",
+    selector: "section",
+    property: "padding",
+    value: "20px",
+    explanation: "Padding creates space inside the border, between the section edge and its content. It does not separate the section from neighbouring elements."
+  }),
+  guidedCssCard({
+    id: "web-css-margin",
+    title: "Add space outside a section",
+    selector: "section",
+    property: "margin",
+    value: "24px 0",
+    explanation: "Margin creates space outside an element's border. The first value sets top and bottom margin; the second sets left and right margin."
+  }),
+  guidedCssCard({
+    id: "web-css-border",
+    title: "Draw a section border",
+    selector: "section",
+    property: "border",
+    value: "2px solid #0f6f8c",
+    explanation: "The border shorthand combines width, line style, and colour. The border appears between the element's padding and margin."
+  }),
+  guidedCssCard({
+    id: "web-css-radius",
+    title: "Round the section corners",
+    selector: "section",
+    property: "border-radius",
+    value: "6px",
+    explanation: "border-radius rounds an element's corners. It changes the shape of the border without changing the content or spacing."
   }),
   moduleCard("css-layout", "CSS Layout", {
     id: "web-css-class",
     title: "Use a class selector",
-    scenario: "A class lets CSS target selected elements without changing every tag of the same type.",
-    supportDocument: ["HTML class: notice-card", "CSS selector: .notice-card"],
+    scenario: "A class lets CSS target selected elements without changing every element of the same tag type. A class name is added in HTML and selected with a full stop in CSS.",
+    supportDocument: ["HTML: <section class=\"notice-card\">", "CSS selector: .notice-card", "The full stop belongs only in the CSS selector."],
     goal: "Add class=\"notice-card\" to a section and style .notice-card.",
-    steps: ["Add class=\"notice-card\" to the welcome section.", "Open CSS and create a .notice-card rule.", "Add padding inside the rule."],
+    steps: ["In the HTML tab, add class=\"notice-card\" to the opening section tag.", "Do not add the full stop to the HTML class value.", "Open the CSS tab and create a .notice-card rule; the full stop tells CSS to find that class.", "Add padding: 20px; between the braces.", "Preview and confirm that only the selected section gains inner spacing."],
     starterHtml: apexPageHtml,
     starterCss: "",
     expected: { htmlIncludes: ["class=\"notice-card\""], cssIncludes: [".notice-card", "padding"] },
@@ -975,46 +1096,85 @@ const cssCards: WebsiteAuthoringCard[] = [
   moduleCard("css-layout", "CSS Layout", {
     id: "web-css-id",
     title: "Use an id selector",
-    scenario: "An id selector targets one unique element.",
-    supportDocument: ["HTML id: hero", "CSS selector: #hero"],
+    scenario: "An id identifies one unique element on a page. CSS selects an id by placing # before the id name.",
+    supportDocument: ["HTML: <header id=\"hero\">", "CSS selector: #hero", "Use a class for repeated styling and an id for one unique element."],
     goal: "Add id=\"hero\" to the header and style #hero.",
-    steps: ["Find the header tag.", "Change it to <header id=\"hero\">.", "Open CSS and add a #hero rule."],
+    steps: ["In the HTML tab, find the opening header tag.", "Change it to <header id=\"hero\"> without changing the closing tag.", "Open the CSS tab and add a #hero rule.", "Add background-color: #e0f2fe; inside the rule.", "Preview and confirm that the unique header is targeted."],
     starterHtml: apexPageHtml,
     starterCss: "",
-    expected: { htmlIncludes: ["id=\"hero\""], cssIncludes: ["#hero"] },
+    expected: { htmlIncludes: ["id=\"hero\""], cssIncludes: ["#hero", "background-color", "#e0f2fe"] },
     points: 20
   }),
   moduleCard("css-layout", "CSS Layout", {
     id: "web-css-box",
-    title: "Add spacing and borders",
-    scenario: "Margin, padding, and border control spacing around and inside boxes.",
-    supportDocument: ["Properties: margin, padding, border"],
-    goal: "Add margin, padding, and border to the section rule.",
-    steps: ["Open the CSS tab.", "Create or find a section rule.", "Add margin, padding, and border properties."],
+    title: "Combine the CSS box model",
+    scenario: "Every element is treated as a box. Content sits in the centre, padding adds inner space, border draws the edge, and margin adds outer space.",
+    supportDocument: ["Inside to outside: content -> padding -> border -> margin", "section padding: 20px", "section border: 2px solid #0f6f8c", "section margin: 24px 0"],
+    goal: "Combine padding, border, and margin in one section rule.",
+    steps: ["Open the CSS tab and create a section rule.", "Add padding: 20px; to create space inside the section.", "Add border: 2px solid #0f6f8c; to make the section edge visible.", "Add margin: 24px 0; to separate the section from nearby content.", "Preview and point out the inner padding and outer margin before checking."],
     starterHtml: apexPageHtml,
     starterCss: "",
     expected: { cssIncludes: ["section", "margin", "padding", "border"] },
     points: 20
   }),
+  guidedCssCard({
+    id: "web-css-width",
+    title: "Limit the content width",
+    selector: "main",
+    property: "max-width",
+    value: "900px",
+    explanation: "max-width prevents content from becoming too wide on large screens while still allowing it to shrink on narrower screens."
+  }),
   moduleCard("css-layout", "CSS Layout", {
     id: "web-css-flex",
     title: "Use flex layout",
-    scenario: "Flex layout places navigation links neatly in a row.",
-    supportDocument: ["Selector: nav", "Properties: display, gap", "Value: flex"],
+    scenario: "display: flex changes how the direct children of an element are arranged. On nav, the links become flexible items in a row; gap adds consistent space between them.",
+    supportDocument: ["Parent selector: nav", "First declaration: display: flex;", "Second declaration: gap: 16px;", "The nav is the flex container; its links are flex items."],
     goal: "Style the nav element with flex layout.",
-    steps: ["Open CSS.", "Create a nav rule.", "Add display: flex; and gap."],
+    steps: ["Preview the navigation before styling it.", "Open CSS and create a nav rule.", "Add display: flex; to arrange the direct child links in a row.", "Add gap: 16px; to create equal space between links.", "Preview again and explain which element is the container and which elements are the items."],
     starterHtml: apexPageHtml,
     starterCss: "",
-    expected: { cssIncludes: ["nav", "display", "flex", "gap"] },
+    expected: { cssIncludes: ["nav", "display", "flex", "gap", "16px"] },
     points: 20
   }),
-  cssPractice("practice-colour", "Practical Task 1: Style colours", "Peak Colour Practice", ["body", "font-family", "h1", "color", "section", "background"]),
-  cssPractice("practice-spacing", "Practical Task 2: Style spacing", "Peak Spacing Practice", ["main", "max-width", "section", "padding", "margin"]),
-  cssPractice("practice-nav", "Practical Task 3: Style navigation", "Peak Navigation Style", ["nav", "display", "flex", "gap", "a", "text-decoration"]),
-  cssPractice("practice-card", "Practical Task 4: Style a content card", "Peak Card Style", [".notice-card", "border", "padding", "border-radius", "box-shadow"]),
-  cssPractice("practice-image", "Practical Task 5: Style responsive images", "Peak Image Style", ["img", "max-width", "height", "border-radius"]),
-  cssPractice("practice-table", "Practical Task 6: Style a table", "Peak Table Style", ["table", "border-collapse", "th", "td", "border", "padding"]),
-  cssPractice("practice-final", "Practical Task 7: Final CSS layout build", "Peak CSS Evidence", ["body", "font-family", "main", "max-width", "nav", "display", "flex", "section", "padding", "h1", "color", "a:hover"])
+  guidedCssCard({
+    id: "web-css-link-decoration",
+    title: "Remove link underlines",
+    selector: "nav a",
+    property: "text-decoration",
+    value: "none",
+    explanation: "A descendant selector uses a space. nav a selects links inside nav without changing links elsewhere on the page."
+  }),
+  guidedCssCard({
+    id: "web-css-hover",
+    title: "Add a link hover state",
+    selector: "nav a:hover",
+    property: "color",
+    value: "#d97706",
+    explanation: ":hover is a pseudo-class. The rule applies only while the pointer is over a navigation link, giving the user interaction feedback."
+  }),
+  cssPractice("practice-colour", "Milestone 1: Combine colours and type", "Peak Colour Practice", ["body", "font-family", "background-color", "h1", "color", "font-size"], "Combine the first text and colour properties on a supplied page. Keep each selector in its own clear rule."),
+  cssPractice("practice-spacing", "Milestone 2: Build a readable content width", "Peak Spacing Practice", ["main", "max-width", "margin", "section", "padding"], "Limit long lines and use the box model to create readable space around the page content."),
+  cssPractice("practice-nav", "Milestone 3: Style navigation", "Peak Navigation Style", ["nav", "display", "flex", "gap", "nav a", "text-decoration", "nav a:hover"], "Turn the existing navigation into a clear row of links and add visible feedback when a user points to a link."),
+  cssPractice("practice-card", "Milestone 4: Style a content card", "Peak Card Style", [".notice-card", "border", "padding", "border-radius", "box-shadow"], "Apply several box properties to one selected section so it reads as a distinct information card.", apexPageHtml.replace('<section id="sessions">', '<section id="sessions" class="notice-card">')),
+  cssPractice("practice-image", "Milestone 5: Make an image responsive", "Peak Image Style", ["img", "max-width", "100%", "height", "auto", "border-radius"], "Use max-width and automatic height so an image can shrink with its container without being stretched. The practice image is already supplied in HTML; this task changes only its CSS.", insertIntoSessionsSection('        <img src="/icon.svg" alt="Peak Study Hub practice icon">')),
+  cssPractice("practice-table", "Milestone 6: Style a data table", "Peak Table Style", ["table", "border-collapse", "th", "td", "border", "padding"], "Make table data easier to scan by joining adjacent borders and adding space inside heading and data cells.", tableStarterHtml),
+  fullPagePractice("css-layout", "CSS Layout", {
+    slug: "practice-final",
+    title: "Final CSS build: Style a complete practice page",
+    heading: "Peak CSS Evidence",
+    paragraph: "Peak students practise the page, then check the browser preview.",
+    extraSupport: [
+      "Link: Start practice -> practice.html",
+      "CSS requirements: body font-family and background-color; main max-width and centred margin; nav flex and gap; section padding and border; h1 color; nav link hover colour."
+    ],
+    tags: ["html", "head", "title", "body", "header", "nav", "a", "main", "section", "h1", "p"],
+    expected: {
+      links: [{ text: "Start practice", href: "practice.html" }],
+      cssIncludes: ["body", "font-family", "background-color", "main", "max-width", "margin", "nav", "display", "flex", "gap", "section", "padding", "border", "h1", "color", "nav a:hover"]
+    },
+    points: 70
+  })
 ];
 
 function examPractice(slug: string, title: string, heading: string): WebsiteAuthoringCard {
