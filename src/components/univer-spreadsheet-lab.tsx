@@ -26,6 +26,10 @@ type UniverApi = {
   } | null;
 };
 
+type UniverInstance = {
+  dispose: () => void;
+};
+
 type UniverSpreadsheetLabProps = {
   moduleId?: string;
 };
@@ -437,6 +441,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
   useEffect(() => {
     let disposed = false;
+    let univerInstance: UniverInstance | null = null;
 
     async function bootUniver() {
       const [{ createUniver, LocaleType, mergeLocales }, { UniverSheetsCorePreset }, locale] = await Promise.all([
@@ -447,7 +452,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
       if (disposed) return;
 
-      const { univerAPI } = createUniver({
+      const { univer, univerAPI } = createUniver({
         locale: LocaleType.EN_US,
         locales: {
           [LocaleType.EN_US]: mergeLocales(locale.default)
@@ -459,6 +464,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
         ]
       });
 
+      univerInstance = univer;
       univerAPI.createWorkbook(getStarterWorkbook(moduleId));
       univerApiRef.current = univerAPI;
       setReady(true);
@@ -468,6 +474,9 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
 
     return () => {
       disposed = true;
+      univerApiRef.current = null;
+      univerInstance?.dispose();
+      document.getElementById(containerId)?.replaceChildren();
     };
   }, [containerId, moduleId]);
 
