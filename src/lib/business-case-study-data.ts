@@ -40,6 +40,12 @@ type QuestionDraft = {
   feedback: string[];
 };
 
+type ReasoningDistractors = {
+  application: [string, string, string];
+  analysis: [string, string, string];
+  evaluation: [string, string, string];
+};
+
 const caseSkillProgression: BusinessAssessmentSkill[][] = [
   ["K", "K", "APP", "AN", "EVAL"],
   ["K", "K", "APP", "AN", "EVAL"],
@@ -48,14 +54,6 @@ const caseSkillProgression: BusinessAssessmentSkill[][] = [
   ["K", "K", "APP", "AN", "EVAL"],
   ["K", "K", "APP", "AN", "EVAL"]
 ];
-
-function caseOnlyDetail(seed: CaseSeed, index: number) {
-  return `${seed.details[index]} is relevant case evidence, but it needs to be linked clearly to ${seed.focus}.`;
-}
-
-function unsupportedAction(seed: CaseSeed) {
-  return `${seed.title} should choose the lowest-risk approach, but this needs evidence from the scenario to be convincing.`;
-}
 
 function rotateOptions(options: [string, string, string, string], id: string): { options: [string, string, string, string]; correctIndex: number } {
   const shift = id.split("").reduce((total, char) => total + char.charCodeAt(0), 0) % options.length;
@@ -666,9 +664,9 @@ function knowledgeDraft(seed: CaseSeed, variant: number): QuestionDraft {
     hint: "Choose the statement that gives the relevant business meaning, not merely a case detail or an unsupported recommendation.",
     options: [
       seed.genericTheory,
-      caseOnlyDetail(seed, 0),
-      unsupportedAction(seed),
-      `${seed.details[3]} means that ${seed.focus} has no effect on the business.`
+      `Only businesses without ${seed.details[0]} need to consider ${seed.focus}.`,
+      `${seed.focus} means the business should always act on ${seed.details[3]}, regardless of cost or evidence.`,
+      `${seed.details[2]} proves that ${seed.focus} cannot influence this business.`
     ],
     feedback: [
       `Correct: ${seed.genericTheory}`,
@@ -678,15 +676,14 @@ function knowledgeDraft(seed: CaseSeed, variant: number): QuestionDraft {
 }
 
 function applicationDraft(seed: CaseSeed, variant: number): QuestionDraft {
+  const distractors = reasoningDistractors[seed.id].application;
   if (variant % 2 === 0) {
     return {
       question: `Explain one reason ${seed.focus} is relevant to ${seed.title}.`,
       hint: `Use a named detail from the scenario, such as ${seed.details[0]} or ${seed.details[1]}.`,
       options: [
       seed.appliedPoint,
-      seed.genericTheory,
-      caseOnlyDetail(seed, 0),
-      unsupportedAction(seed)
+      ...distractors
     ] as [string, string, string, string],
       feedback: [
         "Correct: this applies the business idea to a specific detail from the case.",
@@ -700,9 +697,7 @@ function applicationDraft(seed: CaseSeed, variant: number): QuestionDraft {
     hint: `Look for the detail that connects ${seed.details[2]} or ${seed.details[3]} to ${seed.focus}.`,
       options: [
       seed.appliedPoint,
-      caseOnlyDetail(seed, 2),
-      seed.genericTheory,
-      unsupportedAction(seed)
+      ...distractors
     ] as [string, string, string, string],
     feedback: [
       "Correct: it uses case evidence rather than giving only a textbook statement.",
@@ -712,15 +707,14 @@ function applicationDraft(seed: CaseSeed, variant: number): QuestionDraft {
 }
 
 function analysisDraft(seed: CaseSeed, variant: number): QuestionDraft {
+  const distractors = reasoningDistractors[seed.id].analysis;
   if (variant % 2 === 0) {
     return {
       question: `Analyse one likely effect of ${seed.focus} on ${seed.title}.`,
       hint: "Choose the answer that moves from the business concept to a case detail and then to a likely consequence.",
       options: [
       seed.analysisChain,
-      seed.appliedPoint,
-      seed.genericTheory,
-      unsupportedAction(seed)
+      ...distractors
     ] as [string, string, string, string],
       feedback: [
         "Correct: this develops a cause-and-effect chain linked to the case.",
@@ -734,9 +728,7 @@ function analysisDraft(seed: CaseSeed, variant: number): QuestionDraft {
     hint: `Develop the effect beyond identifying ${seed.details[2]}; show what happens to the business as a result.`,
       options: [
       seed.analysisChain,
-      seed.appliedPoint,
-      seed.evaluation,
-      caseOnlyDetail(seed, 2)
+      ...distractors
     ] as [string, string, string, string],
     feedback: [
       "Correct: the answer explains a developed effect using the scenario.",
@@ -746,15 +738,14 @@ function analysisDraft(seed: CaseSeed, variant: number): QuestionDraft {
 }
 
 function evaluationDraft(seed: CaseSeed, variant: number): QuestionDraft {
+  const distractors = reasoningDistractors[seed.id].evaluation;
   if (variant % 2 === 0) {
     return {
       question: `Recommend whether ${seed.title} should follow the course of action suggested in the scenario. Justify your answer.`,
       hint: `Use ${seed.focus}, at least one detail from the scenario, a consequence, and a reason why the judgement is best for this business.`,
       options: [
       seed.evaluation,
-      seed.analysisChain,
-      seed.appliedPoint,
-      unsupportedAction(seed)
+      ...distractors
     ] as [string, string, string, string],
       feedback: [
         "Correct: this includes knowledge, application, analysis, and a justified judgement.",
@@ -768,9 +759,7 @@ function evaluationDraft(seed: CaseSeed, variant: number): QuestionDraft {
     hint: `The strongest answer should explain why one course of action suits ${seed.title} better than the alternative.`,
     options: [
       seed.evaluation,
-      seed.analysisChain,
-      seed.genericTheory,
-      seed.appliedPoint
+      ...distractors
     ] as [string, string, string, string],
     feedback: [
       "Correct: the judgement is supported by case evidence and a developed reason.",
@@ -1236,7 +1225,211 @@ const caseSeeds: CaseSeed[] = [
   }
 ];
 
+const reasoningDistractors: Record<string, ReasoningDistractors> = {
+  "bus-case-1-1": {
+    application: ["Employing eight workers makes the bakery a large company, so finance cannot restrict growth.", "Premium handmade bread means customers will accept any price at a second shop.", "Selling out before closing proves a second location will have identical demand."],
+    analysis: ["A second shop would reduce total fixed costs because rent would be shared across two locations.", "Competition from cheaper supermarket bread would automatically increase Ama's profit margin.", "Replacing staff uniforms would create enough capacity to supply both shops."],
+    evaluation: ["Ama should open immediately because selling out guarantees that every future shop will succeed.", "Ama should reject expansion because a small business should never increase its number of outlets.", "Ama should decide mainly by comparing the colour and cost of next year's uniforms."],
+  },
+  "bus-case-1-2": {
+    application: ["Leo's repair skills guarantee that he will manage cash and promotion effectively.", "The presence of three phone retailers proves there is no demand for repairs in the mall.", "Choosing a blue sign is the main purpose of Leo's business plan."],
+    analysis: ["Paying three months' rent in advance would increase the kiosk's available cash.", "Same-day repairs mean Leo will never need to buy or hold replacement parts.", "Competing retailers will automatically send all repair customers to Leo."],
+    evaluation: ["Leo should open without forecasting because technical ability is the only requirement for success.", "Leo should abandon the idea solely because other phone businesses operate in the mall.", "Leo should base the final decision on whether the landlord approves the blue sign."],
+  },
+  "bus-case-1-3": {
+    application: ["Employing carpenters means the workers automatically own shares in the partnership.", "Custom production removes the partners' responsibility for business debts.", "Painting the workshop green protects Mina and Joel's personal savings."],
+    analysis: ["Taking a larger bank loan would reduce the amount of debt the partners must repay.", "Limited liability would make every custom table cheaper to manufacture.", "Changing legal structure would remove the need for skilled carpenters."],
+    evaluation: ["The partners should incorporate because limited companies can never fail or owe money.", "They should remain a partnership because growing demand makes personal liability harmless.", "They should choose the legal structure that requires the least paperwork, regardless of debt risk."],
+  },
+  "bus-case-1-4": {
+    application: ["Growing tomatoes and making sauce are both primary-sector activities.", "Selling sauce at a higher price guarantees it will be profitable.", "The decorative flowers are the strongest evidence for processing the tomato crop."],
+    analysis: ["Buying cooking equipment would immediately reduce the farm's fixed costs.", "Food-safety training would shorten the tomato-growing season.", "Year-round sauce sales would make packaging and distribution costs disappear."],
+    evaluation: ["The family should process the entire crop because added value always guarantees higher profit.", "The family should reject sauce production because farms must operate only in the primary sector.", "The decision should depend mainly on whether the flowers beside the farmhouse grow well."],
+  },
+  "bus-case-1-5": {
+    application: ["Discounted youth sessions show that profit maximisation is the gym's only objective.", "Old exercise machines mean a social enterprise is not allowed to charge membership fees.", "Brighter changing-room walls would remove the need to earn a surplus."],
+    analysis: ["Reducing every membership fee would automatically provide more cash for replacement equipment.", "Replacing machines would prevent the gym from delivering any social benefit.", "A larger surplus would always make low-income members better able to afford fees."],
+    evaluation: ["The gym should maximise prices because social enterprises have no responsibility to their users.", "It should keep all fees unchanged even if unsafe machines can no longer be replaced.", "It should prioritise wall colour over affordability and equipment condition."],
+  },
+  "bus-case-1-6": {
+    application: ["National advertising means Nia would have complete freedom over products and pricing.", "Paying a franchise fee makes Nia an employee rather than a business owner.", "The staff kitchen is the main benefit supplied by the franchisor."],
+    analysis: ["Using an established brand would prevent Nia from paying any start-up costs.", "Approved suppliers would allow her to stock any independent designer she chooses.", "A percentage-of-sales fee would increase Nia's profit on every item sold."],
+    evaluation: ["Nia should buy the franchise because a recognised brand guarantees profit in every town.", "She should reject it simply because all franchise agreements remove every business decision.", "She should decide according to the size of the staff kitchen rather than projected sales and fees."],
+  },
+  "bus-case-2-1": {
+    application: ["Rotating shifts prove receptionists are highly motivated and unlikely to leave.", "Replacing entrance plants addresses the causes of slow check-in.", "Low pay cannot affect service because guests, not employees, use the hotel rooms."],
+    analysis: ["Higher labour turnover would reduce recruitment and training costs for the hotel.", "Giving recognition would make experienced receptionists less able to answer guests.", "Slow check-in would increase repeat bookings because guests spend longer at reception."],
+    evaluation: ["The hotel should raise pay immediately without checking costs or the reasons employees leave.", "It should ignore turnover because replacement workers always provide identical service at once.", "It should spend the motivation budget on more entrance plants instead of reception staff."],
+  },
+  "bus-case-2-2": {
+    application: ["Laissez-faire leadership guarantees clear guidance for inexperienced production workers.", "Missed deadlines show that retailers are satisfied with BrightBag's performance.", "The factory lunch menu determines whether school bags reach retailers on time."],
+    analysis: ["Giving fewer instructions would make inexperienced workers complete orders more consistently.", "Missing further deadlines would increase retailer loyalty and future orders.", "Changing leadership style would remove all production capacity constraints immediately."],
+    evaluation: ["The manager should remain laissez-faire because workers never need guidance in manufacturing.", "The manager should become autocratic permanently, regardless of staff experience or ideas.", "The best leadership decision should be based on which lunch menu workers prefer."],
+  },
+  "bus-case-2-3": {
+    application: ["Internal candidates' stock knowledge proves they already have strong team-leadership skills.", "External recruitment would always be completed before an internal appointment.", "The imported-fruit display is evidence that the supervisor must be recruited externally."],
+    analysis: ["Advertising externally would reduce recruitment time to zero before the holiday period.", "Promoting internally would make the successful candidate forget the store's systems and customers.", "Hiring a more experienced outsider would guarantee existing employees remain motivated."],
+    evaluation: ["FreshMart should recruit externally because outside candidates are always better managers.", "It should promote internally solely because this option requires no assessment of leadership ability.", "It should delay the appointment until after the holiday period so the vacancy has no effect."],
+  },
+  "bus-case-2-4": {
+    application: ["Using the same furniture colour will teach new workers food hygiene.", "External training is automatically cheaper than training at the branch.", "Ten new recruits mean induction is unnecessary because they can train one another."],
+    analysis: ["Training before opening would increase till errors because workers become overconfident.", "On-the-job training would prevent the café serving customers during every future shift.", "Consistent hygiene procedures would make customer service and food quality less reliable."],
+    evaluation: ["The café should choose external training because courses always suit every workplace exactly.", "It should provide no training until mistakes occur, since correction is cheaper than preparation.", "It should select the method according to furniture colour rather than cost and practical relevance."],
+  },
+  "bus-case-2-5": {
+    application: ["Sixty advisers and two supervisors create a narrow span of control.", "The office lease explains why unusual refunds remain unresolved.", "Giving advisers authority would increase the number of approvals each supervisor must make."],
+    analysis: ["Adding team leaders would increase each existing supervisor's number of direct reports.", "Delegating refund authority would guarantee that no adviser ever makes an incorrect decision.", "Longer customer delays would improve satisfaction because complaints receive more attention."],
+    evaluation: ["ConnectCare should delegate every refund decision without limits or training.", "It should retain the structure because unresolved problems cannot affect utility clients.", "It should choose the structure with the fewest job titles, regardless of service quality."],
+  },
+  "bus-case-2-6": {
+    application: ["Growing parcel demand means automation cannot make any scheduling role redundant.", "Repainting vans is the main workforce-planning response to route software.", "Redundancy payments are revenue earned when employees leave."],
+    analysis: ["Removing scheduling jobs would immediately increase the motivation of all remaining staff.", "Automatic route planning would reduce parcel demand because deliveries become more efficient.", "Paying redundancy compensation would lower SwiftRoute's short-term cash outflow."],
+    evaluation: ["SwiftRoute should dismiss every office worker immediately because software never requires oversight.", "It should abandon useful software solely to avoid discussing changes with employees.", "It should base staffing numbers on the number of newly painted vans."],
+  },
+  "bus-case-3-1": {
+    application: ["Friends' opinions are representative because every teenager has the same preferences.", "Owning a delivery bicycle identifies the best mango flavour and bottle size.", "A market dominated by fizzy drinks proves teenagers will not buy juice."],
+    analysis: ["Using an unrepresentative sample would guarantee accurate national demand forecasts.", "Ordering packaging before research would reduce the risk of unsold stock.", "Better target-market data would make the start-up's limited finance less important."],
+    evaluation: ["ZestUp should launch the flavour preferred by the founders' friends without further research.", "It should abandon mango juice because existing fizzy drinks make entry impossible.", "It should spend most research funds studying how often the delivery bicycle is used."],
+  },
+  "bus-case-3-2": {
+    application: ["Serious runners and casual gym users form one segment because both enter the same shop.", "Saturday footfall proves every customer values performance above price.", "Market segmentation requires StridePoint to stop selling low-priced accessories."],
+    analysis: ["Sending the same message to both groups would always increase advertising relevance.", "Targeting performance benefits at serious runners would make the advertising budget larger automatically.", "Segmenting customers would prevent casual users from buying specialist shoes."],
+    evaluation: ["StridePoint should advertise only to serious runners because they are necessarily more profitable.", "It should avoid segmentation because one general advert always persuades every customer equally.", "It should choose its target segment according to Saturday market opening hours alone."],
+  },
+  "bus-case-3-3": {
+    application: ["Rising ingredient costs mean customers will accept any price increase.", "Fresh meals make competitor prices irrelevant to local families.", "Changing dining-room music is a cost-plus pricing calculation."],
+    analysis: ["A large price increase would guarantee higher revenue even if family demand falls sharply.", "Keeping prices unchanged would make rising energy and ingredient costs disappear.", "Lower-priced competitors would lose customers whenever Maple Table charges more."],
+    evaluation: ["The restaurant should pass on every cost increase because demand never responds to price.", "It should cut prices below costs permanently to match fast-food competitors.", "It should choose meal prices according to the dining-room music rather than margins and demand."],
+  },
+  "bus-case-3-4": {
+    application: ["Website visitors who leave without ordering prove product promotion is already effective.", "Silver packaging is the only factor that determines online conversion.", "Paying an influencer guarantees that every follower will buy handmade jewellery."],
+    analysis: ["Improved photographs would reduce customers' ability to judge products online.", "Offering large discounts would always increase profit per necklace.", "More social-media views would guarantee orders even if the website remains difficult to use."],
+    evaluation: ["LunaCraft should spend all available money on influencers because reach always becomes sales.", "It should offer permanent deep discounts without considering its handmade production costs.", "It should replace packaging first because buyers rarely mention it."],
+  },
+  "bus-case-3-5": {
+    application: ["Using retailers would give Oakline complete control over customer service and custom orders.", "Bulky tables can be distributed digitally without storage or delivery.", "The repaired workshop roof determines the best channel of distribution."],
+    analysis: ["Paying retailer margins would increase the revenue Oakline keeps from each table.", "Selling directly would guarantee nationwide market coverage without extra promotion or delivery capacity.", "Retail displays would prevent customers from seeing tables before ordering."],
+    evaluation: ["Oakline should use every retailer offered because wider coverage always produces higher profit.", "It should sell only directly because intermediaries can never add value.", "It should select a channel according to last year's roof repair cost."],
+  },
+  "bus-case-3-6": {
+    application: ["A premium environmental image means PureLeaf can ignore price and distribution decisions.", "Replacing the office printer is part of the soap's marketing mix.", "Entering supermarkets guarantees prominent shelf space beside cheaper brands."],
+    analysis: ["Lowering price sharply would strengthen the premium image without affecting margins.", "Using non-recyclable promotion would automatically improve environmental credibility.", "Coordinating the four Ps would remove all supermarket competition."],
+    evaluation: ["PureLeaf should copy the cheapest soap because differentiation never affects buying decisions.", "It should enter every supermarket immediately without checking margins or shelf position.", "It should make the office printer replacement the main marketing priority."],
+  },
+  "bus-case-4-1": {
+    application: ["Personalised colours are best produced by an unchanged continuous production line.", "Stable monthly orders make one-off job production the most efficient method.", "The older puzzle inventory determines how plastic cars should be manufactured."],
+    analysis: ["Stopping the line for frequent colour changes would increase output of standard cars.", "Flow production would make each identical car require more individual skilled labour.", "Regular retailer orders would raise the risk that a high-output line remains unused."],
+    evaluation: ["PlayMotion should accept every personalised order because customer choice never disrupts flow production.", "It should replace the production line with job production even though most demand is for identical cars.", "It should choose the method according to its unrelated puzzle inventory."],
+  },
+  "bus-case-4-2": {
+    application: ["Buying the largest possible flour order is always efficient because inventory has no carrying cost.", "Limited storage means Sunrise should hold enough flour for several years.", "Wedding-cake box design determines the bakery's reorder level for flour."],
+    analysis: ["Holding more flour would release cash immediately for weekly wages.", "Reducing inventory to zero would prevent production delays when suppliers are late.", "Flour damage would increase the quantity available for sale to cafés."],
+    evaluation: ["Sunrise should always accept the bulk discount regardless of storage capacity or spoilage.", "It should hold no flour because suppliers can never delay a delivery.", "It should base flour orders on the design of wedding-cake boxes."],
+  },
+  "bus-case-4-3": {
+    application: ["Final inspection alone is quality assurance because it prevents defects at every assembly stage.", "More customer complaints show that current quality procedures are successful.", "Redesigning cardboard packaging will correct faulty screens during assembly."],
+    analysis: ["Checking quality during assembly would increase the number of defective laptops reaching retailers.", "Reducing returns would raise repair and redelivery costs for NovaBook.", "Preventing screen faults would necessarily reduce monthly production to zero."],
+    evaluation: ["NovaBook should inspect only finished laptops because prevention is always more expensive than failure.", "It should replace every assembly worker before identifying where screen faults arise.", "It should prioritise packaging design even if faulty screens continue damaging its reputation."],
+  },
+  "bus-case-4-4": {
+    application: ["A faster printer's higher fixed cost will reduce InkWorks' break-even output automatically.", "Seasonal demand is irrelevant when assessing whether expected sales cover break-even.", "The lease end date is the same calculation as contribution per poster."],
+    analysis: ["A lower variable cost per poster would reduce contribution and raise break-even output.", "Higher maximum output guarantees enough annual demand to cover the new fixed costs.", "Buying the printer would turn every fixed cost into a variable cost."],
+    evaluation: ["InkWorks should buy because faster machinery is profitable at every possible sales level.", "It should reject the printer solely because fixed costs rise, ignoring variable-cost savings and capacity.", "It should decide from festival demand alone without forecasting quieter months."],
+  },
+  "bus-case-4-5": {
+    application: ["The side-street site best reaches office workers because it has lower lunchtime footfall.", "Limited parking proves the office location has no access advantage for walking customers.", "Recently fitted kitchens make both locations equally suitable in every respect."],
+    analysis: ["Choosing the office site would reduce rent and customer exposure at the same time.", "Higher lunchtime footfall would automatically reduce CityLunch's sales revenue.", "Extra evening-delivery space would guarantee demand from office workers at noon."],
+    evaluation: ["CityLunch should choose the office site because the busiest location is profitable at any rent.", "It should choose the side street only because lower rent is always more important than sales potential.", "It should ignore target customers because both premises already contain kitchens."],
+  },
+  "bus-case-4-6": {
+    application: ["Lean inventory means keeping every specialist part in stock in case it is requested.", "Obsolete parts improve cash flow because they remain on crowded shelves.", "A new cycle path guarantees suppliers will deliver every part immediately."],
+    analysis: ["Reducing spare-parts inventory would increase cash tied up in unused stock.", "Holding no safety stock would prevent delays when suppliers take five days.", "Removing obsolete items would reduce the workshop's available shelf space."],
+    evaluation: ["CycleFix should adopt zero inventory immediately because lean methods eliminate supplier delays.", "It should retain every old part because inventory can never become obsolete.", "It should order for forecast cycle-path demand without considering lead times or current cash."],
+  },
+  "bus-case-5-1": {
+    application: ["Changing staff aprons is the strongest reason for borrowing $3000.", "Steady cash inflows mean the salon already has unlimited retained profit.", "A bank loan is internal finance generated by regular clients."],
+    analysis: ["Monthly loan repayments would increase Glow's available cash every month.", "Replacing uncomfortable chairs would necessarily reduce customer satisfaction.", "Borrowing would remove the need to compare interest with expected benefits."],
+    evaluation: ["Glow should accept any loan because regular clients guarantee every repayment.", "It should avoid all external finance even if unsafe or uncomfortable chairs harm service.", "It should finance aprons first because appearance always produces a higher return than essential equipment."],
+  },
+  "bus-case-5-2": {
+    application: ["Strong August sales remove the need to plan cash payments in June and July.", "Ordering fewer popular sizes always increases revenue during the school season.", "Seasonal window decoration is the cause of the shop's supplier-payment gap."],
+    analysis: ["Paying suppliers before customer sales would create a cash surplus automatically.", "An overdraft would reduce the timing gap by eliminating rent and wages.", "Running out of popular sizes would increase sales because scarcity replaces inventory."],
+    evaluation: ["SmartStart should order unlimited stock because August demand can never be overestimated.", "It should order nothing until customers have paid, even if this loses the seasonal sales opportunity.", "It should choose finance according to the window display rather than the duration and size of the cash gap."],
+  },
+  "bus-case-5-3": {
+    application: ["Higher revenue proves operating profit has increased by the same percentage.", "Discounting old inventory has no effect on profit or gross margin.", "Unchanged employee uniforms explain the rise in advertising costs."],
+    analysis: ["If rent rises faster than gross profit, operating profit must increase.", "More online advertising spending guarantees that every additional sale is profitable.", "Discounting inventory would increase the gross profit earned per item."],
+    evaluation: ["Threadline should judge performance from revenue alone because costs do not affect profit.", "It should stop all advertising solely because its cost has risen, without measuring generated sales.", "It should use employee-uniform changes as its main profitability indicator."],
+  },
+  "bus-case-5-4": {
+    application: ["Full cake displays prove Bean & Crumb has enough cash to pay next week's bills.", "Perishable inventory is more liquid than money in the bank in every circumstance.", "New menu boards will convert supplier invoices into current assets."],
+    analysis: ["Keeping unsold cakes longer would increase their resale value and improve liquidity.", "A heavy discount would increase the profit margin on each cake sold.", "Failing to pay wages and suppliers would improve the café's ability to continue trading."],
+    evaluation: ["The café should discount every product immediately because sales volume is the only objective.", "It should refuse all promotions even if cakes become unsellable before bills are due.", "It should buy more menu boards with cash before dealing with wages and supplier payments."],
+  },
+  "bus-case-5-5": {
+    application: ["A second factory should be financed with short-term trade credit for office supplies.", "Issuing shares requires MetroDesk to repay the capital with monthly interest.", "The chosen logo determines whether equity finance is affordable."],
+    analysis: ["Issuing shares would increase MetroDesk's loan repayments and interest costs.", "Using only debt would guarantee directors retain control without increasing financial risk.", "Long-term factory assets would generate all required sales before any finance is needed."],
+    evaluation: ["MetroDesk should issue as many shares as possible because ownership dilution has no consequence.", "It should use a large loan because repayment risk is irrelevant to long-term expansion.", "It should choose finance according to the new factory logo rather than cost, control, and cash flow."],
+  },
+  "bus-case-5-6": {
+    application: ["Pharmacy A's higher gross margin proves it can pay every short-term debt on time.", "Pharmacy B's current ratio directly measures profit earned on each sale.", "Identical closing times make both pharmacies financially identical."],
+    analysis: ["Slow inventory turnover would release cash more quickly for Pharmacy B.", "A high gross margin would guarantee strong liquidity even when little cash is held.", "Comparing one ratio would reveal every cause of performance without further information."],
+    evaluation: ["HealthChoice should buy Pharmacy A using gross margin alone.", "It should buy Pharmacy B using current ratio alone and ignore profitability.", "It should treat both businesses as equal because they close at the same time."],
+  },
+  "bus-case-6-1": {
+    application: ["Owning delivery vans protects Frosty Fields from all inflationary cost increases.", "Households reducing non-essential spending means demand for ice cream must rise.", "Inflation lowers the prices of milk, sugar, packaging, and electricity simultaneously."],
+    analysis: ["Raising prices would always increase sales volume during weaker household demand.", "Reducing pack size would increase the quantity of ingredients used per pack.", "Absorbing every cost increase would raise the profit margin on each tub."],
+    evaluation: ["Frosty Fields should pass on every cost increase because customers never compare prices.", "It should absorb all inflation indefinitely even if margins become unsustainable.", "It should base its response on van ownership rather than demand, costs, and competitor prices."],
+  },
+  "bus-case-6-2": {
+    application: ["Currency appreciation makes Highland's locally priced coffee cheaper for overseas buyers.", "Solar warehouse lighting prevents exchange rates from affecting export demand.", "Selling 75% overseas means competitors cannot attract Highland's customers."],
+    analysis: ["A stronger local currency would automatically increase the foreign-currency affordability of its coffee.", "Higher export prices would prevent buyers from switching to suppliers in other countries.", "Quality reputation would eliminate every effect of exchange-rate movements on demand."],
+    evaluation: ["Highland should keep all prices unchanged because quality guarantees overseas loyalty.", "It should stop exporting immediately whenever the currency appreciates.", "It should choose its response according to warehouse lighting rather than margins and customer sensitivity."],
+  },
+  "bus-case-6-3": {
+    application: ["Equal fabric colours mean the two suppliers have identical ethical performance.", "Unsafe working conditions are an internal production cost paid only by FairThread.", "Customer interest in sustainability makes supplier audits unnecessary."],
+    analysis: ["Using the accused supplier would guarantee stronger customer trust and reputation.", "The certified supplier's higher price would automatically reduce total profit regardless of customer response.", "Pressure-group criticism would lower awareness of FairThread's sourcing choices."],
+    evaluation: ["FairThread should always choose the cheapest supplier because ethics cannot affect sales.", "It should choose the certified supplier at any price without assessing quality, demand, or margins.", "It should decide from fabric colour because both suppliers offer the same range."],
+  },
+  "bus-case-6-4": {
+    application: ["Sponsoring a football team removes the external cost of possible river pollution.", "Smells experienced by residents are a private cost recorded only in RiverTone's accounts.", "Employing local people gives the factory permission to ignore its environmental impact."],
+    analysis: ["Cleaner technology would increase waste and resident complaints by definition.", "Losing the operating permit would allow RiverTone to produce more paint.", "Ignoring pollution concerns would strengthen relations with regulators and the community."],
+    evaluation: ["RiverTone should avoid cleaner technology because installation cost is the only relevant factor.", "It should stop production permanently without comparing compliance options and long-term benefits.", "It should treat sports sponsorship as a substitute for meeting environmental requirements."],
+  },
+  "bus-case-6-5": {
+    application: ["Growing overseas social-media interest guarantees profitable orders in every country.", "Recycled domestic packaging removes customs and currency risks abroad.", "Globalisation means delivery charges and returns cannot affect international sales."],
+    analysis: ["Higher delivery charges would make Mara's final overseas price more competitive.", "Customs delays would always increase repeat purchases from international customers.", "Offering worldwide delivery immediately would reduce the complexity of returns and currencies."],
+    evaluation: ["Mara should launch worldwide at once because online interest always converts into demand.", "She should reject all exports because international delivery can never be managed by a small business.", "She should choose markets according to recycled-box use rather than demand, delivery cost, and customs risk."],
+  },
+  "bus-case-6-6": {
+    application: ["Free tyre-pressure checks prevent sales tax from affecting bicycle prices or margins.", "Online price comparison means customers will not notice a tax-related price increase.", "Larger competitors always pay a higher sales-tax rate than CityCycle."],
+    analysis: ["Passing on the full tax would reduce final prices and attract price-sensitive customers.", "Absorbing the tax would increase the profit margin on each bicycle sold.", "A higher price would guarantee more sales because customers compare alternatives online."],
+    evaluation: ["CityCycle should pass on the whole tax because customer demand never responds to price.", "It should absorb every tax increase indefinitely even if the business becomes unprofitable.", "It should rely on free tyre checks alone without calculating the effect on price and margin."],
+  },
+};
+
+function validateCaseOptions(caseStudy: BusinessCaseStudy) {
+  const seen = new Set<string>();
+
+  caseStudy.questions.forEach((question) => {
+    if (new Set(question.options).size !== question.options.length) {
+      throw new Error(`Duplicate options in ${question.id}`);
+    }
+
+    question.options.forEach((option) => {
+      const normalized = option.trim().toLowerCase();
+      if (seen.has(normalized)) throw new Error(`Repeated option in ${caseStudy.id}: ${option}`);
+      seen.add(normalized);
+    });
+  });
+}
+
 export const businessCaseStudyModules = [1, 2, 3, 4, 5, 6].map((unitId) => ({
   unitId,
-  cases: caseSeeds.filter((caseStudy) => caseStudy.unitId === unitId).map((caseStudy, index) => buildCase(caseStudy, index))
+  cases: caseSeeds.filter((caseStudy) => caseStudy.unitId === unitId).map((caseStudy, index) => {
+    if (!reasoningDistractors[caseStudy.id]) throw new Error(`Missing reasoning options for ${caseStudy.id}`);
+    const builtCase = buildCase(caseStudy, index);
+    validateCaseOptions(builtCase);
+    return builtCase;
+  })
 }));

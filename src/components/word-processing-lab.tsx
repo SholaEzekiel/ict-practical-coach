@@ -786,9 +786,9 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               table_default_attributes: { border: "1" },
               table_default_styles: { borderCollapse: "collapse", width: "100%" },
               table_sizing_mode: isFreePractice ? "fixed" : "relative",
-              table_column_resizing: "preservetable",
+              table_column_resizing: "resizetable",
               table_resize_bars: true,
-              object_resizing: isFreePractice ? "img table" : "img",
+              object_resizing: "img,table",
               table_toolbar: isFreePractice
                 ? "tableprops tablecellprops | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells"
                 : "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
