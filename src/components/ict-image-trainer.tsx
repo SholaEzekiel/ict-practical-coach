@@ -1,5 +1,7 @@
 "use client";
 
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
 import { useMemo, useState } from "react";
 import { CheckCircle2, Cpu, HardDrive, MemoryStick, XCircle } from "lucide-react";
 import { Card, Pill } from "./ui";
@@ -50,6 +52,7 @@ export function IctImageTrainer() {
   const [score, setScore] = useState(0);
   const question = questions[index];
   const Icon = question.Icon;
+  const options = useShuffledOptions("ict-image:" + question.id, question.options);
   const correct = selected === question.answer;
 
   const progress = useMemo(() => `${index + 1}/${questions.length}`, [index]);
@@ -83,7 +86,7 @@ export function IctImageTrainer() {
           <p className="text-sm font-semibold text-ocean">{question.title}</p>
           <p className="mt-2 text-lg font-semibold">{question.prompt}</p>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {question.options.map((option) => (
+            {options.map(({ option }) => (
               <button
                 key={option}
                 onClick={() => choose(option)}

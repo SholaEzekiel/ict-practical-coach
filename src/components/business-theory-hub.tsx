@@ -1,5 +1,7 @@
 "use client";
 
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
 import { useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, Sparkles, XCircle } from "lucide-react";
 import { businessNoteModules } from "@/lib/business-note-data";
@@ -1306,7 +1308,7 @@ export function BusinessTheoryHub() {
   const orderedIndex = quizOrder.length ? quizOrder[quizIndex % quizOrder.length] : 0;
   const quizQuestion = knowledgeQuestions[orderedIndex] || knowledgeQuestions[0];
   const quizTerm = quizQuestion?.correct;
-  const options = quizQuestion?.options || [];
+  const options = useShuffledOptions("business-theory:" + (quizQuestion?.id || ""), quizQuestion?.options || []).map(item => item.option);
   const selectedAnswer = activeModule && quizQuestion ? quizSelections[activeModule.id]?.[quizQuestion.id] || null : null;
   const isCorrect = selectedAnswer === quizTerm?.title;
   const moduleScore = quizAttempts[activeModule.id] || { correct: 0, attempted: 0 };

@@ -4,33 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Editor } from "@tinymce/tinymce-react";
 import type { Editor as TinyMCEEditor } from "tinymce";
-import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  ArrowLeft,
-  Bold,
-  CheckCircle2,
-  Columns2,
-  FileText,
-  Hash,
-  Image as ImageIcon,
-  ImagePlus,
-  Italic,
-  Languages,
-  List,
-  ListOrdered,
-  Merge,
-  MonitorPlay,
-  PaintBucket,
-  Pilcrow,
-  Ruler,
-  Sparkles,
-  Table2,
-  TextCursorInput,
-  Underline
-} from "lucide-react";
+import { ArrowLeft, CheckCircle2, MonitorPlay, Sparkles } from "lucide-react";
 import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { compactSupportLines } from "@/lib/task-instructions";
@@ -252,31 +226,16 @@ function sortFirstTableContent(html: string) {
   return root.innerHTML;
 }
 
-function mergeFirstTableRowContent(html: string) {
-  const root = createDocumentRoot(html);
-  const table = root.querySelector("table");
-  const firstRow = table?.querySelector("tr");
-  if (!table || !firstRow) return html;
-  const cells = Array.from(firstRow.querySelectorAll("td, th")) as HTMLTableCellElement[];
-  if (cells.length < 2) return html;
-  const mergedText = cells.map((cell) => cell.textContent?.trim()).filter(Boolean).join(" ");
-  firstRow.innerHTML = `<td colspan="${cells.length}" style="text-align:center">${mergedText}</td>`;
-  return root.innerHTML;
-}
-
 export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
   const editorRef = useRef<TinyMCEEditor | null>(null);
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [completed, setCompleted] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [wordCount, setWordCount] = useState(0);
   const [content, setContent] = useState(cards[0]?.starterHtml || "");
   const [documentClasses, setDocumentClasses] = useState("");
   const [spellcheckLanguage, setSpellcheckLanguage] = useState("en-GB");
-  const [cellFillColor, setCellFillColor] = useState("#dbeafe");
   const draftsRef = useRef(new Map<string, WordProcessingDraft>());
 
   const card = cards[activeIndex];
@@ -293,28 +252,14 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!editor || !isFreePractice) return;
+    if (!editor) return;
     editor.getBody().lang = spellcheckLanguage;
     editor.getBody().spellcheck = true;
     editor.getDoc().documentElement.lang = spellcheckLanguage;
   }, [isFreePractice, spellcheckLanguage]);
 
-  function refreshWordCount(html = content) {
-    const root = createDocumentRoot(html);
-    const text = root.textContent || "";
-    const words = text.trim().split(/\s+/).filter(Boolean);
-    setWordCount(words.length);
-  }
-
-  function setEditorContent(nextContent: string) {
-    setContent(nextContent);
-    editorRef.current?.setContent(nextContent);
-    refreshWordCount(nextContent);
-  }
-
   function runCheck() {
     const root = createDocumentRoot(content, documentClasses);
-    refreshWordCount();
     const result = validateDocument(root, card);
     setFeedback(result);
     if (result.ok) {
@@ -368,46 +313,11 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     setDocumentClasses(draft?.documentClasses ?? "");
     setFeedback(null);
     editorRef.current?.setContent(nextContent);
-    refreshWordCount(nextContent);
   }
 
   function nextCard() {
     if (!currentComplete || activeIndex === cards.length - 1) return;
     loadCard(Math.min(activeIndex + 1, cards.length - 1));
-  }
-
-  function toolbarButton(label: string, Icon: typeof Bold, onClick: () => void) {
-    return (
-      <button
-        type="button"
-        title={label}
-        aria-label={label}
-        onMouseDown={(event) => event.preventDefault()}
-        onClick={onClick}
-        className="grid h-9 w-9 place-items-center rounded-md text-ink hover:bg-slate-100"
-      >
-        <Icon size={18} aria-hidden="true" />
-      </button>
-    );
-  }
-
-  function applyColumns(count: 2 | 3) {
-    setDocumentClasses((classes) => {
-      const next = classes.split(" ").filter((item) => item && item !== "columns-2" && item !== "columns-3");
-      next.push(`columns-${count}`);
-      return next.join(" ");
-    });
-  }
-
-  function runEditorCommand(name: string, value?: string) {
-    const editor = editorRef.current;
-    if (!editor) return;
-    editor.focus();
-    editor.execCommand(name, false, value);
-    editor.nodeChanged();
-    const nextContent = editor.getContent() || content;
-    setContent(nextContent);
-    refreshWordCount(nextContent);
   }
 
   function previousCard() {
@@ -419,7 +329,6 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     editorRef.current?.insertContent(html);
     const nextContent = editorRef.current?.getContent() || content;
     setContent(nextContent);
-    refreshWordCount(nextContent);
   }
 
   function toggleDocumentClass(className: string) {
@@ -429,35 +338,8 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     });
   }
 
-  function insertHeader() {
-    insertContent(`<header class="doc-header">Peak Study Hub</header><p></p>`);
-  }
-
-  function insertFooter() {
-    insertContent(`<footer class="doc-footer">Peak Study Hub | Page <span class="page-number">1</span></footer><p></p>`);
-  }
-
   function insertPageNumber() {
     insertContent(`<span class="page-number">1</span>`);
-  }
-
-  function insertStudyImage() {
-    insertContent(`<p style="text-align:center"><img src="/assets/peak-study-card.svg" alt="peak study workspace" data-align="center" style="max-width:260px;width:45%;height:auto" /></p><p></p>`);
-  }
-
-  function importLocalImage(file?: File) {
-    if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const editor = editorRef.current;
-      if (!editor) return;
-      editor.focus();
-      editor.insertContent(`<img src="${String(reader.result)}" alt="${editor.dom.encode(file.name)}" />`);
-      const nextContent = editor.getContent();
-      setContent(nextContent);
-      refreshWordCount(nextContent);
-    };
-    reader.readAsDataURL(file);
   }
 
   function ignoreSelectedSpelling() {
@@ -465,39 +347,9 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     if (!editor || editor.selection.isCollapsed()) return;
     const selectedHtml = editor.selection.getContent({ format: "html" });
     if (!selectedHtml) return;
-    editor.selection.setContent(`<span lang="${spellcheckLanguage}" spellcheck="false" data-spellcheck-ignore="true">${selectedHtml}</span>`);
+    editor.selection.setContent(`<span lang="${editor.getBody().lang}" spellcheck="false" data-spellcheck-ignore="true">${selectedHtml}</span>`);
     editor.nodeChanged();
     setContent(editor.getContent());
-  }
-
-  function selectedTableCells(editor: TinyMCEEditor) {
-    const selected = editor.dom.select("td[data-mce-selected], th[data-mce-selected]") as HTMLTableCellElement[];
-    if (selected.length) return selected;
-    const current = editor.dom.getParent(editor.selection.getNode(), "td,th") as HTMLTableCellElement | null;
-    return current ? [current] : [];
-  }
-
-  function applyCellFill(color: string) {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const cells = selectedTableCells(editor);
-    cells.forEach((cell) => editor.dom.setStyle(cell, "background-color", color));
-    if (!cells.length) return;
-    editor.nodeChanged();
-    setContent(editor.getContent());
-  }
-
-  function insertTable() {
-    insertContent(`<table><tbody><tr><td>Club</td><td>Teacher</td><td>Room</td></tr><tr><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td></tr></tbody></table><p></p>`);
-  }
-
-  function sortFirstTable() {
-    const nextContent = sortFirstTableContent(content);
-    if (nextContent) setEditorContent(nextContent);
-  }
-
-  function mergeFirstTableRow() {
-    setEditorContent(mergeFirstTableRowContent(content));
   }
 
   if (!card) return null;
@@ -611,114 +463,6 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
           <h2 className="font-bold">Document workspace</h2>
           <p className="mt-1 text-sm text-slate-600">Use the toolbar, edit the document, then check the final result.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-1 border-b border-line bg-slate-50 px-4 py-2">
-          {toolbarButton("Bold", Bold, () => runEditorCommand("Bold"))}
-          {toolbarButton("Italic", Italic, () => runEditorCommand("Italic"))}
-          {toolbarButton("Underline", Underline, () => runEditorCommand("Underline"))}
-          <span className="mx-2 h-8 w-px bg-line" />
-          {toolbarButton("Heading 1", Pilcrow, () => runEditorCommand("FormatBlock", "h1"))}
-          {toolbarButton("Align left", AlignLeft, () => runEditorCommand("JustifyLeft"))}
-          {toolbarButton("Centre align", AlignCenter, () => runEditorCommand("JustifyCenter"))}
-          {toolbarButton("Right align", AlignRight, () => runEditorCommand("JustifyRight"))}
-          {toolbarButton("Justify", AlignJustify, () => runEditorCommand("JustifyFull"))}
-          <span className="mx-2 h-8 w-px bg-line" />
-          {toolbarButton("Bullet list", List, () => runEditorCommand("InsertUnorderedList"))}
-          {toolbarButton("Numbered list", ListOrdered, () => runEditorCommand("InsertOrderedList"))}
-          {toolbarButton("Insert table", Table2, insertTable)}
-          {toolbarButton("Insert study image", ImageIcon, insertStudyImage)}
-          {toolbarButton("Two columns", Columns2, () => applyColumns(2))}
-          {toolbarButton("Merge first table row", Merge, mergeFirstTableRow)}
-          <span className="mx-2 h-8 w-px bg-line" />
-          {toolbarButton("Toggle wider margins", Ruler, () => toggleDocumentClass("page-margin-wide"))}
-          {toolbarButton("Toggle landscape page", FileText, () => toggleDocumentClass("page-landscape"))}
-          {toolbarButton("Insert header", TextCursorInput, insertHeader)}
-          {toolbarButton("Insert footer", Pilcrow, insertFooter)}
-          {toolbarButton("Insert page number", Hash, insertPageNumber)}
-          {toolbarButton("Toggle paragraph spacing", Columns2, () => toggleDocumentClass("paragraph-spacing-relaxed"))}
-          <button
-            type="button"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={sortFirstTable}
-            className="rounded-md px-3 py-2 text-sm font-bold text-ink hover:bg-slate-100"
-          >
-            Sort A-Z
-          </button>
-          <span className="ml-auto rounded-md bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm">
-            {wordCount} words
-          </span>
-        </div>
-        {isFreePractice && (
-          <div className="flex flex-wrap items-center gap-2 border-b border-line bg-white px-4 py-2">
-            <label className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-2 text-sm font-semibold text-ink" title="Document spell-check language">
-              <Languages size={17} aria-hidden="true" />
-              <span className="sr-only">Spell-check language</span>
-              <select
-                aria-label="Spell-check language"
-                value={spellcheckLanguage}
-                onChange={(event) => setSpellcheckLanguage(event.target.value)}
-                className="bg-transparent text-sm outline-none"
-              >
-                {SPELLCHECK_LANGUAGES.map((language) => <option key={language.value} value={language.value}>{language.label}</option>)}
-              </select>
-            </label>
-            <button
-              type="button"
-              title="Ignore spelling for the selected word"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={ignoreSelectedSpelling}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
-            >
-              Ignore selected word
-            </button>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
-              onChange={(event) => {
-                importLocalImage(event.target.files?.[0]);
-                event.target.value = "";
-              }}
-            />
-            <button
-              type="button"
-              title="Import an image from this computer"
-              onClick={() => imageInputRef.current?.click()}
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-bold text-ocean hover:bg-mist"
-            >
-              <ImagePlus size={17} aria-hidden="true" /> Import image
-            </button>
-            <label className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-white px-2 text-sm font-semibold text-ink" title="Choose table-cell fill colour">
-              <PaintBucket size={17} aria-hidden="true" />
-              <span className="sr-only">Table-cell fill colour</span>
-              <input
-                type="color"
-                aria-label="Table-cell fill colour"
-                value={cellFillColor}
-                onChange={(event) => setCellFillColor(event.target.value)}
-                className="h-6 w-7 cursor-pointer border-0 bg-transparent p-0"
-              />
-            </label>
-            <button
-              type="button"
-              title="Apply the chosen fill to the selected table cell"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => applyCellFill(cellFillColor)}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
-            >
-              Fill cell
-            </button>
-            <button
-              type="button"
-              title="Remove fill from the selected table cell"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => applyCellFill("")}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-bold text-ink hover:bg-slate-100"
-            >
-              Clear fill
-            </button>
-          </div>
-        )}
         <div className="min-h-0 flex-1 overflow-auto bg-slate-100 p-6">
           <Editor
             tinymceScriptSrc="/tinymce/tinymce.min.js"
@@ -727,30 +471,86 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             onInit={(_, editor) => {
               editorRef.current = editor;
               editor.getBody().className = `word-document ${documentClasses}`;
-              if (isFreePractice) {
-                editor.getBody().lang = spellcheckLanguage;
-                editor.getBody().spellcheck = true;
-                editor.getDoc().documentElement.lang = spellcheckLanguage;
-              }
-              refreshWordCount(editor.getContent());
+              editor.getBody().lang = spellcheckLanguage;
+              editor.getBody().spellcheck = true;
+              editor.getDoc().documentElement.lang = spellcheckLanguage;
             }}
             onEditorChange={(value) => {
               setContent(value);
-              refreshWordCount(value);
             }}
             init={{
               height: "100%",
               min_height: 640,
-              menubar: isFreePractice ? "edit insert format table tools" : false,
+              menubar: "edit insert format layout table review view",
               branding: false,
               promotion: false,
-              statusbar: isFreePractice,
-              plugins: isFreePractice
-                ? "advlist autolink charmap fullscreen image link lists nonbreaking pagebreak searchreplace table visualblocks wordcount code"
-                : "lists table link image wordcount code",
-              toolbar: isFreePractice
-                ? "undo redo searchreplace | blocks fontfamily fontsize lineheight | bold italic underline strikethrough superscript subscript | forecolor backcolor removeformat | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table image link charmap pagebreak | visualblocks fullscreen code"
-                : "undo redo | blocks fontfamily fontsize | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | table image link | code",
+              statusbar: true,
+              plugins: "advlist autolink charmap fullscreen image link lists nonbreaking pagebreak searchreplace table visualblocks wordcount",
+              toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lineheight | table image link",
+              toolbar_mode: "wrap",
+              menu: {
+                edit: { title: "Edit", items: "undo redo | cut copy paste | selectall | searchreplace" },
+                insert: { title: "Insert", items: "image link inserttable | charmap nonbreaking pagebreak | documentheader documentfooter documentpagenumber" },
+                format: { title: "Format", items: "bold italic underline strikethrough superscript subscript | blocks fontfamily fontsize | forecolor backcolor | removeformat" },
+                layout: { title: "Layout", items: "documentmargins documentorientation documentcolumns documentspacing" },
+                table: { title: "Table", items: "inserttable | cell row column | tableprops deletetable | documenttablesort" },
+                review: { title: "Review", items: "documentlanguage documentignorespelling | wordcount" },
+                view: { title: "View", items: "visualblocks | fullscreen" }
+              },
+              setup: (editor) => {
+                const textInsertion = (name: string, title: string, tag: "header" | "footer") => {
+                  editor.ui.registry.addMenuItem(name, {
+                    text: title,
+                    onAction: () => editor.windowManager.open({
+                      title,
+                      body: { type: "panel", items: [{ type: "input", name: "text", label: title + " text" }] },
+                      initialData: { text: "" },
+                      buttons: [{ type: "cancel", text: "Cancel" }, { type: "submit", text: "Insert", primary: true }],
+                      onSubmit: (dialog) => {
+                        editor.insertContent("<" + tag + ' class="doc-' + tag + '">' + editor.dom.encode(dialog.getData().text) + "</" + tag + "><p></p>");
+                        dialog.close();
+                      }
+                    })
+                  });
+                };
+                textInsertion("documentheader", "Header", "header");
+                textInsertion("documentfooter", "Footer", "footer");
+                editor.ui.registry.addMenuItem("documentpagenumber", { text: "Page number", onAction: insertPageNumber });
+                editor.ui.registry.addNestedMenuItem("documentmargins", {
+                  text: "Margins",
+                  getSubmenuItems: () => [
+                    { type: "menuitem", text: "Normal", onAction: () => setDocumentClasses(value => value.split(" ").filter(item => item !== "page-margin-wide").join(" ")) },
+                    { type: "menuitem", text: "Wide", onAction: () => setDocumentClasses(value => [...value.split(" ").filter(item => item !== "page-margin-wide"), "page-margin-wide"].join(" ")) }
+                  ]
+                });
+                editor.ui.registry.addNestedMenuItem("documentorientation", {
+                  text: "Orientation",
+                  getSubmenuItems: () => [
+                    { type: "menuitem", text: "Portrait", onAction: () => setDocumentClasses(value => value.split(" ").filter(item => item !== "page-landscape").join(" ")) },
+                    { type: "menuitem", text: "Landscape", onAction: () => setDocumentClasses(value => [...value.split(" ").filter(item => item !== "page-landscape"), "page-landscape"].join(" ")) }
+                  ]
+                });
+                editor.ui.registry.addNestedMenuItem("documentcolumns", {
+                  text: "Columns",
+                  getSubmenuItems: () => [1, 2, 3].map(count => ({
+                    type: "menuitem" as const,
+                    text: String(count),
+                    onAction: () => setDocumentClasses(value => [...value.split(" ").filter(item => item && item !== "columns-2" && item !== "columns-3"), ...(count > 1 ? ["columns-" + count] : [])].join(" "))
+                  }))
+                });
+                editor.ui.registry.addMenuItem("documentspacing", { text: "Paragraph spacing", onAction: () => toggleDocumentClass("paragraph-spacing-relaxed") });
+                editor.ui.registry.addMenuItem("documenttablesort", { text: "Sort first table A-Z", onAction: () => {
+                  const sorted = sortFirstTableContent(editor.getContent());
+                  if (sorted) editor.setContent(sorted);
+                } });
+                editor.ui.registry.addNestedMenuItem("documentlanguage", {
+                  text: "Spelling language",
+                  getSubmenuItems: () => SPELLCHECK_LANGUAGES.map(language => ({
+                    type: "menuitem" as const, text: language.label, onAction: () => setSpellcheckLanguage(language.value)
+                  }))
+                });
+                editor.ui.registry.addMenuItem("documentignorespelling", { text: "Ignore selected word", onAction: ignoreSelectedSpelling });
+              },
               font_family_formats: "Arial=arial,helvetica,sans-serif;Calibri=calibri,arial,sans-serif;Times New Roman=times new roman,times,serif",
               fontsize_formats: "10pt 11pt 12pt 14pt 18pt 24pt 36pt",
               line_height_formats: "1 1.15 1.5 2",
@@ -775,8 +575,8 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 body.word-document h1 { margin: 0 0 16px; font-size: 28px; font-weight: 700; }
                 body.word-document h2 { margin: 0 0 12px; font-size: 22px; font-weight: 700; }
                 body.word-document p { margin: 0 0 12px; }
-                body.word-document table { margin: 16px 0; ${isFreePractice ? "max-width: 100%;" : "width: 100%;"} border-collapse: collapse; }
-                body.word-document td, body.word-document th { min-width: ${isFreePractice ? "32px" : "120px"}; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
+                body.word-document table { margin: 16px 0; max-width: 100%; border-collapse: collapse; }
+                body.word-document td, body.word-document th { min-width: 32px; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
                 body.word-document img { display: inline-block; margin: 12px 0; max-width: 100%; }
                 body.word-document span[data-spellcheck-ignore="true"] { text-decoration: none; }
                 .doc-header, .doc-footer { border-bottom: 1px solid #cbd5e1; color: #475569; font-size: 13px; margin-bottom: 16px; padding-bottom: 6px; text-align: right; }
@@ -785,20 +585,19 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               `,
               table_default_attributes: { border: "1" },
               table_default_styles: { borderCollapse: "collapse", width: "100%" },
-              table_sizing_mode: isFreePractice ? "fixed" : "relative",
+              table_sizing_mode: "fixed",
               table_column_resizing: "resizetable",
               table_resize_bars: true,
               object_resizing: "img,table",
-              table_toolbar: isFreePractice
-                ? "tableprops tablecellprops | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells"
-                : "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+              table_toolbar: "tableprops tablecellprops | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells",
               browser_spellcheck: true,
-              contextmenu: isFreePractice ? "link image table" : "table",
-              paste_data_images: isFreePractice,
-              file_picker_types: isFreePractice ? "image" : undefined,
+              contextmenu: "link image table",
+              paste_data_images: true,
+              file_picker_types: "image",
+              image_list: [{ title: "Practice image", value: "/assets/peak-study-card.svg" }],
+              image_advtab: true,
               images_file_types: "jpg,jpeg,png,gif,webp",
-              file_picker_callback: isFreePractice
-                ? (callback, _value, meta) => {
+              file_picker_callback: (callback, _value, meta) => {
                     if (meta.filetype !== "image") return;
                     const input = document.createElement("input");
                     input.type = "file";
@@ -811,8 +610,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                       reader.readAsDataURL(file);
                     };
                     input.click();
-                  }
-                : undefined,
+                  },
               automatic_uploads: false
             }}
           />

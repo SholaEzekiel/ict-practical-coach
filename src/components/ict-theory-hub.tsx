@@ -1,5 +1,7 @@
 "use client";
 
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { ictTheoryModules } from "@/lib/ict-theory-data";
@@ -8,15 +10,6 @@ import { Card, Pill, ProgressBar } from "@/components/ui";
 import { spacedShuffle } from "@/lib/spaced-shuffle";
 
 type ContentTarget = string | "module-glossary" | "module-quiz";
-
-function shuffle<T>(items: T[]) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
 
 function usefulQuizFeedback(feedback: string, correctAnswer: string) {
   const cleaned = feedback.replace(/^Correct[.:]?\s*/i, "").trim();
@@ -415,10 +408,7 @@ export function IctTheoryHub() {
   const isCorrect = selectedAnswer === quiz?.correctIndex;
   const additionalFeedback = quiz ? usefulQuizFeedback(quiz.feedback, quiz.options[quiz.correctIndex]) : "";
   const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
-  const shuffledOptions = useMemo(() => {
-    if (!quiz) return [];
-    return shuffle(quiz.options.map((option, index) => ({ option, index })));
-  }, [quiz]);
+  const shuffledOptions = useShuffledOptions("ict-theory:" + (quiz?.id || ""), quiz?.options || []);
 
   useEffect(() => {
     setQuizOrder(spacedShuffle(

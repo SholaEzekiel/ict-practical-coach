@@ -1,5 +1,7 @@
 "use client";
 
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, ChevronLeft, Database, FileDown, FileInput, KeyRound, Link2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Printer, Rows3, Search, Sparkles, Tags } from "lucide-react";
@@ -18,15 +20,6 @@ type QuizScore = {
   correct: number;
   attempted: number;
 };
-
-function shuffle<T>(items: T[]) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
 
 function cloneTable(table: DatabaseTable) {
   return {
@@ -195,10 +188,7 @@ export function DatabaseLab({ moduleId }: { moduleId?: string }) {
   const quizScoreKey = moduleId || module?.id || "databases";
   const quizScore = quizAttempts[quizScoreKey] || { correct: 0, attempted: 0 };
   const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
-  const quizOptions = useMemo(
-    () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
-    [card?.id, card?.quiz]
-  );
+  const quizOptions = useShuffledOptions("database-lab.tsx:" + (card?.id || ""), card?.quiz?.options || []);
   const feedbackRef = useFeedbackAutoScroll<HTMLElement>(feedback, Boolean(feedback && !feedback.ok));
   const queryRows = useMemo(() => {
     const rows = selected?.rows || [];

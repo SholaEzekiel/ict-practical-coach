@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, ListChecks } from "lucide-react";
 import { businessCaseStudyModules } from "@/lib/business-case-study-data";
@@ -16,15 +18,6 @@ const skillLabels = {
   EVAL: "Evaluation"
 } as const;
 
-function shuffle<T>(items: T[]) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
-
 export function BusinessCaseStudyHub() {
   const [activeUnitId, setActiveUnitId] = useState(businessCaseStudyModules[0]?.unitId || 1);
   const [caseIndex, setCaseIndex] = useState(0);
@@ -37,8 +30,7 @@ export function BusinessCaseStudyHub() {
   const activeCase = activeModule.cases[safeCaseIndex] || activeModule.cases[0];
   const safeQuestionIndex = Math.min(questionIndex, Math.max(0, activeCase.questions.length - 1));
   const activeQuestion = activeCase.questions[safeQuestionIndex] || activeCase.questions[0];
-  const previousOptionOrders = useRef<Record<string, number[]>>({});
-  const [options, setOptions] = useState(() => shuffle(activeQuestion.options.map((option, index) => ({ option, index }))));
+  const options = useShuffledOptions("case:" + activeQuestion.id, activeQuestion.options);
   const totalQuestions = activeModule.cases.reduce((total, caseStudy) => total + caseStudy.questions.length, 0);
   const unitQuestionIds = useMemo(() => activeModule.cases.flatMap((caseStudy) => caseStudy.questions.map((question) => question.id)), [activeModule]);
   const currentQuestionPosition = activeModule.cases
@@ -64,30 +56,14 @@ export function BusinessCaseStudyHub() {
     setQuestionIndex((index) => Math.min(index, Math.max(0, activeCase.questions.length - 1)));
   }, [activeCase.questions.length, activeModule.cases.length]);
 
-  useEffect(() => {
-    previousOptionOrders.current[activeQuestion.id] = options.map(({ index }) => index);
-  }, []);
 
-  function prepareOptions(question: typeof activeQuestion) {
-    let nextOptions = shuffle(question.options.map((option, index) => ({ option, index })));
-    const previousOrder = previousOptionOrders.current[question.id];
-    const repeatedOrder = previousOrder?.every((index, position) => index === nextOptions[position]?.index);
-
-    if (repeatedOrder && nextOptions.length > 1) {
-      nextOptions = [...nextOptions.slice(1), nextOptions[0]];
-    }
-
-    previousOptionOrders.current[question.id] = nextOptions.map(({ index }) => index);
-    setOptions(nextOptions);
-  }
 
   function chooseUnit(unitId: number) {
-    const nextModule = businessCaseStudyModules.find((module) => module.unitId === unitId) || businessCaseStudyModules[0];
     setActiveUnitId(unitId);
     setCaseIndex(0);
     setQuestionIndex(0);
     setAnswers({});
-    prepareOptions(nextModule.cases[0].questions[0]);
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -109,7 +85,7 @@ export function BusinessCaseStudyHub() {
       if (remaining < questionCount) {
         setCaseIndex(nextCaseIndex);
         setQuestionIndex(remaining);
-        prepareOptions(activeModule.cases[nextCaseIndex].questions[remaining]);
+
         return;
       }
       remaining -= questionCount;
@@ -210,7 +186,7 @@ export function BusinessCaseStudyHub() {
                 setCaseIndex(0);
                 setQuestionIndex(0);
                 setAnswers({});
-                prepareOptions(activeModule.cases[0].questions[0]);
+
               }}
               className="mt-3 text-xs font-bold text-ocean hover:underline"
             >

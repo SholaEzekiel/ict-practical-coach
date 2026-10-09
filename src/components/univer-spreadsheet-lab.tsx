@@ -1,5 +1,7 @@
 "use client";
 
+import { useShuffledOptions } from "@/lib/use-shuffled-options";
+
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
@@ -61,15 +63,6 @@ type QuizScore = {
 
 const practiceRowCount = 500;
 const practiceColumnCount = 40;
-
-function shuffle<T>(items: T[]) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
 
 function colToIndex(column: string) {
   return column
@@ -393,10 +386,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const progressValue = moduleCardsForRoute.length ? (completedModuleCards / moduleCardsForRoute.length) * 100 : 0;
   const quizScore = quizAttempts[moduleId || "spreadsheets"] || { correct: 0, attempted: 0 };
   const quizAccuracy = quizScore.attempted ? Math.round((quizScore.correct / quizScore.attempted) * 100) : 0;
-  const quizOptions = useMemo(
-    () => card?.quiz ? shuffle(card.quiz.options.map((option, index) => ({ option, index }))) : [],
-    [card?.id, card?.quiz]
-  );
+  const quizOptions = useShuffledOptions("univer-spreadsheet-lab.tsx:" + (card?.id || ""), card?.quiz?.options || []);
   const feedbackRef = useFeedbackAutoScroll<HTMLDivElement>(feedback, Boolean(feedback && !feedback.isCorrect));
 
   useEffect(() => {

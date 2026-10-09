@@ -95,95 +95,122 @@ function knowledgeItem(
 const knowledgeBanks: Record<string, QuestionDraft[]> = {
   "bus-case-1-1": [
     knowledgeItem(
-      "What type of business organisation is Ama's bakery most likely to be, and which detail supports this?",
-      "Use the ownership information in the scenario.",
-      "A sole trader, because Ama owns the bakery herself.",
-      "A partnership, because the bakery employs eight workers.",
-      "A public limited company, because it sells premium products.",
-      "A franchise, because Ama wants to open a second shop.",
-      "a sole trader is a business owned by one person; employees do not become owners"
+      "Which type of business organisation does Ama currently operate?",
+      "Use the information about who owns the business.",
+      "A sole trader: Ama is the only owner.",
+      "A partnership: the eight workers share ownership.",
+      "A private limited company: selling to cafes creates shareholders.",
+      "A franchise: every business with a second shop is a franchise.",
+      "employees and customers do not become owners; Ama alone owns the business"
     ),
     knowledgeItem(
-      "Which production method is most suitable for making quantities of premium bread in separate baking runs?",
-      "Think about products made together in groups rather than one continuous flow.",
-      "Batch production",
-      "Flow production",
-      "Job production",
-      "Lean production",
-      "batch production makes a set quantity of one product before production changes to another batch"
-    ),
-    knowledgeItem(
-      "Which source could provide Ama with long-term external finance for a second shop?",
-      "Choose finance borrowed for several years rather than money generated inside the bakery.",
-      "A bank loan",
-      "Retained profit",
-      "Trade credit for flour",
-      "Reducing bread inventory",
-      "a bank loan is external finance repaid over an agreed period with interest"
+      "Which economic sector describes the bakery's bread-making activity?",
+      "Classify the activity of turning ingredients into goods.",
+      "Secondary sector: flour and other ingredients are transformed into bread.",
+      "Primary sector: the bakery extracts flour directly from the earth.",
+      "Tertiary sector: producing bread is a service rather than manufacturing.",
+      "Public sector: employing workers makes the bakery government-owned.",
+      "manufacturing bread transforms raw materials, so this activity belongs to the secondary sector"
     )
   ],
   "bus-case-1-2": [
     knowledgeItem(
-      "What is start-up capital?",
-      "Identify the finance needed before a new business begins trading.",
-      "Money used to establish a new business and buy its initial resources",
-      "Revenue earned after the business opens",
-      "Profit retained by an established company",
-      "The value of goods sold during one year",
-      "start-up capital pays for the assets and expenses needed to begin operating"
+      "Which entrepreneurial characteristic does Leo show by committing his savings before knowing whether the kiosk will succeed?",
+      "Consider uncertainty when starting a business.",
+      "Risk-taking: Leo could lose the money he invests.",
+      "Limited liability: every entrepreneur's savings are protected.",
+      "Continuity: the business automatically survives any change of owner.",
+      "Public ownership: the government accepts the business risk.",
+      "entrepreneurs commit resources while the outcome remains uncertain"
     ),
     knowledgeItem(
-      "Which part of Leo's business plan should estimate demand for phone repairs in the mall?",
-      "Choose the section that studies customers and competitors.",
-      "Market research and the marketing plan",
-      "The organisational chart",
-      "The production quality record",
-      "The statement of financial position",
-      "market research helps a start-up estimate customer demand and understand competitors"
+      "Which statement describes a business plan?",
+      "Think about the document Leo prepares before opening.",
+      "A document setting out objectives and how the proposed business will operate.",
+      "A legal agreement giving another business permission to use Leo's brand.",
+      "A measure of business size based only on the number of employees.",
+      "A record proving that a new business cannot fail.",
+      "a business plan brings together objectives, planned activities, and the resources needed"
     )
   ],
   "bus-case-1-3": [
     knowledgeItem(
-      "Which feature of a partnership explains why the owners' personal savings may be at risk?",
-      "Recall the liability normally faced by ordinary partners.",
-      "Partners usually have unlimited liability for business debts.",
-      "Partners can sell shares to the public.",
-      "The government owns the workshop's assets.",
-      "The workshop must operate as a social enterprise.",
-      "unlimited liability means owners may have to use personal assets to repay business debts"
+      "Why may Mina and Joel's personal savings be at risk in their ordinary partnership?",
+      "Consider the owners' legal responsibility for debts.",
+      "They have unlimited liability and may have to use personal assets to repay debts.",
+      "Their employees automatically have responsibility for the owners' debts.",
+      "Partnership ownership gives the owners limited liability.",
+      "Their customers own the workshop because they order custom tables.",
+      "ordinary partners normally have unlimited liability for business debts"
+    ),
+    knowledgeItem(
+      "Which feature distinguishes a private limited company from their partnership?",
+      "Focus on legal identity and ownership.",
+      "The company has a separate legal identity and its shareholders have limited liability.",
+      "The company must be owned by the government.",
+      "Its shares must be offered to everyone on a stock exchange.",
+      "Its owners cannot employ workers or pursue growth.",
+      "incorporation separates the company legally from its shareholders"
     )
   ],
   "bus-case-1-4": [
     knowledgeItem(
-      "How would the farm's activity be classified after it turns tomatoes into bottled sauce?",
-      "Distinguish extracting or growing raw materials from manufacturing goods.",
-      "Sauce making is secondary-sector activity because it processes raw materials.",
-      "Sauce making is primary-sector activity because it grows tomatoes.",
-      "Sauce making is tertiary-sector activity because every product is a service.",
-      "Sauce making is public-sector activity because food is essential.",
-      "the secondary sector converts raw materials into finished or semi-finished goods"
+      "Which classification correctly describes Kofi Family Foods before and after it starts making sauce?",
+      "Classify growing crops separately from processing them.",
+      "Growing tomatoes is primary activity; making bottled sauce is secondary activity.",
+      "Growing tomatoes is secondary activity; making sauce is primary activity.",
+      "Both activities are tertiary because customers buy the products.",
+      "Both activities are public-sector because food meets a need.",
+      "growing extracts natural resources and processing converts them into manufactured goods"
+    ),
+    knowledgeItem(
+      "What does added value mean for a bottle of Kofi's sauce?",
+      "Distinguish added value from profit.",
+      "The selling price of the sauce minus the cost of its bought-in materials.",
+      "The selling price minus every business expense.",
+      "The number of tomatoes grown minus the number sold.",
+      "The total amount the family invests in the business.",
+      "added value is the difference between selling price and the cost of bought-in materials"
     )
   ],
   "bus-case-1-5": [
     knowledgeItem(
-      "What feature makes the community gym a social enterprise?",
-      "Look for the combination of trading income and a social purpose.",
-      "It trades to meet a social aim while earning a surplus to continue operating.",
-      "It must distribute all surplus to private shareholders.",
-      "It is owned and controlled by central government.",
-      "It cannot charge customers for using its services.",
-      "a social enterprise uses business activity to pursue social objectives and normally reinvests surplus"
+      "What makes Riverside Community Gym a social enterprise?",
+      "Consider its trading activity and purpose.",
+      "It earns income while pursuing the social aim of affordable access to exercise.",
+      "It distributes all income to private owners as its only objective.",
+      "It is automatically government-owned because it serves the community.",
+      "It is prohibited from charging members or earning a surplus.",
+      "a social enterprise combines business activity with a social purpose"
+    ),
+    knowledgeItem(
+      "Which pair identifies an internal and an external stakeholder of the gym?",
+      "Distinguish people working within the organisation from people outside it.",
+      "Internal: the trainers; external: the members.",
+      "Internal: the members; external: the trainers.",
+      "Internal: local residents; external: the gym manager.",
+      "Internal: equipment suppliers; external: employed trainers.",
+      "employees work within the business, while customers and suppliers are external stakeholders"
     )
   ],
   "bus-case-1-6": [
     knowledgeItem(
-      "Which statement correctly describes Nia's role in the franchise?",
-      "Distinguish the franchisee from the established brand owner.",
-      "Nia is the franchisee who pays to use the franchisor's brand and business system.",
-      "Nia is the franchisor because she follows another business's rules.",
-      "Nia becomes an employee with no investment or business risk.",
-      "Nia can change the brand and operating system without permission.",
-      "a franchisee buys the right to operate using the franchisor's established name and methods"
+      "What is Nia's role if she pays to operate under the clothing brand's name?",
+      "Distinguish the buyer of the right from the owner of the brand.",
+      "Franchisee: she buys the right to use the established brand and system.",
+      "Franchisor: she owns the brand being licensed to other businesses.",
+      "Public-sector manager: the government owns the outlet.",
+      "Employee: she invests nothing and takes no business risk.",
+      "the franchisee pays the franchisor for the right to use its business name and methods"
+    ),
+    knowledgeItem(
+      "How does a joint venture differ from the franchise Nia is considering?",
+      "Consider how independent businesses work together.",
+      "Independent businesses cooperate on a particular project and share resources and risks.",
+      "One business buys permanent ownership of all the other business's assets.",
+      "An individual operates a business without sharing any decisions.",
+      "A business sells shares to the general public on a stock exchange.",
+      "a joint venture involves businesses working together on an agreed project"
     )
   ],
   "bus-case-2-1": [
@@ -780,6 +807,46 @@ function buildCase(seed: CaseSeed, caseNumber: number): BusinessCaseStudy {
     return makeQuestion(seed, id, skill, evaluationDraft(seed, variant));
   });
 
+  const unitOnePrompts: Record<string, [string, string, string]> = {
+  "bus-case-1-1": [
+    "Which statement correctly applies internal growth to Ama's proposed second shop?",
+    "What is a likely consequence of Ama accepting the equal partner's offer?",
+    "Which growth decision best fits Ama's limited capital and wish to retain control?"
+  ],
+  "bus-case-1-2": [
+    "How could a business plan help Leo prepare to start his kiosk?",
+    "How could planning the required resources reduce Leo's start-up risk?",
+    "Should Leo prepare a business plan before committing his savings?"
+  ],
+  "bus-case-1-3": [
+    "How would private limited company status address Mina and Joel's concern?",
+    "What would incorporation change about the owners' liability for workshop debts?",
+    "Which ownership decision best balances protection of personal savings and the owners' wish to keep control?"
+  ],
+  "bus-case-1-4": [
+    "How would making bottled sauce change the sectors in which Kofi Family Foods operates?",
+    "How could sauce production affect added value compared with selling fresh tomatoes?",
+    "Which approach to sauce production best fits the family's limited management experience?"
+  ],
+  "bus-case-1-5": [
+    "Which statement applies the gym's social and business objectives to its situation?",
+    "How could keeping fees too low affect the gym's ability to achieve its objectives?",
+    "Which fee decision best balances the gym's social purpose and continued survival?"
+  ],
+  "bus-case-1-6": [
+    "How could a franchise help Nia given her limited ownership experience?",
+    "What is a likely effect of using an established franchise brand and paying royalties?",
+    "Does a franchise suit Nia better than starting without the brand's support?"
+  ]
+};
+  const prompts = unitOnePrompts[seed.id];
+  if (prompts) {
+    questions.forEach(question => {
+      const index = (["APP", "AN", "EVAL"] as BusinessAssessmentSkill[]).indexOf(question.skill);
+      if (index >= 0) question.question = prompts[index];
+    });
+  }
+
   return {
     id: seed.id,
     unitId: seed.unitId,
@@ -795,55 +862,55 @@ const caseSeeds: CaseSeed[] = [
     id: "bus-case-1-1",
     unitId: 1,
     title: "Ama's Artisan Bakery",
-    scenario: "Ama owns a bakery with eight workers and sells premium handmade bread to households and two local cafés. The bakery opens six days a week, uses batch production, and often sells out before closing. Ama is considering a second shop near a busy bus station, but her finance is limited and a nearby supermarket sells cheaper bread. She also plans to replace the staff uniforms next year.",
-    details: ["8 workers", "premium handmade products", "limited finance", "possible second shop"],
+scenario: "Ama is the sole owner of a bakery employing eight workers. It transforms flour and other ingredients into premium handmade bread for households and two local cafes. The bakery often sells out before closing. Ama wants to reach more customers through a second shop near a bus station, but has limited capital and wants to retain control of recipes and customer service. A potential partner offers capital in return for equal decision-making power. Another bakery offers to discuss a joint project. Ama could also remain small and focus on her existing customers. Her main objective is to keep the business successful without growing beyond what she can manage.",
+details: ["sole owner", "wants to retain control", "limited capital", "possible second shop"],
     focus: "business growth",
-    genericTheory: "Business growth can increase sales and market share.",
-    appliedPoint: "Opening a second shop could increase sales, but Ama's limited finance makes expansion risky.",
-    analysisChain: "If Ama opens a second shop, fixed costs such as rent and wages will rise, so cash outflows may increase before enough premium bread is sold.",
-    evaluation: "Ama should expand only if forecast demand covers the extra rent and wages, because the small workforce and limited finance make survival more important than rapid growth."
+genericTheory: "Internal growth expands an existing business through its own activities.",
+appliedPoint: "Opening her own second shop is internal growth; it would let Ama reach more customers while keeping ownership.",
+analysisChain: "A partner could contribute capital for expansion, but equal decision-making would reduce Ama's control and could create disagreements over recipes.",
+    evaluation: "Ama should initially remain small and prepare for gradual internal growth, because this preserves her control while she builds the capital and management capacity for another shop."
   },
   {
     id: "bus-case-1-2",
     unitId: 1,
     title: "Leo Mobile Repairs",
-    scenario: "Leo wants to open a phone repair kiosk in a busy shopping mall where three phone retailers already trade. He has strong technical skills and owns basic repair tools, but has little experience of cash management or promotion. The landlord requires three months' rent in advance, while customers usually want repairs completed on the same day. Leo prefers a blue shop sign, although this will not determine whether the kiosk succeeds.",
+    scenario: "Leo plans to start a phone repair kiosk in a shopping mall. He has repair skills and basic tools but little experience of running a business. He will invest his savings without knowing how many customers will use the service. His business plan sets out an objective of surviving the first year, estimates the resources he needs, and considers competition from nearby repair businesses. A local government programme offers free start-up advice. Leo wants to own the kiosk himself initially, rather than share decisions with a partner.",
     details: ["new start-up", "technical repair skills", "busy mall", "limited management experience"],
     focus: "enterprise and business plans",
     genericTheory: "A business plan sets out objectives, finance, marketing, and operations.",
     appliedPoint: "A business plan would help Leo estimate kiosk rent, repair equipment costs, and expected customer demand in the mall.",
-    analysisChain: "If Leo plans cash needs before opening, he is less likely to run out of money for parts, so repairs can continue and customers are less likely to be lost.",
+    analysisChain: "Identifying the resources he needs in a business plan could reveal a shortage before Leo commits his savings, reducing the risk of starting a business he cannot sustain.",
     evaluation: "A plan will not guarantee success, but it is important because Leo has limited management experience and must judge whether mall rent can be covered by repair sales."
   },
   {
     id: "bus-case-1-3",
     unitId: 1,
     title: "Oak & Pine Workshop",
-    scenario: "Mina and Joel operate Oak & Pine Workshop as a partnership and employ four skilled carpenters. The business makes custom dining tables, so each order requires different measurements and finishes. Demand is increasing, but the partners may need a bank loan for new machinery and are worried that personal savings could be at risk if debts rise. Their workshop is painted green, which customers rarely see.",
+    scenario: "Mina and Joel own Oak & Pine Workshop as an ordinary partnership and employ four carpenters. They transform timber into dining tables. Demand is increasing, and they want to grow while protecting their personal savings from business debts. They are considering registering a private limited company with themselves as the only shareholders. They value shared control and do not want to offer shares to the general public. Registration would bring additional legal requirements, which they must weigh against limited liability.",
     details: ["partnership", "custom tables", "two owners", "personal savings at risk"],
     focus: "legal structure",
     genericTheory: "Limited liability means owners do not usually risk personal assets for company debts.",
     appliedPoint: "Becoming a private limited company could protect the friends' personal savings if the furniture workshop builds up debts.",
-    analysisChain: "If the workshop becomes incorporated, it may also find it easier to raise capital, allowing it to buy better equipment and complete more custom table orders.",
+    analysisChain: "Incorporation would separate the workshop legally from its owners, so business debts would normally threaten the company's assets rather than Mina and Joel's personal savings.",
     evaluation: "A private limited company may suit the workshop if debt risk is increasing, although the friends must accept more legal requirements and possible shared control with shareholders."
   },
   {
     id: "bus-case-1-4",
     unitId: 1,
     title: "Kofi Family Foods",
-    scenario: "Kofi Family Foods grows tomatoes and sells most of them to wholesalers at harvest time. The family is considering using part of the crop to make bottled tomato sauce, which would require cooking equipment, packaging, and food-safety training. Sauce could be sold throughout the year at a higher price, but the farm has limited production experience. The family also grows flowers beside the farmhouse for decoration.",
+    scenario: "Kofi Family Foods is privately owned by a family that grows tomatoes and sells them to wholesalers. The family is considering turning some tomatoes into bottled sauce. This would extend its activities from growing a crop to manufacturing a finished product. The sauce could command a higher selling price, but bottles and other bought-in ingredients would also cost money. The family has limited experience of running a manufacturing business and wants to avoid expanding too quickly. It could begin with a small trial while continuing to sell fresh tomatoes.",
     details: ["primary activity", "tomatoes", "possible sauce production", "family business"],
     focus: "business classification",
     genericTheory: "Primary businesses extract or grow raw materials, while secondary businesses manufacture goods.",
-    appliedPoint: "Growing tomatoes is primary activity, but making bottled tomato sauce would move the farm into secondary production.",
-    analysisChain: "Adding sauce production could increase added value because the family sells a finished product, which may allow a higher selling price than raw tomatoes.",
-    evaluation: "Making sauce could increase added value, but the family should only do it if it can afford equipment and has demand beyond its current tomato buyers."
+    appliedPoint: "Processing tomatoes into sauce adds a secondary-sector activity to the family's existing primary-sector business.",
+    analysisChain: "Sauce could increase added value if its higher selling price more than offsets the extra cost of bought-in bottles and ingredients; a higher price alone does not establish this.",
+    evaluation: "A small sauce trial while continuing to sell tomatoes would let the family explore growth without immediately expanding beyond its limited management experience."
   },
   {
     id: "bus-case-1-5",
     unitId: 1,
     title: "Riverside Community Gym",
-    scenario: "Riverside Community Gym is a social enterprise serving a low-income neighbourhood. It employs five trainers, offers discounted youth sessions, and wants membership fees to remain affordable. Several exercise machines are old, so the gym must generate enough surplus to replace them without abandoning its social objective. Members have also requested brighter changing-room walls.",
+    scenario: "Riverside Community Gym is a social enterprise in a low-income neighbourhood. Its social objective is affordable access to exercise, while its business objective is to earn enough surplus to continue operating and replace old equipment. It employs five trainers and offers discounted youth sessions. Members want low fees, while trainers want secure jobs and reliable pay. Managers are considering a modest increase in standard adult fees while retaining youth discounts. A large increase for everyone could conflict with the gym's social purpose.",
     details: ["social enterprise", "low membership fees", "needs surplus", "old equipment"],
     focus: "business objectives",
     genericTheory: "Business objectives can include survival, profit, growth, market share, and social aims.",
@@ -855,8 +922,8 @@ const caseSeeds: CaseSeed[] = [
     id: "bus-case-1-6",
     unitId: 1,
     title: "Nia Style Outlet",
-    scenario: "Nia is considering opening an outlet of a well-known clothing franchise in her town. The franchisor provides store design, approved suppliers, staff training, and national advertising, but Nia must pay an initial fee and a percentage of sales. Local customers recognise the brand, although Nia would have limited freedom to stock independent designers. The proposed shop has a small staff kitchen at the rear.",
-    details: ["established clothing brand", "store design", "supplier system", "fees and rules"],
+    scenario: "Nia wants to start a clothing business but has little experience as an owner. A recognised brand offers her a franchise with an established business system and support. She would pay an initial fee and royalties and follow rules about the products she sells. Alternatively, a local designer proposes a joint venture in which they share resources and decisions to run a new outlet. Nia values support and a recognised name more than complete freedom, but must decide whether the franchise restrictions and payments are acceptable.",
+    details: ["established clothing brand","limited ownership experience","possible joint venture","fees and rules"],
     focus: "franchising",
     genericTheory: "A franchise lets one business use another business's name, products, and operating methods.",
     appliedPoint: "Nia may benefit from the established clothing brand's advertising and supplier system, but she must pay fees and follow store rules.",
@@ -1227,34 +1294,34 @@ const caseSeeds: CaseSeed[] = [
 
 const reasoningDistractors: Record<string, ReasoningDistractors> = {
   "bus-case-1-1": {
-    application: ["Employing eight workers makes the bakery a large company, so finance cannot restrict growth.", "Premium handmade bread means customers will accept any price at a second shop.", "Selling out before closing proves a second location will have identical demand."],
-    analysis: ["A second shop would reduce total fixed costs because rent would be shared across two locations.", "Competition from cheaper supermarket bread would automatically increase Ama's profit margin.", "Replacing staff uniforms would create enough capacity to supply both shops."],
-    evaluation: ["Ama should open immediately because selling out guarantees that every future shop will succeed.", "Ama should reject expansion because a small business should never increase its number of outlets.", "Ama should decide mainly by comparing the colour and cost of next year's uniforms."],
+    application: ["Accepting an equal partner is internal growth because Ama would still work in the bakery.", "A second shop is external growth because it is outside the first building.", "Remaining small means Ama must give ownership of the bakery to her workers."],
+    analysis: ["An equal partner would supply capital while leaving Ama with sole decision-making power.", "Opening another shop would reduce the number of locations Ama has to manage.", "Remaining a sole trader would protect Ama's personal assets through limited liability."],
+    evaluation: ["Ama should accept the equal partner because more capital outweighs her stated preference to retain control.", "Ama should open several shops immediately because selling out at one shop proves she can manage a larger business.", "Ama should convert to a public limited company now because any small business can avoid growth problems by selling shares publicly."]
   },
   "bus-case-1-2": {
-    application: ["Leo's repair skills guarantee that he will manage cash and promotion effectively.", "The presence of three phone retailers proves there is no demand for repairs in the mall.", "Choosing a blue sign is the main purpose of Leo's business plan."],
-    analysis: ["Paying three months' rent in advance would increase the kiosk's available cash.", "Same-day repairs mean Leo will never need to buy or hold replacement parts.", "Competing retailers will automatically send all repair customers to Leo."],
-    evaluation: ["Leo should open without forecasting because technical ability is the only requirement for success.", "Leo should abandon the idea solely because other phone businesses operate in the mall.", "Leo should base the final decision on whether the landlord approves the blue sign."],
+    application: ["A plan is mainly useful after failure, when Leo no longer has business decisions to make.", "Having repair skills means Leo's survival objective is already achieved.", "Receiving government advice would turn Leo's kiosk into a public-sector business."],
+    analysis: ["Preparing a plan would remove the uncertainty of customer demand and guarantee survival.", "Taking a partner would increase Leo's independent control because decisions would be shared.", "Start-up advice would replace the need for Leo to commit any resources to the kiosk."],
+    evaluation: ["Leo should open immediately because technical skills alone provide the experience needed to run a business.", "Leo should take a partner automatically because every start-up must have at least two owners.", "Leo should abandon the plan because planning cannot guarantee success and therefore has no practical value."]
   },
   "bus-case-1-3": {
-    application: ["Employing carpenters means the workers automatically own shares in the partnership.", "Custom production removes the partners' responsibility for business debts.", "Painting the workshop green protects Mina and Joel's personal savings."],
-    analysis: ["Taking a larger bank loan would reduce the amount of debt the partners must repay.", "Limited liability would make every custom table cheaper to manufacture.", "Changing legal structure would remove the need for skilled carpenters."],
-    evaluation: ["The partners should incorporate because limited companies can never fail or owe money.", "They should remain a partnership because growing demand makes personal liability harmless.", "They should choose the legal structure that requires the least paperwork, regardless of debt risk."],
+    application: ["Selling shares to the general public is necessary to establish a private limited company.", "Incorporation would protect the personal assets of employees but leave the owners with unlimited liability.", "Remaining a partnership would separate the business legally from Mina and Joel."],
+    analysis: ["Registering the company would remove the workshop's debts rather than change who is legally responsible.", "Keeping both owners as shareholders would require Mina and Joel to surrender control to the general public.", "Unlimited liability would prevent creditors from seeking repayment from the partners' personal assets."],
+    evaluation: ["They should remain a partnership because increasing demand means personal savings cannot be at risk.", "They should become a public limited company because public share ownership is required for limited liability.", "They should choose the structure with the least administration even if it fails their objective of protecting personal assets."]
   },
   "bus-case-1-4": {
-    application: ["Growing tomatoes and making sauce are both primary-sector activities.", "Selling sauce at a higher price guarantees it will be profitable.", "The decorative flowers are the strongest evidence for processing the tomato crop."],
-    analysis: ["Buying cooking equipment would immediately reduce the farm's fixed costs.", "Food-safety training would shorten the tomato-growing season.", "Year-round sauce sales would make packaging and distribution costs disappear."],
-    evaluation: ["The family should process the entire crop because added value always guarantees higher profit.", "The family should reject sauce production because farms must operate only in the primary sector.", "The decision should depend mainly on whether the flowers beside the farmhouse grow well."],
+    application: ["Sauce making remains primary activity because the family also grows the tomatoes.", "Making sauce turns the family business into the public sector because it supplies food.", "Selling fresh tomatoes and sauce means the farm provides only tertiary services."],
+    analysis: ["The sauce's higher selling price proves added value rises even if bought-in materials cost much more.", "A higher selling price means added value is identical to total sales revenue.", "Growing into manufacturing would remove the need for the family to develop any new management skills."],
+    evaluation: ["They should process the whole crop immediately because a higher selling price guarantees successful growth.", "They should stay exclusively in farming because a privately owned business cannot enter the secondary sector.", "They should stop selling tomatoes before testing sauce demand because operating in two sectors is not allowed."]
   },
   "bus-case-1-5": {
-    application: ["Discounted youth sessions show that profit maximisation is the gym's only objective.", "Old exercise machines mean a social enterprise is not allowed to charge membership fees.", "Brighter changing-room walls would remove the need to earn a surplus."],
-    analysis: ["Reducing every membership fee would automatically provide more cash for replacement equipment.", "Replacing machines would prevent the gym from delivering any social benefit.", "A larger surplus would always make low-income members better able to afford fees."],
-    evaluation: ["The gym should maximise prices because social enterprises have no responsibility to their users.", "It should keep all fees unchanged even if unsafe machines can no longer be replaced.", "It should prioritise wall colour over affordability and equipment condition."],
+    application: ["Being a social enterprise means affordable access must be replaced by profit maximisation.", "Earning a surplus would make the gym lose its social-enterprise status.", "Serving low-income members means the government must own the gym."],
+    analysis: ["Keeping every fee very low would guarantee both affordable access and enough surplus to replace equipment.", "Raising all fees sharply would satisfy members and trainers equally because their objectives are identical.", "Allowing equipment to deteriorate would support survival because members could not choose another gym."],
+    evaluation: ["The gym should raise every fee sharply because social objectives can only be achieved through maximum profit.", "The gym should avoid any fee change even if it can no longer maintain equipment or pay its trainers.", "The gym should prioritise growth in member numbers alone without considering affordability or survival."]
   },
   "bus-case-1-6": {
-    application: ["National advertising means Nia would have complete freedom over products and pricing.", "Paying a franchise fee makes Nia an employee rather than a business owner.", "The staff kitchen is the main benefit supplied by the franchisor."],
-    analysis: ["Using an established brand would prevent Nia from paying any start-up costs.", "Approved suppliers would allow her to stock any independent designer she chooses.", "A percentage-of-sales fee would increase Nia's profit on every item sold."],
-    evaluation: ["Nia should buy the franchise because a recognised brand guarantees profit in every town.", "She should reject it simply because all franchise agreements remove every business decision.", "She should decide according to the size of the staff kitchen rather than projected sales and fees."],
+    application: ["The franchise would give Nia the established name while allowing her to disregard all operating rules.", "Entering the joint venture would make Nia sole owner of the designer's business.", "Paying franchise royalties would make Nia the franchisor who licenses the original brand."],
+    analysis: ["A recognised brand would eliminate Nia's start-up risk rather than reduce it.", "A joint venture would pool resources while giving Nia full independent decision-making power.", "Franchise support would make fees and restrictions irrelevant to the ownership decision."],
+    evaluation: ["Nia should choose the franchise solely for its name without considering payments or product restrictions.", "Nia should choose the joint venture because sharing decisions always provides more freedom than sole ownership.", "Nia should start entirely alone because an inexperienced owner never benefits from an established business system."]
   },
   "bus-case-2-1": {
     application: ["Rotating shifts prove receptionists are highly motivated and unlikely to leave.", "Replacing entrance plants addresses the causes of slow check-in.", "Low pay cannot affect service because guests, not employees, use the hotel rooms."],
@@ -1412,6 +1479,9 @@ function validateCaseOptions(caseStudy: BusinessCaseStudy) {
   const seen = new Set<string>();
 
   caseStudy.questions.forEach((question) => {
+    if (caseStudy.unitId === 1 && /\b(?:batch production|job production|flow production|lean production|break-even|current ratio|gross profit margin)\b/i.test([question.question, ...question.options].join(" "))) {
+      throw new Error(`Out-of-unit topic in ${question.id}`);
+    }
     if (new Set(question.options).size !== question.options.length) {
       throw new Error(`Duplicate options in ${question.id}`);
     }
