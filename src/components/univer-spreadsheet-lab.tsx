@@ -432,6 +432,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   useEffect(() => {
     let disposed = false;
     let univerInstance: UniverInstance | null = null;
+    let disposeGridResizing: (() => void) | undefined;
 
     async function bootUniver() {
       const [{ createUniver, LocaleType, mergeLocales }, { UniverSheetsCorePreset }, locale] = await Promise.all([
@@ -457,6 +458,12 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       univerInstance = univer;
       univerAPI.createWorkbook(getStarterWorkbook(moduleId));
       univerApiRef.current = univerAPI;
+      if (moduleId === "free-practice") {
+        const { attachSpreadsheetGridResizing } = await import("@/lib/spreadsheet-grid-resizing");
+        const container = document.getElementById(containerId);
+        if (!disposed && container) disposeGridResizing = attachSpreadsheetGridResizing(univer, univerAPI, container);
+      }
+      if (disposed) return;
       setReady(true);
     }
 
@@ -465,6 +472,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     return () => {
       disposed = true;
       univerApiRef.current = null;
+      disposeGridResizing?.();
       univerInstance?.dispose();
       document.getElementById(containerId)?.replaceChildren();
     };
