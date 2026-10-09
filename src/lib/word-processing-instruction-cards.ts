@@ -1123,7 +1123,7 @@ const moduleExamChallengeCards: WordProcessingInstructionCard[] = [
     goal: "Edit the digital skills table by adding Biology and merging the heading row.",
     steps: [
       "Add Biology, 50 and 40 above Chemistry.",
-      "Use the merge toolbar button to merge the first table row.",
+      "Select all cells in the first row, then choose Table > Cell > Merge cells and centre the text.",
       "Check the first row text is centred and the Biology row is present."
     ],
     starterHtml: stemStyleStarter,

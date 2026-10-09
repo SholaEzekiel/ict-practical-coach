@@ -493,7 +493,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 insert: { title: "Insert", items: "image link inserttable | charmap nonbreaking pagebreak | documentheader documentfooter documentpagenumber" },
                 format: { title: "Format", items: "bold italic underline strikethrough superscript subscript | blocks fontfamily fontsize | forecolor backcolor | removeformat" },
                 layout: { title: "Layout", items: "documentmargins documentorientation documentcolumns documentspacing" },
-                table: { title: "Table", items: "inserttable | cell row column | tableprops deletetable | documenttablesort" },
+                table: { title: "Table", items: "inserttable | cell row column | documentclearcellfill | tableprops deletetable | documenttablesort" },
                 review: { title: "Review", items: "documentlanguage documentignorespelling | wordcount" },
                 view: { title: "View", items: "visualblocks | fullscreen" }
               },
@@ -539,9 +539,23 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                   }))
                 });
                 editor.ui.registry.addMenuItem("documentspacing", { text: "Paragraph spacing", onAction: () => toggleDocumentClass("paragraph-spacing-relaxed") });
+                editor.ui.registry.addMenuItem("documentclearcellfill", {
+                  text: "Clear cell fill",
+                  onAction: () => {
+                    const selected = editor.dom.select("td[data-mce-selected], th[data-mce-selected]");
+                    const current = editor.dom.getParent(editor.selection.getNode(), "td,th");
+                    const cells = selected.length ? selected : current ? [current] : [];
+                    editor.undoManager.transact(() => cells.forEach(cell => editor.dom.setStyle(cell, "background-color", "")));
+                    editor.nodeChanged();
+                    setContent(editor.getContent());
+                  }
+                });
                 editor.ui.registry.addMenuItem("documenttablesort", { text: "Sort first table A-Z", onAction: () => {
                   const sorted = sortFirstTableContent(editor.getContent());
-                  if (sorted) editor.setContent(sorted);
+                  if (sorted) {
+                    editor.undoManager.transact(() => editor.setContent(sorted));
+                    setContent(editor.getContent());
+                  }
                 } });
                 editor.ui.registry.addNestedMenuItem("documentlanguage", {
                   text: "Spelling language",
@@ -589,7 +603,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               table_column_resizing: "resizetable",
               table_resize_bars: true,
               object_resizing: "img,table",
-              table_toolbar: "tableprops tablecellprops | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells",
+              table_toolbar: "tableprops tablecellprops tabledelete | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells",
               browser_spellcheck: true,
               contextmenu: "link image table",
               paste_data_images: true,
