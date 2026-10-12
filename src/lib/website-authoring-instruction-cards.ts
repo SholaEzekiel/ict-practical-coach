@@ -1,3 +1,5 @@
+import { cssProgressionCards, cssProgressionModules } from "./website-css-progression";
+
 export type WebsiteAuthoringModule = {
   id: string;
   title: string;
@@ -18,6 +20,9 @@ export type WebsiteExpectedResult = {
   containedLinks?: Array<{ container: string; text?: string; href?: string }>;
   linkedImages?: Array<{ href?: string; srcIncludes?: string; srcFromUploadedImage?: boolean; alt?: string }>;
   cssIncludes?: string[];
+  styleChecks?: Array<{ source: "inline" | "internal" | "external"; selector: string; declarations: Record<string, string> }>;
+  stylesheetLink?: string;
+  noInternalStyles?: boolean;
   tableHeaders?: string[];
   title?: string;
 };
@@ -36,6 +41,7 @@ export type WebsiteAuthoringCard = {
   expected: WebsiteExpectedResult;
   teacherReview?: string[];
   points: number;
+  progressive?: boolean;
 };
 
 type CardDraft = Omit<WebsiteAuthoringCard, "moduleId" | "moduleTitle" | "starterCss" | "points"> & {
@@ -75,11 +81,7 @@ export const websiteAuthoringModules: WebsiteAuthoringModule[] = [
     title: "HTML Tables",
     description: "Build tables from support data using rows, heading cells, data cells, captions, and scope."
   },
-  {
-    id: "css-layout",
-    title: "CSS Layout",
-    description: "Apply selectors, colours, spacing, borders, widths, simple layout, and responsive rules."
-  },
+  ...cssProgressionModules,
   {
     id: "exam-build",
     title: "Exam Website Build",
@@ -1300,7 +1302,7 @@ const allCards = [
   ...textMediaCards,
   ...linksNavigationCards,
   ...tableCards,
-  ...cssCards,
+  ...cssProgressionCards,
   ...examBuildCards,
   moduleCard("free-practice", "Free Practice", {
     id: "web-free-practice",

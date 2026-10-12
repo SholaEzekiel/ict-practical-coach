@@ -12,6 +12,7 @@ import { visibleSupportLines } from "@/lib/task-instructions";
 import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { getWebsiteAuthoringCardsForModule, getWebsiteAuthoringModule } from "@/lib/website-authoring-instruction-cards";
 import type { WebsiteAuthoringCard } from "@/lib/website-authoring-instruction-cards";
+import { cssProgressionModules } from "@/lib/website-css-progression";
 
 type Feedback = {
   ok: boolean;
@@ -63,6 +64,11 @@ function getBodyInnerHtml(html: string) {
   return match?.[1]?.trim() || "";
 }
 
+function previewCss(html: string, css: string) {
+  const document = new DOMParser().parseFromString(html, "text/html");
+  return [...Array.from(document.querySelectorAll("head style")).map(style => style.textContent || ""), css].join("\n");
+}
+
 function replaceBodyInnerHtml(source: string, bodyHtml: string) {
   return source.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1\n${bodyHtml}\n$2`);
 }
@@ -102,6 +108,7 @@ function matchingUploadedFiles(card: WebsiteAuthoringCard, activityFiles: Activi
 }
 
 function resolveActivityFilePaths(source: string, files: ActivityFile[]) {
+  if (typeof window !== "undefined") source = source.replace(/(["'])\/assets\//g, `$1${window.location.origin}/assets/`);
   return files.reduce((current, file) => {
     const escapedPath = escapeRegExp(file.virtualPath);
     const escapedName = escapeRegExp(file.name.toLowerCase());
@@ -304,6 +311,33 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     if (!normalise(css).includes(normalise(part))) messages.push(`Add ${part} to the CSS.`);
   });
 
+  if (card.expected.stylesheetLink && !Array.from(document.querySelectorAll('head link[rel="stylesheet"]')).some(link => link.getAttribute("href") === card.expected.stylesheetLink)) {
+    messages.push(`Link ${card.expected.stylesheetLink} as a stylesheet inside head.`);
+  }
+  if (card.expected.noInternalStyles && document.querySelector("style")) messages.push("Move the rules to the CSS tab and remove the internal style block.");
+  card.expected.styleChecks?.forEach(check => {
+    const elements = Array.from(document.querySelectorAll(check.selector.replace(/:hover\b/g, "")));
+    if (!elements.length) { messages.push(`Apply ${check.selector} to an element in the HTML.`); return; }
+    const expected = window.document.createElement("span").style;
+    Object.entries(check.declarations).forEach(([property, value]) => expected.setProperty(property, value));
+    let styles: CSSStyleDeclaration[];
+    if (check.source === "inline") styles = elements.map(element => (element as HTMLElement).style);
+    else {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(check.source === "external" ? css : Array.from(document.querySelectorAll("head style")).map(style => style.textContent || "").join("\n"));
+      const selectors = (value: string) => value.split(",").map(part => part.trim()).sort().join(",");
+      styles = Array.from(sheet.cssRules).filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && selectors(rule.selectorText) === selectors(check.selector)).map(rule => rule.style);
+    }
+    Object.keys(check.declarations).forEach(property => {
+      const actual = styles.map(style => style.getPropertyValue(property)).filter(Boolean).at(-1);
+      if (actual !== expected.getPropertyValue(property)) messages.push(`Set ${property}: ${check.declarations[property]} for ${check.selector} using ${check.source} CSS.`);
+      if (check.source !== "inline" && elements.some(element => {
+        const inlineValue = (element as HTMLElement).style.getPropertyValue(property);
+        return inlineValue && inlineValue !== expected.getPropertyValue(property);
+      })) messages.push(`Remove the conflicting inline ${property} from ${check.selector} so the stylesheet rule is visible.`);
+    });
+  });
+
   return {
     ok: messages.length === 0,
     messages: messages.length === 0
@@ -327,6 +361,17 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   const isFreePractice = card?.moduleId === "free-practice" || moduleId === "free-practice";
   const [html, setHtml] = useState(card?.starterHtml || "");
   const [css, setCss] = useState(card?.starterCss || "");
+  const nextCssModule = cssProgressionModules[cssProgressionModules.findIndex(item => item.id === moduleId) + 1];
+  useEffect(() => {
+    if (!cards[0]?.progressive) return;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("peak-css-stage:" + moduleId) || "null");
+      if (saved && typeof saved.html === "string" && typeof saved.css === "string") {
+        setHtml(saved.html);
+        setCss(saved.css);
+      }
+    } catch { /* The completed starter page remains available without browser storage. */ }
+  }, [moduleId, cards]);
   const [activityFiles, setActivityFiles] = useState<ActivityFile[]>([]);
   const visualEditorRef = useRef<GrapesEditor | null>(null);
   const visualContainerRef = useRef<HTMLDivElement>(null);
@@ -353,7 +398,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       storageManager: false,
       fromElement: false,
       components: hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "",
-      style: css,
+      style: typeof window === "undefined" ? css : previewCss(html, css),
       blockManager: {
         appendTo: undefined,
         blocks: [
@@ -376,6 +421,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       visualInteractionRef.current = true;
     });
     editor.on("update", () => {
+      if (card.progressive) return;
       if (!visualInteractionRef.current || syncingFromCodeRef.current || Date.now() - lastCodeSyncAtRef.current < 500) return;
       if (visualUpdateTimerRef.current) clearTimeout(visualUpdateTimerRef.current);
       visualUpdateTimerRef.current = setTimeout(() => {
@@ -416,7 +462,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     visualInteractionRef.current = false;
     syncingFromCodeRef.current = true;
     visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(resolvedHtml) : "");
-    visualEditorRef.current.setStyle(resolvedCss);
+    visualEditorRef.current.setStyle(previewCss(resolvedHtml, resolvedCss));
     window.setTimeout(() => {
       window.requestAnimationFrame(() => {
         syncingFromCodeRef.current = false;
@@ -429,8 +475,9 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     if (!next) return;
     draftsRef.current.set(card.id, { html, css, mode });
     const draft = draftsRef.current.get(next.id);
-    const nextHtml = draft?.html ?? next.starterHtml;
-    const nextCss = draft?.css ?? next.starterCss;
+    const continuePage = next.progressive && card.progressive && next.moduleId === card.moduleId && index === activeIndex + 1;
+    const nextHtml = draft?.html ?? (continuePage ? html : next.starterHtml);
+    const nextCss = draft?.css ?? (continuePage ? css : next.starterCss);
     setActiveIndex(index);
     setHtml(nextHtml);
     setCss(nextCss);
@@ -441,7 +488,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       visualInteractionRef.current = false;
       syncingFromCodeRef.current = true;
       visualEditorRef.current.setComponents(hasPreviewableDocument(nextHtml) ? getBodyInnerHtml(resolveActivityFilePaths(nextHtml, activityFilesRef.current)) : "");
-      visualEditorRef.current.setStyle(resolveActivityFilePaths(nextCss, activityFilesRef.current));
+      visualEditorRef.current.setStyle(previewCss(resolveActivityFilePaths(nextHtml, activityFilesRef.current), resolveActivityFilePaths(nextCss, activityFilesRef.current)));
       window.setTimeout(() => {
         window.requestAnimationFrame(() => {
           syncingFromCodeRef.current = false;
@@ -461,8 +508,13 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     const safeCss = resolvedCss.replace(/<\/style/gi, "<\\/style");
     const toolbar = `<div class="peak-preview-toolbar"><strong>Peak web preview</strong><button type="button" onclick="window.print()">Print / Save as PDF</button></div>`;
     const toolbarCss = `.peak-preview-toolbar{position:sticky;top:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;background:#fff;border-bottom:1px solid #d9e2ea;color:#14212b;font-family:Arial,sans-serif}.peak-preview-toolbar button{border:0;border-radius:8px;background:#0f6f8c;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer}@media print{.peak-preview-toolbar{display:none!important}}`;
+    const previewDocument = new DOMParser().parseFromString(resolvedHtml, "text/html");
+    previewDocument.querySelectorAll('link[rel="stylesheet"][href="styles.css"]').forEach(link => {
+      link.setAttribute("href", "data:text/css;charset=utf-8," + encodeURIComponent(resolvedCss));
+    });
+    const previewHtml = "<!doctype html>\n" + previewDocument.documentElement.outerHTML;
     const source = hasPreviewableDocument(html)
-      ? resolvedHtml.replace(/<\/head>/i, `<style>${toolbarCss}${safeCss}</style></head>`).replace(/<body([^>]*)>/i, `<body$1>${toolbar}`)
+      ? previewHtml.replace(/<\/head>/i, `<style>${toolbarCss}${safeCss}</style></head>`).replace(/<body([^>]*)>/i, `<body$1>${toolbar}`)
       : `<!doctype html><html><head><title>Peak Preview</title><style>${toolbarCss}${safeCss}</style></head><body>${toolbar}${resolvedHtml}</body></html>`;
     const previewUrl = URL.createObjectURL(new Blob([source], { type: "text/html" }));
     window.open(previewUrl, "_blank", "noopener,noreferrer");
@@ -616,14 +668,22 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                 >
                   <ChevronLeft size={16} aria-hidden="true" /> Previous
                 </button>
-                <button
+                {card.progressive && currentComplete && activeIndex === cards.length - 1 && nextCssModule ? (
+                  <Link
+                    href={`/subjects/ict/website-authoring/${nextCssModule.id}`}
+                    onClick={() => {
+                      try { sessionStorage.setItem("peak-css-stage:" + nextCssModule.id, JSON.stringify({ html, css })); } catch { /* Use the next stage's completed starter if storage is unavailable. */ }
+                    }}
+                    className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white"
+                  >Next stage</Link>
+                ) : <button
                   type="button"
                   onClick={nextCard}
                   disabled={!currentComplete || activeIndex === cards.length - 1}
                   className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                 >
                   Next
-                </button>
+                </button>}
               </div>
             </div>
           </>
