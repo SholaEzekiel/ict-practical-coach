@@ -9,6 +9,7 @@ import { ProgressBar } from "@/components/ui";
 import { PracticeTimer } from "@/components/practice-timer";
 import { compactSupportLines } from "@/lib/task-instructions";
 import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
+import { attachWordSpelling } from "@/lib/word-spelling";
 import { getWordProcessingCardsForModule, getWordProcessingModule } from "@/lib/word-processing-instruction-cards";
 import type { WordProcessingExpectedResult, WordProcessingInstructionCard } from "@/lib/word-processing-instruction-cards";
 
@@ -230,6 +231,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   const cards = useMemo(() => getWordProcessingCardsForModule(moduleId), [moduleId]);
   const module = getWordProcessingModule(moduleId) || getWordProcessingModule(cards[0]?.moduleId);
   const editorRef = useRef<TinyMCEEditor | null>(null);
+  const spellingRef = useRef<ReturnType<typeof attachWordSpelling> | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [completed, setCompleted] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -251,12 +253,15 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }, [documentClasses]);
 
   useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    editor.getBody().lang = spellcheckLanguage;
-    editor.getBody().spellcheck = true;
-    editor.getDoc().documentElement.lang = spellcheckLanguage;
-  }, [isFreePractice, spellcheckLanguage]);
+    spellingRef.current?.setLanguage(spellcheckLanguage);
+  }, [spellcheckLanguage]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("peak-word-spelling-language");
+      if (SPELLCHECK_LANGUAGES.some(language => language.value === saved)) setSpellcheckLanguage(saved!);
+    } catch { /* English remains the default when browser storage is unavailable. */ }
+  }, []);
 
   function runCheck() {
     const root = createDocumentRoot(content, documentClasses);
@@ -313,6 +318,8 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
     setDocumentClasses(draft?.documentClasses ?? "");
     setFeedback(null);
     editorRef.current?.setContent(nextContent);
+    editorRef.current?.undoManager.clear();
+    editorRef.current?.undoManager.add();
   }
 
   function nextCard() {
@@ -343,13 +350,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
   }
 
   function ignoreSelectedSpelling() {
-    const editor = editorRef.current;
-    if (!editor || editor.selection.isCollapsed()) return;
-    const selectedHtml = editor.selection.getContent({ format: "html" });
-    if (!selectedHtml) return;
-    editor.selection.setContent(`<span lang="${editor.getBody().lang}" spellcheck="false" data-spellcheck-ignore="true">${selectedHtml}</span>`);
-    editor.nodeChanged();
-    setContent(editor.getContent());
+    spellingRef.current?.ignoreSelection();
   }
 
   if (!card) return null;
@@ -471,9 +472,13 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
             onInit={(_, editor) => {
               editorRef.current = editor;
               editor.getBody().className = `word-document ${documentClasses}`;
-              editor.getBody().lang = spellcheckLanguage;
-              editor.getBody().spellcheck = true;
-              editor.getDoc().documentElement.lang = spellcheckLanguage;
+              const spelling = attachWordSpelling(editor);
+              spellingRef.current = spelling;
+              spelling.setLanguage(spellcheckLanguage);
+              editor.on("remove", () => {
+                spelling.dispose();
+                if (spellingRef.current === spelling) spellingRef.current = null;
+              });
             }}
             onEditorChange={(value) => {
               setContent(value);
@@ -486,7 +491,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               promotion: false,
               statusbar: true,
               plugins: "advlist autolink charmap fullscreen image link lists nonbreaking pagebreak searchreplace table visualblocks wordcount",
-              toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lineheight | table image link",
+              toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | lineheight | table image link | documentcheckspelling",
               toolbar_mode: "wrap",
               menu: {
                 edit: { title: "Edit", items: "undo redo | cut copy paste | selectall | searchreplace" },
@@ -494,7 +499,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 format: { title: "Format", items: "bold italic underline strikethrough superscript subscript | blocks fontfamily fontsize | forecolor backcolor | removeformat" },
                 layout: { title: "Layout", items: "documentmargins documentorientation documentcolumns documentspacing" },
                 table: { title: "Table", items: "inserttable | cell row column | documentclearcellfill | tableprops deletetable | documenttablesort" },
-                review: { title: "Review", items: "documentlanguage documentignorespelling | wordcount" },
+                review: { title: "Review", items: "documentlanguage documentcheckspelling documentignorespelling | wordcount" },
                 view: { title: "View", items: "visualblocks | fullscreen" }
               },
               setup: (editor) => {
@@ -507,7 +512,18 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                       initialData: { text: "" },
                       buttons: [{ type: "cancel", text: "Cancel" }, { type: "submit", text: "Insert", primary: true }],
                       onSubmit: (dialog) => {
-                        editor.insertContent("<" + tag + ' class="doc-' + tag + '">' + editor.dom.encode(dialog.getData().text) + "</" + tag + "><p></p>");
+                        editor.undoManager.transact(() => {
+                          const body = editor.getBody();
+                          const existing = body.querySelector(`${tag}.doc-${tag}`);
+                          const section = existing || editor.dom.create(tag, { class: `doc-${tag}` });
+                          section.textContent = dialog.getData().text;
+                          if (!existing) {
+                            if (tag === "header") body.prepend(section);
+                            else body.append(section);
+                          }
+                        });
+                        editor.nodeChanged();
+                        setContent(editor.getContent());
                         dialog.close();
                       }
                     })
@@ -560,10 +576,23 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 editor.ui.registry.addNestedMenuItem("documentlanguage", {
                   text: "Spelling language",
                   getSubmenuItems: () => SPELLCHECK_LANGUAGES.map(language => ({
-                    type: "menuitem" as const, text: language.label, onAction: () => setSpellcheckLanguage(language.value)
+                    type: "togglemenuitem" as const, text: language.label,
+                    onAction: () => {
+                      setSpellcheckLanguage(language.value);
+                      spellingRef.current?.setLanguage(language.value);
+                      try { localStorage.setItem("peak-word-spelling-language", language.value); } catch { /* Language still changes without storage. */ }
+                    },
+                    onSetup: (api: { setActive: (active: boolean) => void }) => {
+                      const update = () => api.setActive(editor.getBody().lang === language.value);
+                      update();
+                      editor.on("SpellingLanguageChange", update);
+                      return () => editor.off("SpellingLanguageChange", update);
+                    }
                   }))
                 });
                 editor.ui.registry.addMenuItem("documentignorespelling", { text: "Ignore selected word", onAction: ignoreSelectedSpelling });
+                editor.ui.registry.addMenuItem("documentcheckspelling", { text: "Check spelling", onAction: () => spellingRef.current?.check() });
+                editor.ui.registry.addButton("documentcheckspelling", { icon: "spell-check", tooltip: "Check spelling in the selected document language", onAction: () => spellingRef.current?.check() });
               },
               font_family_formats: "Arial=arial,helvetica,sans-serif;Calibri=calibri,arial,sans-serif;Times New Roman=times new roman,times,serif",
               fontsize_formats: "10pt 11pt 12pt 14pt 18pt 24pt 36pt",
@@ -589,10 +618,13 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
                 body.word-document h1 { margin: 0 0 16px; font-size: 28px; font-weight: 700; }
                 body.word-document h2 { margin: 0 0 12px; font-size: 22px; font-weight: 700; }
                 body.word-document p { margin: 0 0 12px; }
-                body.word-document table { margin: 16px 0; max-width: 100%; border-collapse: collapse; }
+                body.word-document table { margin: 16px 0; border-collapse: collapse; }
                 body.word-document td, body.word-document th { min-width: 32px; border: 1px solid #9ca3af; padding: 7px 10px; vertical-align: top; }
                 body.word-document img { display: inline-block; margin: 12px 0; max-width: 100%; }
                 body.word-document span[data-spellcheck-ignore="true"] { text-decoration: none; }
+                ::highlight(peak-spelling) { text-decoration: underline wavy #dc2626; }
+                .ephox-snooker-resizer-cols { cursor: col-resize; }
+                .ephox-snooker-resizer-rows { cursor: row-resize; }
                 .doc-header, .doc-footer { border-bottom: 1px solid #cbd5e1; color: #475569; font-size: 13px; margin-bottom: 16px; padding-bottom: 6px; text-align: right; }
                 .doc-footer { border-bottom: 0; border-top: 1px solid #cbd5e1; margin-bottom: 0; margin-top: 20px; padding-bottom: 0; padding-top: 6px; }
                 .page-number { border: 1px solid #cbd5e1; border-radius: 4px; display: inline-block; min-width: 24px; padding: 0 4px; text-align: center; }
@@ -604,7 +636,7 @@ export function WordProcessingLab({ moduleId }: WordProcessingLabProps) {
               table_resize_bars: true,
               object_resizing: "img,table",
               table_toolbar: "tableprops tablecellprops tabledelete | tablecellbackgroundcolor tablecellbordercolor | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol | tablemergecells tablesplitcells",
-              browser_spellcheck: true,
+              browser_spellcheck: false,
               contextmenu: "link image table",
               paste_data_images: true,
               file_picker_types: "image",
