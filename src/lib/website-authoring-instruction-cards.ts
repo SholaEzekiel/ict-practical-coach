@@ -20,7 +20,7 @@ export type WebsiteExpectedResult = {
   containedLinks?: Array<{ container: string; text?: string; href?: string }>;
   linkedImages?: Array<{ href?: string; srcIncludes?: string; srcFromUploadedImage?: boolean; alt?: string }>;
   cssIncludes?: string[];
-  styleChecks?: Array<{ source: "inline" | "internal" | "external"; selector: string; declarations: Record<string, string> }>;
+  styleChecks?: Array<{ source: "inline" | "internal" | "external"; selector: string; label?: string; declarations: Record<string, string> }>;
   stylesheetLink?: string;
   noInternalStyles?: boolean;
   tableHeaders?: string[];

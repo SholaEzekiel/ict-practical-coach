@@ -1,3 +1,5 @@
+import { splitSpreadsheetFormulaCards, spreadsheetFormulaModules } from "./spreadsheet-formula-modules";
+
 export type SpreadsheetInstructionCard = {
   id: string;
   category:
@@ -84,7 +86,7 @@ export const spreadsheetModules = [
   { id: "intro", title: "Introduction", description: "Cells, rows, columns, ranges, and confident movement around the worksheet." },
   { id: "data-entry", title: "Data Entry", description: "Typing labels, values, headings, and small tables accurately." },
   { id: "formatting", title: "Formatting", description: "Bold, italic, underline, alignment, number formats, fill colour, and readable tables." },
-  { id: "formula", title: "Formulae", description: "Cell-reference formulae, SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, IF, SUMIF, AVERAGEIF, and lookups." },
+  ...spreadsheetFormulaModules,
   { id: "data-tools", title: "Data Tools", description: "Sorting, filtered views, searching, and preparing source data." },
   { id: "chart", title: "Charts", description: "Selecting chart data, chart titles, axis labels, and chart-ready source tables." },
   { id: "layout", title: "Print and Layout", description: "Print areas, row and column sizing, gridlines, and page layout preparation." },
@@ -160,6 +162,7 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
 function formulaIncludesCard(id: string, goal: string, scenario: string, cell: string, formulaIncludes: string[], value: string | number, steps: string[], difficulty: SpreadsheetInstructionCard["difficulty"] = "confident") {
   const functionName = formulaIncludes[0];
   const guidedSteps = steps.filter((step) => !/^Type exactly |^Press Enter\.$/i.test(step));
+  const copying = guidedSteps.some(step => /fill handle/i.test(step));
   return baseCard({
     id,
     moduleId: "formula",
@@ -168,7 +171,7 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
     skill: functionName,
     studentGoal: goal,
     scenario,
-    studentSteps: [
+    studentSteps: copying ? guidedSteps : [
       ...(guidedSteps.length ? guidedSteps : [`Click ${cell}.`]),
       "Type = to start a formula.",
       `Use ${functionName} for this task.`,
@@ -176,7 +179,7 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
       "Press Enter and check the result."
     ],
     instruction: goal,
-    meaning: "Use the named function and references to produce a result that changes with the worksheet data.",
+    meaning: copying ? "Copy the existing formula so its relative references change for each destination row." : "Use the named function and references to produce a result that changes with the worksheet data.",
     clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
     expectedSelection: cell,
     expectedAction: "formula",
@@ -185,7 +188,7 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
     commonMistakes: ["Typing the displayed answer manually", "Using the wrong lookup range", "Leaving out exact match"],
     feedback: {
       wrongSelection: `Place the formula in ${cell}.`,
-      wrongTool: `Use a ${functionName} formula in the cell or formula bar.`,
+      wrongTool: copying ? "Use the fill handle to copy the existing formula." : `Use a ${functionName} formula in the cell or formula bar.`,
       wrongResult: `${cell} must show ${value} using the required formula parts.`
     },
     hints: ["Check commas and brackets carefully.", "Use absolute references for fixed lookup tables.", "Do not type the displayed answer manually."],
@@ -1090,7 +1093,7 @@ export const allSpreadsheetInstructionCards: SpreadsheetInstructionCard[] = [
   ...introSpreadsheetCards,
   ...dataEntryCards,
   ...formattingCards,
-  ...formulaCards,
+  ...splitSpreadsheetFormulaCards(formulaCards),
   ...dataToolCards,
   ...chartCards,
   ...layoutCards

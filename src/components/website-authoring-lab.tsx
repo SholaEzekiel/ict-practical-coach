@@ -317,7 +317,7 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
   if (card.expected.noInternalStyles && document.querySelector("style")) messages.push("Move the rules to the CSS tab and remove the internal style block.");
   card.expected.styleChecks?.forEach(check => {
     const elements = Array.from(document.querySelectorAll(check.selector.replace(/:hover\b/g, "")));
-    if (!elements.length) { messages.push(`Apply ${check.selector} to an element in the HTML.`); return; }
+    if (!elements.length) { messages.push(check.label ? `Keep ${check.label} in the HTML.` : `Apply ${check.selector} to an element in the HTML.`); return; }
     const expected = window.document.createElement("span").style;
     Object.entries(check.declarations).forEach(([property, value]) => expected.setProperty(property, value));
     let styles: CSSStyleDeclaration[];
@@ -330,7 +330,7 @@ function validateWebsite(card: WebsiteAuthoringCard, html: string, css: string, 
     }
     Object.keys(check.declarations).forEach(property => {
       const actual = styles.map(style => style.getPropertyValue(property)).filter(Boolean).at(-1);
-      if (actual !== expected.getPropertyValue(property)) messages.push(`Set ${property}: ${check.declarations[property]} for ${check.selector} using ${check.source} CSS.`);
+      if (actual !== expected.getPropertyValue(property)) messages.push(`Set ${property}: ${check.declarations[property]} for ${check.label || check.selector} using ${check.source} CSS.`);
       if (check.source !== "inline" && elements.some(element => {
         const inlineValue = (element as HTMLElement).style.getPropertyValue(property);
         return inlineValue && inlineValue !== expected.getPropertyValue(property);
@@ -365,7 +365,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
   useEffect(() => {
     if (!cards[0]?.progressive) return;
     try {
-      const saved = JSON.parse(sessionStorage.getItem("peak-css-stage:" + moduleId) || "null");
+      const saved = JSON.parse(sessionStorage.getItem("peak-css-v2-stage:" + moduleId) || "null");
       if (saved && typeof saved.html === "string" && typeof saved.css === "string") {
         setHtml(saved.html);
         setCss(saved.css);
@@ -397,6 +397,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       height: "100%",
       storageManager: false,
       fromElement: false,
+      panels: card.progressive ? { defaults: [] } : undefined,
       components: hasPreviewableDocument(html) ? getBodyInnerHtml(html) : "",
       style: typeof window === "undefined" ? css : previewCss(html, css),
       blockManager: {
@@ -417,6 +418,7 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     });
 
     visualEditorRef.current = editor;
+    if (card.progressive) editor.on("load", () => editor.runCommand("preview"));
     editor.on("component:selected", () => {
       visualInteractionRef.current = true;
     });
@@ -461,8 +463,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
     lastCodeSyncAtRef.current = Date.now();
     visualInteractionRef.current = false;
     syncingFromCodeRef.current = true;
-    visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(resolvedHtml) : "");
     visualEditorRef.current.setStyle(previewCss(resolvedHtml, resolvedCss));
+    visualEditorRef.current.setComponents(hasPreviewableDocument(html) ? getBodyInnerHtml(resolvedHtml) : "");
     window.setTimeout(() => {
       window.requestAnimationFrame(() => {
         syncingFromCodeRef.current = false;
@@ -487,8 +489,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
       lastCodeSyncAtRef.current = Date.now();
       visualInteractionRef.current = false;
       syncingFromCodeRef.current = true;
-      visualEditorRef.current.setComponents(hasPreviewableDocument(nextHtml) ? getBodyInnerHtml(resolveActivityFilePaths(nextHtml, activityFilesRef.current)) : "");
       visualEditorRef.current.setStyle(previewCss(resolveActivityFilePaths(nextHtml, activityFilesRef.current), resolveActivityFilePaths(nextCss, activityFilesRef.current)));
+      visualEditorRef.current.setComponents(hasPreviewableDocument(nextHtml) ? getBodyInnerHtml(resolveActivityFilePaths(nextHtml, activityFilesRef.current)) : "");
       window.setTimeout(() => {
         window.requestAnimationFrame(() => {
           syncingFromCodeRef.current = false;
@@ -672,7 +674,11 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
                   <Link
                     href={`/subjects/ict/website-authoring/${nextCssModule.id}`}
                     onClick={() => {
-                      try { sessionStorage.setItem("peak-css-stage:" + nextCssModule.id, JSON.stringify({ html, css })); } catch { /* Use the next stage's completed starter if storage is unavailable. */ }
+                      try {
+                        const key = "peak-css-v2-stage:" + nextCssModule.id;
+                        if (card.moduleId === "css-introduction") sessionStorage.removeItem(key);
+                        else sessionStorage.setItem(key, JSON.stringify({ html, css }));
+                      } catch { /* Use the next stage's completed starter if storage is unavailable. */ }
                     }}
                     className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white"
                   >Next stage</Link>
@@ -782,8 +788,8 @@ export function WebsiteAuthoringLab({ moduleId }: WebsiteAuthoringLabProps) {
         <div className="flex items-center gap-2 border-b border-line p-4">
           <Eye size={18} aria-hidden="true" />
           <div>
-            <h2 className="font-bold">Visual builder</h2>
-            <p className="mt-1 text-sm text-slate-600">Use the GrapesJS canvas to inspect and edit the page.</p>
+            <h2 className="font-bold">{card.progressive ? "Page preview" : "Visual builder"}</h2>
+            {!card.progressive && <p className="mt-1 text-sm text-slate-600">Use the GrapesJS canvas to inspect and edit the page.</p>}
           </div>
         </div>
         <div className="relative h-full min-h-0">

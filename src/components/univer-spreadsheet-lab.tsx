@@ -7,6 +7,7 @@ import Link from "next/link";
 import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
 import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { getSpreadsheetCardsForModule, getSpreadsheetModule } from "@/lib/spreadsheet-instruction-cards";
+import { getFormulaStarter, spreadsheetFormulaModules } from "@/lib/spreadsheet-formula-modules";
 import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
 import { PracticeTimer } from "@/components/practice-timer";
 import { Card, Pill, ProgressBar } from "./ui";
@@ -17,7 +18,7 @@ type WorkbookSeed = {
   id: string;
   name: string;
   sheetOrder: string[];
-  sheets: Record<string, { id: string; name: string; rowCount: number; columnCount: number; cellData: CellData }>;
+  sheets: Record<string, { id: string; name: string; rowCount: number; columnCount: number; cellData: CellData; columnData?: Record<number, { w: number }> }>;
 };
 
 type UniverApi = {
@@ -91,7 +92,7 @@ function makeWorkbook(name: string, cellEntries: Array<[string, CellValue]> = []
     sheets: {
       "sheet-01": {
         id: "sheet-01",
-        name,
+        name: name.replace(/[:\\/?*\[\]]/g, " ").slice(0, 31),
         rowCount: practiceRowCount,
         columnCount: practiceColumnCount,
         cellData
@@ -101,6 +102,17 @@ function makeWorkbook(name: string, cellEntries: Array<[string, CellValue]> = []
 }
 
 function getStarterWorkbook(moduleId?: string) {
+  const formulaStarter = getFormulaStarter(moduleId);
+  if (formulaStarter) {
+    const workbook = makeWorkbook(getSpreadsheetModule(moduleId)?.title || "Formula Practice", formulaStarter.cells);
+    if (moduleId !== "formula") workbook.sheets["sheet-01"].columnData = { 0: { w: 140 }, 3: { w: 160 }, 7: { w: 150 } };
+    formulaStarter.formulas.forEach(([cell, formula]) => {
+      put(workbook.sheets["sheet-01"].cellData, cell, "");
+      const match = /^([A-Z]+)(\d+)$/.exec(cell)!;
+      workbook.sheets["sheet-01"].cellData[Number(match[2]) - 1][colToIndex(match[1])].f = formula;
+    });
+    return workbook;
+  }
   if (moduleId === "formatting") return makeWorkbook("Formatting");
   if (moduleId === "layout") {
     return makeWorkbook("Print Layout", [
@@ -382,6 +394,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const isLayoutModule = moduleId === "layout";
   const card = moduleCardsForRoute[activeIndex];
   const currentCardComplete = card ? completed.includes(card.id) : false;
+  const formulaModuleIndex = spreadsheetFormulaModules.findIndex(module => module.id === moduleId);
+  const nextFormulaModule = formulaModuleIndex >= 0 ? spreadsheetFormulaModules[formulaModuleIndex + 1] : undefined;
   const completedModuleCards = moduleCardsForRoute.filter((task) => completed.includes(task.id)).length;
   const progressValue = moduleCardsForRoute.length ? (completedModuleCards / moduleCardsForRoute.length) * 100 : 0;
   const quizScore = quizAttempts[moduleId || "spreadsheets"] || { correct: 0, attempted: 0 };
@@ -982,13 +996,15 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                   >
                     <ChevronLeft size={16} /> Previous
                   </button>
-                  <button
+                  {currentCardComplete && activeIndex === moduleCardsForRoute.length - 1 && nextFormulaModule ? (
+                    <Link href={`/subjects/ict/spreadsheets/${nextFormulaModule.id}`} className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white">Next module</Link>
+                  ) : <button
                     onClick={nextCard}
                     disabled={!currentCardComplete || activeIndex === moduleCardsForRoute.length - 1}
                     className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                   >
                     Next
-                  </button>
+                  </button>}
                 </div>
               </div>
             </div>

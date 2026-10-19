@@ -31,7 +31,7 @@ export default function IctSpreadsheetsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {spreadsheetModules.map((module) => {
-          const Icon = moduleIcons[module.id as keyof typeof moduleIcons] || FileSpreadsheet;
+          const Icon = module.id.startsWith("formula") ? FunctionSquare : moduleIcons[module.id as keyof typeof moduleIcons] || FileSpreadsheet;
           const tasks = getSpreadsheetCardsForModule(module.id);
           const autoChecked = tasks.filter((task) => task.autoCheck).length;
           const cardContent = (

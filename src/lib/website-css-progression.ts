@@ -1,12 +1,12 @@
 import type { WebsiteAuthoringCard, WebsiteAuthoringModule, WebsiteExpectedResult } from "./website-authoring-instruction-cards";
 
 export const cssProgressionModules: WebsiteAuthoringModule[] = [
-  { id: "css-introduction", title: "1. CSS Introduction: Inline Styles", description: "Build a small club page, decode visible colours, and style individual HTML elements." },
-  { id: "css-internal", title: "2. Internal Styles and Classes", description: "Move into a head style block; connect element, class, and ID selectors to the page." },
-  { id: "css-tables", title: "3. Styling Tables", description: "Develop the same timetable with borders, heading colours, padding, and width." },
-  { id: "css-positioning", title: "4. Spacing and Positioning", description: "Arrange the page, navigation, sections, and image with visible layout changes." },
-  { id: "css-backgrounds", title: "5. Background Images", description: "Control an image's position, repetition, and size on a contrasting background." },
-  { id: "css-layout", title: "6. External Stylesheets", description: "Transfer your internal rules to styles.css, then extend the completed page." }
+  { id: "css-introduction", title: "CSS Introduction: Inline Styles", description: "Change paragraph colour, heading size, and table-cell spacing using simple inline styles." },
+  { id: "css-internal", title: "Internal Styles and Classes", description: "Move into a head style block; connect element, class, and ID selectors to the page." },
+  { id: "css-tables", title: "Styling Tables", description: "Develop the same timetable with borders, heading colours, padding, and width." },
+  { id: "css-positioning", title: "Spacing and Positioning", description: "Arrange the page, navigation, sections, and image with visible layout changes." },
+  { id: "css-backgrounds", title: "Background Images", description: "Control an image's position, repetition, and size on a contrasting background." },
+  { id: "css-layout", title: "External Stylesheets", description: "Transfer your internal rules to styles.css, then extend the completed page." }
 ];
 
 type StyleCheck = NonNullable<WebsiteExpectedResult["styleChecks"]>[number];
@@ -15,53 +15,57 @@ const inline: Record<string, Record<string, string>> = {};
 const rules: Record<string, Record<string, string>> = {};
 let paragraphClass = "";
 let external = false;
-let hasContent = true;
+let headerId = false;
+const firstCell = "table tr:nth-child(2) td:first-child";
 const declarations = (values: Record<string, string>) => Object.entries(values).map(([property, value]) => `${property}: ${value};`).join(" ");
 const stylesheet = () => Object.entries(rules).map(([selector, values]) => `${selector} {\n  ${Object.entries(values).map(([key, value]) => `${key}: ${value};`).join("\n  ")}\n}`).join("\n\n");
-const attributes = (id: string) => `id="${id}"${inline["#" + id] ? ` style="${declarations(inline["#" + id])}"` : ""}`;
-function page() {
+const attributes = (selector: string) => inline[selector] ? ` style="${declarations(inline[selector])}"` : "";
+function page(introduction: boolean) {
+  const heading = `<h1${attributes("h1")}>Digital Club</h1>`;
+  const paragraph = `<p${attributes("p")}${paragraphClass ? ` class="${paragraphClass}"` : ""}>Welcome to our digital club.</p>`;
+  const table = `<table>
+  <tr><th>Activity</th><th>Day</th></tr>
+  <tr><td${attributes(firstCell)}>Web design</td><td>Monday</td></tr>
+  <tr><td>Spreadsheets</td><td>Friday</td></tr>
+</table>`;
   return `<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
   <title>Digital Club</title>
   ${external ? '<link rel="stylesheet" href="styles.css">' : Object.keys(rules).length ? `<style>\n${stylesheet()}\n</style>` : ""}
 </head>
 <body>
-${hasContent ? `  <header id="banner"><h1 ${attributes("heading")}>Digital Club</h1></header>
-  <nav><a href="#sessions">Sessions</a> <a href="#contact">Contact</a></nav>
+${introduction ? `  ${heading}
+  ${paragraph}
+  ${table}` : `  <header${headerId ? ' id="banner"' : ""}>${heading}</header>
+  <nav><a href="#">Sessions</a> <a href="#">Contact</a></nav>
   <main>
-    <p ${attributes("welcome")}${paragraphClass ? ` class="${paragraphClass}"` : ""}>Welcome to our digital club.</p>
-    <section id="sessions">
+    ${paragraph}
+    <section>
       <h2>Weekly sessions</h2>
-      <table id="timetable">
-        <tr><th>Activity</th><th>Day</th></tr>
-        <tr><td ${attributes("first-cell")}>Web design</td><td>Monday</td></tr>
-        <tr><td>Spreadsheets</td><td>Friday</td></tr>
-      </table>
+      ${table}
     </section>
-    <img src="/assets/peak-study-card.svg" alt="Study workspace">
+    <img src="/assets/peak-study-card.svg" alt="Study workspace" width="220">
   </main>
-  <footer id="contact">Contact: digital club office</footer>` : ""}
+  <footer>Contact: digital club office</footer>`}
 </body>
 </html>`;
 }
 
 const stages: Step[][] = [
   [
-    { title: "Build the page before styling", explanation: "HTML provides content and structure. CSS changes how that content looks. Begin with an unstyled page so later changes are easy to recognise.", selector: "", declarations: {}, source: "inline", observe: "A Digital Club heading and a welcome paragraph appear." },
-    { title: "See a named colour", explanation: 'An inline style belongs in an opening HTML tag: <p style="color: red;">. The property color changes text, not its background.', selector: "#welcome", declarations: { color: "red" }, source: "inline", observe: "Only the welcome paragraph becomes red." },
-    { title: "Decode a hexadecimal colour", explanation: "A six-digit hex colour starts with #. The pairs describe red, green, and blue, from 00 (none) to ff (maximum). #0000ff means no red, no green, full blue. Replace the previous colour; do not add a second color declaration.", selector: "#welcome", declarations: { color: "#0000ff" }, source: "inline", observe: "The same paragraph changes from red to vivid blue." },
-    { title: "Colour one table cell", explanation: 'background-color fills the element. #00ff00 means full green. Add style="background-color: #00ff00;" to the td containing Web design, not to the whole table.', selector: "#first-cell", declarations: { "background-color": "#00ff00" }, source: "inline", observe: "One timetable cell becomes bright green; the other cells stay unchanged." },
-    { title: "Increase the heading size", explanation: "CSS controls more than colour. A px value sets a visible size. Add font-size to the h1 opening tag without changing its text.", selector: "#heading", declarations: { "font-size": "40px" }, source: "inline", observe: "The Digital Club heading becomes noticeably larger." },
-    { title: "Give the coloured cell breathing room", explanation: "Padding is space inside an element's boundary. Keep the green background and add padding to the same style attribute, separating declarations with semicolons.", selector: "#first-cell", declarations: { padding: "16px" }, source: "inline", observe: "The green cell expands around Web design." }
+    { title: "Make paragraph text red", explanation: 'Add a style attribute to the existing paragraph: <p style="color: red;">. The color property changes the text colour.', selector: "p", declarations: { color: "red" }, source: "inline", observe: "Only the welcome paragraph becomes red." },
+    { title: "Decode a hexadecimal colour", explanation: "A six-digit hex colour starts with #. The pairs describe red, green, and blue, from 00 (none) to ff (maximum). #0000ff means no red, no green, full blue. Replace the previous colour; do not add a second color declaration.", selector: "p", declarations: { color: "#0000ff" }, source: "inline", observe: "The same paragraph changes from red to vivid blue." },
+    { title: "Colour one table cell", explanation: 'background-color fills the element. #00ff00 means full green. Add style="background-color: #00ff00;" to the td containing Web design, not to the whole table.', selector: firstCell, declarations: { "background-color": "#00ff00" }, source: "inline", observe: "One timetable cell becomes bright green; the other cells stay unchanged." },
+    { title: "Increase the heading size", explanation: "CSS controls more than colour. A px value sets a visible size. Add font-size to the h1 opening tag without changing its text.", selector: "h1", declarations: { "font-size": "40px" }, source: "inline", observe: "The Digital Club heading becomes noticeably larger." },
+    { title: "Give the coloured cell breathing room", explanation: "Padding is space inside an element's boundary. Keep the green background and add padding to the same style attribute, separating declarations with semicolons.", selector: firstCell, declarations: { padding: "16px" }, source: "inline", observe: "The green cell expands around Web design." }
   ],
   [
     { title: "Write your first internal rule", explanation: "Internal CSS belongs inside <style> in head. The element selector p targets paragraphs: p { color: #dc2626; }. Remove the welcome paragraph's inline color so it does not override this rule. p is an element selector; .p would be a class named p.", selector: "p", declarations: { color: "#dc2626" }, source: "internal", observe: "The welcome paragraph changes from blue to a strong red." },
     { title: "Add a second declaration", explanation: "One rule can contain several property: value; declarations between its braces. Keep the red text and increase paragraph size.", selector: "p", declarations: { "font-size": "22px" }, source: "internal", observe: "The red paragraph becomes larger." },
     { title: "Connect a class to HTML", explanation: 'Write .notice { border: 3px solid #7c3aed; } in the style block. Then add class="notice" to the welcome p opening tag. The dot is used in CSS, not in the HTML class value.', selector: ".notice", declarations: { border: "3px solid #7c3aed" }, source: "internal", className: "notice", observe: "A purple border appears around the welcome paragraph only." },
     { title: "Develop the notice style", explanation: "Add background-color and padding to the existing .notice rule. The yellow fill and internal spacing make the class's effect unmistakable.", selector: ".notice", declarations: { "background-color": "#facc15", padding: "16px" }, source: "internal", observe: "The bordered notice gains a vivid yellow background and space around its text." },
-    { title: "Style the header by its ID", explanation: 'An ID selector starts with #. #banner matches <header id="banner">. This # identifies an element; in #0f766e it introduces a colour value.', selector: "#banner", declarations: { "background-color": "#0f766e", color: "#ffffff", padding: "20px" }, source: "internal", observe: "The heading sits on a dark teal band with contrasting white text." },
+    { title: "Style the header by its ID", explanation: 'Add id="banner" to the header opening tag. Then #banner in the style block selects that header. IDs are introduced here after practising element and class selectors.', selector: "#banner", declarations: { "background-color": "#0f766e", color: "#ffffff", padding: "20px" }, source: "internal", observe: "The heading sits on a dark teal band with contrasting white text." },
     { title: "Give the footer its own style", explanation: "A footer element selector can style the contact area without changing the notice or header. Keep the previous rules.", selector: "footer", declarations: { "background-color": "#7c3aed", color: "#ffffff", padding: "16px" }, source: "internal", observe: "The footer becomes a distinct purple band with readable white contact text." }
   ],
   [
@@ -95,35 +99,68 @@ const stages: Step[][] = [
 
 export const cssProgressionCards: WebsiteAuthoringCard[] = stages.flatMap((steps, stageIndex) => steps.map((step, index) => {
   const module = cssProgressionModules[stageIndex];
-  const starterHtml = !step.selector ? page().replace('<h1 id="heading">Digital Club</h1>', "").replace('    <p id="welcome">Welcome to our digital club.</p>', "") : page();
+  const starterHtml = page(stageIndex === 0);
   const starterCss = external ? stylesheet() : "";
-  if (!step.selector) hasContent = true;
   if (step.className) paragraphClass = step.className;
-  if (stageIndex === 1 && index === 0) delete inline["#welcome"];
-  if (stageIndex === 2 && index === 3) delete inline["#first-cell"].padding;
+  if (step.selector === "#banner") headerId = true;
+  if (stageIndex === 1 && index === 0) delete inline.p;
+  if (stageIndex === 2 && index === 3) delete inline[firstCell].padding;
   if (step.transfer) external = true;
   const target = step.source === "inline" ? inline : rules;
   if (step.selector) target[step.selector] = { ...target[step.selector], ...step.declarations };
   const checks: StyleCheck[] = [
-    ...Object.entries(inline).map(([selector, properties]) => ({ source: "inline" as const, selector, declarations: { ...properties } })),
+    ...Object.entries(inline).map(([selector, properties]) => ({ source: "inline" as const, selector, label: selector === firstCell ? "the Web design table cell" : selector === "h1" ? "the Digital Club heading" : "the welcome paragraph", declarations: { ...properties } })),
     ...Object.entries(rules).map(([selector, properties]) => ({ source: external ? "external" as const : "internal" as const, selector, declarations: { ...properties } }))
   ];
-  const code = step.selector ? step.source === "inline" ? `style="${declarations(target[step.selector])}"` : `${step.selector} { ${declarations(step.declarations)} }` : '<h1 id="heading">Digital Club</h1> and <p id="welcome">Welcome to our digital club.</p>';
+  const tag = step.selector === firstCell ? "td" : step.selector;
+  const code = step.source === "inline" ? `<${tag} style="${declarations(target[step.selector])}">` : `${step.selector} { ${declarations(step.declarations)} }`;
+  const goals: Record<string, string> = {
+  "Make paragraph text red": "Make the welcome paragraph red.",
+  "Decode a hexadecimal colour": "Change the welcome paragraph from red to blue using #0000ff.",
+  "Colour one table cell": "Give the Web design table cell a bright green background.",
+  "Increase the heading size": "Set the Digital Club heading's font size to 40 pixels.",
+  "Give the coloured cell breathing room": "Add 16 pixels of padding inside the green table cell.",
+  "Write your first internal rule": "Make paragraph text red using a rule inside the HTML head.",
+  "Add a second declaration": "Set the paragraph font size to 22 pixels, keeping its red colour.",
+  "Connect a class to HTML": "Give the welcome paragraph a purple border using the notice class.",
+  "Develop the notice style": "Add a yellow background and 16 pixels of padding to the notice.",
+  "Style the header by its ID": "Give the header a teal background using the banner ID.",
+  "Give the footer its own style": "Give the footer a purple background and white text.",
+  "Draw a visible table grid": "Add a dark 2-pixel border around every table cell.",
+  "Join the table borders": "Join neighbouring cell borders into one table grid.",
+  "Distinguish the heading row": "Make the table headings white on a blue background.",
+  "Space every table cell": "Give all table cells 12 pixels of padding.",
+  "Widen the timetable": "Make the timetable fill the width of its section.",
+  "Centre the page content": "Centre the main area and limit its width to 760 pixels.",
+  "Arrange navigation links": "Arrange the navigation links in a row with a 24-pixel gap.",
+  "Separate the timetable section": "Add an orange border and spacing around the timetable section.",
+  "Align the heading text": "Centre the Digital Club heading inside the header.",
+  "Position the study image": "Centre the study image and set its width to 220 pixels.",
+  "Prepare a contrasting background": "Give the timetable section an amber background.",
+  "Add a background image": "Use the supplied study graphic as the section background.",
+  "Stop repetition and set image size": "Show one background graphic, 140 pixels wide.",
+  "Position the background without covering data": "Place the background graphic at the bottom-right, below the table.",
+  "Move the rules to an external stylesheet": "Move the internal rules to styles.css without changing the page's appearance.",
+  "Choose the whole page's font": "Use Arial for the page's text.",
+  "Style links as a group": "Make navigation links bold and blue, without underlines.",
+  "Add a hover state": "Give a navigation link a yellow background when the pointer is over it.",
+  "Finish the page spacing": "Remove the default space around the outside of the page."
+};
   return {
     id: `web-${module.id}-${index + 1}`, moduleId: module.id, moduleTitle: module.title,
-    title: step.title, scenario: step.explanation, goal: step.transfer ? "Move the existing CSS into styles.css without changing the page's appearance." : `Apply this change: ${code}`,
-    supportDocument: [`Stage ${stageIndex + 1}: ${module.title}`, `Change to write: ${code}`, `Visible result: ${step.observe}`, "Keep the earlier content and styles; this task extends the same Digital Club page."],
+    title: step.title, scenario: step.explanation, goal: goals[step.title],
+    supportDocument: [`Example: ${code}`, `Look for: ${step.observe}`],
     steps: [
-      !step.selector ? 'In HTML, add <h1 id="heading">Digital Club</h1> inside header, then add <p id="welcome">Welcome to our digital club.</p> at the start of main.' : step.source === "inline" ? "Work in the HTML tab; find the named element's opening tag." : step.source === "internal" ? "Work in the HTML tab; add or edit rules inside <style> in head." : "Work in the CSS tab; keep the stylesheet link inside HTML head.",
-      ...(step.className ? ['Add class="notice" to the welcome paragraph in HTML.'] : []),
-      ...(stageIndex === 1 && index === 0 ? ["Remove the welcome paragraph's inline color before adding the internal rule."] : []),
+      step.source === "inline" ? `In the HTML tab, find the opening <${tag}> tag${step.selector === firstCell ? " for Web design" : ""}.` : step.source === "internal" ? "In the HTML tab, edit the <style> block inside <head>." : "Edit the rules in the CSS tab.",
+      ...(step.source === "inline" ? [`Add or edit the style attribute: style="${declarations(target[step.selector])}". Keep the closing >.`] : [`Add or update this rule: ${code}`]),
+      ...(step.className ? ['Add class="notice" to the welcome paragraph opening tag.'] : []),
+      ...(step.selector === "#banner" ? ['Add id="banner" to the header opening tag.'] : []),
+      ...(stageIndex === 1 && index === 0 ? ["Remove the welcome paragraph's inline color so the internal rule can take effect."] : []),
       ...(stageIndex === 2 && index === 3 ? ["Remove inline padding from the Web design cell; keep its green fill."] : []),
-      "Keep previous declarations and add the requested change.",
-      `Preview and observe: ${step.observe}`,
-      "Check the result, then continue to the next step on this page."
+      `Preview: ${step.observe}`
     ],
     starterHtml, starterCss, progressive: true,
-    expected: { requiredTags: ["h1", "p", "table", "th", "td", "footer", "nav", "img"], containedTags: [{ container: "#banner", tag: "h1" }, { container: "main", tag: "p" }], containedText: [{ container: "#heading", text: "Digital Club" }, { container: "#welcome", text: "Welcome to our digital club." }, ...(paragraphClass ? [{ container: "#welcome.notice", text: "Welcome to our digital club." }] : [])], styleChecks: checks, ...(external ? { links: [], stylesheetLink: "styles.css", noInternalStyles: true } : {}) },
+    expected: { requiredTags: ["h1", "p", "table", "th", "td", ...(stageIndex > 0 ? ["header", "footer", "nav", "img"] : [])], containedText: [{ container: "h1", text: "Digital Club" }, { container: paragraphClass ? "p.notice" : "p", text: "Welcome to our digital club." }], styleChecks: checks, ...(headerId ? { containedTags: [{ container: "#banner", tag: "h1" }] } : {}), ...(external ? { stylesheetLink: "styles.css", noInternalStyles: true } : {}) },
     points: 10
   };
 }));
