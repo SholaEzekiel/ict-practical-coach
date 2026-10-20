@@ -31,6 +31,29 @@ type WorkbookSnapshot = {
   resources?: Array<{ name?: string; data?: string | Record<string, unknown> }>;
 };
 
+type LiveWorksheet = {
+  getRange: (cell: string) => { getFormula: () => string; getValue: () => unknown };
+};
+
+// Shared formulas store an anchor/offset rather than an f field on every copied cell.
+// Let Univer resolve those references; never infer a formula from the displayed value.
+export function readSpreadsheetResult(snapshot: unknown, cells: CellExpectation[], sheet: LiveWorksheet): unknown {
+  const source = snapshot as WorkbookSnapshot;
+  const sheetId = source.sheetOrder?.[0] || Object.keys(source.sheets || {})[0];
+  if (!sheetId || !source.sheets?.[sheetId]) return snapshot;
+  const cellData = { ...source.sheets[sheetId].cellData };
+  for (const expected of cells) {
+    const indexes = a1ToIndexes(expected.cell);
+    if (!indexes) continue;
+    const { rowIndex, columnIndex } = indexes;
+    const range = sheet.getRange(expected.cell);
+    cellData[rowIndex] = { ...cellData[rowIndex], [columnIndex]: {
+      ...cellData[rowIndex]?.[columnIndex], f: range.getFormula(), v: range.getValue()
+    } };
+  }
+  return { ...source, sheets: { ...source.sheets, [sheetId]: { ...source.sheets[sheetId], cellData } } };
+}
+
 export type SpreadsheetResultFeedback = {
   isCorrect: boolean;
   canAutoCheck: boolean;
@@ -47,6 +70,7 @@ function normaliseFormula(value: unknown) {
 }
 
 function nearlyEqual(actual: unknown, expected: number) {
+  if (actual === null || actual === undefined || typeof actual === "boolean" || String(actual).trim() === "") return false;
   const numberValue = typeof actual === "number" ? actual : Number(String(actual ?? "").replace(/,/g, ""));
   return Number.isFinite(numberValue) && Math.abs(numberValue - expected) < 0.000001;
 }
@@ -272,7 +296,6 @@ function checkColumns(snapshot: WorkbookSnapshot, columns: Array<{ column: strin
 
 function cellMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
   const actual = getCell(snapshot, expected.cell);
-  const hasFormulaExpectation = Boolean(expected.formula || expected.formulaIncludes?.length);
 
   if (expected.formula && normaliseFormula(actual?.f) !== normaliseFormula(expected.formula)) {
     return {
@@ -293,16 +316,14 @@ function cellMatches(snapshot: WorkbookSnapshot, expected: CellExpectation) {
     }
   }
 
-  // Univer may save the committed formula before its calculated value cache updates.
-  // A matching required formula is authoritative and still prevents typed-value shortcuts.
-  if (!hasFormulaExpectation && expected.value !== undefined && typeof expected.value === "number" && !nearlyEqual(actual?.v, expected.value)) {
+  if (expected.value !== undefined && typeof expected.value === "number" && !nearlyEqual(actual?.v, expected.value)) {
     return {
       ok: false,
       message: `${expected.cell} should show ${expected.value}.`
     };
   }
 
-  if (!hasFormulaExpectation && expected.value !== undefined && typeof expected.value !== "number" && normaliseText(actual?.v) !== normaliseText(expected.value)) {
+  if (expected.value !== undefined && typeof expected.value !== "number" && normaliseText(actual?.v) !== normaliseText(expected.value)) {
     return {
       ok: false,
       message: `${expected.cell} should show ${expected.value}.`

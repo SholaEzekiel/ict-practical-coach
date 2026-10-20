@@ -11,7 +11,7 @@ export const spreadsheetFormulaModules = [
     "min-sold", "max-sold", "count-sold", "counta-items"
   ] },
   { id: "formula-references", title: "Copying and Cell References", description: "Use the fill handle, follow relative references, and keep a reference fixed with $.", cards: [
-    "copy-average", "absolute-total", "task-absolute-discount"
+    "reference-headings", "reference-data", "reference-link", "reference-cost", "reference-copy", "reference-update", "copy-average", "absolute-total", "task-absolute-discount"
   ] },
   { id: "formula-logic", title: "IF and Logical Tests", description: "Start with a two-way IF decision, copy it, then compare nested IF and IFS.", cards: [
     "if-simple", "if-copy", "nested-if", "ifs", "task-shop-if", "task-shop-nested-if"
@@ -34,7 +34,17 @@ export function splitSpreadsheetFormulaCards(cards: SpreadsheetInstructionCard[]
     const card = remaining.get(id);
     if (!card) throw new Error("Missing or repeated formula exercise: " + id);
     remaining.delete(id);
-    return { ...card, moduleId: module.id, moduleTitle: module.title };
+    const extraCopyChecks = id === "sheet-formula-if-copy" ? [
+      { cell: "E4", formula: '=IF(B4>=20,"Good","Review")', value: "Review" },
+      { cell: "E5", formula: '=IF(B5>=20,"Good","Review")', value: "Good" },
+      { cell: "E6", formula: '=IF(B6>=20,"Good","Review")', value: "Review" }
+    ] : id === "sheet-formula-task-shop-copy-revenue" ? [
+      { cell: "D21", formula: "=B21*C21", value: 42 },
+      { cell: "D22", formula: "=B22*C22", value: 42 }
+    ] : [];
+    return { ...card, moduleId: module.id, moduleTitle: module.title,
+      autoCheck: { ...card.autoCheck, cells: [...card.autoCheck.cells, ...extraCopyChecks] }
+    };
   }));
   if (remaining.size) throw new Error("Ungrouped formula exercises: " + [...remaining.keys()].join(", "));
   return grouped;

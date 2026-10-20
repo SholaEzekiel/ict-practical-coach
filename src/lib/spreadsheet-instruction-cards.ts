@@ -161,8 +161,9 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
 
 function formulaIncludesCard(id: string, goal: string, scenario: string, cell: string, formulaIncludes: string[], value: string | number, steps: string[], difficulty: SpreadsheetInstructionCard["difficulty"] = "confident") {
   const functionName = formulaIncludes[0];
-  const guidedSteps = steps.filter((step) => !/^Type exactly |^Press Enter\.$/i.test(step));
-  const copying = guidedSteps.some(step => /fill handle/i.test(step));
+  const guidedSteps = steps.filter((step) => !/^Type exactly |^Press Enter\.$/i.test(step)).map(step =>
+    step.replace(/Drag the fill handle down to (\w+)\./, `Navigate your cursor to the bottom-right corner of cell ${steps[0].match(/Click (\w+)/)?.[1] || cell}. When the cursor changes to a plus sign (+), drag down to cell $1 and release.`));
+  const copying = steps.some(step => /fill handle/i.test(step));
   return baseCard({
     id,
     moduleId: "formula",
@@ -654,8 +655,23 @@ const formulaDataCards = [
 
 const formulaCards = [
   ...formulaDataCards,
+  entryCard("formula", "sheet-formula-reference-headings", "Create your own stationery table headings in J16:M16.", "Build a small table before practising references. Keep the club table for the later tasks.", [["J16", "Item"], ["K16", "Price"], ["L16", "Quantity"], ["M16", "Cost"]]),
+  entryCard("formula", "sheet-formula-reference-data", "Enter three stationery items and their numbers.", "Each cost will use the price and quantity on the same row.", [["J17", "Pen"], ["K17", 2], ["L17", 3], ["J18", "Book"], ["K18", 5], ["L18", 2], ["J19", "Folder"], ["K19", 3], ["L19", 4]]),
+  formulaCard("sheet-formula-reference-link", "Show the Pen price in K22 using a cell reference.", "A reference links to another cell: =K17 means use the current value in K17, not a typed 2.", "K22", "=K17", 2, [], "beginner"),
+  formulaCard("sheet-formula-reference-cost", "Calculate the Pen cost in M17.", "Multiply the price in K17 by the quantity in L17. Use cell references, not typed numbers.", "M17", "=K17*L17", 6, [], "beginner"),
+  {
+    ...formulaIncludesCard("sheet-formula-reference-copy", "Copy your cost formula into M18 and M19.", "Relative references change when copied: each item must use its own price and quantity.", "M19", ["K19*L19"], 12, ["Click M17.", "Navigate your cursor to the bottom-right corner of cell M17. When the cursor changes to a plus sign (+), drag down to M19 and release. This is the fill handle.", "Check that M18 shows 10 and M19 shows 12."]),
+    autoCheck: { cells: [{ cell: "M17", formula: "=K17*L17", value: 6 }, { cell: "M18", formula: "=K18*L18", value: 10 }, { cell: "M19", formula: "=K19*L19", value: 12 }] }
+  },
+  {
+    ...entryCard("formula", "sheet-formula-reference-update", "Change the Pen price in K17 to 4 and check both linked results.", "Do not replace the formulas. K22 should update to 4 and M17 to 12 automatically.", [["K17", 4]]),
+    autoCheck: { cells: [{ cell: "K17", value: 4 }, { cell: "K22", formula: "=K17", value: 4 }, { cell: "M17", formula: "=K17*L17", value: 12 }] }
+  },
   formulaCard("sheet-formula-divide", "Calculate sold per session for Drama.", "Divide Drama's Sold value in B4 by its Sessions value in C4.", "D4", "=B4/C4", 3),
-  formulaIncludesCard("sheet-formula-copy-average", "Copy the sold-per-session formula down.", "Use the fill handle so each row divides Sold by Sessions.", "D7", ["B7/C7"], 4, ["Click D4.", "Point at the small fill handle at the bottom-right corner of D4.", "Drag the fill handle down to D7.", "Check that D5:D7 divide the Sold value by Sessions on their own row."]),
+  {
+    ...formulaIncludesCard("sheet-formula-copy-average", "Copy the sold-per-session formula down.", "Use the fill handle so each row divides Sold by Sessions.", "D7", ["B7/C7"], 4, ["Click D4.", "Drag the fill handle down to D7.", "Check that D5:D7 divide the Sold value by Sessions on their own row."]),
+    autoCheck: { cells: [4, 5, 6, 7].map((row, index) => ({ cell: `D${row}`, formula: `=B${row}/C${row}`, value: [3, 22 / 6, 3.2, 4][index] })) }
+  },
   formulaCard("sheet-formula-sum-sold", "Calculate total sold.", "Use SUM to add all sold values.", "B8", "=SUM(B4:B7)", 76),
   formulaCard("sheet-formula-sum-sessions", "Calculate total sessions.", "Use SUM again with a different range.", "C8", "=SUM(C4:C7)", 22),
   formulaCard("sheet-formula-average-sold", "Calculate average sold.", "Use AVERAGE to find the mean sold value.", "B9", "=AVERAGE(B4:B7)", 19),

@@ -5,7 +5,7 @@ import { useShuffledOptions } from "@/lib/use-shuffled-options";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { BarChart3, CheckCircle2, ChevronDown, ChevronLeft, ClipboardCheck, Download, Eraser, FileUp, PanelLeftClose, PanelLeftOpen, Printer, Sparkles } from "lucide-react";
-import { validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
+import { readSpreadsheetResult, validateSpreadsheetResult, type SpreadsheetResultFeedback } from "@/lib/spreadsheet-result-checker";
 import { getSpreadsheetCardsForModule, getSpreadsheetModule } from "@/lib/spreadsheet-instruction-cards";
 import { getFormulaStarter, spreadsheetFormulaModules } from "@/lib/spreadsheet-formula-modules";
 import { useFeedbackAutoScroll } from "@/lib/use-feedback-auto-scroll";
@@ -22,10 +22,12 @@ type WorkbookSeed = {
 };
 
 type UniverApi = {
+  getFormula: () => { whenComputingCompleteAsync: (timeout?: number) => Promise<boolean> };
   createWorkbook?: (workbook: WorkbookSeed) => unknown;
   getActiveWorkbook?: () => {
     save?: () => unknown;
     getSnapshot?: () => unknown;
+    getSheets: () => Array<{ getRange: (cell: string) => { getFormula: () => string; getValue: () => unknown } }>;
   } | null;
 };
 
@@ -361,6 +363,7 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
   const [points, setPoints] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
   const [ready, setReady] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [instructionsOpen, setInstructionsOpen] = useState(true);
   const [csvText, setCsvText] = useState("");
   const [importingFile, setImportingFile] = useState(false);
@@ -501,8 +504,8 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
     univerApiRef.current?.createWorkbook?.(workbook);
   }
 
-  function checkWork() {
-    if (!card) return;
+  async function checkWork() {
+    if (!card || checking) return;
 
     if (card.quiz) {
       const selectedAnswer = quizAnswers[card.id];
@@ -525,8 +528,31 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
       return;
     }
 
-    const currentSnapshot = snapshot();
-    const result = validateSpreadsheetResult(card, currentSnapshot);
+    let currentSnapshot: unknown;
+    let result: SpreadsheetResultFeedback;
+    setChecking(true);
+    try {
+      const api = univerApiRef.current;
+      if (!api || !await api.getFormula().whenComputingCompleteAsync(5000)) throw new Error("Still calculating");
+      const workbook = api.getActiveWorkbook?.();
+      const sheet = workbook?.getSheets()[0];
+      if (!sheet) throw new Error("Worksheet unavailable");
+      // Calculation can still be queued when the engine initially reports idle.
+      // Retry live reads briefly rather than accepting formula text without a result.
+      for (let attempt = 0; attempt < 8; attempt++) {
+        await new Promise(resolve => window.setTimeout(resolve, 150));
+        if (!await api.getFormula().whenComputingCompleteAsync(5000)) throw new Error("Still calculating");
+        currentSnapshot = readSpreadsheetResult(snapshot(), card.autoCheck.cells, sheet);
+        result = validateSpreadsheetResult(card, currentSnapshot);
+        if (result.isCorrect) break;
+      }
+    } catch {
+      setFeedback({ isCorrect: false, canAutoCheck: true, message: "The spreadsheet is still updating. Please try checking again.", nextStep: "Press Enter to finish editing, then check your result." });
+      return;
+    } finally {
+      setChecking(false);
+    }
+    result = validateSpreadsheetResult(card, currentSnapshot);
 
     if (result.isCorrect && card.printCheck) {
       const printError = validatePrintSettings(card.printCheck, printSettings);
@@ -979,9 +1005,9 @@ export function UniverSpreadsheetLab({ moduleId }: UniverSpreadsheetLabProps) {
                     <span className="rounded-full bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700 shadow-soft">+{card.marks * 10} points</span>
                   </div>
                 )}
-                <button onClick={checkWork} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90">
+                <button onClick={checkWork} disabled={checking} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-leaf px-3 py-3 text-sm font-semibold text-white hover:bg-leaf/90 disabled:opacity-60">
                   {card.autoCheck || card.quiz ? <CheckCircle2 size={16} /> : <ClipboardCheck size={16} />}
-                  Check my result
+                  {checking ? "Checking result..." : "Check my result"}
                 </button>
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
