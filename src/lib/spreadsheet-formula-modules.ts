@@ -10,14 +10,23 @@ export const spreadsheetFormulaModules = [
   { id: "formula-statistics", title: "Minimum, Maximum and Counting", description: "Find the smallest and largest values; distinguish COUNT from COUNTA.", cards: [
     "min-sold", "max-sold", "count-sold", "counta-items"
   ] },
-  { id: "formula-references", title: "Copying and Cell References", description: "Use the fill handle, follow relative references, and keep a reference fixed with $.", cards: [
-    "reference-headings", "reference-data", "reference-link", "reference-cost", "reference-copy", "reference-update", "copy-average", "absolute-total", "task-absolute-discount"
+  { id: "formula-references", title: "Build a Table and Use References", description: "Start with a blank worksheet, build a stationery table, and see linked formula results update.", cards: [
+    "reference-headings", "reference-data", "reference-link", "reference-cost", "reference-copy", "reference-update"
+  ] },
+  { id: "formula-copying", title: "Copying and Absolute References", description: "Use prepared club data to copy relative references and compare a value against a fixed total.", cards: [
+    "copy-average", "absolute-total"
+  ] },
+  { id: "formula-discounts", title: "Fixed Discount References", description: "Use a prepared price and discount rate to practise an absolute reference.", cards: [
+    "task-absolute-discount"
   ] },
   { id: "formula-logic", title: "IF and Logical Tests", description: "Start with a two-way IF decision, copy it, then compare nested IF and IFS.", cards: [
-    "if-simple", "if-copy", "nested-if", "ifs", "task-shop-if", "task-shop-nested-if"
+    "if-simple", "if-copy", "nested-if", "ifs"
   ] },
   { id: "formula-conditions", title: "Conditional Counting and Totals", description: "Use COUNTIF, SUMIF, and AVERAGEIF before applying them to a shop table.", cards: [
-    "countif", "sumif", "averageif", "task-shop-countif", "task-shop-sumif"
+    "countif", "sumif", "averageif"
+  ] },
+  { id: "formula-shop-decisions", title: "Shop Decisions and Conditions", description: "Apply IF, nested IF, COUNTIF, and SUMIF to one prepared school-shop table.", cards: [
+    "task-shop-if", "task-shop-nested-if", "task-shop-countif", "task-shop-sumif"
   ] },
   { id: "formula-lookups", title: "Lookup Functions", description: "Build lookup tables and practise exact-match VLOOKUP, HLOOKUP, and XLOOKUP.", cards: [
     "lookup-table", "vlookup", "hlookup-table", "hlookup", "xlookup", "task-discount-lookup-table", "task-vlookup-discount"
@@ -53,7 +62,17 @@ export function splitSpreadsheetFormulaCards(cards: SpreadsheetInstructionCard[]
 export function getFormulaStarter(moduleId?: string): { cells: Array<[string, string | number]>; formulas: Array<[string, string]> } | undefined {
   if (!spreadsheetFormulaModules.some(module => module.id === moduleId)) return undefined;
   if (moduleId === "formula") return { cells: [], formulas: [] };
-  if (moduleId === "formula-practice") return { cells: [["A1", "School Shop Revenue"]], formulas: [] };
+  if (moduleId === "formula-references" || moduleId === "formula-lookups" || moduleId === "formula-practice") return { cells: [], formulas: [] };
+  if (moduleId === "formula-discounts") return { cells: [
+    ["A21", "Item"], ["B21", "Price"], ["A22", "Notebook"], ["B22", 3],
+    ["H24", "Fixed discount rate"], ["H25", 0.15]
+  ], formulas: [] };
+  if (moduleId === "formula-shop-decisions") return { cells: [
+    ["A20", "Item"], ["B20", "Price"], ["C20", "Sold"], ["D20", "Revenue"],
+    ["A21", "Pen"], ["B21", 1.5], ["C21", 28], ["D21", 42],
+    ["A22", "Notebook"], ["B22", 3], ["C22", 14], ["D22", 42],
+    ["A23", "Folder"], ["B23", 2], ["C23", 19], ["D23", 38]
+  ], formulas: [] };
   const cells: Array<[string, string | number]> = [
     ["A1", "Club Formula Practice"],
     ["A3", "Item"], ["B3", "Sold"], ["C3", "Sessions"], ["D3", "Sold per session"], ["E3", "Status"],
@@ -63,15 +82,12 @@ export function getFormulaStarter(moduleId?: string): { cells: Array<[string, st
     ["A7", "Art"], ["B7", 20], ["C7", 5],
     ["A8", "Total"], ["A9", "Average"], ["A10", "Lowest"], ["A11", "Highest"]
   ];
-  if (moduleId === "formula-logic" || moduleId === "formula-conditions") cells.push(
-    ["A20", "Item"], ["B20", "Price"], ["C20", "Sold"], ["D20", "Revenue"],
-    ["A21", "Pen"], ["B21", 1.5], ["C21", 28], ["D21", 42],
-    ["A22", "Notebook"], ["B22", 3], ["C22", 14], ["D22", 42],
-    ["A23", "Folder"], ["B23", 2], ["C23", 19], ["D23", 38]
-  );
-  if (moduleId === "formula-references") {
-    cells.push(["A22", "Notebook"], ["B22", 3], ["H24", "Fixed discount rate"], ["H25", 0.15]);
-    return { cells, formulas: [["D4", "=B4/C4"], ["B8", "=SUM(B4:B7)"]] };
+  if (moduleId === "formula-copying") {
+    return { cells: cells.filter(([cell]) => !["E3", "A9", "A10", "A11"].includes(cell)), formulas: [["D4", "=B4/C4"], ["B8", "=SUM(B4:B7)"]] };
   }
-  return { cells, formulas: [] };
+  const needed = moduleId === "formula-totals" ? /^(A[13456789]|[BC][34567])$/
+    : moduleId === "formula-statistics" ? /^(A(?:[134567]|10|11)|B[34567])$/
+    : moduleId === "formula-conditions" ? /^(A[134567]|B[34567])$/
+    : /^(A[134567]|B[34567]|E3)$/;
+  return { cells: cells.filter(([cell]) => needed.test(cell)), formulas: [] };
 }

@@ -123,8 +123,7 @@ function getStarterWorkbook(moduleId?: string) {
       ["A3", "Robotics"], ["B3", 22], ["C3", 6], ["D3", 3.67], ["E3", "Ms Patel"], ["F3", "Lab 1"],
       ["A4", "Coding"], ["B4", 16], ["C4", 5], ["D4", 3.2], ["E4", "Mr Obi"], ["F4", "Lab 2"],
       ["A5", "Art"], ["B5", 20], ["C5", 5], ["D5", 4], ["E5", "Mrs Green"], ["F5", "Room 3"],
-      ["A7", "Total"], ["B7", 76], ["C7", 22], ["D7", 3.45],
-      ["A10", "Print notes"], ["A11", "Use print settings to control output evidence."], ["A12", "Check preview before saving PDF."]
+      ["A7", "Total"], ["B7", 76], ["C7", 22], ["D7", 3.45]
     ]);
   }
   if (moduleId === "free-practice") return makeWorkbook("Free Practice", [["A1", "Paste or import data to begin"]]);

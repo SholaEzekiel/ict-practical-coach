@@ -45,18 +45,26 @@ async function findApi(page) {
     for (const group of groups) {
       await page.goto((process.env.TEST_URL || 'http://localhost:3012') + '/subjects/ict/spreadsheets/' + group.id, { timeout: 120000 });
       await findApi(page);
+      if (['formula', 'formula-references', 'formula-lookups', 'formula-practice'].includes(group.id)) {
+        const populated = await page.evaluate(() => {
+          const book = window.qaApi.getActiveWorkbook().save();
+          return Object.values(book.sheets[book.sheetOrder[0]].cellData || {}).flatMap(row => Object.values(row)).filter(cell => cell.f || (cell.v !== undefined && cell.v !== null && cell.v !== ''));
+        });
+        assert.equal(populated.length, 0, group.id + ': no preloaded student-built table');
+        console.log('PASS blank starter', group.id);
+      }
       for (const card of getSpreadsheetCardsForModule(group.id)) {
         const slug = card.id.replace('sheet-formula-', '');
         await page.evaluate(async ({ card, slug, formula }) => {
           const api = window.qaApi;
           const sheet = api.getActiveWorkbook().getSheets()[0];
           if (['copy-average', 'reference-copy', 'if-copy', 'task-shop-copy-revenue'].includes(slug)) {
-            const [from, to] = { 'copy-average': ['D4', 'D4:D7'], 'reference-copy': ['M17', 'M17:M19'], 'if-copy': ['E4', 'E4:E7'], 'task-shop-copy-revenue': ['D21', 'D21:D23'] }[slug];
+            const [from, to] = { 'copy-average': ['D4', 'D4:D7'], 'reference-copy': ['D4', 'D4:D6'], 'if-copy': ['E4', 'E4:E7'], 'task-shop-copy-revenue': ['D21', 'D21:D23'] }[slug];
             await sheet.getRange(from).autoFill(sheet.getRange(to));
           } else {
             for (const expected of card.autoCheck.cells) {
               // The update lesson edits only the source, leaving existing formulas intact.
-              if (slug === 'reference-update' && expected.cell !== 'K17') continue;
+              if (slug === 'reference-update' && expected.cell !== 'B4') continue;
               await sheet.getRange(expected.cell).setValue(expected.formula || (expected.formulaIncludes ? formula : expected.value));
             }
           }
@@ -65,7 +73,7 @@ async function findApi(page) {
           await api.getFormula().whenComputingCompleteAsync(10000);
         }, { card, slug, formula: formulas[slug] });
         if (slug === 'reference-link' || slug === 'copy-average') {
-          const address = slug === 'reference-link' ? 'K22' : 'D5';
+          const address = slug === 'reference-link' ? 'B9' : 'D5';
           const value = slug === 'reference-link' ? 2 : 22 / 6;
           await page.evaluate(async ({ address, value }) => {
             await window.qaApi.getActiveWorkbook().getSheets()[0].getRange(address).setValue(value);
@@ -76,7 +84,7 @@ async function findApi(page) {
             const sheet = window.qaApi.getActiveWorkbook().getSheets()[0];
             if (slug === 'copy-average') {
               await sheet.getRange('D4').autoFill(sheet.getRange('D4:D7'));
-            } else await sheet.getRange(address).setValue('=K17');
+            } else await sheet.getRange(address).setValue('=B4');
           }, { slug, address });
           console.log('PASS real typed-answer rejection', slug);
         }

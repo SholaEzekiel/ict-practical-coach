@@ -655,17 +655,17 @@ const formulaDataCards = [
 
 const formulaCards = [
   ...formulaDataCards,
-  entryCard("formula", "sheet-formula-reference-headings", "Create your own stationery table headings in J16:M16.", "Build a small table before practising references. Keep the club table for the later tasks.", [["J16", "Item"], ["K16", "Price"], ["L16", "Quantity"], ["M16", "Cost"]]),
-  entryCard("formula", "sheet-formula-reference-data", "Enter three stationery items and their numbers.", "Each cost will use the price and quantity on the same row.", [["J17", "Pen"], ["K17", 2], ["L17", 3], ["J18", "Book"], ["K18", 5], ["L18", 2], ["J19", "Folder"], ["K19", 3], ["L19", 4]]),
-  formulaCard("sheet-formula-reference-link", "Show the Pen price in K22 using a cell reference.", "A reference links to another cell: =K17 means use the current value in K17, not a typed 2.", "K22", "=K17", 2, [], "beginner"),
-  formulaCard("sheet-formula-reference-cost", "Calculate the Pen cost in M17.", "Multiply the price in K17 by the quantity in L17. Use cell references, not typed numbers.", "M17", "=K17*L17", 6, [], "beginner"),
+  entryCard("formula", "sheet-formula-reference-headings", "Create your own stationery table headings in A3:D3.", "Start with this blank worksheet. Build the table you will use throughout these six tasks.", [["A3", "Item"], ["B3", "Price"], ["C3", "Quantity"], ["D3", "Cost"]]),
+  entryCard("formula", "sheet-formula-reference-data", "Enter three stationery items and their numbers.", "Each cost will use the price and quantity on the same row.", [["A4", "Pen"], ["B4", 2], ["C4", 3], ["A5", "Book"], ["B5", 5], ["C5", 2], ["A6", "Folder"], ["B6", 3], ["C6", 4]]),
+  formulaCard("sheet-formula-reference-link", "Show the Pen price in B9 using a cell reference.", "A reference links to another cell: =B4 means use the current value in B4, not a typed 2.", "B9", "=B4", 2, [], "beginner"),
+  formulaCard("sheet-formula-reference-cost", "Calculate the Pen cost in D4.", "Multiply the price in B4 by the quantity in C4. Use cell references, not typed numbers.", "D4", "=B4*C4", 6, [], "beginner"),
   {
-    ...formulaIncludesCard("sheet-formula-reference-copy", "Copy your cost formula into M18 and M19.", "Relative references change when copied: each item must use its own price and quantity.", "M19", ["K19*L19"], 12, ["Click M17.", "Navigate your cursor to the bottom-right corner of cell M17. When the cursor changes to a plus sign (+), drag down to M19 and release. This is the fill handle.", "Check that M18 shows 10 and M19 shows 12."]),
-    autoCheck: { cells: [{ cell: "M17", formula: "=K17*L17", value: 6 }, { cell: "M18", formula: "=K18*L18", value: 10 }, { cell: "M19", formula: "=K19*L19", value: 12 }] }
+    ...formulaIncludesCard("sheet-formula-reference-copy", "Copy your cost formula into D5 and D6.", "Relative references change when copied: each item must use its own price and quantity.", "D6", ["B6*C6"], 12, ["Click D4.", "Navigate your cursor to the bottom-right corner of cell D4. When the cursor changes to a plus sign (+), drag down to D6 and release. This is the fill handle.", "Check that D5 shows 10 and D6 shows 12."]),
+    autoCheck: { cells: [{ cell: "D4", formula: "=B4*C4", value: 6 }, { cell: "D5", formula: "=B5*C5", value: 10 }, { cell: "D6", formula: "=B6*C6", value: 12 }] }
   },
   {
-    ...entryCard("formula", "sheet-formula-reference-update", "Change the Pen price in K17 to 4 and check both linked results.", "Do not replace the formulas. K22 should update to 4 and M17 to 12 automatically.", [["K17", 4]]),
-    autoCheck: { cells: [{ cell: "K17", value: 4 }, { cell: "K22", formula: "=K17", value: 4 }, { cell: "M17", formula: "=K17*L17", value: 12 }] }
+    ...entryCard("formula", "sheet-formula-reference-update", "Change the Pen price in B4 to 4 and check both linked results.", "Do not replace the formulas. B9 should update to 4 and D4 to 12 automatically.", [["B4", 4]]),
+    autoCheck: { cells: [{ cell: "B4", value: 4 }, { cell: "B9", formula: "=B4", value: 4 }, { cell: "D4", formula: "=B4*C4", value: 12 }] }
   },
   formulaCard("sheet-formula-divide", "Calculate sold per session for Drama.", "Divide Drama's Sold value in B4 by its Sessions value in C4.", "D4", "=B4/C4", 3),
   {
