@@ -2,14 +2,22 @@
 
 import { useShuffledOptions } from "@/lib/use-shuffled-options";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { BookOpenCheck, CheckCircle2, ChevronLeft, ChevronRight, FileText, ListChecks, XCircle } from "lucide-react";
 import { ictTheoryModules } from "@/lib/ict-theory-data";
-import type { IctTheoryLesson } from "@/lib/ict-theory-data";
+import type { IctTheoryLesson, IctTheoryQuiz } from "@/lib/ict-theory-data";
 import { Card, Pill, ProgressBar } from "@/components/ui";
 import { spacedShuffle } from "@/lib/spaced-shuffle";
 
-type ContentTarget = string | "module-glossary" | "module-quiz";
+type ContentTarget = string | "module-glossary" | "module-quiz" | "module-cases";
+
+function questionOrder(questions: IctTheoryQuiz[]) {
+  if (questions[0]?.caseStudy) {
+    const cases = [...new Set(questions.map(question => question.caseStudy!.id))];
+    return spacedShuffle(cases, id => id).flatMap(id => questions.flatMap((question, index) => question.caseStudy?.id === id ? [index] : []));
+  }
+  return spacedShuffle(questions.map((_, index) => index), index => questions[index]?.question.trim().toLowerCase() || String(index));
+}
 
 function usefulQuizFeedback(feedback: string, correctAnswer: string) {
   const cleaned = feedback.replace(/^Correct[.:]?\s*/i, "").trim();
@@ -382,18 +390,26 @@ function IctLessonRenderer({ lesson }: { lesson: IctTheoryLesson }) {
 export function IctTheoryHub() {
   const [activeModuleId, setActiveModuleId] = useState(ictTheoryModules[0]?.id || "");
   const [activeLessonId, setActiveLessonId] = useState<ContentTarget>(ictTheoryModules[0]?.lessons[0]?.id || "");
-  const [quizOrder, setQuizOrder] = useState<number[]>([]);
+  const [quizResetKey, setQuizResetKey] = useState(0);
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizSelections, setQuizSelections] = useState<Record<string, Record<string, number>>>({});
+  const [termSearch, setTermSearch] = useState("");
+  const [topicFilter, setTopicFilter] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
 
   const activeModule = ictTheoryModules.find((module) => module.id === activeModuleId) || ictTheoryModules[0];
   const activeLesson = activeModule?.lessons.find((lesson) => lesson.id === activeLessonId);
+  const caseMode = activeLessonId === "module-cases";
+  const quizBank = useMemo(() => activeModule.quiz.filter(question => Boolean(question.caseStudy) === caseMode && (!topicFilter || (question.studyTopic || "Core questions") === topicFilter)), [activeModule, caseMode, topicFilter]);
+  const quizOrder = useMemo(() => questionOrder(quizBank), [quizBank, quizResetKey]);
+  const glossaryTopics = [...new Set(activeModule.glossary.map(entry => entry.topic || "Core vocabulary"))].sort();
+  const quizTopics = [...new Set(activeModule.quiz.filter(question => !question.caseStudy).map(question => question.studyTopic || "Core questions"))].sort();
+  const visibleTerms = activeModule.glossary.filter(entry => (!topicFilter || (entry.topic || "Core vocabulary") === topicFilter) && [entry.term, entry.definition, ...(entry.aliases || [])].join(" ").toLowerCase().includes(termSearch.toLowerCase().trim()));
   const orderedIndex = quizOrder.length ? quizOrder[Math.min(quizIndex, quizOrder.length - 1)] : 0;
-  const quiz = activeModule?.quiz[orderedIndex] || activeModule?.quiz[0];
+  const quiz = quizBank[orderedIndex] || quizBank[0];
   const moduleSelections = activeModule ? quizSelections[activeModule.id] || {} : {};
   const selectedAnswer = quiz ? moduleSelections[quiz.id] ?? null : null;
-  const moduleScore = (activeModule?.quiz || []).reduce(
+  const moduleScore = quizBank.reduce(
     (score, question) => {
       const answer = moduleSelections[question.id];
       if (answer === undefined) return score;
@@ -404,19 +420,11 @@ export function IctTheoryHub() {
     },
     { correct: 0, attempted: 0 }
   );
-  const quizProgress = activeModule?.quiz.length ? (moduleScore.attempted / activeModule.quiz.length) * 100 : 0;
+  const quizProgress = quizBank.length ? (moduleScore.attempted / quizBank.length) * 100 : 0;
   const isCorrect = selectedAnswer === quiz?.correctIndex;
   const additionalFeedback = quiz ? usefulQuizFeedback(quiz.feedback, quiz.options[quiz.correctIndex]) : "";
   const isLastQuizQuestion = quizIndex >= Math.max(0, quizOrder.length - 1);
   const shuffledOptions = useShuffledOptions("ict-theory:" + (quiz?.id || ""), quiz?.options || []);
-
-  useEffect(() => {
-    setQuizOrder(spacedShuffle(
-      (activeModule?.quiz || []).map((_, index) => index),
-      (index) => activeModule?.quiz[index]?.question.trim().toLowerCase() || String(index),
-    ));
-    setQuizIndex(0);
-  }, [activeModule?.id, activeModule?.quiz]);
 
   function chooseModule(moduleId: string) {
     const nextModule = ictTheoryModules.find((module) => module.id === moduleId);
@@ -424,12 +432,17 @@ export function IctTheoryHub() {
     setActiveLessonId(nextModule?.lessons[0]?.id || "");
     setQuizIndex(0);
     setQuizSelections({});
+    setTermSearch("");
+    setTopicFilter("");
     scrollToContent();
   }
 
   function chooseContent(moduleId: string, target: ContentTarget) {
     if (moduleId !== activeModuleId) setActiveModuleId(moduleId);
     setActiveLessonId(target);
+    setQuizIndex(0);
+    setTermSearch("");
+    setTopicFilter("");
     scrollToContent();
   }
 
@@ -438,6 +451,11 @@ export function IctTheoryHub() {
     window.requestAnimationFrame(() => {
       contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  }
+
+  function chooseTopic(topic: string) {
+    setTopicFilter(topic);
+    setQuizIndex(0);
   }
 
   function nextQuestion() {
@@ -474,7 +492,7 @@ export function IctTheoryHub() {
               <button type="button" onClick={() => chooseModule(module.id)} className="flex w-full items-center justify-between gap-4 text-left">
                 <span>
                   <span className="text-sm font-semibold text-slate-500">{module.lessons.length} lessons</span>
-                  <span className="mt-2 block break-words text-xl font-bold text-ink">Unit {module.moduleId} {module.moduleTitle}</span>
+                  <span className="mt-2 block break-words text-xl font-bold text-ink">{module.id.startsWith("application-") ? "" : `Unit ${module.moduleId} `}{module.moduleTitle}</span>
                 </span>
                 <ChevronRight className={`flex-none text-ocean transition ${open ? "rotate-90" : ""}`} size={20} aria-hidden="true" />
               </button>
@@ -503,7 +521,7 @@ export function IctTheoryHub() {
                         activeLessonId === "module-glossary" ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
                       }`}
                     >
-                      <span className="min-w-0 break-words font-bold">Module glossary</span>
+                      <span className="min-w-0 break-words font-bold">Module glossary ({module.glossary.length})</span>
                       <ChevronRight size={17} className="flex-none" aria-hidden="true" />
                     </button>
                     <button
@@ -513,7 +531,11 @@ export function IctTheoryHub() {
                         activeLessonId === "module-quiz" ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"
                       }`}
                     >
-                      <span className="min-w-0 break-words font-bold">Multiple choice questions</span>
+                      <span className="min-w-0 break-words font-bold">Multiple choice questions ({module.quiz.filter(question => !question.caseStudy).length})</span>
+                      <ChevronRight size={17} className="flex-none" aria-hidden="true" />
+                    </button>
+                    <button type="button" onClick={() => chooseContent(module.id, "module-cases")} className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left transition ${activeLessonId === "module-cases" ? "border-ocean bg-mist text-ocean" : "border-line bg-white text-ink hover:border-ocean"}`}>
+                      <span className="min-w-0 break-words font-bold">Case study practice ({new Set(module.quiz.flatMap(question => question.caseStudy ? [question.caseStudy.id] : [])).size} cases, {module.quiz.filter(question => question.caseStudy).length} questions)</span>
                       <ChevronRight size={17} className="flex-none" aria-hidden="true" />
                     </button>
                   </div>
@@ -526,7 +548,7 @@ export function IctTheoryHub() {
 
       <div ref={contentRef} className="min-w-0 scroll-mt-24 space-y-5">
         <Card>
-          <Pill>Unit {activeModule?.moduleId}</Pill>
+          <Pill>{activeModule.id.startsWith("application-") ? "Application" : `Unit ${activeModule.moduleId}`}</Pill>
           <h2 className="mt-4 text-3xl font-bold">{activeModule?.moduleTitle}</h2>
           <p className="mt-3 leading-7 text-slate-600">{activeModule?.overview}</p>
         </Card>
@@ -552,26 +574,32 @@ export function IctTheoryHub() {
           <Card>
             <Pill>Glossary</Pill>
             <h3 className="mt-4 text-2xl font-bold">{activeModule?.moduleTitle} glossary</h3>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="text-sm font-semibold">Search terms<input type="search" value={termSearch} onChange={event => setTermSearch(event.target.value)} className="mt-1 block w-full rounded-md border border-line px-3 py-2 font-normal" /></label>
+              <label className="text-sm font-semibold">Study topic<select aria-label="Study topic" value={topicFilter} onChange={event => chooseTopic(event.target.value)} className="mt-1 block w-full rounded-md border border-line bg-white px-3 py-2 font-normal"><option value="">All topics</option>{glossaryTopics.map(topic => <option key={topic}>{topic}</option>)}</select></label>
+            </div>
+            <p className="mt-3 text-sm text-slate-600">{visibleTerms.length} of {activeModule.glossary.length} terms</p>
             <div className="mt-5 divide-y divide-line overflow-hidden rounded-lg border border-line bg-white">
-              {activeModule?.glossary.map((term) => (
+              {visibleTerms.map((term) => (
                 <div key={term.term} className="grid gap-2 p-4 md:grid-cols-[220px_minmax(0,1fr)]">
-                  <p className="break-words font-bold text-ink">{term.term}</p>
-                  <p className="text-sm leading-6 text-slate-700">{term.definition}</p>
+                  <div><p className="break-words font-bold text-ink">{term.term}</p><p className="mt-1 text-xs text-ocean">{term.topic || "Core vocabulary"}</p></div>
+                  <div><p className="text-sm leading-6 text-slate-700">{term.definition}</p>{Boolean(term.aliases?.length) && <p className="mt-1 text-xs text-slate-500">Also called: {term.aliases!.join(", ")}</p>}{Boolean(term.alsoStudyIn?.length) && <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">{term.alsoStudyIn!.map(id => <button type="button" key={id} onClick={() => { chooseContent(id, "module-glossary"); setTermSearch(term.term); }} className="text-xs font-semibold text-ocean underline">{ictTheoryModules.find(module => module.id === id)?.moduleTitle}</button>)}</div>}</div>
                 </div>
               ))}
+              {!visibleTerms.length && <p className="p-4 text-sm text-slate-600">No matching terms.</p>}
             </div>
           </Card>
         )}
 
-        {activeLessonId === "module-quiz" && quiz && (
+        {(activeLessonId === "module-quiz" || caseMode) && quiz && (
           <Card>
             <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] lg:items-start">
               <div>
                 <div className="flex items-center gap-2">
                   <ListChecks size={20} className="text-ocean" aria-hidden="true" />
-                  <h2 className="text-2xl font-bold">Multiple choice questions</h2>
+                  <h2 className="text-2xl font-bold">{caseMode ? "Case study practice" : "Multiple choice questions"}</h2>
                 </div>
-                <p className="mt-3 leading-7 text-slate-600">Read each question, then choose the term, description, or function that best answers it.</p>
+                {!caseMode && <label className="mt-4 block text-sm font-semibold">Study topic<select aria-label="Study topic" value={topicFilter} onChange={event => chooseTopic(event.target.value)} className="mt-1 block w-full rounded-md border border-line bg-white px-3 py-2 font-normal"><option value="">All topics</option>{quizTopics.map(topic => <option key={topic}>{topic}</option>)}</select></label>}
                 <div className="mt-4 rounded-lg border border-line bg-white p-4">
                   <p className="text-sm font-bold text-ink">Scoreboard</p>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
@@ -598,10 +626,7 @@ export function IctTheoryHub() {
                         delete next[activeModule.id];
                         return next;
                       });
-                      setQuizOrder(spacedShuffle(
-                        (activeModule?.quiz || []).map((_, index) => index),
-                        (index) => activeModule?.quiz[index]?.question.trim().toLowerCase() || String(index),
-                      ));
+                      setQuizResetKey(key => key + 1);
                       setQuizIndex(0);
                     }}
                     className="mt-3 text-xs font-bold text-ocean hover:underline"
@@ -612,13 +637,14 @@ export function IctTheoryHub() {
                 <div className="mt-5">
                   <div className="mb-2 flex justify-between text-sm font-medium">
                     <span>{activeModule?.moduleTitle}</span>
-                    <span>{moduleScore.attempted}/{activeModule?.quiz.length || 1}</span>
+                    <span>{moduleScore.attempted}/{quizBank.length || 1}</span>
                   </div>
                   <ProgressBar value={quizProgress} />
                 </div>
               </div>
 
-              <div className="rounded-lg border border-line bg-mist p-5">
+              <div data-quiz-id={quiz.id} className="rounded-lg border border-line bg-mist p-5">
+                {quiz.caseStudy && <div className="mb-5 border-b border-line pb-4"><h3 className="font-bold">{quiz.caseStudy.title}</h3><p className="mt-2 text-sm leading-7 text-slate-700">{quiz.caseStudy.scenario}</p></div>}
                 <p className="text-xs font-bold uppercase tracking-wide text-ocean">{quiz.topic}</p>
                 <p className="mt-3 text-lg font-semibold leading-8 text-ink">{quiz.question}</p>
                 <div className="mt-5 grid gap-3">

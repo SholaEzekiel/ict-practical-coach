@@ -1,3 +1,6 @@
+import { ictCoursebookGlossary, ictGlossaryRelatedModules, ictTermKey, mergeIctGlossary, type IctGlossaryEntry } from "./ict-coursebook-glossary";
+import { ictCaseStudies } from "./ict-case-study-data";
+
 export type IctTheoryLesson = {
   id: string;
   number: string;
@@ -32,6 +35,8 @@ export type IctTheoryQuiz = {
   options: string[];
   correctIndex: number;
   feedback: string;
+  studyTopic?: string;
+  caseStudy?: { id: string; title: string; scenario: string };
 };
 
 export type IctTheoryModule = {
@@ -41,7 +46,7 @@ export type IctTheoryModule = {
   overview: string;
   lessons: IctTheoryLesson[];
   quiz: IctTheoryQuiz[];
-  glossary: Array<{ term: string; definition: string }>;
+  glossary: IctGlossaryEntry[];
 };
 
 const baseIctTheoryModules: IctTheoryModule[] = [
@@ -2118,20 +2123,23 @@ function generatedQuizForModule(module: IctTheoryModule): IctTheoryQuiz[] {
   );
   if (terms.length < 4) return [];
   return terms.flatMap((entry, index) => {
-    const others = [...terms.slice(index + 1), ...terms.slice(0, index)].slice(0, 3);
+    const rotated = [...terms.slice(index + 1), ...terms.slice(0, index)];
+    const others = rotated.filter(other => other.topic === entry.topic).concat(rotated.filter(other => other.topic !== entry.topic)).slice(0, 3);
     const asksAboutFunction = /\b(controls?|performs?|processes?|stores?|provides?|allows?|enables?|used to|responsible for)\b/i.test(entry.definition);
     return [
       {
-        id: module.id + "-term-" + index,
+        id: module.id + "-term-" + ictTermKey(entry.term),
         topic: entry.term,
+        studyTopic: entry.topic || "Core vocabulary",
         question: (asksAboutFunction ? "Which term performs this function? " : "Which term matches this description? ") + entry.definition,
         options: [entry.term, ...others.map((other) => other.term)],
         correctIndex: 0,
         feedback: ""
       },
       {
-        id: module.id + "-meaning-" + index,
+        id: module.id + "-meaning-" + ictTermKey(entry.term),
         topic: entry.term,
+        studyTopic: entry.topic || "Core vocabulary",
         question: "Which description correctly explains " + entry.term + "?",
         options: [entry.definition, ...others.map((other) => other.definition)],
         correctIndex: 0,
@@ -2524,14 +2532,52 @@ const ictTheoryStudyAdditions: Record<string, NonNullable<IctTheoryLesson["study
   ]
 };
 
-export const ictTheoryModules: IctTheoryModule[] = [...baseIctTheoryModules, ...applicationTheoryModules].map((module) => ({
-  ...module,
-  lessons: module.lessons.map((lesson) => ({
-    ...lesson,
-    studyBlocks: [...(lesson.studyBlocks || []), ...(ictTheoryStudyAdditions[lesson.id] || [])]
-  })),
-  quiz: (() => {
+const imageTheoryModule: IctTheoryModule = {
+  id: "application-images", moduleId: 15, moduleTitle: "Image Editing Theory",
+  overview: "Understand image properties, editing operations, compression and preparation for digital or printed output.",
+  glossary: [], quiz: [], lessons: [
+    { id: "ict-15-image-properties", number: "15.1", title: "Pixels, Colour and Size", summary: "Image dimensions, colour depth and aspect ratio describe different properties.", keyPoints: [
+      "A raster image is a grid of pixels. Pixel dimensions describe the number of pixels across and down.",
+      "Colour depth is the number of bits used to represent a pixel's colour; it is not the number of pixels in the image.",
+      "Preserve the width-to-height ratio when resizing to avoid stretching. Output size affects the pixels per inch available for printing."
+    ] },
+    { id: "ict-15-image-editing", number: "15.2", title: "Editing and Composition", summary: "Choose the operation that changes the intended property without damaging other content.", keyPoints: [
+      "Crop removes outer content; resize changes dimensions; rotate turns an image; reflect creates a mirror image.",
+      "Layers separate parts of a composition. Transparency allows underlying content to show through.",
+      "Brightness changes overall lightness, while contrast concerns differences between light and dark areas."
+    ] },
+    { id: "ict-15-image-output", number: "15.3", title: "Compression and Output", summary: "Keep an editable original and prepare an appropriate copy for the output purpose.", keyPoints: [
+      "Lossless compression permits exact recovery of the original data. Lossy compression discards information to reduce size.",
+      "Decompressing a lossy file does not restore information that was discarded. Repeated lossy re-saving can reduce quality.",
+      "Check the required dimensions, visible quality, transparency support, format and file size before publishing or printing."
+    ] }
+  ]
+};
+
+const allIctModules = [...baseIctTheoryModules, ...applicationTheoryModules, imageTheoryModule];
+for (const entry of ictCoursebookGlossary) {
+  if (!allIctModules.some(module => module.id === entry.moduleId)) throw new Error("Unmapped ICT glossary module: " + entry.moduleId);
+}
+
+export const ictTheoryModules: IctTheoryModule[] = allIctModules.map((module) => {
+  const glossary = mergeIctGlossary(module.glossary, ictCoursebookGlossary
+    .filter(entry => entry.moduleId === module.id || ictGlossaryRelatedModules[entry.term]?.includes(module.id))
+    .map(entry => ({ ...entry, alsoStudyIn: [entry.moduleId, ...(ictGlossaryRelatedModules[entry.term] || [])].filter(id => id !== module.id) })));
+  const cases: IctTheoryQuiz[] = ictCaseStudies.filter(study => study.moduleId === module.id).flatMap(study => study.questions.map((question, index) => ({
+    id: `${study.id}-q${index + 1}`, topic: study.title, studyTopic: "Case study practice",
+    question: question.question, options: question.options, correctIndex: 0, feedback: question.feedback,
+    caseStudy: { id: study.id, title: study.title, scenario: study.scenario }
+  })));
+  return {
+    ...module, glossary,
+    lessons: module.lessons.map((lesson) => ({
+      ...lesson,
+      studyBlocks: [...(lesson.studyBlocks || []), ...(ictTheoryStudyAdditions[lesson.id] || [])]
+    })),
+    quiz: (() => {
     const manualQuiz = [...module.quiz, ...(extraIctTheoryQuizByModule[module.id] || [])];
-    return [...manualQuiz, ...generatedQuizForModule(module)];
+    return [...manualQuiz, ...generatedQuizForModule({ ...module, glossary }), ...cases]
+      .filter((question, index, all) => all.findIndex(other => other.question.trim().toLowerCase() === question.question.trim().toLowerCase()) === index);
   })()
-}));
+  };
+});

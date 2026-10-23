@@ -49,4 +49,12 @@ for (const moduleId of ['formula-logic', 'formula-conditions', 'formula-copying'
   assert.equal(getFormulaStarter(moduleId).cells.some(([address]) => Number(address.match(/\d+/)[0]) >= 20), false, moduleId + ': no unrelated shop data');
 }
 assert.equal(getFormulaStarter('formula-shop-decisions').cells.some(([address]) => Number(address.match(/\d+/)[0]) < 20), false, 'shop practice has no unrelated club table');
+const absolute = getSpreadsheetCardsForModule('formula-copying').find(card => card.id.endsWith('absolute-total'));
+assert(absolute.scenario.startsWith('An absolute reference locks'));
+assert(!absolute.studentSteps.join(' ').includes('=B4/$B$8'), 'later practice must not supply the whole answer');
+assert(absolute.studentSteps.some(step => step.includes('dollar sign')));
+assert(getSpreadsheetCardsForModule('formula').some(card => card.id.endsWith('divide')), 'division must be taught before absolute references');
+const discount = getSpreadsheetCardsForModule('formula-discounts')[0];
+assert(discount.studentSteps[0].includes('F22'), 'discount task must identify its destination');
+assert(!discount.studentSteps.join(' ').includes('B22*(1-$H$25)'), 'discount practice must require formula construction');
 console.log(`Passed ${count} lesson contracts, negative formula/value checks, and shared-formula regression.`);

@@ -130,8 +130,8 @@ function entryCard(moduleId: string, id: string, goal: string, scenario: string,
   });
 }
 
-function formulaCard(id: string, goal: string, scenario: string, cell: string, formula: string, value: string | number, extraSteps: string[] = [], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing") {
-  const functionName = formula.replace(/^=/, "").split("(")[0] || "formula";
+function formulaCard(id: string, goal: string, scenario: string, cell: string, formula: string, value: string | number, extraSteps: string[] = [], difficulty: SpreadsheetInstructionCard["difficulty"] = "developing", introduceFormula = true) {
+  const functionName = /^=([A-Z]+)\(/i.exec(formula)?.[1] || "cell-reference";
   return baseCard({
     id,
     moduleId: "formula",
@@ -140,10 +140,10 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
     skill: functionName,
     studentGoal: goal,
     scenario,
-    studentSteps: [`Click ${cell}.`, `Type ${formula} to calculate this result.`, ...extraSteps, "Press Enter and check the result."],
+    studentSteps: [`Click ${cell}.`, ...(introduceFormula ? [`Type ${formula} to calculate this result.`] : ["Start your formula with =."]), ...extraSteps, "Press Enter and check the result."],
     instruction: goal,
     meaning: "A formula must start with = and use cell references so the result updates if source data changes.",
-    clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
+    clickPath: [`Cell ${cell}`, "Formula bar", introduceFormula ? `Use ${functionName}` : "Construct a formula from the task"],
     expectedSelection: cell,
     expectedAction: "formula",
     expectedResult: `${cell} shows ${value} using a formula with the correct references.`,
@@ -160,7 +160,7 @@ function formulaCard(id: string, goal: string, scenario: string, cell: string, f
 }
 
 function formulaIncludesCard(id: string, goal: string, scenario: string, cell: string, formulaIncludes: string[], value: string | number, steps: string[], difficulty: SpreadsheetInstructionCard["difficulty"] = "confident") {
-  const functionName = formulaIncludes[0];
+  const functionName = /^[A-Z]+$/.test(formulaIncludes[0]) ? formulaIncludes[0] : "cell-reference";
   const guidedSteps = steps.filter((step) => !/^Type exactly |^Press Enter\.$/i.test(step)).map(step =>
     step.replace(/Drag the fill handle down to (\w+)\./, `Navigate your cursor to the bottom-right corner of cell ${steps[0].match(/Click (\w+)/)?.[1] || cell}. When the cursor changes to a plus sign (+), drag down to cell $1 and release.`));
   const copying = steps.some(step => /fill handle/i.test(step));
@@ -173,26 +173,26 @@ function formulaIncludesCard(id: string, goal: string, scenario: string, cell: s
     studentGoal: goal,
     scenario,
     studentSteps: copying ? guidedSteps : [
-      ...(guidedSteps.length ? guidedSteps : [`Click ${cell}.`]),
+      `Click ${cell}; this is where your answer formula belongs.`,
       "Type = to start a formula.",
-      `Use ${functionName} for this task.`,
-      "Use the worksheet labels to identify the correct range, criteria, lookup table, or return column.",
+      ...guidedSteps,
+      ...(functionName !== "cell-reference" ? [`Use ${functionName} for this task.`] : []),
       "Press Enter and check the result."
     ],
     instruction: goal,
-    meaning: copying ? "Copy the existing formula so its relative references change for each destination row." : "Use the named function and references to produce a result that changes with the worksheet data.",
+    meaning: copying ? "Copy the existing formula so its relative references change for each destination row." : functionName === "cell-reference" ? "Use source-cell references and the stated operations so the answer updates when source data changes." : "Use the named function and references to produce a result that changes with the worksheet data.",
     clickPath: [`Cell ${cell}`, "Formula bar", `Use ${functionName}`],
     expectedSelection: cell,
     expectedAction: "formula",
     expectedResult: `${cell} shows ${value} using a formula.`,
     autoCheck: { cells: [{ cell, formulaIncludes, value }] },
-    commonMistakes: ["Typing the displayed answer manually", "Using the wrong lookup range", "Leaving out exact match"],
+    commonMistakes: ["Typing the displayed answer manually", "Entering the formula in a source cell instead of the named answer cell", "Using references that do not match the task"],
     feedback: {
       wrongSelection: `Place the formula in ${cell}.`,
       wrongTool: copying ? "Use the fill handle to copy the existing formula." : `Use a ${functionName} formula in the cell or formula bar.`,
       wrongResult: `${cell} must show ${value} using the required formula parts.`
     },
-    hints: ["Check commas and brackets carefully.", "Use absolute references for fixed lookup tables.", "Do not type the displayed answer manually."],
+    hints: ["Check operators and brackets carefully.", "Lock only references that must stay fixed when copied.", "Do not type the displayed answer manually."],
     difficulty
   });
 }
@@ -658,7 +658,7 @@ const formulaCards = [
   entryCard("formula", "sheet-formula-reference-headings", "Create your own stationery table headings in A3:D3.", "Start with this blank worksheet. Build the table you will use throughout these six tasks.", [["A3", "Item"], ["B3", "Price"], ["C3", "Quantity"], ["D3", "Cost"]]),
   entryCard("formula", "sheet-formula-reference-data", "Enter three stationery items and their numbers.", "Each cost will use the price and quantity on the same row.", [["A4", "Pen"], ["B4", 2], ["C4", 3], ["A5", "Book"], ["B5", 5], ["C5", 2], ["A6", "Folder"], ["B6", 3], ["C6", 4]]),
   formulaCard("sheet-formula-reference-link", "Show the Pen price in B9 using a cell reference.", "A reference links to another cell: =B4 means use the current value in B4, not a typed 2.", "B9", "=B4", 2, [], "beginner"),
-  formulaCard("sheet-formula-reference-cost", "Calculate the Pen cost in D4.", "Multiply the price in B4 by the quantity in C4. Use cell references, not typed numbers.", "D4", "=B4*C4", 6, [], "beginner"),
+  formulaCard("sheet-formula-reference-cost", "Calculate the Pen cost in D4.", "Multiply the price in B4 by the quantity in C4. Use cell references, not typed numbers.", "D4", "=B4*C4", 6, ["Multiply the Pen price reference by its quantity reference, using * for multiplication."], "beginner", false),
   {
     ...formulaIncludesCard("sheet-formula-reference-copy", "Copy your cost formula into D5 and D6.", "Relative references change when copied: each item must use its own price and quantity.", "D6", ["B6*C6"], 12, ["Click D4.", "Navigate your cursor to the bottom-right corner of cell D4. When the cursor changes to a plus sign (+), drag down to D6 and release. This is the fill handle.", "Check that D5 shows 10 and D6 shows 12."]),
     autoCheck: { cells: [{ cell: "D4", formula: "=B4*C4", value: 6 }, { cell: "D5", formula: "=B5*C5", value: 10 }, { cell: "D6", formula: "=B6*C6", value: 12 }] }
@@ -673,9 +673,9 @@ const formulaCards = [
     autoCheck: { cells: [4, 5, 6, 7].map((row, index) => ({ cell: `D${row}`, formula: `=B${row}/C${row}`, value: [3, 22 / 6, 3.2, 4][index] })) }
   },
   formulaCard("sheet-formula-sum-sold", "Calculate total sold.", "Use SUM to add all sold values.", "B8", "=SUM(B4:B7)", 76),
-  formulaCard("sheet-formula-sum-sessions", "Calculate total sessions.", "Use SUM again with a different range.", "C8", "=SUM(C4:C7)", 22),
+  formulaCard("sheet-formula-sum-sessions", "Calculate total sessions.", "Use SUM again with a different range.", "C8", "=SUM(C4:C7)", 22, ["Use SUM with the Sessions cells from C4 to C7 as its range."], "developing", false),
   formulaCard("sheet-formula-average-sold", "Calculate average sold.", "Use AVERAGE to find the mean sold value.", "B9", "=AVERAGE(B4:B7)", 19),
-  formulaCard("sheet-formula-average-sessions", "Calculate average sessions.", "Practise AVERAGE with the sessions range.", "C9", "=AVERAGE(C4:C7)", 5.5),
+  formulaCard("sheet-formula-average-sessions", "Calculate average sessions.", "Practise AVERAGE with the sessions range.", "C9", "=AVERAGE(C4:C7)", 5.5, ["Use AVERAGE with the Sessions cells from C4 to C7 as its range."], "developing", false),
   formulaCard("sheet-formula-min-sold", "Find the lowest sold value.", "Use MIN to return the smallest sold value.", "B10", "=MIN(B4:B7)", 16),
   formulaCard("sheet-formula-max-sold", "Find the highest sold value.", "Use MAX to return the largest sold value.", "B11", "=MAX(B4:B7)", 22),
   formulaCard("sheet-formula-count-sold", "Count numeric sold values.", "Use COUNT to count numbers in the sold column.", "B12", "=COUNT(B4:B7)", 4),
@@ -683,7 +683,7 @@ const formulaCards = [
   formulaCard("sheet-formula-addition", "Add two source values.", "Practise addition using cell references.", "F4", "=B4+C4", 24),
   formulaCard("sheet-formula-subtraction", "Subtract sessions from sold.", "Practise subtraction using cell references.", "F5", "=B5-C5", 16),
   formulaCard("sheet-formula-multiplication", "Multiply sold by sessions.", "Practise multiplication using cell references.", "F6", "=B6*C6", 80),
-  formulaCard("sheet-formula-absolute-total", "Use an absolute reference.", "Compare Drama sold against the total sold in B8.", "G4", "=B4/$B$8", 0.2368421053, ["The displayed value may be rounded."], "confident"),
+  formulaCard("sheet-formula-absolute-total", "Use an absolute reference.", "An absolute reference locks a cell's column and row when the formula is copied. Compare Drama sold against the total sold in B8.", "G4", "=B4/$B$8", 0.2368421053, ["Divide Drama's quantity sold in B4 by the total quantity sold in B8, using / for division.", "Keep B4 relative. Add a dollar sign before both the B and the 8 in the total's reference to lock that cell.", "Check that the result is approximately 0.237, meaning Drama accounts for about 23.7% of the total."], "confident", false),
   formulaIncludesCard("sheet-formula-countif", "Count items with sold values at least 20.", "COUNTIF counts cells that meet one condition.", "B14", ["COUNTIF", "B4:B7", ">=20"], 2, ["Use the sold range.", "Set the condition to include values of 20 or more."]),
   formulaIncludesCard("sheet-formula-sumif", "Add sold values at least 20.", "SUMIF adds only cells that meet one condition.", "B15", ["SUMIF", "B4:B7", ">=20"], 42, ["Use the sold range for both checking and adding.", "Set the condition to include values of 20 or more."]),
   formulaIncludesCard("sheet-formula-averageif", "Average sold values at least 18.", "AVERAGEIF averages only matching cells.", "B16", ["AVERAGEIF", "B4:B7", ">=18"], 20, ["Use the sold range.", "Set the condition to include values of 18 or more."]),
@@ -719,17 +719,17 @@ const formulaCards = [
     difficulty: "confident",
     marks: 3
   }),
-  formulaCard("sheet-formula-task-shop-first-revenue", "Calculate revenue for Pen.", "Use multiplication for the first shop item.", "D21", "=B21*C21", 42, [], "developing"),
+  formulaCard("sheet-formula-task-shop-first-revenue", "Calculate revenue for Pen.", "Use multiplication for the first shop item.", "D21", "=B21*C21", 42, ["Multiply the Pen price in B21 by the number sold in C21, using cell references and the * operator."], "developing", false),
   formulaIncludesCard("sheet-formula-task-shop-copy-revenue", "Copy revenue formulas down.", "Use relative references so each item calculates its own revenue.", "D23", ["B23*C23"], 38, ["Click D21.", "Drag the fill handle down to D23.", "Check that each revenue cell uses its own row."], "developing"),
-  formulaCard("sheet-formula-task-shop-total-final", "Recalculate total shop revenue.", "Now that all revenue cells are complete, total the revenue column.", "D24", "=SUM(D21:D23)", 122, [], "developing"),
-  formulaCard("sheet-formula-task-shop-average", "Calculate average revenue.", "The shop manager wants the mean revenue per item.", "D25", "=AVERAGE(D21:D23)", 40.6666666667, ["The displayed result may be rounded."], "developing"),
+  formulaCard("sheet-formula-task-shop-total-final", "Recalculate total shop revenue.", "Now that all revenue cells are complete, total the revenue column.", "D24", "=SUM(D21:D23)", 122, ["Use SUM with the revenue range from D21 to D23."], "developing", false),
+  formulaCard("sheet-formula-task-shop-average", "Calculate average revenue.", "The shop manager wants the mean revenue per item.", "D25", "=AVERAGE(D21:D23)", 40.6666666667, ["Use AVERAGE with the revenue range from D21 to D23.", "The displayed result may be rounded."], "developing", false),
   formulaIncludesCard("sheet-formula-task-shop-countif", "Count items selling at least 20 units.", "Use COUNTIF on the Sold column.", "C25", ["COUNTIF", "C21:C23", ">=20"], 1, ["Use the shop Sold column.", "Set the condition to include values of 20 or more."], "developing"),
   formulaIncludesCard("sheet-formula-task-shop-sumif", "Total revenue for items selling at least 15 units.", "Use SUMIF with one range for sold values and another for revenue.", "D26", ["SUMIF", "C21:C23", ">=15", "D21:D23"], 80, ["Use the Sold column to test the condition.", "Use the Revenue column for the values to add.", "Set the condition to include values of 15 or more."], "confident"),
   formulaIncludesCard("sheet-formula-task-shop-if", "Classify Pen sales.", "Use IF to show whether Pen sold enough units.", "E21", ["IF", "C21>=20", "High", "Check"], "High", ["Use the Pen sold value as the condition.", "Return High if the target is met and Check if it is not."], "developing"),
   formulaIncludesCard("sheet-formula-task-shop-nested-if", "Classify Folder sales with three levels.", "Use nested IF to produce a more detailed label.", "E23", ["IF", "C23>=25", "Excellent", "C23>=15", "Good"], "Good", ["Test the Folder sold value against the highest target first.", "Return Excellent, Good, or Check depending on the value."], "confident"),
   entryCard("formula", "sheet-formula-task-discount-lookup-table", "Create a discount lookup table.", "Prepare a small table for a final lookup task.", [["G20", "Code"], ["H20", "Discount"], ["G21", "A"], ["H21", 0.1], ["G22", "B"], ["H22", 0.15], ["G23", "C"], ["H23", 0.2]], "developing"),
   formulaIncludesCard("sheet-formula-task-vlookup-discount", "Look up a discount rate.", "Use VLOOKUP to return the discount for code B.", "H25", ["VLOOKUP", "B", "$G$21:$H$23", "2", "FALSE"], 0.15, ["Use code B as the lookup value.", "Use the code-and-discount table and return the discount column.", "Use exact match."], "confident"),
-  formulaIncludesCard("sheet-formula-task-absolute-discount", "Apply an absolute discount reference.", "Calculate the discounted price for Notebook using the fixed rate in H25.", "F22", ["B22*(1-$H$25)"], 2.55, ["Use the Notebook price.", "Subtract the fixed discount rate from 1 before multiplying.", "Keep the discount-rate cell fixed with an absolute reference."], "confident")
+  formulaIncludesCard("sheet-formula-task-absolute-discount", "Calculate Notebook's discounted price in F22.", "An absolute reference keeps the discount-rate cell fixed when a formula is copied. A rate of 0.15 means 15% off, so the customer pays 85% of the original price.", "F22", ["B22*(1-$H$25)"], 2.55, ["Use the original Notebook price in B22; do not change the rate in H25.", "In brackets, subtract the rate referenced by H25 from 1 to find the proportion of the price still payable.", "Multiply the original price reference by that bracketed calculation.", "Add a dollar sign before H and before 25 in the discount-rate reference, so both its column and row stay fixed.", "Leave B22 relative. Check that F22 shows 2.55 and H25 still shows 0.15."], "confident")
 ];
 
 const dataToolCards = [
